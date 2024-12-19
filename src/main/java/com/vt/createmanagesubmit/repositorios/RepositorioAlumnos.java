@@ -24,4 +24,6 @@ public interface RepositorioAlumnos extends CrudRepository<Alumno, Long>{
 
     List<Alumno> findByObra(String obra);
 
+    List<Alumno> findByPlantillaId(Long plantillaId);
+
 }

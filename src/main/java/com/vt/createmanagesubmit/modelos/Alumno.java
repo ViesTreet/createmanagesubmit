@@ -26,6 +26,7 @@ public class Alumno {
 
     private String nombreAsistente;
 
+    @Column(length = 500)
     private String nombreCurso;
 
     private String diasCursos;

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -21,7 +22,7 @@ import com.vt.createmanagesubmit.servicios.ServicioArchivos;
 public class ControladorPrueba {
 
     @Autowired
-    private ServicioArchivos excelService;
+    private ServicioArchivos servicioAr;
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> subirExcel(@RequestPart("file") MultipartFile file) {
@@ -37,7 +38,7 @@ public class ControladorPrueba {
             file.transferTo(tempFile);
 
             // Procesar el archivo
-            excelService.leerExcelYGuardarEnBD(tempFile.getAbsolutePath());
+            servicioAr.leerExcelYGuardarEnBD(tempFile.getAbsolutePath());
 
             // Eliminar el archivo temporal
             tempFile.delete();
@@ -46,6 +47,16 @@ public class ControladorPrueba {
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al procesar el archivo");
+        }
+    }
+
+    @GetMapping("/generateCertificates")
+    public ResponseEntity<?> generateCertificates() {
+        try {
+            servicioAr.generateCertificates();
+            return ResponseEntity.ok("Certificados generados exitosamente.");
+        } catch(Exception e) {
+            return ResponseEntity.status(500).body("Error al generar certificados: " + e.getMessage());
         }
     }
 }

@@ -3,11 +3,14 @@ package com.vt.createmanagesubmit.servicios;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellValue;
@@ -17,22 +20,43 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.xslf.usermodel.XMLSlideShow;
+import org.apache.poi.xslf.usermodel.XSLFShape;
+import org.apache.poi.xslf.usermodel.XSLFSlide;
+import org.apache.poi.xslf.usermodel.XSLFTextShape;
+import org.jodconverter.core.document.DefaultDocumentFormatRegistry;
+import org.jodconverter.core.office.OfficeException;
+import org.jodconverter.core.office.OfficeUtils;
+import org.jodconverter.local.JodConverter;
+import org.jodconverter.local.office.LocalOfficeManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.vt.createmanagesubmit.modelos.Alumno;
+import com.vt.createmanagesubmit.modelos.Plantilla;
 import com.vt.createmanagesubmit.repositorios.RepositorioAlumnos;
+import com.vt.createmanagesubmit.repositorios.RepositorioPlantillas;
+
+import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class ServicioArchivos {
 
     @Autowired
-    private RepositorioAlumnos alumnoRepository;
+    private RepositorioAlumnos alumnoRepo;
+
+    @Autowired
+    private RepositorioPlantillas plantillaRepo;
 
     public void leerExcelYGuardarEnBD(String rutaArchivo) throws IOException {
         FileInputStream fileInputStream = new FileInputStream(new File(rutaArchivo));
 
         Workbook workbook = WorkbookFactory.create(fileInputStream);
+
+        Plantilla planti = new Plantilla();
+        planti.setNombreCertificado("aaaaa");
+        planti.setPathArchivo("src/main/resources/static/DIPLOMAS SETOP Matriz.pptx");
+        plantillaRepo.save(planti);
 
         // Iterar sobre las hojas del libro
         for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
@@ -69,7 +93,17 @@ public class ServicioArchivos {
                 }
 
                 System.out.println(alumno.getNombreAsistente()+" "+alumno.getRut());
-                alumnoRepository.save(alumno);
+                if (alumno.getNombreAsistente() != null) {
+                Optional<Plantilla> optionalPlantilla = plantillaRepo.findById(1L);
+                if (optionalPlantilla.isPresent()) {
+                    Plantilla plantilla = optionalPlantilla.get();
+                    alumno.setPlantilla(plantilla);
+                    alumnoRepo.save(alumno);
+                } else {
+        // Manejar el caso en que la plantilla no se encuentra
+                    throw new EntityNotFoundException("Plantilla no encontrada");
+                }
+}
             }
         }
 
@@ -179,4 +213,83 @@ public class ServicioArchivos {
                 return "";
         }
     }
+
+    public void generateCertificates() throws Exception {
+
+        List<Alumno> alumnos = alumnoRepo.findAll();
+        for (Alumno alumno : alumnos) {
+            generateCertificateForAlumno(alumno);
+        }
+    }
+
+    private void generateCertificateForAlumno(Alumno alumno) throws Exception {
+        // Obtén la plantilla asociada al alumno
+        Plantilla plantilla = alumno.getPlantilla();
+        if (plantilla == null) {
+            throw new Exception("No hay una plantilla asociada al Alumno con ID " + alumno.getId());
+        }
+
+        // Carga la plantilla PPTX desde pathArchivo
+        String templatePath = plantilla.getPathArchivo();
+        // Asegúrate de que plantilla.getPathArchivo() es la ruta correcta al archivo PPTX
+
+        // Carga el archivo PPTX usando Apache POI
+        XMLSlideShow ppt;
+        try (FileInputStream inputStream = new FileInputStream(templatePath)) {
+            ppt = new XMLSlideShow(inputStream);
+        }
+
+        // Modifica las shapes con nombre 'name' y 'contenido'
+        for (XSLFSlide slide : ppt.getSlides()) {
+            for (XSLFShape shape : slide.getShapes()) {
+                if (shape instanceof XSLFTextShape) {
+                    XSLFTextShape textShape = (XSLFTextShape) shape;
+                    String shapeName = textShape.getShapeName();
+                    if ("name".equals(shapeName)) {
+                        textShape.setText(alumno.getNombreAsistente());
+                    } else if ("contenido".equals(shapeName)) {
+                        textShape.setText(alumno.getNombreCurso());
+                    }
+                }
+            }
+        }
+
+        // Guarda el PPTX modificado en un archivo temporal
+        String outputPptxPath = "temp/" + alumno.getId() + ".pptx";
+        File tempDir = new File("temp");
+        if (!tempDir.exists()) {
+            tempDir.mkdirs();
+        }
+        try (FileOutputStream out = new FileOutputStream(outputPptxPath)) {
+            ppt.write(out);
+        }
+
+        // Convierte el PPTX modificado a PDF usando JODConverter
+        String outputPdfPath = "output/pdf/" + alumno.getId() + ".pdf";
+        File pdfDir = new File("output/pdf");
+        if (!pdfDir.exists()) {
+            pdfDir.mkdirs();
+        }
+
+        // Configura el OfficeManager con la ruta donde está instalado LibreOffice
+        LocalOfficeManager officeManager = LocalOfficeManager.builder()
+            .install()
+            .build();
+
+        try {
+            officeManager.start();
+            JodConverter.convert(new File(outputPptxPath))
+                .as(DefaultDocumentFormatRegistry.PPTX)
+                .to(new File(outputPdfPath))
+                .as(DefaultDocumentFormatRegistry.PDF)
+                .execute();
+        } catch (OfficeException e) {
+            e.printStackTrace();
+        } finally {
+            OfficeUtils.stopQuietly(officeManager);
+        }
+
+        new File(outputPptxPath).delete();
+    }
+    
 }
