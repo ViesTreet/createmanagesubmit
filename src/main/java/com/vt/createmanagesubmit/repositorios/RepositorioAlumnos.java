@@ -2,11 +2,11 @@ package com.vt.createmanagesubmit.repositorios;
 
 import java.util.List;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.vt.createmanagesubmit.modelos.Alumno;
 
-public interface RepositorioAlumnos extends CrudRepository<Alumno, Long>{
+public interface RepositorioAlumnos extends JpaRepository<Alumno, Long>{
 
     List<Alumno> findAll();
 

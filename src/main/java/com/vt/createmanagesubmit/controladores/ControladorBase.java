@@ -9,6 +9,8 @@ import com.vt.createmanagesubmit.servicios.Servicio;
 
 
 
+
+
 @Controller
 public class ControladorBase {
 
@@ -17,15 +19,25 @@ public class ControladorBase {
 
     @GetMapping("/")
     public String index() {
-        //servicio.registrarNuevoAlumnoExcel("/home/vt/Documentos/GitHub/createmanagesubmit/src/main/resources/static/Diplomas Año 2018.xls");
+        
         return "index.jsp";
     }
     
-
+    @GetMapping("/home")
+    public String home() {
+        return "home.jsp";
+    }
+    
     @GetMapping("/add")
     public String subirABaseDeDatos() {
         return "add.jsp";
     }
+
+    @GetMapping("/dataBase")
+    public String baseDeDatos() {
+        return "database.jsp";
+    }
+    
     
 
 }
