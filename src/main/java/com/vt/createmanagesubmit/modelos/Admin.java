@@ -33,6 +33,7 @@ public class Admin {
     @PrePersist
 	protected void onCreated() {
 		this.createdAt = new Date();
+		this.updatedAt = new Date();
 	}
 	
 	@PreUpdate

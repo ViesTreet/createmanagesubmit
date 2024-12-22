@@ -2,9 +2,13 @@ package com.vt.createmanagesubmit.controladores;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.vt.createmanagesubmit.servicios.Servicio;
+
 
 
 
@@ -35,9 +39,15 @@ public class ControladorBase {
 
     @GetMapping("/dataBase")
     public String baseDeDatos() {
-        return "database.jsp";
+        return "databaseAlumno.jsp";
     }
     
-    
+    @GetMapping("/buscarAlumno")
+    public String busquedaAlumno(@RequestParam("filtro") String filtro, @RequestParam("busqueda") String busqueda, Model model) {
+        // Pasar los parámetros al modelo para usarlos en el JSP
+        model.addAttribute("filtro", filtro);
+        model.addAttribute("busqueda", busqueda);
+        return "databaseAlumnoBusqueda.jsp";
+    }
 
 }

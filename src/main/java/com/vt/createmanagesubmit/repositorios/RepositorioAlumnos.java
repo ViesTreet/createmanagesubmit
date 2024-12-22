@@ -2,28 +2,30 @@ package com.vt.createmanagesubmit.repositorios;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.vt.createmanagesubmit.modelos.Alumno;
 
-public interface RepositorioAlumnos extends JpaRepository<Alumno, Long>{
+public interface RepositorioAlumnos extends JpaRepository<Alumno, Long> {
 
-    List<Alumno> findAll();
+    Page<Alumno> findAll(Pageable pageable);
 
-    List<Alumno> findByNombreCurso(String nombreCurso);
+    Page<Alumno> findByNombreCursoContaining(String nombreCurso, Pageable pageable);
 
-    List<Alumno> findByNombreAsistente(String nombreAsistente);
+    Page<Alumno> findByNombreAsistenteContaining(String nombreAsistente, Pageable pageable);
 
-    List<Alumno> findByRut(String rut);
+    Page<Alumno> findByRutContaining(String rut, Pageable pageable);
 
-    List<Alumno> findByCliente(String cliente);
+    Page<Alumno> findByClienteContaining(String cliente, Pageable pageable);
 
-    List<Alumno> findByEstado(String estado);
+    Page<Alumno> findByEstadoContaining(String estado, Pageable pageable);
 
-    List<Alumno> findByRelator(String relator);
+    Page<Alumno> findByRelatorContaining(String relator, Pageable pageable);
 
-    List<Alumno> findByObra(String obra);
+    Page<Alumno> findByObraContaining(String obra, Pageable pageable);
 
-    List<Alumno> findByPlantillaId(Long plantillaId);
-
+    List<Alumno> findByPlantillaId(Long plantillaId); 
 }
+

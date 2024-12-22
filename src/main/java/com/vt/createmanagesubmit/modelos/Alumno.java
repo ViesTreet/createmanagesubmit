@@ -250,6 +250,7 @@ public class Alumno {
     @PrePersist
 	protected void onCreated() {
 		this.createdAt = new Date();
+        this.updatedAt = new Date();
 	}
 	
 	@PreUpdate
