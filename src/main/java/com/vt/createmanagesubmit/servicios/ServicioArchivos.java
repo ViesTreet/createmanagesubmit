@@ -48,15 +48,15 @@ public class ServicioArchivos {
     @Autowired
     private RepositorioPlantillas plantillaRepo;
 
-    public void leerExcelYGuardarEnBD(String rutaArchivo) throws IOException {
+    @Autowired
+    private Servicio servicio;
+
+    String correoEmpresa = Servicio.CORREO_EMPRESA;
+
+    public void leerExcelYGuardarEnBD(String rutaArchivo,String procesar,String plantilla) throws IOException {
         FileInputStream fileInputStream = new FileInputStream(new File(rutaArchivo));
 
         Workbook workbook = WorkbookFactory.create(fileInputStream);
-
-        Plantilla planti = new Plantilla();
-        planti.setNombreCertificado("aaaaa");
-        planti.setPathArchivo("src/main/resources/static/DIPLOMAS SETOP Matriz.pptx");
-        plantillaRepo.save(planti);
 
         // Iterar sobre las hojas del libro
         for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
@@ -92,18 +92,21 @@ public class ServicioArchivos {
                     }
                 }
 
-                System.out.println(alumno.getNombreAsistente()+" "+alumno.getRut());
                 if (alumno.getNombreAsistente() != null) {
-                Optional<Plantilla> optionalPlantilla = plantillaRepo.findById(1L);
-                if (optionalPlantilla.isPresent()) {
-                    Plantilla plantilla = optionalPlantilla.get();
-                    alumno.setPlantilla(plantilla);
+                    if(!plantilla.trim().equals("excel")){
+                        Optional<Plantilla> plantillaOp = servicio.plantillaPorNombre(plantilla);
+                        if(plantillaOp.isPresent()){
+                            Plantilla plantillaAlumnoEstablecido = plantillaOp.get();
+                            alumno.setPlantilla(plantillaAlumnoEstablecido);
+                        }
+                    }
+                    if(alumno.getCorreo()==null){
+                        
+                        alumno.setCorreo(correoEmpresa);
+                    }
+                    
                     alumnoRepo.save(alumno);
-                } else {
-        // Manejar el caso en que la plantilla no se encuentra
-                    throw new EntityNotFoundException("Plantilla no encontrada");
                 }
-}
             }
         }
 
@@ -118,8 +121,7 @@ public class ServicioArchivos {
         // Asignar el valor al atributo correspondiente
         switch (nombreColumna.toLowerCase()) {
             case "nº":
-            case "número": // Si la columna se llama "Nº" o "Número"
-                // Si quieres guardar este dato, puedes agregar un atributo en Alumno
+            case "número": 
                 break;
             case "NOMBRE ASISTENTE":
             case "nombre asistente":
@@ -181,6 +183,25 @@ public class ServicioArchivos {
             case "Correo":
                 alumno.setCorreo(valorCelda);
                 break;
+            case "Plantilla":
+            case "plantilla":
+                Optional<Plantilla> plantillaAlumnoOptional = servicio.plantillaPorNombre(valorCelda);
+                if(plantillaAlumnoOptional.isPresent()){
+                    Plantilla plantillaAlumno = plantillaAlumnoOptional.get();
+                    alumno.setPlantilla(plantillaAlumno);
+                }else{
+                    Optional<Plantilla> plantillaErrorOptional = servicio.plantillaPorNombre("Error en encontrar plantilla");
+
+                    if (plantillaErrorOptional.isPresent()) {
+                        Plantilla plantillaAlumno = plantillaErrorOptional.get();
+                        alumno.setPlantilla(plantillaAlumno);
+                    } else {
+                        Plantilla plantillaAlumno = new Plantilla();
+                        plantillaAlumno.setNombreCertificado("Error en encontrar plantilla");
+                        plantillaRepo.save(plantillaAlumno);
+                        alumno.setPlantilla(plantillaAlumno);
+                    }
+                }
             default:
                 // Si hay columnas que no corresponden a ningún atributo, puedes ignorarlas
                 break;

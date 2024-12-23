@@ -104,9 +104,15 @@ public String agregarAlumno(
 
     servicio.comprobarYGuardar(nuevoAlumno);
     return "redirect:/addAlumnoBase";
-}
+    }
 
     
+    @GetMapping("/addAlumnoBase/excel")
+    public String getMethodName(Model model) {
+        List<Plantilla> plantillas = servicio.todasLasPlantillas();
+        model.addAttribute("plantillas",plantillas);
+        return "addAlumnoExcel.jsp";
+    }
     
 
 }

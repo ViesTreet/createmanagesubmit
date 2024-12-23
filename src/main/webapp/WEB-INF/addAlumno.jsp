@@ -112,10 +112,11 @@
                     </div>
                     <div class="d-flex align-items-center justify-content-between pt-1">
                         <div>
-                            <label style="font-size: 10px;">Guardar(curso/dias/horas/correlativo/cliente/obra/codigo/relator/estado/plantilla)</label>
-                            <input type="checkbox" name="guardar" id="guardar">
+                            <label style="font-size: 10px;">Guardar datos comunes</label>
+                            <input type="checkbox" name="guardar" id="guardar" onchange="guardarDatos()">
                         </div>
                         <input class="btn btn-success" type="submit" value="Añadir">
+                        <a href="addAlumnoBase/excel" class="btn btn-primary">Agregar usando excel</a>
                     </div>
                     
                 </form>
@@ -130,70 +131,36 @@
     </footer>
     <script>
         window.onload = function() {
-            if (localStorage.getItem('curso')) {
-                document.getElementById('curso').value = localStorage.getItem('curso');
-            }
-            if (localStorage.getItem('diasCursos')) {
-                document.getElementById('diasCursos').value = localStorage.getItem('diasCursos');
-            }
-            if (localStorage.getItem('numeroHoras')) {
-                document.getElementById('numeroHoras').value = localStorage.getItem('numeroHoras');
-            }
-            if (localStorage.getItem('numeroCorrelativoInterno')) {
-                document.getElementById('numeroCorrelativoInterno').value = localStorage.getItem('numeroCorrelativoInterno');
-            }
-            if (localStorage.getItem('cliente')) {
-                document.getElementById('cliente').value = localStorage.getItem('cliente');
-            }
-            if (localStorage.getItem('obra')) {
-                document.getElementById('obra').value = localStorage.getItem('obra');
-            }
-            if (localStorage.getItem('codigo')) {
-                document.getElementById('codigo').value = localStorage.getItem('codigo');
-            }
-            if (localStorage.getItem('relator')) {
-                document.getElementById('relator').value = localStorage.getItem('relator');
-            }
-            if (localStorage.getItem('estado')) {
-                document.getElementById('estado').value = localStorage.getItem('estado');
-            }
-            if (localStorage.getItem('diploma')) {
-                document.getElementById('diploma').value = localStorage.getItem('diploma');
-            }
-            if (localStorage.getItem('plantilla')) {
-                document.getElementById('plantilla').value = localStorage.getItem('plantilla');
+            var campos = ['curso', 'diasCursos', 'numeroHoras', 'numeroCorrelativoInterno', 'cliente', 'obra', 'codigo', 'asistencia', 'estado', 'diploma', 'plantilla', 'relator'];
+        
+            campos.forEach(function(campo) {
+                if (localStorage.getItem(campo)) {
+                    document.getElementById(campo).value = localStorage.getItem(campo);
+                }
+            });
+        
+            if (localStorage.getItem('datosGuardados') === 'true') {
+                document.getElementById('guardar').checked = true;
             }
         };
-    </script>
-    
-    <script>
+        
         function guardarDatos() {
             var guardar = document.getElementById('guardar').checked;
+            var campos = ['curso', 'diasCursos', 'numeroHoras', 'numeroCorrelativoInterno', 'cliente', 'obra', 'codigo', 'asistencia', 'estado', 'diploma', 'plantilla', 'relator'];
+        
             if (guardar) {
-                localStorage.setItem('curso', document.getElementById('curso').value);
-                localStorage.setItem('diasCursos', document.getElementById('diasCursos').value);
-                localStorage.setItem('numeroHoras', document.getElementById('numeroHoras').value);
-                localStorage.setItem('numeroCorrelativoInterno', document.getElementById('numeroCorrelativoInterno').value);
-                localStorage.setItem('cliente', document.getElementById('cliente').value);
-                localStorage.setItem('obra', document.getElementById('obra').value);
-                localStorage.setItem('codigo', document.getElementById('codigo').value);
-                localStorage.setItem('relator', document.getElementById('relator').value);
-                localStorage.setItem('estado', document.getElementById('estado').value);
-                localStorage.setItem('diploma', document.getElementById('diploma').value);
-                localStorage.setItem('plantilla', document.getElementById('plantilla').value);
+                campos.forEach(function(campo) {
+                    var elemento = document.getElementById(campo);
+                    if (elemento) {
+                        localStorage.setItem(campo, elemento.value);
+                    }
+                });
+                localStorage.setItem('datosGuardados', 'true');
             } else {
-                localStorage.removeItem('curso');
-                localStorage.removeItem('diasCursos');
-                localStorage.removeItem('numeroHoras');
-                localStorage.removeItem('numeroCorrelativoInterno');
-                localStorage.removeItem('cliente');
-                localStorage.removeItem('obra');
-                localStorage.removeItem('codigo');
-                localStorage.removeItem('relator');
-                localStorage.removeItem('asistencia');
-                localStorage.removeItem('estado');
-                localStorage.removeItem('diploma');
-                localStorage.removeItem('plantilla');
+                campos.forEach(function(campo) {
+                    localStorage.removeItem(campo);
+                });
+                localStorage.removeItem('datosGuardados');
             }
         }
     </script>

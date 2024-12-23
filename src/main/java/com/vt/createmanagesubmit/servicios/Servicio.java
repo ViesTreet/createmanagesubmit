@@ -1,6 +1,7 @@
 package com.vt.createmanagesubmit.servicios;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -23,7 +24,7 @@ public class Servicio {
     @Autowired
     private RepositorioPlantillas repoPlanti;
 
-    String correoEmpresa = "example@example.com";
+    public static String CORREO_EMPRESA = "example@example.com";
 
     public Alumno registrarNuevoAlumno(Alumno nuevoAlumno){
         return repoAlum.save(nuevoAlumno);
@@ -71,44 +72,75 @@ public class Servicio {
         return repoPlanti.findById(id).orElse(null);
     }
 
-    public void comprobarYGuardar(Alumno nuevoAlumno){ //correo,nota aprobacion,asistencia, horas arreglar
-        if(!nuevoAlumno.getNombreAsistente().trim().isBlank()||nuevoAlumno.getNombreAsistente()!=null){
-            if(nuevoAlumno.getEstado().trim().equals("auto")||nuevoAlumno.getEstado().trim()=="auto"){
-                if(!nuevoAlumno.getNotaAprovacion().trim().isBlank() && nuevoAlumno.getAsistencia().trim().isBlank()){
-                    float nota = Float.parseFloat(nuevoAlumno.getNotaAprovacion());
-                    if(nota>=nuevoAlumno.getPlantilla().getNotaMin()){
-                        nuevoAlumno.setEstado("aprobado");
-                    }
-                }
-                else if(!nuevoAlumno.getAsistencia().trim().isBlank() && nuevoAlumno.getNotaAprovacion().trim().isBlank()){
-                    int asistenciaAlumno = Integer.parseInt(nuevoAlumno.getAsistencia());
-                    if (asistenciaAlumno >= nuevoAlumno.getPlantilla().getAsistenciaMin()){
-                        nuevoAlumno.setEstado("aprobado");
-                    }
-                }
+    public Optional<Plantilla> plantillaPorNombre(String nombre){
+        return repoPlanti.findByNombreCertificado(nombre);
+    }
 
-                else if(!nuevoAlumno.getNotaAprovacion().trim().isBlank() && !nuevoAlumno.getAsistencia().trim().isBlank()){
-                    float nota = Float.parseFloat(nuevoAlumno.getNotaAprovacion());
-                    int asistenciaAlumno = Integer.parseInt(nuevoAlumno.getAsistencia());
-                    if(asistenciaAlumno >= nuevoAlumno.getPlantilla().getAsistenciaMin() && nota>=nuevoAlumno.getPlantilla().getNotaMin()){
-                        nuevoAlumno.setEstado("aprobado");
+    public void comprobarYGuardar(Alumno nuevoAlumno) {
+        if (nuevoAlumno.getNombreAsistente() != null && !nuevoAlumno.getNombreAsistente().trim().isEmpty()) {
+            String estadoFormulario = nuevoAlumno.getEstado().trim();
+    
+            // Si el estado es 'auto', realizamos la evaluación automática
+            if (estadoFormulario.equals("auto")) {
+                boolean tieneNota = nuevoAlumno.getNotaAprovacion() != null && !nuevoAlumno.getNotaAprovacion().trim().isEmpty();
+                boolean tieneAsistencia = nuevoAlumno.getAsistencia() != null && !nuevoAlumno.getAsistencia().trim().isEmpty();
+                boolean aprobado = false;
+    
+                try {
+                    if (tieneNota && !tieneAsistencia) {
+                        // Solo nota
+                        float nota = Float.parseFloat(nuevoAlumno.getNotaAprovacion().trim());
+                        if (nota >= nuevoAlumno.getPlantilla().getNotaMin()) {
+                            aprobado = true;
+                        }
+                    } else if (!tieneNota && tieneAsistencia) {
+                        // Solo asistencia
+                        int asistenciaAlumno = Integer.parseInt(nuevoAlumno.getAsistencia().trim());
+                        if (asistenciaAlumno >= nuevoAlumno.getPlantilla().getAsistenciaMin()) {
+                            aprobado = true;
+                        }
+                    } else if (tieneNota && tieneAsistencia) {
+                        // Ambos
+                        float nota = Float.parseFloat(nuevoAlumno.getNotaAprovacion().trim());
+                        int asistenciaAlumno = Integer.parseInt(nuevoAlumno.getAsistencia().trim());
+                        if (nota >= nuevoAlumno.getPlantilla().getNotaMin() && asistenciaAlumno >= nuevoAlumno.getPlantilla().getAsistenciaMin()) {
+                            aprobado = true;
+                        }
+                    } else {
+                        // No hay nota ni asistencia
+                        nuevoAlumno.setEstado("revisionManual");
                     }
-                }
-                else{
+    
+                    if (aprobado) {
+                        nuevoAlumno.setEstado("aprobado");
+                    } else if (!nuevoAlumno.getEstado().equals("revisionManual")) {
+                        nuevoAlumno.setEstado("noAprobado");
+                    }
+                } catch (NumberFormatException e) {
+                    // Manejo de errores en caso de formato incorrecto
                     nuevoAlumno.setEstado("revisionManual");
                 }
             }
-
-            if(nuevoAlumno.getCorreo().trim().isEmpty()){
-                nuevoAlumno.setCorreo(correoEmpresa);
+            // Si el estado es 'aprobado' o 'noAprobado', no hacemos nada (se respeta la elección manual)
+    
+            // Validación del correo
+            if (nuevoAlumno.getCorreo() == null || nuevoAlumno.getCorreo().trim().isEmpty()) {
+                nuevoAlumno.setCorreo(CORREO_EMPRESA);
             }
-
-            String[] fechaPartes = nuevoAlumno.getDiasCursos().trim().split("-");
-            String fechaFormateada = "entre el "+fechaPartes[0]+" al "+fechaPartes[1];
-            nuevoAlumno.setDiasCursos(fechaFormateada);
-
-            nuevoAlumno.setNumeroHoras(nuevoAlumno.getNumeroHoras()+" horas");
-
+    
+            // Formateo de la fecha
+            if (nuevoAlumno.getDiasCursos() != null && nuevoAlumno.getDiasCursos().contains("-")) {
+                String[] fechaPartes = nuevoAlumno.getDiasCursos().trim().split("-");
+                String fechaFormateada = "entre el " + fechaPartes[0] + " al " + fechaPartes[1];
+                nuevoAlumno.setDiasCursos(fechaFormateada);
+            }
+    
+            // Añadir 'horas' al número de horas
+            if (nuevoAlumno.getNumeroHoras() != null && !nuevoAlumno.getNumeroHoras().trim().isEmpty()) {
+                nuevoAlumno.setNumeroHoras(nuevoAlumno.getNumeroHoras().trim() + " horas");
+            }
+    
+            // Guardar el alumno en la base de datos
             repoAlum.save(nuevoAlumno);
         }
     }

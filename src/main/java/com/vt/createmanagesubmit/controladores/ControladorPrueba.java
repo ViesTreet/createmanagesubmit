@@ -23,7 +23,7 @@ public class ControladorPrueba {
 
     @Autowired
     private ServicioArchivos servicioAr;
-
+/* 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> subirExcel(@RequestPart("file") MultipartFile file) {
         if (file.isEmpty()) {
@@ -59,5 +59,6 @@ public class ControladorPrueba {
             return ResponseEntity.status(500).body("Error al generar certificados: " + e.getMessage());
         }
     }
+        */
 }
 
