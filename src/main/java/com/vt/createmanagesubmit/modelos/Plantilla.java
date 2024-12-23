@@ -36,6 +36,10 @@ public class Plantilla {
 
     private String pathLogo;
 
+    private int asistenciaMin;
+
+    private float notaMin; 
+
     @OneToMany(mappedBy = "plantilla", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Alumno> alumnos;
 
@@ -49,96 +53,180 @@ public class Plantilla {
     public Plantilla() {
     }
 
-    public Plantilla(List<Alumno> alumnos, Date createdAt, String descripcion, Long id, String nombreCertificado, String pathArchivo, String pathLogo, String tipoArchivo, Date updatedAt) {
-        this.alumnos = alumnos;
-        this.createdAt = createdAt;
-        this.descripcion = descripcion;
+    
+
+
+    public Plantilla(Long id, String nombreCertificado, String descripcion, String tipoArchivo, String pathArchivo,
+            String pathLogo, int asistenciaMin, float notaMin, List<Alumno> alumnos, Date createdAt, Date updatedAt) {
         this.id = id;
         this.nombreCertificado = nombreCertificado;
+        this.descripcion = descripcion;
+        this.tipoArchivo = tipoArchivo;
         this.pathArchivo = pathArchivo;
         this.pathLogo = pathLogo;
-        this.tipoArchivo = tipoArchivo;
+        this.asistenciaMin = asistenciaMin;
+        this.notaMin = notaMin;
+        this.alumnos = alumnos;
+        this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
+
+    
+
 
     public Long getId() {
         return id;
     }
 
+
+
+
     public void setId(Long id) {
         this.id = id;
     }
+
+
+
 
     public String getNombreCertificado() {
         return nombreCertificado;
     }
 
+
+
+
     public void setNombreCertificado(String nombreCertificado) {
         this.nombreCertificado = nombreCertificado;
     }
+
+
+
 
     public String getDescripcion() {
         return descripcion;
     }
 
+
+
+
     public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
     }
+
+
+
 
     public String getTipoArchivo() {
         return tipoArchivo;
     }
 
+
+
+
     public void setTipoArchivo(String tipoArchivo) {
         this.tipoArchivo = tipoArchivo;
     }
+
+
+
 
     public String getPathArchivo() {
         return pathArchivo;
     }
 
+
+
+
     public void setPathArchivo(String pathArchivo) {
         this.pathArchivo = pathArchivo;
     }
+
+
+
 
     public String getPathLogo() {
         return pathLogo;
     }
 
+
+
+
     public void setPathLogo(String pathLogo) {
         this.pathLogo = pathLogo;
     }
+
+
+
+
+    public int getAsistenciaMin() {
+        return asistenciaMin;
+    }
+
+
+
+
+    public void setAsistenciaMin(int asistenciaMin) {
+        this.asistenciaMin = asistenciaMin;
+    }
+
+
+
+
+    public float getNotaMin() {
+        return notaMin;
+    }
+
+
+
+
+    public void setNotaMin(float notaMin) {
+        this.notaMin = notaMin;
+    }
+
+
+
 
     public List<Alumno> getAlumnos() {
         return alumnos;
     }
 
+
+
+
     public void setAlumnos(List<Alumno> alumnos) {
         this.alumnos = alumnos;
     }
+
+
+
 
     public Date getCreatedAt() {
         return createdAt;
     }
 
+
+
+
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
+
+
+
 
     public Date getUpdatedAt() {
         return updatedAt;
     }
 
+
+
+
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
     }
 
-    @Override
-    public String toString() {
-        return "Plantilla [id=" + id + ", nombreCertificado=" + nombreCertificado + ", descripcion=" + descripcion
-                + ", tipoArchivo=" + tipoArchivo + ", pathArchivo=" + pathArchivo + ", pathLogo=" + pathLogo
-                + ", alumnos=" + alumnos + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + "]";
-    }
+
+
 
     @PrePersist
 	protected void onCreated() {
