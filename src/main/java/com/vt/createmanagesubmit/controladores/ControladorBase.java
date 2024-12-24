@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -54,13 +55,21 @@ public class ControladorBase {
         return "databaseAlumno.jsp";
     }
     
-    @GetMapping("/buscarAlumno")
+    @GetMapping("/dataBaseAlumno/buscarAlumno")
     public String busquedaAlumno(@RequestParam("filtro") String filtro, @RequestParam("busqueda") String busqueda, Model model) {
         // Pasar los parámetros al modelo para usarlos en el JSP
         model.addAttribute("filtro", filtro);
         model.addAttribute("busqueda", busqueda);
         return "databaseAlumnoBusqueda.jsp";
     }
+
+    @GetMapping("/dataBaseAlumno/alumno/{id}")
+    public String getMethodName(@PathVariable("id")Long id,Model model) {
+        Alumno alumno = servicio.alumnoPorId(id);
+        model.addAttribute("alumno",alumno);
+        return "alumnoDatos.jsp";
+    }
+    
 
     @GetMapping("/addAlumnoBase")
     public String AgregarAlumno(Model model) {
@@ -111,7 +120,6 @@ public String agregarAlumno(
     if(diploma.equals("enviar")){
         if(nuevoAlumno.getEstado().equals("aprobado")){
             try {
-                System.out.println("llegamos");
                 servicioAr.generateCertificateForAlumno(nuevoAlumno);
                 nuevoAlumno.setDiploma("enviado");
             } catch (Exception e) {

@@ -88,7 +88,7 @@ public class ControladorApi {
     }
 
     @PostMapping("/enviarRestantes")
-    public String enviarRestantes(@RequestParam(value ="orden")String orden) {
+    public String enviarRestantes() {
         try {
             servicioAr.generateCertificatesAll();
         } catch (Exception e) {

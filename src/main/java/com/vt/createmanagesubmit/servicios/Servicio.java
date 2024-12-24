@@ -35,6 +35,10 @@ public class Servicio {
         return repoAlum.save(nuevoAlumno);
     }
 
+    public Alumno alumnoPorId(Long id){
+        return repoAlum.findById(id).orElse(null);
+    }
+
     public Page<Alumno> todosLosAlumnos(){
         return repoAlum.findAll(PageRequest.of(0, 200, Sort.by("updatedAt").descending()));
     }

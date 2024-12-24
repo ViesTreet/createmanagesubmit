@@ -75,6 +75,11 @@
             cursor: pointer;
         }
 
+        #alumnosNoEnviados {
+            height: 50vh; /* Define una altura fija */
+            overflow-y: auto; /* Permite el desplazamiento vertical cuando el contenido es grande */
+        }
+
         @media (min-width: 1024px){
             #contenderBase{
                 max-width: 95vw;
@@ -225,19 +230,19 @@
             const busqueda = document.querySelector('[name="busquedaAlumno"]').value;
 
             // Construye la URL dinámica usando concatenación de strings
-            const url = '/buscarAlumno?filtro=' + encodeURIComponent(filtro) + '&busqueda=' + encodeURIComponent(busqueda);
+            const url = 'dataBaseAlumno/buscarAlumno?filtro=' + encodeURIComponent(filtro) + '&busqueda=' + encodeURIComponent(busqueda);
 
             // Redirige al enlace generado
             window.location.href = url;
         });
     </script>
     <div class="overlay" id="overlay">
-        <div class="popup">
+        <div class="popup" style="overflow-y: auto;">
             <div class="d-flex justify-content-end">
                 <button class="btn btn-danger" onclick="closeForm()">Cerrar</button>
             </div>
             <h2 class="text-center pb-2">Alumnos que se enviarán:</h2>
-            <form>
+            <form action="/enviarRestantes" method="post">
                 <div id="alumnosNoEnviados"></div>
                 <div class="d-flex justify-content-center">
                     <input type="hidden" name="orden" value="true">

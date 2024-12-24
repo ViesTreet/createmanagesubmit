@@ -14,7 +14,7 @@
 </head>
 <body>
     <header class="d-flex align-items-center justify-content-between p-3 bg-light" style="height: 10vh;">
-        <div class="logo"><img src="/images/Logobgremove.png" alt="[LOGO]"></div>
+        <div class="logo"><a href="/home"><img src="/images/Logobgremove.png" alt="[LOGO]"></div></a>
         <nav>
             <a href="#" class="mx-2">Inicio</a>
             <a href="#" class="mx-2">Funciones</a>
@@ -130,20 +130,50 @@
         </div>
     </footer>
     <script>
+        function setCookie(name, value, days) {
+            var expires = "";
+            if (days) {
+                var date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + (value || "") + expires + "; path=/";  // No uses "Secure" aquí
+
+        }
+
+        function getCookie(name) {
+            var nameEQ = name + "=";
+            var ca = document.cookie.split(';');
+            for (var i = 0; i < ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+
+        function eraseCookie(name) {   
+            document.cookie = name + '=; Max-Age=-99999999;';  
+        }
+
         window.onload = function() {
             var campos = ['curso', 'diasCursos', 'numeroHoras', 'numeroCorrelativoInterno', 'cliente', 'obra', 'codigo', 'asistencia', 'estado', 'diploma', 'plantilla', 'relator'];
         
             campos.forEach(function(campo) {
-                if (localStorage.getItem(campo)) {
-                    document.getElementById(campo).value = localStorage.getItem(campo);
+                var valor = getCookie(campo);
+                if (valor) {
+                    var elemento = document.getElementById(campo);
+                    if (elemento) {
+                        elemento.value = valor;
+                    }
                 }
             });
         
-            if (localStorage.getItem('datosGuardados') === 'true') {
+            if (getCookie('datosGuardados') === 'true') {
                 document.getElementById('guardar').checked = true;
             }
         };
-        
+
         function guardarDatos() {
             var guardar = document.getElementById('guardar').checked;
             var campos = ['curso', 'diasCursos', 'numeroHoras', 'numeroCorrelativoInterno', 'cliente', 'obra', 'codigo', 'asistencia', 'estado', 'diploma', 'plantilla', 'relator'];
@@ -152,15 +182,15 @@
                 campos.forEach(function(campo) {
                     var elemento = document.getElementById(campo);
                     if (elemento) {
-                        localStorage.setItem(campo, elemento.value);
+                        setCookie(campo, elemento.value, 7); // Guardar por 7 días
                     }
                 });
-                localStorage.setItem('datosGuardados', 'true');
+                setCookie('datosGuardados', true, 7);
             } else {
                 campos.forEach(function(campo) {
-                    localStorage.removeItem(campo);
+                    eraseCookie(campo);
                 });
-                localStorage.removeItem('datosGuardados');
+                eraseCookie('datosGuardados');
             }
         }
     </script>

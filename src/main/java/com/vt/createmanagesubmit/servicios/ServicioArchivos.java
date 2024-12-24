@@ -274,9 +274,11 @@ public class ServicioArchivos {
 
     public void generateCertificatesAll() throws Exception {
 
-        List<Alumno> alumnos = alumnoRepo.findAllByDiploma("noEnviado");
+        List<Alumno> alumnos = alumnoRepo.findAllByDiplomaAndEstado("noEnviado", "aprobado");
         for (Alumno alumno : alumnos) {
             generateCertificateForAlumno(alumno);
+            alumno.setDiploma("enviado");
+            alumnoRepo.save(alumno);
         }
     }
 
