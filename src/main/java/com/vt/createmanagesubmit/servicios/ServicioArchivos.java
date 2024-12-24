@@ -280,6 +280,13 @@ public class ServicioArchivos {
         }
     }
 
+    public void generateCertificatesById(Long id) throws Exception {
+
+        Alumno alumno = alumnoRepo.findById(id).orElse(null);
+        
+        generateCertificateForAlumno(alumno);
+    }
+
     public void generateCertificateForAlumno(Alumno alumno) throws Exception {
         // Obtén la plantilla asociada al alumno
         Plantilla plantilla = alumno.getPlantilla();

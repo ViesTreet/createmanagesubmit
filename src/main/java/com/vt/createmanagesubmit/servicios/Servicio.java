@@ -121,7 +121,7 @@ public class Servicio {
         return nuevoAlumno;
     }
 
-    public void comprobarYGuardar(Alumno nuevoAlumno,String orden) {
+    public Alumno comprobarYGuardar(Alumno nuevoAlumno,String orden) {
         if(nuevoAlumno.getAsistencia().trim().isEmpty()){
             nuevoAlumno.setAsistencia(null);
         }
@@ -190,23 +190,11 @@ public class Servicio {
             if (nuevoAlumno.getNumeroHoras() != null && !nuevoAlumno.getNumeroHoras().trim().isEmpty()) {
                 nuevoAlumno.setNumeroHoras(nuevoAlumno.getNumeroHoras().trim() + " horas");
             }
-    
-            if(orden.equals("enviar")){
-                if(nuevoAlumno.getEstado()=="aprobado"){
-                    try {
-                        servicioAr.generateCertificateForAlumno(nuevoAlumno);
-                        nuevoAlumno.setDiploma("enviado");
-                    } catch (Exception e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                }else{
-                    nuevoAlumno.setDiploma("noEnviado");
-                }
-            }else{
-                nuevoAlumno.setDiploma("noEnviado");
-            }
+            
             repoAlum.save(nuevoAlumno);
+            return nuevoAlumno;
+        }else{
+            return null;
         }
     }
 }

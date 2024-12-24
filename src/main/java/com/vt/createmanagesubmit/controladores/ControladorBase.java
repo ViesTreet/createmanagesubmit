@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.vt.createmanagesubmit.modelos.Alumno;
 import com.vt.createmanagesubmit.modelos.Plantilla;
 import com.vt.createmanagesubmit.servicios.Servicio;
+import com.vt.createmanagesubmit.servicios.ServicioArchivos;
 
 
 
@@ -28,6 +29,9 @@ public class ControladorBase {
     @Autowired
     @Lazy
     private Servicio servicio;
+
+    @Autowired
+    private ServicioArchivos servicioAr;
 
     @GetMapping("/")
     public String index() {
@@ -103,7 +107,24 @@ public String agregarAlumno(
     Plantilla plantillausuario = servicio.plantillaPorId(plantilla);
     nuevoAlumno.setPlantilla(plantillausuario);
 
-    servicio.comprobarYGuardar(nuevoAlumno,diploma);
+    nuevoAlumno=servicio.comprobarYGuardar(nuevoAlumno,diploma);
+    if(diploma.equals("enviar")){
+        if(nuevoAlumno.getEstado().equals("aprobado")){
+            try {
+                System.out.println("llegamos");
+                servicioAr.generateCertificateForAlumno(nuevoAlumno);
+                nuevoAlumno.setDiploma("enviado");
+            } catch (Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }else{
+            nuevoAlumno.setDiploma("noEnviado");
+        }
+    }else{
+        nuevoAlumno.setDiploma("noEnviado");
+    }
+    servicio.registrarNuevoAlumno(nuevoAlumno);
     return "redirect:/addAlumnoBase";
     }
 
