@@ -3,6 +3,7 @@ package com.vt.createmanagesubmit.controladores;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,6 +26,7 @@ import com.vt.createmanagesubmit.servicios.Servicio;
 public class ControladorBase {
 
     @Autowired
+    @Lazy
     private Servicio servicio;
 
     @GetMapping("/")
@@ -43,7 +45,7 @@ public class ControladorBase {
         return "add.jsp";
     }
 
-    @GetMapping("/dataBase")
+    @GetMapping("/dataBaseAlumno")
     public String baseDeDatos() {
         return "databaseAlumno.jsp";
     }
@@ -89,7 +91,6 @@ public String agregarAlumno(
     nuevoAlumno.setCodigo(codigo);
     nuevoAlumno.setCorreo(correo);
     nuevoAlumno.setDiasCursos(diasCursos);
-    nuevoAlumno.setDiploma(diploma);
     nuevoAlumno.setEstado(estado);
     nuevoAlumno.setNombreAsistente(nombreAsistente);
     nuevoAlumno.setNombreCurso(curso);
@@ -102,7 +103,7 @@ public String agregarAlumno(
     Plantilla plantillausuario = servicio.plantillaPorId(plantilla);
     nuevoAlumno.setPlantilla(plantillausuario);
 
-    servicio.comprobarYGuardar(nuevoAlumno);
+    servicio.comprobarYGuardar(nuevoAlumno,diploma);
     return "redirect:/addAlumnoBase";
     }
 

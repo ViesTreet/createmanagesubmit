@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -23,15 +24,19 @@ import com.vt.createmanagesubmit.dto.AlumnoDTO;
 import com.vt.createmanagesubmit.modelos.Alumno;
 import com.vt.createmanagesubmit.servicios.Servicio;
 import com.vt.createmanagesubmit.servicios.ServicioArchivos;
+import org.springframework.web.bind.annotation.RequestBody;
+
 
 @RestController
 @RequestMapping("/api")
 public class ControladorApi {
 
     @Autowired
+    @Lazy
     private Servicio ser;
 
     @Autowired
+    @Lazy
     private ServicioArchivos servicioAr;
 
     @GetMapping("/datos")
@@ -47,7 +52,7 @@ public class ControladorApi {
     }
 
     @PostMapping(value = "/uploadAlumnoExcel", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> subirExcel(@RequestPart("file") MultipartFile file,@RequestParam(value = "procesar", required = false) String procesar,@RequestParam(value = "plantillaNombre")String plantilla) {
+    public ResponseEntity<String> subirExcel(@RequestPart("file") MultipartFile file,@RequestParam(value = "estadoDiplomaExcel", required = false) String estadoDiplomaExcel,@RequestParam(value = "plantillaNombre")String plantilla,@RequestParam(value ="estadoExcel")String estadoExcel) {
         if (file.isEmpty()) {
             return ResponseEntity.badRequest().body("El archivo está vacío");
         }
@@ -60,7 +65,7 @@ public class ControladorApi {
             file.transferTo(tempFile);
 
             // Procesar el archivo
-            servicioAr.leerExcelYGuardarEnBD(tempFile.getAbsolutePath(),procesar,plantilla);
+            servicioAr.leerExcelYGuardarEnBD(tempFile.getAbsolutePath(),estadoDiplomaExcel,plantilla,estadoExcel);
 
             // Eliminar el archivo temporal
             tempFile.delete();
@@ -75,12 +80,28 @@ public class ControladorApi {
     @GetMapping("/generateCertificates")
     public ResponseEntity<?> generateCertificates() {
         try {
-            servicioAr.generateCertificates();
+            servicioAr.generateCertificatesAll();
             return ResponseEntity.ok("Certificados generados exitosamente.");
         } catch(Exception e) {
             return ResponseEntity.status(500).body("Error al generar certificados: " + e.getMessage());
         }
     }
+
+    @PostMapping("/enviarRestantes")
+    public String enviarRestantes(@RequestParam(value ="orden")String orden) {
+        if(orden.equals("true")){
+            try {
+                servicioAr.generateCertificatesAll();
+            } catch (Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+
+        
+        return "redirect:/dataBaseAlumno";
+    }
+    
         
 }
 

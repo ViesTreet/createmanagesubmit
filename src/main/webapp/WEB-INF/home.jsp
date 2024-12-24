@@ -25,7 +25,7 @@
     </header>
     <main class="d-flex flex-column align-items-center justify-content-center" style="height: 90vh;">
         <h1 class="text-center">Bienvenido a E-VOLUTION</h1>
-        <a href="/dataBase" class="btn btn-primary btn-custom">Base de datos</a>
+        <a href="/dataBaseAlumno" class="btn btn-primary btn-custom">Base de datos</a>
         <a href="/addAlumnoBase" class="btn btn-secondary btn-custom">Agregar alumno base de datos</a>
         <button class="btn btn-light btn-custom">Documentación</button>
     </main>

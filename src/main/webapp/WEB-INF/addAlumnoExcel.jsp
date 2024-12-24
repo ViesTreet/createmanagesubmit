@@ -31,16 +31,30 @@
                         <input class="form-control" type="file" id="file" name="file" accept=".xls,.xlsx" required>
                     </div>
                     <div class="pb-2 pt-2">
-                        <label for="procesar">Enviar y Generar Certificados</label>
-                        <input class="form-check-input" type="checkbox" id="procesar" name="procesar" value="true">
-                        
-                    </div>
-                    <div class="pb-2 pt-2">
+                        <label for="plantillaNombre">Elegir la plantilla a usar</label>
                         <select name="plantillaNombre" id="plantillaNombre">
                             <option value="excel">Usar plantillas del excel</option>
                             <c:forEach items="${plantillas}" var="plantilla">
-                                    <option value="${plantilla.nombreCertificado}">${plantilla.nombreCertificado}</option>
-                                </c:forEach>
+                                <option value="${plantilla.nombreCertificado}">${plantilla.nombreCertificado}</option>
+                            </c:forEach>
+                        </select>
+                    </div>
+                    <div class="pb-2 pt-2">
+                        <label for="estadoExcel">Elegir el estado de los alumnos</label>
+                        <select name="estadoExcel" id="estadoExcel">
+                            <option value="Eexcel">Usar estado del excel</option>
+                            <option value="Eauto">Automatico</option>
+                            <option value="aprobado">Aprobado</option>
+                            <option value="noAprobado">No aprobado</option>
+                        </select>
+                    </div>
+                    <div class="pb-2 pt-2">
+                        <label for="estadoDiplomaExcel">Acciones a realizar</label>
+                        <select name="estadoDiplomaExcel" id="estadoDiplomaExcel">
+                            <option value="diploExcel">Realizar segun excel</option>
+                            <option value="enviarApro">Enviar(APROBADOS)</option>
+                            <option value="enviarTodos">Enviar(TODOS)</option>
+                            <option value="noEnviar">No enviar</option>
                         </select>
                     </div>
                     <div class="d-flex align-items-end justify-content-between pb-2 pt-2">

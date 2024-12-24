@@ -27,5 +27,7 @@ public interface RepositorioAlumnos extends JpaRepository<Alumno, Long> {
     Page<Alumno> findByObraContaining(String obra, Pageable pageable);
 
     List<Alumno> findByPlantillaId(Long plantillaId); 
+
+    List<Alumno> findAllByDiploma(String Diploma);
 }
 

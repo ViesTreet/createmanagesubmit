@@ -25,7 +25,55 @@
         #alumnoBuscador{
                 padding-right: 0px;
                 padding-left: 0px;
-            }
+        }
+
+        .overlay {
+            display: none; /* Oculto por defecto */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); /* Fondo oscuro */
+            z-index: 999; /* Por encima de otros elementos */
+        }
+
+        /* Contenedor del formulario emergente */
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1000; /* Por encima del overlay */
+            width: 90%;
+            max-width: 400px;
+        }
+
+        /* Botón cerrar */
+        .close-btn {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .close-btn:hover {
+            background-color: darkred;
+        }
+
+        /* Botón principal */
+        .open-btn {
+            margin: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
 
         @media (min-width: 1024px){
             #contenderBase{
@@ -90,7 +138,8 @@
                 </form>
             </div>
             <div>
-                <a class="btn btn-success" href="/addAlumno">+</a>
+                <button class="btn btn-primary" onclick="openForm()">Enviar restantes</button>
+                <a class="btn btn-success" href="/addAlumnoBase">+</a>
             </div>
         </div>
         <div id="contenedorTabla" style="overflow-y: auto; max-height: 70vh; max-width: 95vw;">
@@ -106,6 +155,7 @@
                         <th>Rut</th>
                         <th>Correo</th>
                         <th>Plantilla</th>
+                        <th>Diploma</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -116,42 +166,55 @@
     </div>
 
     <script>
-        $(document).ready(function(){
-            function cargarDatos(){
+        $(document).ready(function () {
+            function cargarDatos() {
                 $.ajax({
                     url: "/api/datos",
                     method: "GET",
-                    success: function(data){
+                    success: function (data) {
                         var tbody = $("#tablaAlumnos tbody");
+                        var contenedorNoEnviados = $("#alumnosNoEnviados"); // Un contenedor para los alumnos con estado "noEnviado"
+    
                         tbody.empty(); // Limpiar la tabla antes de agregar nuevos datos
-
-                        $.each(data, function(i, alumno){
-                            var fila = "<tr>"+
-                                "<td>"+ (alumno.nombreAsistente != null ? alumno.nombreAsistente : "") +"</td>"+
-                                "<td>"+ (alumno.nombreCurso != null ? alumno.nombreCurso : "") +"</td>"+
-                                "<td>"+ (alumno.cliente != null ? alumno.cliente : "") +"</td>"+
-                                "<td>"+ (alumno.obra != null ? alumno.obra : "") +"</td>"+
-                                "<td>"+ (alumno.relator != null ? alumno.relator : "") +"</td>"+
-                                "<td>"+ (alumno.estado != null ? alumno.estado : "") +"</td>"+
-                                "<td>"+ (alumno.rut != null ? alumno.rut : "") +"</td>"+
-                                "<td>"+ (alumno.correo != null ? alumno.correo : "") +"</td>"+
-                                "<td>"+ (alumno.plantilla != null ? alumno.plantilla : "") +"</td>"+
+                        contenedorNoEnviados.empty(); // Limpiar el contenedor antes de agregar nuevos datos
+    
+                        $.each(data, function (i, alumno) {
+                            // Crear una fila de tabla para todos los alumnos
+                            var fila = "<tr>" +
+                                "<td><a href='/dataBaseAlumno/alumno/" + alumno.id + "'>" + (alumno.nombreAsistente != null ? alumno.nombreAsistente : "") + "</a></td>" +
+                                "<td>" + (alumno.nombreCurso != null ? alumno.nombreCurso : "") + "</td>" +
+                                "<td>" + (alumno.cliente != null ? alumno.cliente : "") + "</td>" +
+                                "<td>" + (alumno.obra != null ? alumno.obra : "") + "</td>" +
+                                "<td>" + (alumno.relator != null ? alumno.relator : "") + "</td>" +
+                                "<td>" + (alumno.estado != null ? alumno.estado : "") + "</td>" +
+                                "<td>" + (alumno.rut != null ? alumno.rut : "") + "</td>" +
+                                "<td>" + (alumno.correo != null ? alumno.correo : "") + "</td>" +
+                                "<td>" + (alumno.plantilla != null ? alumno.plantilla : "") + "</td>" +
+                                "<td>" + (alumno.diploma != null ? alumno.diploma : "") + "</td>" +
                                 "</tr>";
                             tbody.append(fila);
+    
+                            // Si el estado es "noEnviado", agregar un <p> al contenedor
+                            if (alumno.diploma === "noEnviado" && alumno.estado ==="aprobado") {
+                                var parrafo = "<p>Alumno: " + (alumno.nombreAsistente != null ? alumno.nombreAsistente : "Desconocido") + " Del curso: "+(alumno.nombreCurso != null ? alumno.nombreCurso : "Desconocido")+" se le enviara el certificado <br></br>";
+                                contenedorNoEnviados.append(parrafo);
+                            }
                         });
                     },
-                    error: function(error){
+                    error: function (error) {
                         console.log("Error al obtener los datos", error);
                     }
                 });
             }
-
+    
             // Cargar datos inicialmente
             cargarDatos();
-
+    
             // Actualizar la tabla cada 30 segundos (30000 milisegundos)
             setInterval(cargarDatos, 30000);
         });
+    </script>
+    
     </script>
     <script>
         document.getElementById('buscarLink').addEventListener('click', function(event) {
@@ -167,6 +230,32 @@
             // Redirige al enlace generado
             window.location.href = url;
         });
+    </script>
+    <div class="overlay" id="overlay">
+        <div class="popup">
+            <div class="d-flex justify-content-end">
+                <button class="btn btn-danger" onclick="closeForm()">Cerrar</button>
+            </div>
+            <h2 class="text-center pb-2">Alumnos que se enviarán:</h2>
+            <form>
+                <div id="alumnosNoEnviados"></div>
+                <div class="d-flex justify-content-center">
+                    <input type="hidden" name="orden" value="true">
+                    <input class="btn btn-success" type="submit" value="Enviar">
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+        // Función para mostrar el formulario
+        function openForm() {
+            document.getElementById('overlay').style.display = 'block';
+        }
+
+        // Función para ocultar el formulario
+        function closeForm() {
+            document.getElementById('overlay').style.display = 'none';
+        }
     </script>
     <footer class="text-center p-3 bg-light" style="height: 15vh; z-index: 1;">
         <p>Contacto: [Dirección, Teléfono, Correo]</p>

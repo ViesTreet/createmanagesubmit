@@ -90,7 +90,8 @@
                 </form>
             </div>
             <div>
-                <a class="btn btn-success" href="/addAlumno">+</a>
+                <button class="btn btn-primary">Enviar restantes</button>
+                <a class="btn btn-success" href="/addAlumnoBase">+</a>
             </div>
         </div>
         <div id="contenedorTabla" style="overflow-y: auto; max-height: 70vh; max-width: 95vw;">
@@ -106,6 +107,7 @@
                         <th>Rut</th>
                         <th>Correo</th>
                         <th>Plantilla</th>
+                        <th>Estado</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -131,7 +133,7 @@
                         tbody.empty(); // Limpiar la tabla antes de agregar nuevos datos
                         $.each(data, function(i, alumno){
                             var fila = "<tr>"+
-                                "<td>"+ (alumno.nombreAsistente != null ? alumno.nombreAsistente : "") +"</td>"+
+                                "<td><a href='/dataBaseAlumno/alumno/"+alumno.id+"'>"+ (alumno.nombreAsistente != null ? alumno.nombreAsistente : "") +"</a></td>"+
                                 "<td>"+ (alumno.nombreCurso != null ? alumno.nombreCurso : "") +"</td>"+
                                 "<td>"+ (alumno.cliente != null ? alumno.cliente : "") +"</td>"+
                                 "<td>"+ (alumno.obra != null ? alumno.obra : "") +"</td>"+
@@ -140,6 +142,7 @@
                                 "<td>"+ (alumno.rut != null ? alumno.rut : "") +"</td>"+
                                 "<td>"+ (alumno.correo != null ? alumno.correo : "") +"</td>"+
                                 "<td>"+ (alumno.plantilla != null ? alumno.plantilla : "") +"</td>"+
+                                "<td>"+ (alumno.estado != null ? alumno.estado : "") +"</td>"+
                             "</tr>";
                             tbody.append(fila);
                         });

@@ -30,6 +30,7 @@ import org.jodconverter.core.office.OfficeUtils;
 import org.jodconverter.local.JodConverter;
 import org.jodconverter.local.office.LocalOfficeManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import com.vt.createmanagesubmit.modelos.Alumno;
@@ -49,11 +50,12 @@ public class ServicioArchivos {
     private RepositorioPlantillas plantillaRepo;
 
     @Autowired
+    @Lazy
     private Servicio servicio;
 
     String correoEmpresa = Servicio.CORREO_EMPRESA;
 
-    public void leerExcelYGuardarEnBD(String rutaArchivo,String procesar,String plantilla) throws IOException {
+    public void leerExcelYGuardarEnBD(String rutaArchivo,String estadoDiplomaExcel,String plantilla,String estadoExcel) throws IOException {
         FileInputStream fileInputStream = new FileInputStream(new File(rutaArchivo));
 
         Workbook workbook = WorkbookFactory.create(fileInputStream);
@@ -100,11 +102,46 @@ public class ServicioArchivos {
                             alumno.setPlantilla(plantillaAlumnoEstablecido);
                         }
                     }
+
                     if(alumno.getCorreo()==null){
                         
                         alumno.setCorreo(correoEmpresa);
                     }
                     
+                    if(alumno.getEstado()==null){
+                        alumno.setEstado("revisionManual");
+                    }
+
+                    if(alumno.getEstado()!="Eexcel"){
+                        if(estadoExcel.equals("Eauto")){
+                            alumno = servicio.funcionEstadoManual(alumno);
+                        }else{
+                            alumno.setEstado(estadoExcel);
+                        }
+                    }
+
+                    if(!estadoDiplomaExcel.equals("diploExcel")){
+                        if(estadoDiplomaExcel.equals("noEnviar")){
+                            alumno.setDiploma("noEnviado");
+                        }else if(estadoDiplomaExcel.equals("enviarApro")){
+                            if(alumno.getEstado()=="aprobado"){
+                                try {
+                                    generateCertificateForAlumno(alumno);
+                                    alumno.setDiploma("enviado");
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }else if(estadoDiplomaExcel.equals("enviarTodos")){
+                            try {
+                                generateCertificateForAlumno(alumno);
+                                alumno.setDiploma("enviado");
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+
                     alumnoRepo.save(alumno);
                 }
             }
@@ -235,15 +272,15 @@ public class ServicioArchivos {
         }
     }
 
-    public void generateCertificates() throws Exception {
+    public void generateCertificatesAll() throws Exception {
 
-        List<Alumno> alumnos = alumnoRepo.findAll();
+        List<Alumno> alumnos = alumnoRepo.findAllByDiploma("noEnviado");
         for (Alumno alumno : alumnos) {
             generateCertificateForAlumno(alumno);
         }
     }
 
-    private void generateCertificateForAlumno(Alumno alumno) throws Exception {
+    public void generateCertificateForAlumno(Alumno alumno) throws Exception {
         // Obtén la plantilla asociada al alumno
         Plantilla plantilla = alumno.getPlantilla();
         if (plantilla == null) {
