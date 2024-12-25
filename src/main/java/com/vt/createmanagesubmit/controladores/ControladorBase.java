@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vt.createmanagesubmit.modelos.Alumno;
 import com.vt.createmanagesubmit.modelos.Plantilla;
 import com.vt.createmanagesubmit.servicios.Servicio;
@@ -64,7 +66,7 @@ public class ControladorBase {
     }
 
     @GetMapping("/dataBaseAlumno/alumno/{id}")
-    public String getMethodName(@PathVariable("id")Long id,Model model) {
+    public String alumnoDatos(@PathVariable("id")Long id,Model model) {
         Alumno alumno = servicio.alumnoPorId(id);
         model.addAttribute("alumno",alumno);
         return "alumnoDatos.jsp";
@@ -138,10 +140,50 @@ public String agregarAlumno(
 
     
     @GetMapping("/addAlumnoBase/excel")
-    public String getMethodName(Model model) {
+    public String addAlumnoExcel(Model model) {
         List<Plantilla> plantillas = servicio.todasLasPlantillas();
         model.addAttribute("plantillas",plantillas);
         return "addAlumnoExcel.jsp";
+    }
+
+    @GetMapping("/dataBaseAlumno/alumno/{id}/editar")
+    public String editarAlumno(@PathVariable("id")Long id,Model model) {
+        List<Plantilla> plantillas = servicio.todasLasPlantillas();
+        Alumno alumno = servicio.alumnoPorId(id);
+        model.addAttribute("alumno",alumno);
+        model.addAttribute("plantillas",plantillas);
+        return "editarAlumno.jsp";
+    }
+    
+    @PostMapping("/editarAlumno")
+    public String editarAlumno(
+            @RequestParam("id") Long id,
+            @RequestParam("nombreAsistente") String nombreAsistente,
+            @RequestParam("nombreCurso") String nombreCurso,
+            @RequestParam("diasCursos") String diasCursos,
+            @RequestParam("numeroHoras") String numeroHoras,
+            @RequestParam("numeroCorrelativoInterno") String numeroCorrelativoInterno,
+            @RequestParam("cliente") String cliente,
+            @RequestParam("obra") String obra,
+            @RequestParam("codigo") String codigo,
+            @RequestParam("notaAprovacion") String notaAprovacion,
+            @RequestParam("relator") String relator,
+            @RequestParam("asistencia") String asistencia,
+            @RequestParam("estado") String estado,
+            @RequestParam("diploma") String diploma,
+            @RequestParam("rut") String rut,
+            @RequestParam("correo") String correo,
+            @RequestParam("plantilla") Long plantillaId,
+            Model model) {
+        
+        // Llamar al servicio para procesar los datos
+        servicio.editarAlumno(
+                id, nombreAsistente, nombreCurso, diasCursos, numeroHoras, 
+                numeroCorrelativoInterno, cliente, obra, codigo, notaAprovacion,
+                relator, asistencia, estado, diploma, rut, correo, plantillaId);
+
+        // Redirigir o mostrar una página de confirmación
+        return "redirect:/dataBaseAlumno/alumno/"+id;
     }
     
 

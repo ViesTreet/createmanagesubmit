@@ -287,6 +287,8 @@ public class ServicioArchivos {
         Alumno alumno = alumnoRepo.findById(id).orElse(null);
         
         generateCertificateForAlumno(alumno);
+        alumno.setDiploma("enviado");
+        alumnoRepo.save(alumno);
     }
 
     public void generateCertificateForAlumno(Alumno alumno) throws Exception {

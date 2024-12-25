@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.vt.createmanagesubmit.modelos.Alumno;
 import com.vt.createmanagesubmit.modelos.Plantilla;
@@ -37,6 +38,11 @@ public class Servicio {
 
     public Alumno alumnoPorId(Long id){
         return repoAlum.findById(id).orElse(null);
+    }
+
+    public void borrarAlumnoPorId(Long id){
+        Alumno alumno = repoAlum.findById(id).orElse(null);
+        repoAlum.delete(alumno);
     }
 
     public Page<Alumno> todosLosAlumnos(){
@@ -201,6 +207,62 @@ public class Servicio {
             return null;
         }
     }
+
+    public void editarAlumno(
+            Long id,
+            String nombreAsistente,
+            String nombreCurso,
+            String diasCursos,
+            String numeroHoras,
+            String numeroCorrelativoInterno,
+            String cliente,
+            String obra,
+            String codigo,
+            String notaAprovacion,
+            String relator,
+            String asistencia,
+            String estado,
+            String diploma,
+            String rut,
+            String correo,
+            Long plantillaId) {
+
+        // Crear o actualizar el objeto Alumno
+        Alumno alumno = repoAlum.findById(id).orElse(null);
+
+        alumno.setNombreAsistente(normalizarValor(nombreAsistente));
+        alumno.setNombreCurso(normalizarValor(nombreCurso));
+        alumno.setDiasCursos(normalizarValor(diasCursos));
+        alumno.setNumeroHoras(normalizarValor(numeroHoras));
+        alumno.setNumeroCorrelativoInterno(normalizarValor(numeroCorrelativoInterno));
+        alumno.setCliente(normalizarValor(cliente));
+        alumno.setObra(normalizarValor(obra));
+        alumno.setCodigo(normalizarValor(codigo));
+        alumno.setNotaAprovacion(normalizarValor(notaAprovacion));
+        alumno.setRelator(normalizarValor(relator));
+        alumno.setAsistencia(normalizarValor(asistencia));
+        alumno.setDiploma(normalizarValor(diploma));
+        alumno.setRut(normalizarValor(rut));
+        alumno.setCorreo(normalizarValor(correo));
+        Plantilla plantilla = repoPlanti.findById(plantillaId).orElse(null);
+        alumno.setPlantilla((plantilla));
+        if(!estado.equals("auto")){
+            alumno.setEstado(normalizarValor(estado));
+        }else{
+            alumno = funcionEstadoManual(alumno);
+        }
+
+        // Lógica adicional, como guardar en la base de datos, etc.
+        repoAlum.save(alumno);
+    }
+
+
+    private String normalizarValor(String valor) {
+        return StringUtils.hasText(valor) ? valor.trim() : null;
+    }
+
 }
+
+
 
 

@@ -138,7 +138,7 @@
                 </form>
             </div>
             <div>
-                <a class="btn btn-warning" href="/dataBaseAlumno">+</a>
+                <a class="btn btn-warning" href="/dataBaseAlumno">Regresar</a>
                 <button class="btn btn-primary" onclick="openForm()">Enviar restantes</button>
                 <a class="btn btn-success" href="/addAlumnoBase">+</a>
             </div>

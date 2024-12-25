@@ -13,12 +13,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.view.RedirectView;
 
 import com.vt.createmanagesubmit.dto.AlumnoDTO;
 import com.vt.createmanagesubmit.modelos.Alumno;
@@ -88,7 +90,7 @@ public class ControladorApi {
     }
 
     @PostMapping("/enviarRestantes")
-    public String enviarRestantes() {
+    public RedirectView enviarRestantes() {
         try {
             servicioAr.generateCertificatesAll();
         } catch (Exception e) {
@@ -97,7 +99,24 @@ public class ControladorApi {
         }
 
         
-        return "redirect:/dataBaseAlumno";
+        return new RedirectView("/dataBaseAlumno");
+    }
+    
+    @GetMapping("/generateCert/{id}")
+    public RedirectView certificadoPorIdApi(@PathVariable("id")Long id) {
+        try {
+            servicioAr.generateCertificatesById(id);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return new RedirectView("/dataBaseAlumno/alumno/"+id);
+    }
+    
+    @GetMapping("/dataBaseAlumno/alumno/{id}/borrar")
+    public RedirectView borrarAlumnoIdApi(@PathVariable("id")Long id) {
+        ser.borrarAlumnoPorId(id);
+        return new RedirectView("/dataBaseAlumno");
     }
     
         
