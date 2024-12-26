@@ -1,6 +1,7 @@
 package com.vt.createmanagesubmit.controladores;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -67,30 +68,28 @@ public class ControladorApi {
     
 
     @PostMapping(value = "/uploadAlumnoExcel", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> subirExcel(@RequestPart("file") MultipartFile file,@RequestParam(value = "estadoDiplomaExcel", required = false) String estadoDiplomaExcel,@RequestParam(value = "plantillaNombre")String plantilla,@RequestParam(value ="estadoExcel")String estadoExcel) {
+    public RedirectView subirExcel(@RequestPart("file") MultipartFile file, 
+     @RequestParam(value = "estadoDiplomaExcel", required = false) String estadoDiplomaExcel, 
+     @RequestParam(value = "plantillaNombre") String plantilla, 
+     @RequestParam(value = "estadoExcel") String estadoExcel) {
         if (file.isEmpty()) {
-            return ResponseEntity.badRequest().body("El archivo está vacío");
+            return new RedirectView("/error");
         }
-
         try {
-            // Guardar el archivo temporalmente
-            Path tempDir = Files.createTempDirectory("");
+            // Leer el contenido del archivo en un arreglo de bytes
+            byte[] fileBytes = file.getBytes();
 
-            File tempFile = tempDir.resolve(file.getOriginalFilename()).toFile();
-            file.transferTo(tempFile);
+            // Llamar al método asíncrono y pasarle los bytes del archivo
+            servicioAr.leerExcelYGuardarEnBD(fileBytes, estadoDiplomaExcel, plantilla, estadoExcel);
 
-            // Procesar el archivo
-            servicioAr.leerExcelYGuardarEnBD(tempFile.getAbsolutePath(),estadoDiplomaExcel,plantilla,estadoExcel);
-
-            // Eliminar el archivo temporal
-            tempFile.delete();
-
-            return ResponseEntity.ok("Archivo procesado exitosamente");
+            // Redirigir inmediatamente sin esperar a que termine el procesamiento
+            return new RedirectView("/dataBaseAlumno");
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al procesar el archivo");
+            return new RedirectView("/error");
         }
     }
+
 
     @GetMapping("/generateCertificates")
     public ResponseEntity<?> generateCertificates() {
@@ -102,7 +101,7 @@ public class ControladorApi {
         }
     }
 
-    @PostMapping("/enviarRestantes")
+    @GetMapping("/enviarRestantes")
     public RedirectView enviarRestantes() {
         try {
             servicioAr.generateCertificatesAll();

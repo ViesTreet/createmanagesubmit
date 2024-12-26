@@ -254,10 +254,9 @@
                 <button class="btn btn-danger" onclick="closeForm()">Cerrar</button>
             </div>
             <h2 class="text-center pb-2">Alumnos que se enviarán:</h2>
-            <form action="/enviarRestantes" method="post">
+            <form action="/api/enviarRestantes" method="get">
                 <div id="alumnosNoEnviados"></div>
                 <div class="d-flex justify-content-center">
-                    <input type="hidden" name="orden" value="true">
                     <input class="btn btn-success" type="submit" value="Enviar">
                 </div>
             </form>

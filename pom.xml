@@ -147,11 +147,13 @@
 		    <version>3.4.1</version>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/org.libreoffice/libreoffice -->
 		<dependency>
-        	<groupId>org.libreoffice</groupId>
-        	<artifactId>libreoffice</artifactId>
-        	<version>7.0.0</version> <!-- O la versión que necesites -->
-    	</dependency>
+		    <groupId>org.libreoffice</groupId>
+			<artifactId>libreoffice</artifactId>
+		    <version>24.2.3</version>
+		</dependency>
+
 
 	</dependencies>
 

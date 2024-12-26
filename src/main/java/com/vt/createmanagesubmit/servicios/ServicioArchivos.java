@@ -2,12 +2,14 @@ package com.vt.createmanagesubmit.servicios;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+// Otras importaciones necesarias
 import java.io.FileOutputStream;
 import java.io.IOException;
-// Otras importaciones necesarias
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
@@ -19,13 +21,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import javax.imageio.ImageIO;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.poi.sl.usermodel.PictureData;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.DateUtil;
@@ -39,7 +40,6 @@ import org.apache.poi.xslf.usermodel.XSLFShape;
 import org.apache.poi.xslf.usermodel.XSLFSlide;
 import org.apache.poi.xslf.usermodel.XSLFTextShape;
 import org.jodconverter.core.office.OfficeException;
-import org.jodconverter.core.office.OfficeUtils;
 import org.jodconverter.local.JodConverter;
 import org.jodconverter.local.office.LocalOfficeManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +47,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.google.zxing.BarcodeFormat;
@@ -79,153 +80,155 @@ public class ServicioArchivos {
 
     String correoEmpresa = Servicio.CORREO_EMPRESA;
 
-    public void leerExcelYGuardarEnBD(String rutaArchivo, String estadoDiplomaExcel, String plantilla, String estadoExcel) throws IOException {
-        FileInputStream fileInputStream = new FileInputStream(new File(rutaArchivo));
-        Workbook workbook = WorkbookFactory.create(fileInputStream);
+    @Async
+    public CompletableFuture<Void> leerExcelYGuardarEnBD(byte[] fileBytes, String estadoDiplomaExcel, String plantilla, String estadoExcel) throws IOException {
+        try (InputStream fileInputStream = new ByteArrayInputStream(fileBytes)){
+            Workbook workbook = WorkbookFactory.create(fileInputStream);
 
         // Iterar sobre las hojas del libro
-        for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
-            Sheet hoja = workbook.getSheetAt(i);
+            for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
+                Sheet hoja = workbook.getSheetAt(i);
 
-            // Obtener el encabezado (asumiendo que está en la primera fila)
-            Row encabezado = hoja.getRow(0);
-            Map<Integer, String> mapaColumnas = new HashMap<>();
+                // Obtener el encabezado (asumiendo que está en la primera fila)
+                Row encabezado = hoja.getRow(0);
+                Map<Integer, String> mapaColumnas = new HashMap<>();
 
-            // Mapear los nombres de las columnas a sus índices
-            for (Cell celda : encabezado) {
-                int indiceColumna = celda.getColumnIndex();
-                String nombreColumna = celda.getStringCellValue();
-                mapaColumnas.put(indiceColumna, nombreColumna.trim());
-            }
-
-            // Iterar sobre las filas de datos (empezando desde la segunda fila)
-            for (int filaIndex = 1; filaIndex <= hoja.getLastRowNum(); filaIndex++) {
-                Row fila = hoja.getRow(filaIndex);
-                if (fila == null) {
-                    continue; // Saltar filas vacías
-                }
-
-                Alumno alumno = new Alumno();
-
-                // Iterar sobre las celdas de la fila
-                for (Cell celda : fila) {
+                // Mapear los nombres de las columnas a sus índices
+                for (Cell celda : encabezado) {
                     int indiceColumna = celda.getColumnIndex();
-                    String nombreColumna = mapaColumnas.get(indiceColumna);
-                    if (nombreColumna != null) {
-                        asignarValorAtributo(alumno, nombreColumna, celda);
-                    }
+                    String nombreColumna = celda.getStringCellValue();
+                    mapaColumnas.put(indiceColumna, nombreColumna.trim());
                 }
 
-                if (alumno.getNombreAsistente() != null) {
-                    if (!plantilla.trim().equals("excel")) {
-                        Optional<Plantilla> plantillaOp = servicio.plantillaPorNombre(plantilla);
-                        if (plantillaOp.isPresent()) {
-                            Plantilla plantillaAlumnoEstablecido = plantillaOp.get();
-                            alumno.setPlantilla(plantillaAlumnoEstablecido);
+                // Iterar sobre las filas de datos (empezando desde la segunda fila)
+                for (int filaIndex = 1; filaIndex <= hoja.getLastRowNum(); filaIndex++) {
+                    Row fila = hoja.getRow(filaIndex);
+                    if (fila == null) {
+                        continue; // Saltar filas vacías
+                    }
+
+                    Alumno alumno = new Alumno();
+
+                    // Iterar sobre las celdas de la fila
+                    for (Cell celda : fila) {
+                        int indiceColumna = celda.getColumnIndex();
+                        String nombreColumna = mapaColumnas.get(indiceColumna);
+                        if (nombreColumna != null) {
+                            asignarValorAtributo(alumno, nombreColumna, celda);
                         }
                     }
 
-                    if (alumno.getCorreo() == null) {
-                        alumno.setCorreo(correoEmpresa);
-                    }
-
-                    if (alumno.getEstado() == null) {
-                        alumno.setEstado("revisionManual");
-                    }
-
-                    if (alumno.getEstado() != "Eexcel") {
-                        if (estadoExcel.equals("Eauto")) {
-                            alumno = servicio.funcionEstadoManual(alumno);
-                        } else {
-                            alumno.setEstado(estadoExcel);
+                    if (alumno.getNombreAsistente() != null) {
+                        if (!plantilla.trim().equals("excel")) {
+                            Optional<Plantilla> plantillaOp = servicio.plantillaPorNombre(plantilla);
+                            if (plantillaOp.isPresent()) {
+                                Plantilla plantillaAlumnoEstablecido = plantillaOp.get();
+                                alumno.setPlantilla(plantillaAlumnoEstablecido);
+                            }
                         }
-                    }
 
-                    if (!estadoDiplomaExcel.equals("diploExcel")) {
-                        if (estadoDiplomaExcel.equals("noEnviar")) {
-                            alumno.setDiploma("noEnviado");
+                        if (alumno.getCorreo() == null || alumno.getCorreo().trim().isEmpty() || alumno.getCorreo().trim().isBlank()) {
+                            alumno.setCorreo("javito12ulloa@gmail.com");
+                        }
+
+                        if (alumno.getEstado() == null) {
+                            alumno.setEstado("revisionManual");
+                        }
+
+                        if (!alumno.getEstado().equals("Eexcel")) {
+                            if (estadoExcel.equals("Eauto")) {
+                                alumno = servicio.funcionEstadoManual(alumno);
+                            } else {
+                                alumno.setEstado(estadoExcel);
+                            }
+                        }
+
+                        if (!estadoDiplomaExcel.equals("diploExcel")) {
+                            if (estadoDiplomaExcel.equals("noEnviar")) {
+                                alumno.setDiploma("noEnviado");
+                            } else if (estadoDiplomaExcel.equals("enviarApro")) {
+                                if (alumno.getEstado().equals("aprobado")) {
+                                    alumno.setDiploma("enviado");
+                                }
+                            } else if (estadoDiplomaExcel.equals("enviarTodos")) {
+                                alumno.setDiploma("enviado");
+                            }
+                        }
+
+                        alumnoRepo.save(alumno);
+
+                        if (estadoDiplomaExcel.equals("enviarTodos")) {
+                            try {
+                                generateCertificateForAlumno(alumno);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                         } else if (estadoDiplomaExcel.equals("enviarApro")) {
-                            if (alumno.getEstado() == "aprobado") {
+                            if (alumno.getEstado().equals("aprobado")) {
                                 try {
                                     generateCertificateForAlumno(alumno);
-                                    alumno.setDiploma("enviado");
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
                             }
-                        } else if (estadoDiplomaExcel.equals("enviarTodos")) {
-                            try {
-                                generateCertificateForAlumno(alumno);
-                                alumno.setDiploma("enviado");
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
                         }
                     }
-
-                    alumnoRepo.save(alumno);
                 }
             }
+            workbook.close();
+            fileInputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        workbook.close();
-        fileInputStream.close();
+        
+        return CompletableFuture.completedFuture(null);
     }
 
     private void asignarValorAtributo(Alumno alumno, String nombreColumna, Cell celda) {
-        // Obtener el valor de la celda como String
+        // Obtén el valor de la celda como String
         String valorCelda = obtenerValorCeldaComoString(celda);
 
-        // Asignar el valor al atributo correspondiente
         switch (nombreColumna.toLowerCase()) {
             case "nº":
             case "número":
                 break;
-            case "NOMBRE ASISTENTE":
             case "nombre asistente":
                 alumno.setNombreAsistente(valorCelda);
                 break;
             case "nombre curso":
-            case "Nombre curso":
                 alumno.setNombreCurso(valorCelda);
                 break;
             case "dias curso":
-            case "Dias curso":
                 alumno.setDiasCursos(valorCelda);
                 break;
-            case "Nº de Horas":
+            case "nº de horas":
             case "numero horas":
                 alumno.setNumeroHoras(valorCelda);
                 break;
-            case "Nº Correlativo Interno":
+            case "nº correlativo interno":
             case "numero correlativo interno":
                 alumno.setNumeroCorrelativoInterno(valorCelda);
                 break;
             case "cliente":
-            case "Cliente":
                 alumno.setCliente(valorCelda);
                 break;
             case "obra":
-            case "Obra":
                 alumno.setObra(valorCelda);
                 break;
             case "codigo":
-            case "Codigo":
                 alumno.setCodigo(valorCelda);
                 break;
             case "nota aprobación":
-            case "Nota Aprobación":
+            case "nota aprobacion":
                 alumno.setNotaAprovacion(valorCelda);
                 break;
             case "relator":
-            case "Relator":
                 alumno.setRelator(valorCelda);
                 break;
             case "asistencia":
-            case "Asistencia":
                 alumno.setAsistencia(valorCelda);
                 break;
             case "estado":
-            case "Estado":
                 if (valorCelda.trim().equalsIgnoreCase("aprobado")) {
                     alumno.setEstado("aprobado");
                 } else {
@@ -233,24 +236,20 @@ public class ServicioArchivos {
                 }
                 break;
             case "diploma":
-            case "Diploma":
-                if (valorCelda.trim().equalsIgnoreCase("No enviado")) {
+                if (valorCelda.trim().equalsIgnoreCase("no enviado")) {
                     alumno.setDiploma("noEnviado");
-                } else if (valorCelda.trim().equalsIgnoreCase("Enviado")) {
+                } else if (valorCelda.trim().equalsIgnoreCase("enviado")) {
                     alumno.setDiploma("enviado");
                 } else {
                     alumno.setDiploma("revisionManual");
                 }
                 break;
             case "rut":
-            case "Rut":
                 alumno.setRut(valorCelda);
                 break;
             case "correo":
-            case "Correo":
                 alumno.setCorreo(valorCelda);
                 break;
-            case "Plantilla":
             case "plantilla":
                 Optional<Plantilla> plantillaAlumnoOptional = servicio.plantillaPorNombre(valorCelda);
                 if (plantillaAlumnoOptional.isPresent()) {
@@ -268,8 +267,9 @@ public class ServicioArchivos {
                         alumno.setPlantilla(plantillaAlumno);
                     }
                 }
+                break;
             default:
-                // Si hay columnas que no corresponden a ningún atributo, puedes ignorarlas
+                // Ignorar columnas no reconocidas
                 break;
         }
     }
@@ -280,17 +280,14 @@ public class ServicioArchivos {
                 return celda.getStringCellValue();
             case NUMERIC:
                 if (DateUtil.isCellDateFormatted(celda)) {
-                    // Si es una fecha
                     Date date = celda.getDateCellValue();
                     return new SimpleDateFormat("yyyy-MM-dd").format(date);
                 } else {
-                    // Si es un número
                     return String.valueOf(celda.getNumericCellValue());
                 }
             case BOOLEAN:
                 return String.valueOf(celda.getBooleanCellValue());
             case FORMULA:
-                // Evaluar la fórmula
                 FormulaEvaluator evaluator = celda.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
                 CellValue cellValue = evaluator.evaluate(celda);
                 return cellValue.formatAsString();
@@ -301,6 +298,7 @@ public class ServicioArchivos {
         }
     }
 
+    
     public void generateCertificatesAll() throws Exception {
         List<Alumno> alumnos = alumnoRepo.findAllByDiplomaAndEstado("noEnviado", "aprobado");
         for (Alumno alumno : alumnos) {
@@ -310,14 +308,18 @@ public class ServicioArchivos {
         }
     }
 
+    
     public void generateCertificatesById(Long id) throws Exception {
         Alumno alumno = alumnoRepo.findById(id).orElse(null);
-        generateCertificateForAlumno(alumno);
-        alumno.setDiploma("enviado");
-        alumnoRepo.save(alumno);
+        if (alumno != null) {
+            generateCertificateForAlumno(alumno);
+            alumno.setDiploma("enviado");
+            alumnoRepo.save(alumno);
+        }
     }
 
-    public void generateCertificateForAlumno(Alumno alumno) throws Exception {
+    @Async
+    public CompletableFuture<Void> generateCertificateForAlumno(Alumno alumno) throws Exception {
         // Obtén la plantilla asociada al alumno
         Plantilla plantilla = alumno.getPlantilla();
         if (plantilla == null) {
@@ -354,7 +356,6 @@ public class ServicioArchivos {
                         textShape.setText(textToSet != null ? textToSet : "");
                     }
                 }
-                // Aquí se eliminó el bloque que manejaba XSLFPictureShape
             }
         }
 
@@ -381,7 +382,9 @@ public class ServicioArchivos {
         } catch (OfficeException e) {
             e.printStackTrace();
         } finally {
-            OfficeUtils.stopQuietly(officeManager);
+            if (officeManager != null) {
+                officeManager.stop();
+            }
         }
 
         // Leer el PDF generado como array de bytes
@@ -398,10 +401,8 @@ public class ServicioArchivos {
         byte[] qrCodeBytes = qrCodeOutputStream.toByteArray();
 
         // Enviar correo electrónico al alumno con el PDF y el código QR como adjuntos
-        // Comentario: Aquí es donde se crea el correo electrónico. Puedes darle un formato más bonito.
-        sendEmailWithAttachments(alumno.getCorreo(), "Certificado de Curso",
-                "Estimado " + alumno.getNombreAsistente() + ", adjuntamos su certificado y código QR.",
-                pdfBytes, qrCodeBytes);
+        sendEmailWithAttachments(alumno.getCorreo(), "Certificado de Curso", "Estimado " + alumno.getNombreAsistente() + ", adjuntamos su certificado y código QR.", pdfBytes, qrCodeBytes);
+        return CompletableFuture.completedFuture(null);
     }
 
     private String encryptStudentId(String studentId) throws Exception {
@@ -454,5 +455,7 @@ public class ServicioArchivos {
         helper.addAttachment("codigoQR.png", qrCodeResource);
 
         javaMailSender.send(message);
+
+        
     }
 }

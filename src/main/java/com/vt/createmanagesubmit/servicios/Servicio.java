@@ -123,6 +123,13 @@ public class Servicio {
 
     public void borrarPlantillaPorId(Long id){
         Plantilla plantilla = plantillaPorId(id);
+        Path deletePlantillaPath = Paths.get(STATIC_DIRECTORY + plantilla.getPathArchivo());
+        try {
+            Files.deleteIfExists(deletePlantillaPath);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         repoPlanti.delete(plantilla);
     }
 
@@ -322,7 +329,7 @@ public class Servicio {
         }
 
         // Actualizar la ruta en la BD
-        plantilla.setPathLogo(relativePath);
+        plantilla.setPathLogo(STATIC_DIRECTORY+relativePath);
         repoPlanti.save(plantilla);
     }
 
@@ -350,7 +357,8 @@ public class Servicio {
         }
 
         // Actualizar la ruta en la BD
-        plantilla.setPathArchivo(relativePath);
+        System.out.println(STATIC_DIRECTORY+relativePath);
+        plantilla.setPathArchivo(STATIC_DIRECTORY + relativePath);
         repoPlanti.save(plantilla);
     }
 
@@ -364,7 +372,7 @@ public class Servicio {
         // Guardar el archivo
         Files.write(fullPath, archivo.getBytes());
 
-        return relativePath;
+        return STATIC_DIRECTORY+relativePath;
     }
 
     public String clonarArchivo(String archivoExistente, String subdirectorio) throws IOException {
@@ -380,7 +388,7 @@ public class Servicio {
         // Copiar el archivo
         Files.copy(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
 
-        return relativePath;
+        return STATIC_DIRECTORY+relativePath;
     }
 
 }
