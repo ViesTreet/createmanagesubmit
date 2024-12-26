@@ -63,6 +63,22 @@ public class Servicio {
             case "nombreCurso":
                 listaResultante = repoAlum.findByNombreCursoContaining(dato, pageable); // Usando Containing
                 break;
+            case "estado":
+                if(dato.trim().equals("No aprobado")||dato.trim().equals("no aprobado")||dato.trim().equals("noAprobado")){
+                    listaResultante = repoAlum.findByEstado("noAprobado", pageable);
+                }else if(dato.trim().equals("aprobado")||dato.trim().equals("Aprobado")){
+                    listaResultante = repoAlum.findByEstado("aprobado", pageable);
+                }else{
+                    listaResultante = repoAlum.findByEstado("revisionManual", pageable);
+                }
+                break;      
+            case "diploma":
+                if(dato.trim().equals("enviado")||dato.trim().equals("Enviado")){
+                    listaResultante = repoAlum.findByDiploma("enviado", pageable);
+                }else{
+                    listaResultante=repoAlum.findByDiploma("noEnviado", pageable);
+                }
+                break;
             case "cliente":
                 listaResultante = repoAlum.findByClienteContaining(dato, pageable); // Usando Containing
                 break;
@@ -78,6 +94,11 @@ public class Servicio {
         }
         return listaResultante;
     }
+
+    public List<Plantilla> buscarPlantillaPorCriterio(String dato){
+        List<Plantilla> plantillas = repoPlanti.findAllByNombreCertificadoContaining(dato);
+        return plantillas;
+    }
     
     public List<Plantilla> todasLasPlantillas(){
         return repoPlanti.findAll();
@@ -85,6 +106,11 @@ public class Servicio {
 
     public Plantilla plantillaPorId(Long id){
         return repoPlanti.findById(id).orElse(null);
+    }
+
+    public void borrarPlantillaPorId(Long id){
+        Plantilla plantilla = plantillaPorId(id);
+        repoPlanti.delete(plantilla);
     }
 
     public Optional<Plantilla> plantillaPorNombre(String nombre){

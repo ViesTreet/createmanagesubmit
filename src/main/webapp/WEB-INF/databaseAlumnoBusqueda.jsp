@@ -128,12 +128,14 @@
                     <select id="filtroBusquedaAlumno" class="form-select" name="filtroBusquedaAlumno">
                         <option value="rut">Rut</option>
                         <option value="nombreAsistente">Nombre Asistente</option>
+                        <option value="estado">Estado</option>
+                        <option value="diploma">Diploma</option>
                         <option value="nombreCurso">Nombre Curso</option>
                         <option value="cliente">Cliente</option>
                         <option value="obra">Obra</option>
                         <option value="relator">Relator</option>
                     </select>
-                    <input id="busquedaAlumno" type="search"  class ="col-5" placeholder="Buscar" name="busquedaAlumno"/>
+                    <input id="busquedaAlumno" type="search"  class ="col-5" onkeydown="submitOnEnter(event, 'buscarLink')" placeholder="Buscar" name="busquedaAlumno"/>
                     <a id="buscarLink" href="#" class="btn btn-outline-primary">Buscar</a>
                 </form>
             </div>
@@ -156,7 +158,7 @@
                         <th>Rut</th>
                         <th>Correo</th>
                         <th>Plantilla</th>
-                        <th>Estado</th>
+                        <th>Diploma</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -174,7 +176,7 @@
         
             function cargarDatos(filtro, busqueda){
                 $.ajax({
-                    url: "/api/datos/busquedaAlumno",
+                    url: "/api/datosAlumno/busquedaAlumno",
                     method: "GET",
                     data: { filtro: filtro, busqueda: busqueda }, // Enviar los parámetros como datos
                     success: function(data){
@@ -191,7 +193,7 @@
                                 "<td>"+ (alumno.rut != null ? alumno.rut : "") +"</td>"+
                                 "<td>"+ (alumno.correo != null ? alumno.correo : "") +"</td>"+
                                 "<td>"+ (alumno.plantilla != null ? alumno.plantilla : "") +"</td>"+
-                                "<td>"+ (alumno.estado != null ? alumno.estado : "") +"</td>"+
+                                "<td>"+ (alumno.diploma != null ? alumno.diploma : "") +"</td>"+
                             "</tr>";
                             tbody.append(fila);
                         });
@@ -225,6 +227,16 @@
             // Redirige al enlace generado
             window.location.href = url;
         });
+    </script>
+    <script>
+        // Función que detecta la tecla Enter
+        function submitOnEnter(event, buttonId) {
+            // Verifica si la tecla presionada es Enter (código 13)
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Evita el comportamiento predeterminado
+                document.getElementById(buttonId).click(); // Simula un clic en el botón
+            }
+        }
     </script>
     <div class="overlay" id="overlay">
         <div class="popup">

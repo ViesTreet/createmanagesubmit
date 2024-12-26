@@ -206,11 +206,21 @@ public class ServicioArchivos {
                 break;
             case "estado":
             case "Estado":
-                alumno.setEstado(valorCelda);
+                if(valorCelda.trim().equals("aprobado")||valorCelda.trim().equals("Aprobado")){
+                    alumno.setEstado("aprobado");
+                }else{
+                    alumno.setEstado("noAprobado");
+                }
                 break;
             case "diploma":
             case "Diploma":
-                alumno.setDiploma(valorCelda);
+                if(valorCelda.trim().equals("No enviado")||valorCelda.trim().equals("no enviado")||valorCelda.trim().equals("No Enviado")){
+                    alumno.setDiploma("noEnviado");
+                }else if(valorCelda.trim().equals("Enviado")||valorCelda.trim().equals("enviado")){
+                    alumno.setDiploma("enviado");
+                }else{
+                    alumno.setDiploma("revisionManual");
+                }
                 break;
             case "rut":
             case "Rut":

@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Lista de Alumnos</title>
+    <title>Lista de Plantilla</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Importar CSS de Bootstrap -->
@@ -126,43 +126,24 @@
         </nav>
     </header>
     <div id="contenderBase" class="container pt-2 pb-2" style="height: 90vh;">
-        <h2 class="text-center">Base de datos Alumnos</h2>
+        <h2 class="text-center">Base de datos Plantillas</h2>
         <div class="d-flex align-items-center justify-content-between pb-1" style="max-width: 95vw;">
             <div>
-                <form id="alumnoBuscador" class="col-12">
-                    <select id="filtroBusquedaAlumno" class="form-select" name="filtroBusquedaAlumno">
-                        <option value="rut">Rut</option>
-                        <option value="nombreAsistente">Nombre Asistente</option>
-                        <option value="estado">Estado</option>
-                        <option value="diploma">Diploma</option>
-                        <option value="nombreCurso">Nombre Curso</option>
-                        <option value="cliente">Cliente</option>
-                        <option value="obra">Obra</option>
-                        <option value="relator">Relator</option>
-                    </select>
-                    <input id="busquedaAlumno" type="search"  class ="col-5" onkeydown="submitOnEnter(event, 'buscarLink')" placeholder="Buscar" name="busquedaAlumno"/>
+                <form id="plantillaBuscador" class="col-12">
+                    <input id="busquedaPlantilla" type="search" onkeydown="submitOnEnter(event, 'buscarLink')" class ="col-7" placeholder="Buscar por nombre" name="busquedaPlantilla"/>
                     <a id="buscarLink" href="#" class="btn btn-outline-primary">Buscar</a>
                 </form>
             </div>
-            <div>
-                <button class="btn btn-primary" onclick="openForm()">Enviar restantes</button>
-                <a class="btn btn-success" href="/addAlumnoBase">+</a>
-            </div>
         </div>
         <div id="contenedorTabla" style="overflow-y: auto; max-height: 70vh; max-width: 95vw;">
-            <table class="table table-hover table-sm table-bordered mb-5" style="table-layout: fixed; height: 100%;" id="tablaAlumnos">
+            <table class="table table-hover table-sm table-bordered mb-5" style="table-layout: fixed; height: 100%;" id="tablaPlantilla">
                 <thead class="thead-dark">
                     <tr>
-                        <th>Nombre Asistente</th>
-                        <th>Nombre Curso</th>
-                        <th>Cliente</th>
-                        <th>Obra</th>
-                        <th>Relator</th>
-                        <th>Estado</th>
-                        <th>Rut</th>
-                        <th>Correo</th>
-                        <th>Plantilla</th>
-                        <th>Diploma</th>
+                        <th>Nombre Plantilla</th>
+                        <th>Descripción</th>
+                        <th>Asistencia minima</th>
+                        <th>Nota minima</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -171,41 +152,29 @@
             </table>
         </div>
     </div>
-
+    <button class='btn btn-danger'>Borrar</button>
     <script>
         $(document).ready(function () {
             function cargarDatos() {
                 $.ajax({
-                    url: "/api/datosAlumno",
+                    url: "/api/datosPlantilla",
                     method: "GET",
                     success: function (data) {
-                        var tbody = $("#tablaAlumnos tbody");
-                        var contenedorNoEnviados = $("#alumnosNoEnviados"); // Un contenedor para los alumnos con estado "noEnviado"
+                        var tbody = $("#tablaPlantilla tbody");
     
                         tbody.empty(); // Limpiar la tabla antes de agregar nuevos datos
-                        contenedorNoEnviados.empty(); // Limpiar el contenedor antes de agregar nuevos datos
     
-                        $.each(data, function (i, alumno) {
+                        $.each(data, function (i, plantilla) {
                             // Crear una fila de tabla para todos los alumnos
                             var fila = "<tr>" +
-                                "<td><a href='/dataBaseAlumno/alumno/" + alumno.id + "'>" + (alumno.nombreAsistente != null ? alumno.nombreAsistente : "") + "</a></td>" +
-                                "<td>" + (alumno.nombreCurso != null ? alumno.nombreCurso : "") + "</td>" +
-                                "<td>" + (alumno.cliente != null ? alumno.cliente : "") + "</td>" +
-                                "<td>" + (alumno.obra != null ? alumno.obra : "") + "</td>" +
-                                "<td>" + (alumno.relator != null ? alumno.relator : "") + "</td>" +
-                                "<td>" + (alumno.estado != null ? alumno.estado : "") + "</td>" +
-                                "<td>" + (alumno.rut != null ? alumno.rut : "") + "</td>" +
-                                "<td>" + (alumno.correo != null ? alumno.correo : "") + "</td>" +
-                                "<td>" + (alumno.plantilla != null ? alumno.plantilla : "") + "</td>" +
-                                "<td>" + (alumno.diploma != null ? alumno.diploma : "") + "</td>" +
+                                "<td><a href='/dataBasePlantilla/plantilla/" + plantilla.id + "'>" + (plantilla.nombreCertificado != null ? plantilla.nombreCertificado : "") + "</a></td>" +
+                                "<td>" + (plantilla.descripcion != null ? plantilla.descripcion : "") + "</td>" +
+                                "<td>" + (plantilla.asistenciaMin != null ? plantilla.asistenciaMin : "") + "</td>" +
+                                "<td>" + (plantilla.notaMin != null ? plantilla.notaMin : "") + "</td>" +
+                                "<td class='d-flex justify-content-around'><a class='btn btn-primary' href='/dataBasePlantilla/plantilla/"+ plantilla.id+"/editar'>Editar</a><a href='/dataBasePlantilla/plantilla/"+ plantilla.id+"/borrar' class='btn btn-danger'>Borrar</a></td>" +
                                 "</tr>";
                             tbody.append(fila);
     
-                            // Si el estado es "noEnviado", agregar un <p> al contenedor
-                            if (alumno.diploma === "noEnviado" && alumno.estado ==="aprobado") {
-                                var parrafo = "<p>Alumno: " + (alumno.nombreAsistente != null ? alumno.nombreAsistente : "Desconocido") + " Del curso: "+(alumno.nombreCurso != null ? alumno.nombreCurso : "Desconocido")+" se le enviara el certificado <br></br>";
-                                contenedorNoEnviados.append(parrafo);
-                            }
                         });
                     },
                     error: function (error) {
@@ -228,11 +197,10 @@
         // Prevenir el comportamiento por defecto del enlace
             event.preventDefault();
 
-            const filtro = document.querySelector('[name="filtroBusquedaAlumno"]').value;
-            const busqueda = document.querySelector('[name="busquedaAlumno"]').value;
+            const busqueda = document.querySelector('[name="busquedaPlantilla"]').value;
 
             // Construye la URL dinámica usando concatenación de strings
-            const url = 'dataBaseAlumno/buscarAlumno?filtro=' + encodeURIComponent(filtro) + '&busqueda=' + encodeURIComponent(busqueda);
+            const url = 'dataBasePlantilla/buscarPlantilla?busqueda=' + encodeURIComponent(busqueda);
 
             // Redirige al enlace generado
             window.location.href = url;

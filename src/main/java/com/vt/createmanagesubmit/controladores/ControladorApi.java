@@ -24,9 +24,9 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import com.vt.createmanagesubmit.dto.AlumnoDTO;
 import com.vt.createmanagesubmit.modelos.Alumno;
+import com.vt.createmanagesubmit.modelos.Plantilla;
 import com.vt.createmanagesubmit.servicios.Servicio;
 import com.vt.createmanagesubmit.servicios.ServicioArchivos;
-import org.springframework.web.bind.annotation.RequestBody;
 
 
 @RestController
@@ -41,17 +41,30 @@ public class ControladorApi {
     @Lazy
     private ServicioArchivos servicioAr;
 
-    @GetMapping("/datos")
-    public List<AlumnoDTO> getDatos() {
+    @GetMapping("/datosAlumno")
+    public List<AlumnoDTO> getDatosAlumno() {
         Page<Alumno> alumnos = ser.todosLosAlumnos();
         return alumnos.getContent().stream().map(AlumnoDTO::new).collect(Collectors.toList());
     }
 
-    @GetMapping("/datos/busquedaAlumno")
+    @GetMapping("/datosAlumno/busquedaAlumno")
     public List<AlumnoDTO> getDatosBusquedaAlumno(@RequestParam String filtro, @RequestParam String busqueda) {
         Page<Alumno> alumnos = ser.buscarAlumnosPorCriterio(filtro, busqueda); // Implementa este método en tu servicio
         return alumnos.getContent().stream().map(AlumnoDTO::new).collect(Collectors.toList());
     }
+
+    @GetMapping("/datosPlantilla")
+    public List<Plantilla> getDatosPlantilla() {
+        List<Plantilla> plantilla = ser.todasLasPlantillas();
+        return plantilla;
+    }
+
+    @GetMapping("/datosPlantilla/busquedaPlantilla")
+    public List<Plantilla> getDatosBusquedaPlantilla(@RequestParam String busqueda) {
+        List<Plantilla> plantilla = ser.buscarPlantillaPorCriterio(busqueda);
+        return plantilla;
+    }
+    
 
     @PostMapping(value = "/uploadAlumnoExcel", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> subirExcel(@RequestPart("file") MultipartFile file,@RequestParam(value = "estadoDiplomaExcel", required = false) String estadoDiplomaExcel,@RequestParam(value = "plantillaNombre")String plantilla,@RequestParam(value ="estadoExcel")String estadoExcel) {
@@ -119,6 +132,10 @@ public class ControladorApi {
         return new RedirectView("/dataBaseAlumno");
     }
     
-        
+    @GetMapping("/dataBasePlantilla/Plantilla/{id}/borrar")
+    public RedirectView borrarPlantillaIdApi(@PathVariable("id")Long id){
+        ser.borrarPlantillaPorId(id);
+        return new RedirectView("/dataBasePlantilla");
+    }
 }
 

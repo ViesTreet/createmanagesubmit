@@ -9,11 +9,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vt.createmanagesubmit.modelos.Alumno;
 import com.vt.createmanagesubmit.modelos.Plantilla;
 import com.vt.createmanagesubmit.servicios.Servicio;
@@ -64,6 +61,13 @@ public class ControladorBase {
         model.addAttribute("busqueda", busqueda);
         return "databaseAlumnoBusqueda.jsp";
     }
+
+    @GetMapping("/dataBasePlantilla/buscarPlantilla")
+    public String busquedaPlantilla(@RequestParam("busqueda")String busqueda,Model model) {
+        model.addAttribute("busqueda",busqueda);
+        return "databasePlantillaBusqueda.jsp";
+    }
+    
 
     @GetMapping("/dataBaseAlumno/alumno/{id}")
     public String alumnoDatos(@PathVariable("id")Long id,Model model) {
@@ -186,5 +190,26 @@ public String agregarAlumno(
         return "redirect:/dataBaseAlumno/alumno/"+id;
     }
     
+    @GetMapping("/dataBasePlantilla")
+    public String dataBasePlantilla() {
 
+        return "databasePlantilla.jsp";
+    }
+
+    @GetMapping("/dataBasePlantilla/plantilla/{id}/borrar")
+    public String borrarPlantilla(@PathVariable("id")Long id,Model model) {
+        Plantilla plantilla = servicio.plantillaPorId(id);
+        model.addAttribute("plantilla",plantilla);
+        return "borrarPlantilla.jsp";
+    }
+
+    @GetMapping("/dataBasePlantilla/plantilla/{id}/editar")
+    public String editarPlantilla(@PathVariable("id")Long id,Model model) {
+        Plantilla plantilla = servicio.plantillaPorId(id);
+        model.addAttribute("plantilla",plantilla);
+        return "editarPlantilla.jsp";
+    }
+    
+    
+    
 }
