@@ -1,58 +1,8 @@
 package com.vt.createmanagesubmit.servicios;
 
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import javax.crypto.spec.SecretKeySpec;
-import javax.imageio.ImageIO;
-
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellValue;
-import org.apache.poi.ss.usermodel.Color;
-import org.apache.poi.ss.usermodel.DateUtil;
-import org.apache.poi.ss.usermodel.FormulaEvaluator;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.apache.poi.xslf.usermodel.XMLSlideShow;
-import org.apache.poi.xslf.usermodel.XSLFPictureData;
-import org.apache.poi.xslf.usermodel.XSLFPictureShape;
-import org.apache.poi.xslf.usermodel.XSLFShape;
-import org.apache.poi.xslf.usermodel.XSLFSlide;
-import org.apache.poi.xslf.usermodel.XSLFTextShape;
-import org.jodconverter.core.document.DefaultDocumentFormatRegistry;
-import org.jodconverter.core.office.OfficeException;
-import org.jodconverter.core.office.OfficeUtils;
-import org.jodconverter.local.JodConverter;
-import org.jodconverter.local.office.LocalOfficeManager;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.stereotype.Service;
-
-import com.vt.createmanagesubmit.modelos.Alumno;
-import com.vt.createmanagesubmit.modelos.Plantilla;
-import com.vt.createmanagesubmit.repositorios.RepositorioAlumnos;
-import com.vt.createmanagesubmit.repositorios.RepositorioPlantillas;
-
-import jakarta.persistence.EntityNotFoundException;
-
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -61,44 +11,55 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
-import java.security.SecureRandom;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
-import javax.activation.DataSource;
-import javax.imageio.ImageIO;
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
+import javax.imageio.ImageIO;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.poi.sl.usermodel.PictureData;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellValue;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.FormulaEvaluator;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.xslf.usermodel.XMLSlideShow;
+import org.apache.poi.xslf.usermodel.XSLFShape;
+import org.apache.poi.xslf.usermodel.XSLFSlide;
+import org.apache.poi.xslf.usermodel.XSLFTextShape;
+import org.jodconverter.core.office.OfficeException;
+import org.jodconverter.core.office.OfficeUtils;
+import org.jodconverter.local.JodConverter;
+import org.jodconverter.local.office.LocalOfficeManager;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Service;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
-import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
+import com.vt.createmanagesubmit.modelos.Alumno;
+import com.vt.createmanagesubmit.modelos.Plantilla;
+import com.vt.createmanagesubmit.repositorios.RepositorioAlumnos;
+import com.vt.createmanagesubmit.repositorios.RepositorioPlantillas;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.poi.xslf.usermodel.XMLSlideShow;
-import org.apache.poi.xslf.usermodel.XSLFSlide;
-import org.apache.poi.xslf.usermodel.XSLFShape;
-import org.apache.poi.xslf.usermodel.XSLFTextShape;
-import org.apache.poi.xslf.usermodel.XSLFPictureShape;
-import org.apache.poi.xslf.usermodel.XSLFPictureData;
-
-import org.jodconverter.core.document.DefaultDocumentFormatRegistry;
-import org.jodconverter.local.JodConverter;
-import org.jodconverter.office.OfficeException;
-import org.jodconverter.office.OfficeUtils;
-import org.jodconverter.office.LocalOfficeManager;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 
 @Service
 public class ServicioArchivos {
@@ -118,9 +79,8 @@ public class ServicioArchivos {
 
     String correoEmpresa = Servicio.CORREO_EMPRESA;
 
-    public void leerExcelYGuardarEnBD(String rutaArchivo,String estadoDiplomaExcel,String plantilla,String estadoExcel) throws IOException {
+    public void leerExcelYGuardarEnBD(String rutaArchivo, String estadoDiplomaExcel, String plantilla, String estadoExcel) throws IOException {
         FileInputStream fileInputStream = new FileInputStream(new File(rutaArchivo));
-
         Workbook workbook = WorkbookFactory.create(fileInputStream);
 
         // Iterar sobre las hojas del libro
@@ -151,43 +111,41 @@ public class ServicioArchivos {
                 for (Cell celda : fila) {
                     int indiceColumna = celda.getColumnIndex();
                     String nombreColumna = mapaColumnas.get(indiceColumna);
-
                     if (nombreColumna != null) {
                         asignarValorAtributo(alumno, nombreColumna, celda);
                     }
                 }
 
                 if (alumno.getNombreAsistente() != null) {
-                    if(!plantilla.trim().equals("excel")){
+                    if (!plantilla.trim().equals("excel")) {
                         Optional<Plantilla> plantillaOp = servicio.plantillaPorNombre(plantilla);
-                        if(plantillaOp.isPresent()){
+                        if (plantillaOp.isPresent()) {
                             Plantilla plantillaAlumnoEstablecido = plantillaOp.get();
                             alumno.setPlantilla(plantillaAlumnoEstablecido);
                         }
                     }
 
-                    if(alumno.getCorreo()==null){
-                        
+                    if (alumno.getCorreo() == null) {
                         alumno.setCorreo(correoEmpresa);
                     }
-                    
-                    if(alumno.getEstado()==null){
+
+                    if (alumno.getEstado() == null) {
                         alumno.setEstado("revisionManual");
                     }
 
-                    if(alumno.getEstado()!="Eexcel"){
-                        if(estadoExcel.equals("Eauto")){
+                    if (alumno.getEstado() != "Eexcel") {
+                        if (estadoExcel.equals("Eauto")) {
                             alumno = servicio.funcionEstadoManual(alumno);
-                        }else{
+                        } else {
                             alumno.setEstado(estadoExcel);
                         }
                     }
 
-                    if(!estadoDiplomaExcel.equals("diploExcel")){
-                        if(estadoDiplomaExcel.equals("noEnviar")){
+                    if (!estadoDiplomaExcel.equals("diploExcel")) {
+                        if (estadoDiplomaExcel.equals("noEnviar")) {
                             alumno.setDiploma("noEnviado");
-                        }else if(estadoDiplomaExcel.equals("enviarApro")){
-                            if(alumno.getEstado()=="aprobado"){
+                        } else if (estadoDiplomaExcel.equals("enviarApro")) {
+                            if (alumno.getEstado() == "aprobado") {
                                 try {
                                     generateCertificateForAlumno(alumno);
                                     alumno.setDiploma("enviado");
@@ -195,7 +153,7 @@ public class ServicioArchivos {
                                     e.printStackTrace();
                                 }
                             }
-                        }else if(estadoDiplomaExcel.equals("enviarTodos")){
+                        } else if (estadoDiplomaExcel.equals("enviarTodos")) {
                             try {
                                 generateCertificateForAlumno(alumno);
                                 alumno.setDiploma("enviado");
@@ -209,7 +167,6 @@ public class ServicioArchivos {
                 }
             }
         }
-
         workbook.close();
         fileInputStream.close();
     }
@@ -221,7 +178,7 @@ public class ServicioArchivos {
         // Asignar el valor al atributo correspondiente
         switch (nombreColumna.toLowerCase()) {
             case "nº":
-            case "número": 
+            case "número":
                 break;
             case "NOMBRE ASISTENTE":
             case "nombre asistente":
@@ -232,7 +189,7 @@ public class ServicioArchivos {
                 alumno.setNombreCurso(valorCelda);
                 break;
             case "dias curso":
-            case "dias  curso":
+            case "Dias curso":
                 alumno.setDiasCursos(valorCelda);
                 break;
             case "Nº de Horas":
@@ -269,19 +226,19 @@ public class ServicioArchivos {
                 break;
             case "estado":
             case "Estado":
-                if(valorCelda.trim().equals("aprobado")||valorCelda.trim().equals("Aprobado")){
+                if (valorCelda.trim().equalsIgnoreCase("aprobado")) {
                     alumno.setEstado("aprobado");
-                }else{
+                } else {
                     alumno.setEstado("noAprobado");
                 }
                 break;
             case "diploma":
             case "Diploma":
-                if(valorCelda.trim().equals("No enviado")||valorCelda.trim().equals("no enviado")||valorCelda.trim().equals("No Enviado")){
+                if (valorCelda.trim().equalsIgnoreCase("No enviado")) {
                     alumno.setDiploma("noEnviado");
-                }else if(valorCelda.trim().equals("Enviado")||valorCelda.trim().equals("enviado")){
+                } else if (valorCelda.trim().equalsIgnoreCase("Enviado")) {
                     alumno.setDiploma("enviado");
-                }else{
+                } else {
                     alumno.setDiploma("revisionManual");
                 }
                 break;
@@ -296,12 +253,11 @@ public class ServicioArchivos {
             case "Plantilla":
             case "plantilla":
                 Optional<Plantilla> plantillaAlumnoOptional = servicio.plantillaPorNombre(valorCelda);
-                if(plantillaAlumnoOptional.isPresent()){
+                if (plantillaAlumnoOptional.isPresent()) {
                     Plantilla plantillaAlumno = plantillaAlumnoOptional.get();
                     alumno.setPlantilla(plantillaAlumno);
-                }else{
+                } else {
                     Optional<Plantilla> plantillaErrorOptional = servicio.plantillaPorNombre("Error en encontrar plantilla");
-
                     if (plantillaErrorOptional.isPresent()) {
                         Plantilla plantillaAlumno = plantillaErrorOptional.get();
                         alumno.setPlantilla(plantillaAlumno);
@@ -367,6 +323,7 @@ public class ServicioArchivos {
         if (plantilla == null) {
             throw new Exception("No hay una plantilla asociada al Alumno con ID " + alumno.getId());
         }
+
         // Carga la plantilla PPTX desde pathArchivo
         String templatePath = plantilla.getPathArchivo();
 
@@ -396,19 +353,8 @@ public class ServicioArchivos {
                         String textToSet = alumnoData.get(shapeName);
                         textShape.setText(textToSet != null ? textToSet : "");
                     }
-                } else if (shape instanceof XSLFPictureShape) {
-                    XSLFPictureShape pictureShape = (XSLFPictureShape) shape;
-                    String shapeName = pictureShape.getShapeName();
-                    if ("logo".equals(shapeName) && plantilla.getPathLogo() != null) {
-                        // Inserta el logo en el shape
-                        String logoPath = plantilla.getPathLogo();
-                        try (FileInputStream logoInputStream = new FileInputStream(logoPath)) {
-                            byte[] pictureData = IOUtils.toByteArray(logoInputStream);
-                            int pictureIndex = ppt.addPicture(pictureData, XSLFPictureData.PICTURE_TYPE_PNG);
-                            pictureShape.setPictureData(ppt.getPictureData()[pictureIndex]);
-                        }
-                    }
                 }
+                // Aquí se eliminó el bloque que manejaba XSLFPictureShape
             }
         }
 
@@ -440,6 +386,7 @@ public class ServicioArchivos {
 
         // Leer el PDF generado como array de bytes
         byte[] pdfBytes = Files.readAllBytes(Paths.get(tempPdfPath));
+
         // Eliminar los archivos temporales
         new File(tempPptxPath).delete();
         new File(tempPdfPath).delete();
@@ -452,7 +399,9 @@ public class ServicioArchivos {
 
         // Enviar correo electrónico al alumno con el PDF y el código QR como adjuntos
         // Comentario: Aquí es donde se crea el correo electrónico. Puedes darle un formato más bonito.
-        sendEmailWithAttachments(alumno.getCorreo(), "Certificado de Curso", "Estimado " + alumno.getNombreAsistente() + ", adjuntamos su certificado y código QR.", pdfBytes, qrCodeBytes);
+        sendEmailWithAttachments(alumno.getCorreo(), "Certificado de Curso",
+                "Estimado " + alumno.getNombreAsistente() + ", adjuntamos su certificado y código QR.",
+                pdfBytes, qrCodeBytes);
     }
 
     private String encryptStudentId(String studentId) throws Exception {
@@ -465,7 +414,6 @@ public class ServicioArchivos {
             key = sha.digest(key);
             key = Arrays.copyOf(key, 16); // Usar solo los primeros 128 bits
             SecretKeySpec secretKeySpec = new SecretKeySpec(key, "AES");
-
             Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
             cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec);
             byte[] encrypted = cipher.doFinal(studentId.getBytes("UTF-8"));
@@ -507,5 +455,4 @@ public class ServicioArchivos {
 
         javaMailSender.send(message);
     }
-    
 }

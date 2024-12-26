@@ -131,7 +131,6 @@ public String agregarAlumno(
                 servicioAr.generateCertificateForAlumno(nuevoAlumno);
                 nuevoAlumno.setDiploma("enviado");
             } catch (Exception e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }else{
