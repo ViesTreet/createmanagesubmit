@@ -133,7 +133,7 @@
             </div>
             <div class="d-flex justify-content-around ">
                 <a href="/dataBasePlantilla" class="btn btn-primary">Cancelar</a>
-                <a href="api/dataBasePlantilla/Plantilla/${plantilla.id}/borrar" class="btn btn-danger">Borrar de todos modos</a>
+                <a href="/api/dataBasePlantilla/Plantilla/${plantilla.id}/borrar" class="btn btn-danger">Borrar de todos modos</a>
             </div>
         </div>
     </div>

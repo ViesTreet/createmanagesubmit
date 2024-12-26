@@ -64,6 +64,8 @@ public class ControladorBase {
 
     @GetMapping("/dataBasePlantilla/buscarPlantilla")
     public String busquedaPlantilla(@RequestParam("busqueda")String busqueda,Model model) {
+        List<Plantilla> plantillas = servicio.todasLasPlantillas();
+        model.addAttribute("plantillas",plantillas);
         model.addAttribute("busqueda",busqueda);
         return "databasePlantillaBusqueda.jsp";
     }
@@ -191,8 +193,9 @@ public String agregarAlumno(
     }
     
     @GetMapping("/dataBasePlantilla")
-    public String dataBasePlantilla() {
-
+    public String dataBasePlantilla(Model model) {
+        List<Plantilla> plantillas = servicio.todasLasPlantillas();
+        model.addAttribute("plantillas",plantillas);
         return "databasePlantilla.jsp";
     }
 

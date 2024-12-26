@@ -137,5 +137,105 @@ public class ControladorApi {
         ser.borrarPlantillaPorId(id);
         return new RedirectView("/dataBasePlantilla");
     }
+
+    @PostMapping("/editarPlantilla")
+    public RedirectView editarPlantilla(@RequestParam("id") Long id,@RequestParam(value = "cambiarLogo", required = false) boolean cambiarLogo,@RequestParam(value = "cambiarPlantilla", required = false) boolean cambiarPlantilla,@RequestParam(value = "pathLogo", required = false) MultipartFile nuevoLogo,@RequestParam(value = "pathArchivo", required = false) MultipartFile nuevaPlantilla,@RequestParam(value = "nombreCertificado")String nombre,@RequestParam(value = "descripcion")String descripcion,@RequestParam(value = "asistenciaMin")String asistencia,@RequestParam(value = "notaMin")String nota) {     
+        Plantilla plantilla = ser.plantillaPorId(id);
+        plantilla.setNombreCertificado(nombre);
+        plantilla.setDescripcion(descripcion);
+        if(asistencia.isBlank()){
+            plantilla.setAsistenciaMin(0);
+        }else{
+            plantilla.setAsistenciaMin(Integer.parseInt(asistencia));
+        }
+
+        if(nota.isBlank()){
+            plantilla.setNotaMin(0);
+        }else{
+            plantilla.setNotaMin(Float.parseFloat(nota));
+        }
+
+        ser.guardarPlantilla(plantilla);   
+        try {
+            if (cambiarLogo && nuevoLogo != null && !nuevoLogo.isEmpty()) {
+                ser.cambiarLogo(id, nuevoLogo);
+            }
+            if (cambiarPlantilla && nuevaPlantilla != null && !nuevaPlantilla.isEmpty()) {
+                ser.cambiarPlantilla(id, nuevaPlantilla);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return new RedirectView("/dataBasePlantilla"); // Redirigir a la página de edición
+    }
+
+    @PostMapping("/nuevaPlantilla")
+    public RedirectView crearNuevaPlantilla(
+            @RequestParam String nombreCertificado,
+            @RequestParam String descripcion,
+            @RequestParam String asistenciaMin,
+            @RequestParam String notaMin,
+            @RequestParam(required = false) MultipartFile pathLogo,
+            @RequestParam(required = false) MultipartFile pathArchivo,
+            @RequestParam(required = false) String pathLogoS,
+            @RequestParam(required = false) String pathArchivoS,
+            @RequestParam(defaultValue = "false") boolean clonarLogo,
+            @RequestParam(defaultValue = "false") boolean clonarPlantilla) {
+
+        try {
+            // Crear una nueva plantilla
+            Plantilla nuevaPlantilla = new Plantilla();
+            nuevaPlantilla.setNombreCertificado(nombreCertificado);
+            nuevaPlantilla.setDescripcion(descripcion);
+            if(asistenciaMin.isBlank()){
+                nuevaPlantilla.setAsistenciaMin(0);
+            }else{
+                nuevaPlantilla.setAsistenciaMin(Integer.parseInt(asistenciaMin));
+            }
+
+            if(notaMin.isBlank()){
+                nuevaPlantilla.setNotaMin(0);
+            }else{
+                nuevaPlantilla.setNotaMin(Float.parseFloat(notaMin));
+            }
+
+            // Manejar logo
+            if (clonarLogo) {
+                if (pathLogoS != null && !pathLogoS.isEmpty()) {
+                    nuevaPlantilla.setPathLogo(ser.clonarArchivo(pathLogoS, "/logos/"));
+                } else {
+                    nuevaPlantilla.setPathLogo(null);
+                }
+            } else if (pathLogo != null && !pathLogo.isEmpty()) {
+                nuevaPlantilla.setPathLogo(ser.guardarArchivo(pathLogo, "/logos/"));
+            } else {
+                nuevaPlantilla.setPathLogo(null);
+            }
+
+            // Manejar plantilla
+            if (clonarPlantilla) {
+                if (pathArchivoS != null && !pathArchivoS.isEmpty()) {
+                    nuevaPlantilla.setPathArchivo(ser.clonarArchivo(pathArchivoS, "/plantillas/"));
+                } else {
+                    throw new IllegalArgumentException("Debe proporcionar una plantilla existente si desea clonar.");
+                }
+            } else if (pathArchivo != null && !pathArchivo.isEmpty()) {
+                nuevaPlantilla.setPathArchivo(ser.guardarArchivo(pathArchivo, "/plantillas/"));
+            } else {
+                throw new IllegalArgumentException("Debe proporcionar una plantilla válida para guardar.");
+            }
+
+            // Guardar en la base de datos
+            ser.guardarPlantilla(nuevaPlantilla);
+
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new RedirectView("/dataBasePlantilla"); 
+    }
 }
+
+
 

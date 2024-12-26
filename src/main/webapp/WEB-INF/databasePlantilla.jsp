@@ -49,8 +49,6 @@
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             z-index: 1000; /* Por encima del overlay */
-            width: 90%;
-            max-width: 400px;
         }
 
         /* Botón cerrar */
@@ -134,6 +132,9 @@
                     <a id="buscarLink" href="#" class="btn btn-outline-primary">Buscar</a>
                 </form>
             </div>
+            <div>
+                <button class="btn btn-success" onclick="openForm()">Agregar nueva plantilla</button>
+            </div>
         </div>
         <div id="contenedorTabla" style="overflow-y: auto; max-height: 70vh; max-width: 95vw;">
             <table class="table table-hover table-sm table-bordered mb-5" style="table-layout: fixed; height: 100%;" id="tablaPlantilla">
@@ -152,7 +153,6 @@
             </table>
         </div>
     </div>
-    <button class='btn btn-danger'>Borrar</button>
     <script>
         $(document).ready(function () {
             function cargarDatos() {
@@ -167,7 +167,7 @@
                         $.each(data, function (i, plantilla) {
                             // Crear una fila de tabla para todos los alumnos
                             var fila = "<tr>" +
-                                "<td><a href='/dataBasePlantilla/plantilla/" + plantilla.id + "'>" + (plantilla.nombreCertificado != null ? plantilla.nombreCertificado : "") + "</a></td>" +
+                                "<td>" + (plantilla.nombreCertificado != null ? plantilla.nombreCertificado : "") + "</td>" +
                                 "<td>" + (plantilla.descripcion != null ? plantilla.descripcion : "") + "</td>" +
                                 "<td>" + (plantilla.asistenciaMin != null ? plantilla.asistenciaMin : "") + "</td>" +
                                 "<td>" + (plantilla.notaMin != null ? plantilla.notaMin : "") + "</td>" +
@@ -217,13 +217,58 @@
         }
     </script>
     <div class="overlay" id="overlay">
-        <div class="popup" style="overflow-y: auto;">
+        <div class="popup col-7">
             <div class="d-flex justify-content-end">
                 <button class="btn btn-danger" onclick="closeForm()">Cerrar</button>
             </div>
-            <h2 class="text-center pb-2">Alumnos que se enviarán:</h2>
-            <form action="/enviarRestantes" method="post">
-                <div id="alumnosNoEnviados"></div>
+            <h2 class="text-center pb-2">Crear plantilla</h2>
+            <form action="/api/nuevaPlantilla" method="post" enctype="multipart/form-data">
+                <div class="d-flex justify-content-around">
+                    <div style="max-width: 40%;">
+                        <label for="nombreCertificado">Nombre Plantilla</label>
+                        <input id="nombreCertificado" name="nombreCertificado" type="text" class="form-control" placeholder="Nombre de la plantilla">
+                        <label for="descripcion">Descripcion Plantilla</label>
+                        <input id="descripcion" type="text" name="descripcion" class="form-control" placeholder="Descripcion de la plantilla">
+                        <input type="checkbox" id="clonarLogo" name="clonarLogo" value="true" onclick ="toggleInputs('logo')">
+                        <label for="clonarLogo">Clonar Logo</label>
+                        <div id="inputLogo">
+                            <label for="pathLogo">Nuevo Logo</label>
+                            <input type="file" name="pathLogo" id="pathLogo" class="form-control">
+                        </div>
+                        <div id="selectLogo" style="display: none;">
+                            <label for="pathLogoS">Elegir Plantilla</label>
+                            <select name="pathLogoS" id="pathLogoS" class="form-select">
+                                <c:forEach items="${plantillas}" var="plantilla">
+                                        <option value="${plantilla.pathLogo}">${plantilla.nombreCertificado}</option>
+
+                                    </c:forEach>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="max-width: 40%;">
+                        <label for="asistenciaMin">Asistencia Minima</label>
+                        <input id="asistenciaMin" type="text" name="asistenciaMin" class="form-control" placeholder="ej:60">
+                        <label for="notaMin">Nota Minima</label>
+                        <input id="notaMin" type="text" name="notaMin" class="form-control" placeholder="ej:5.5">
+                        <input type="checkbox" id="clonarPlantilla" name="clonarPlantilla" value="true" onclick ="toggleInputs('plantilla')">
+                        <label for="clonarPlantilla">Clonar Plantilla</label>
+                        <!-- Input file para subir la nueva plantilla -->
+                        <div id="inputPlantilla">
+                            <label for="pathArchivo">Nueva Plantilla(.pptx)</label>
+                            <input type="file" name="pathArchivo" id="pathArchivo" class="form-control" accept=".pptx">
+                        </div>
+                        <div id="selectPlantilla" style="display: none;">
+                            <label for="pathArchivoS">Elegir Plantilla</label>
+                            <select name="pathArchivoS" id="pathArchivoS" class="form-select">
+                                <c:forEach items="${plantillas}" var="plantilla">
+                                        <option value="${plantilla.pathArchivo}">${plantilla.nombreCertificado}</option>
+
+                                    </c:forEach>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+    
                 <div class="d-flex justify-content-center">
                     <input type="hidden" name="orden" value="true">
                     <input class="btn btn-success" type="submit" value="Enviar">
@@ -240,6 +285,35 @@
         // Función para ocultar el formulario
         function closeForm() {
             document.getElementById('overlay').style.display = 'none';
+        }
+    </script>
+    <script>
+        function toggleInputs(type) {
+            if (type === 'logo') {
+                const checkbox = document.getElementById('clonarLogo');
+                const inputFile = document.getElementById('inputLogo');
+                const selectOptions = document.getElementById('selectLogo');
+            
+                if (checkbox.checked) {
+                    inputFile.style.display = 'none';
+                    selectOptions.style.display = 'block';
+                } else {
+                    inputFile.style.display = 'block';
+                    selectOptions.style.display = 'none';
+                }
+            } else if (type === 'plantilla') {
+                const checkbox = document.getElementById('clonarPlantilla');
+                const inputFile = document.getElementById('inputPlantilla');
+                const selectOptions = document.getElementById('selectPlantilla');
+            
+                if (checkbox.checked) {
+                    inputFile.style.display = 'none';
+                    selectOptions.style.display = 'block';
+                } else {
+                    inputFile.style.display = 'block';
+                    selectOptions.style.display = 'none';
+                }
+            }
         }
     </script>
     <footer class="text-center p-3 bg-light" style="height: 15vh; z-index: 1;">

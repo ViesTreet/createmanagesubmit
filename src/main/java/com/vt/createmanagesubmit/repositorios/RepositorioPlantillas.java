@@ -14,6 +14,8 @@ public interface RepositorioPlantillas extends JpaRepository<Plantilla, Long>{
 
     List<Plantilla> findAllById(Long id);
 
+    Optional<Plantilla> findById(Long id);
+
     Optional<Plantilla> findByNombreCertificado(String nombre);
 
     List<Plantilla> findAllByNombreCertificadoContaining(String nombre);

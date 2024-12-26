@@ -1,5 +1,10 @@
 package com.vt.createmanagesubmit.servicios;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.vt.createmanagesubmit.modelos.Alumno;
 import com.vt.createmanagesubmit.modelos.Plantilla;
@@ -31,6 +37,9 @@ public class Servicio {
     private ServicioArchivos servicioAr;
 
     public static String CORREO_EMPRESA = "example@example.com";
+
+    private static final String STATIC_DIRECTORY = "src/main/resources/static";
+
 
     public Alumno registrarNuevoAlumno(Alumno nuevoAlumno){
         return repoAlum.save(nuevoAlumno);
@@ -106,6 +115,10 @@ public class Servicio {
 
     public Plantilla plantillaPorId(Long id){
         return repoPlanti.findById(id).orElse(null);
+    }
+
+    public void guardarPlantilla(Plantilla plantilla){
+        repoPlanti.save(plantilla);
     }
 
     public void borrarPlantillaPorId(Long id){
@@ -285,6 +298,89 @@ public class Servicio {
 
     private String normalizarValor(String valor) {
         return StringUtils.hasText(valor) ? valor.trim() : null;
+    }
+
+    public void cambiarLogo(Long idPlantilla, MultipartFile nuevoLogo) throws IOException {
+        // Obtener la plantilla desde la BD
+        Plantilla plantilla = repoPlanti.findById(idPlantilla)
+                .orElseThrow(() -> new IllegalArgumentException("Plantilla no encontrada"));
+
+        // Ruta absoluta para guardar el nuevo archivo
+        String relativePath = "/logos/" + nuevoLogo.getOriginalFilename();
+        Path logoPath = Paths.get(STATIC_DIRECTORY + relativePath);
+
+        // Crear directorios si no existen
+        Files.createDirectories(logoPath.getParent());
+
+        // Guardar el archivo en el sistema
+        Files.write(logoPath, nuevoLogo.getBytes());
+
+        // Borrar el archivo anterior
+        if (plantilla.getPathLogo() != null) {
+            Path oldLogoPath = Paths.get(STATIC_DIRECTORY + plantilla.getPathLogo());
+            Files.deleteIfExists(oldLogoPath);
+        }
+
+        // Actualizar la ruta en la BD
+        plantilla.setPathLogo(relativePath);
+        repoPlanti.save(plantilla);
+    }
+
+    public void cambiarPlantilla(Long idPlantilla, MultipartFile nuevaPlantilla) throws IOException {
+        // Obtener la plantilla desde la BD
+        Plantilla plantilla = repoPlanti.findById(idPlantilla)
+                .orElseThrow(() -> new IllegalArgumentException("Plantilla no encontrada"));
+
+        // Ruta absoluta para guardar el nuevo archivo
+        String relativePath = "/plantillas/" + nuevaPlantilla.getOriginalFilename();
+        Path plantillaPath = Paths.get(STATIC_DIRECTORY + relativePath);
+
+        // Crear directorios si no existen
+        Files.createDirectories(plantillaPath.getParent());
+
+        // Guardar el archivo en el sistema
+        if(!plantilla.getPathArchivo().equals(relativePath)){
+            Files.write(plantillaPath, nuevaPlantilla.getBytes());
+        }
+        // Borrar el archivo anterior
+        if (plantilla.getPathArchivo() != null && !plantilla.getPathArchivo().equals(relativePath)) {
+            Path oldPlantillaPath = Paths.get(STATIC_DIRECTORY + plantilla.getPathArchivo());
+            System.out.println(oldPlantillaPath);
+            Files.deleteIfExists(oldPlantillaPath);
+        }
+
+        // Actualizar la ruta en la BD
+        plantilla.setPathArchivo(relativePath);
+        repoPlanti.save(plantilla);
+    }
+
+    public String guardarArchivo(MultipartFile archivo, String subdirectorio) throws IOException {
+        String relativePath = subdirectorio + archivo.getOriginalFilename();
+        Path fullPath = Paths.get(STATIC_DIRECTORY + relativePath);
+
+        // Crear directorios si no existen
+        Files.createDirectories(fullPath.getParent());
+
+        // Guardar el archivo
+        Files.write(fullPath, archivo.getBytes());
+
+        return relativePath;
+    }
+
+    public String clonarArchivo(String archivoExistente, String subdirectorio) throws IOException {
+        Path sourcePath = Paths.get(STATIC_DIRECTORY + archivoExistente);
+        String timestamp = String.valueOf(System.currentTimeMillis());
+        String newFileName = "clon_" +timestamp+"_"+ sourcePath.getFileName().toString();
+        String relativePath = subdirectorio + newFileName;
+        Path destinationPath = Paths.get(STATIC_DIRECTORY + relativePath);
+
+        // Crear directorios si no existen
+        Files.createDirectories(destinationPath.getParent());
+
+        // Copiar el archivo
+        Files.copy(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
+
+        return relativePath;
     }
 
 }

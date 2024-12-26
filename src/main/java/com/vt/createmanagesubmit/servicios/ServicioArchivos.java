@@ -5,15 +5,21 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.crypto.spec.SecretKeySpec;
+import javax.imageio.ImageIO;
+
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellValue;
+import org.apache.poi.ss.usermodel.Color;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
@@ -21,6 +27,8 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xslf.usermodel.XMLSlideShow;
+import org.apache.poi.xslf.usermodel.XSLFPictureData;
+import org.apache.poi.xslf.usermodel.XSLFPictureShape;
 import org.apache.poi.xslf.usermodel.XSLFShape;
 import org.apache.poi.xslf.usermodel.XSLFSlide;
 import org.apache.poi.xslf.usermodel.XSLFTextShape;
@@ -31,6 +39,7 @@ import org.jodconverter.local.JodConverter;
 import org.jodconverter.local.office.LocalOfficeManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 
 import com.vt.createmanagesubmit.modelos.Alumno;
@@ -39,6 +48,57 @@ import com.vt.createmanagesubmit.repositorios.RepositorioAlumnos;
 import com.vt.createmanagesubmit.repositorios.RepositorioPlantillas;
 
 import jakarta.persistence.EntityNotFoundException;
+
+import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+// Otras importaciones necesarias
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.SecureRandom;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.activation.DataSource;
+import javax.imageio.ImageIO;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
+
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.WriterException;
+import com.google.zxing.qrcode.QRCodeWriter;
+import com.google.zxing.common.BitMatrix;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.poi.xslf.usermodel.XMLSlideShow;
+import org.apache.poi.xslf.usermodel.XSLFSlide;
+import org.apache.poi.xslf.usermodel.XSLFShape;
+import org.apache.poi.xslf.usermodel.XSLFTextShape;
+import org.apache.poi.xslf.usermodel.XSLFPictureShape;
+import org.apache.poi.xslf.usermodel.XSLFPictureData;
+
+import org.jodconverter.core.document.DefaultDocumentFormatRegistry;
+import org.jodconverter.local.JodConverter;
+import org.jodconverter.office.OfficeException;
+import org.jodconverter.office.OfficeUtils;
+import org.jodconverter.office.LocalOfficeManager;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 
 @Service
 public class ServicioArchivos {
@@ -52,6 +112,9 @@ public class ServicioArchivos {
     @Autowired
     @Lazy
     private Servicio servicio;
+
+    @Autowired
+    private JavaMailSender javaMailSender;
 
     String correoEmpresa = Servicio.CORREO_EMPRESA;
 
@@ -283,7 +346,6 @@ public class ServicioArchivos {
     }
 
     public void generateCertificatesAll() throws Exception {
-
         List<Alumno> alumnos = alumnoRepo.findAllByDiplomaAndEstado("noEnviado", "aprobado");
         for (Alumno alumno : alumnos) {
             generateCertificateForAlumno(alumno);
@@ -293,9 +355,7 @@ public class ServicioArchivos {
     }
 
     public void generateCertificatesById(Long id) throws Exception {
-
         Alumno alumno = alumnoRepo.findById(id).orElse(null);
-        
         generateCertificateForAlumno(alumno);
         alumno.setDiploma("enviado");
         alumnoRepo.save(alumno);
@@ -307,10 +367,8 @@ public class ServicioArchivos {
         if (plantilla == null) {
             throw new Exception("No hay una plantilla asociada al Alumno con ID " + alumno.getId());
         }
-
         // Carga la plantilla PPTX desde pathArchivo
         String templatePath = plantilla.getPathArchivo();
-        // Asegúrate de que plantilla.getPathArchivo() es la ruta correcta al archivo PPTX
 
         // Carga el archivo PPTX usando Apache POI
         XMLSlideShow ppt;
@@ -318,57 +376,136 @@ public class ServicioArchivos {
             ppt = new XMLSlideShow(inputStream);
         }
 
-        // Modifica las shapes con nombre 'name' y 'contenido'
+        // Crea un mapa de los datos del alumno que se usarán para rellenar las shapes
+        Map<String, String> alumnoData = new HashMap<>();
+        alumnoData.put("nombreAsistente", alumno.getNombreAsistente());
+        alumnoData.put("nombreCurso", alumno.getNombreCurso());
+        alumnoData.put("numeroHoras", alumno.getNumeroHoras());
+        alumnoData.put("notaAprovacion", alumno.getNotaAprovacion());
+        alumnoData.put("diasCursos", alumno.getDiasCursos());
+        alumnoData.put("relator", alumno.getRelator());
+        alumnoData.put("asistencia", alumno.getAsistencia());
+
+        // Modifica las shapes con los nombres correspondientes
         for (XSLFSlide slide : ppt.getSlides()) {
             for (XSLFShape shape : slide.getShapes()) {
                 if (shape instanceof XSLFTextShape) {
                     XSLFTextShape textShape = (XSLFTextShape) shape;
                     String shapeName = textShape.getShapeName();
-                    if ("name".equals(shapeName)) {
-                        textShape.setText(alumno.getNombreAsistente());
-                    } else if ("contenido".equals(shapeName)) {
-                        textShape.setText(alumno.getNombreCurso());
+                    if (alumnoData.containsKey(shapeName)) {
+                        String textToSet = alumnoData.get(shapeName);
+                        textShape.setText(textToSet != null ? textToSet : "");
+                    }
+                } else if (shape instanceof XSLFPictureShape) {
+                    XSLFPictureShape pictureShape = (XSLFPictureShape) shape;
+                    String shapeName = pictureShape.getShapeName();
+                    if ("logo".equals(shapeName) && plantilla.getPathLogo() != null) {
+                        // Inserta el logo en el shape
+                        String logoPath = plantilla.getPathLogo();
+                        try (FileInputStream logoInputStream = new FileInputStream(logoPath)) {
+                            byte[] pictureData = IOUtils.toByteArray(logoInputStream);
+                            int pictureIndex = ppt.addPicture(pictureData, XSLFPictureData.PICTURE_TYPE_PNG);
+                            pictureShape.setPictureData(ppt.getPictureData()[pictureIndex]);
+                        }
                     }
                 }
             }
         }
 
         // Guarda el PPTX modificado en un archivo temporal
-        String outputPptxPath = "temp/" + alumno.getId() + ".pptx";
+        String tempPptxPath = "temp/" + alumno.getId() + ".pptx";
         File tempDir = new File("temp");
         if (!tempDir.exists()) {
             tempDir.mkdirs();
         }
-        try (FileOutputStream out = new FileOutputStream(outputPptxPath)) {
+        try (FileOutputStream out = new FileOutputStream(tempPptxPath)) {
             ppt.write(out);
         }
 
-        // Convierte el PPTX modificado a PDF usando JODConverter
-        String outputPdfPath = "output/pdf/" + alumno.getId() + ".pdf";
-        File pdfDir = new File("output/pdf");
-        if (!pdfDir.exists()) {
-            pdfDir.mkdirs();
-        }
-
-        // Configura el OfficeManager con la ruta donde está instalado LibreOffice
+        // Convierte el PPTX a PDF usando JODConverter
+        String tempPdfPath = "temp/" + alumno.getId() + ".pdf";
         LocalOfficeManager officeManager = LocalOfficeManager.builder()
-            .install()
-            .build();
-
+                .install()
+                .build();
         try {
             officeManager.start();
-            JodConverter.convert(new File(outputPptxPath))
-                .as(DefaultDocumentFormatRegistry.PPTX)
-                .to(new File(outputPdfPath))
-                .as(DefaultDocumentFormatRegistry.PDF)
-                .execute();
+            JodConverter.convert(new File(tempPptxPath))
+                    .to(new File(tempPdfPath))
+                    .execute();
         } catch (OfficeException e) {
             e.printStackTrace();
         } finally {
             OfficeUtils.stopQuietly(officeManager);
         }
 
-        new File(outputPptxPath).delete();
+        // Leer el PDF generado como array de bytes
+        byte[] pdfBytes = Files.readAllBytes(Paths.get(tempPdfPath));
+        // Eliminar los archivos temporales
+        new File(tempPptxPath).delete();
+        new File(tempPdfPath).delete();
+
+        // Generar código QR con la URL y el ID encriptado
+        String encryptedId = encryptStudentId(alumno.getId().toString());
+        String qrCodeText = "/api/generar/" + encryptedId;
+        ByteArrayOutputStream qrCodeOutputStream = generateQRCodeImage(qrCodeText, 200, 200);
+        byte[] qrCodeBytes = qrCodeOutputStream.toByteArray();
+
+        // Enviar correo electrónico al alumno con el PDF y el código QR como adjuntos
+        // Comentario: Aquí es donde se crea el correo electrónico. Puedes darle un formato más bonito.
+        sendEmailWithAttachments(alumno.getCorreo(), "Certificado de Curso", "Estimado " + alumno.getNombreAsistente() + ", adjuntamos su certificado y código QR.", pdfBytes, qrCodeBytes);
+    }
+
+    private String encryptStudentId(String studentId) throws Exception {
+        // Define una clave secreta para la encriptación
+        String secretKey = "mySuperSecretKey"; // Debes usar una clave más segura y almacenarla de forma segura
+        MessageDigest sha = null;
+        try {
+            byte[] key = secretKey.getBytes("UTF-8");
+            sha = MessageDigest.getInstance("SHA-1");
+            key = sha.digest(key);
+            key = Arrays.copyOf(key, 16); // Usar solo los primeros 128 bits
+            SecretKeySpec secretKeySpec = new SecretKeySpec(key, "AES");
+
+            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+            cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec);
+            byte[] encrypted = cipher.doFinal(studentId.getBytes("UTF-8"));
+            return Base64.getEncoder().encodeToString(encrypted);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Exception("Error al encriptar el ID del alumno.");
+        }
+    }
+
+    private ByteArrayOutputStream generateQRCodeImage(String text, int width, int height) throws WriterException, IOException {
+        QRCodeWriter qrCodeWriter = new QRCodeWriter();
+        BitMatrix bitMatrix = qrCodeWriter.encode(text, BarcodeFormat.QR_CODE, width, height);
+        BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                bufferedImage.setRGB(x, y, bitMatrix.get(x, y) ? Color.BLACK.getRGB() : Color.WHITE.getRGB());
+            }
+        }
+        ByteArrayOutputStream pngOutputStream = new ByteArrayOutputStream();
+        ImageIO.write(bufferedImage, "PNG", pngOutputStream);
+        return pngOutputStream;
+    }
+
+    private void sendEmailWithAttachments(String toEmail, String subject, String body, byte[] pdfBytes, byte[] qrCodeBytes) throws MessagingException {
+        MimeMessage message = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+        helper.setTo(toEmail);
+        helper.setSubject(subject);
+        helper.setText(body, true); // true indica que es formato HTML
+
+        // Adjuntar el PDF
+        ByteArrayResource pdfResource = new ByteArrayResource(pdfBytes);
+        helper.addAttachment("certificado.pdf", pdfResource);
+
+        // Adjuntar el código QR
+        ByteArrayResource qrCodeResource = new ByteArrayResource(qrCodeBytes);
+        helper.addAttachment("codigoQR.png", qrCodeResource);
+
+        javaMailSender.send(message);
     }
     
 }

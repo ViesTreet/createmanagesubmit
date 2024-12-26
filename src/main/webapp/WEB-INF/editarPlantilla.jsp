@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Lista de Plantilla</title>
+    <title>Editar Plantilla</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Importar CSS de Bootstrap -->
@@ -126,39 +126,67 @@
         </nav>
     </header>
     <div id="contenderBase" class="d-flex justify-content-center align-items-center container pt-2 pb-2" style="height: 90vh;">
-        <div class="card col-5">
+        <div class="card col-6">
             <div class="card-body">
                 <div class="card-title"><h4 class="text-center">Editar plantilla: ${plantilla.nombreCertificado}</h4></div>
             </div>
-            <form action="/editarPlantilla" method="post">
-                <div>
-                    <Label for="nombreCertificado">Nombre Plantilla</Label>
-                    <input id="nombreCertificado" name="nombreCertificado" type="text" class="form-control" placeholder="Nombre de la plantilla">
-                    <br></br>
-                    <Label for="descripcion">Descripcion Plantilla</Label>
-                    <input id="descripcion" type="text" name="descripcion" class="form-control" placeholder="Descripcion de la plantilla">
-                    <br></br>
-                    <Label for="pathLogo">Logo</Label>
-                    <input type="file" name="pathLogo" id="pathLogo" class="form-control">
-                    <br></br>
-                    <label for="pathArchivo">Plantilla</label>
-                    <input type="file" name="pathArchivo" id="pathArchivo" class="form-control">
-                    <br></br>
-                    <Label for="asistenciaMin">Asistencia Minima</Label>
-                    <input id="asistenciaMin" type="text" name="asistenciaMin" class="form-control" placeholder="ej:60">
-                    <br></br>
-                    <br></br>
-                    <Label for="notaMin">Nota Minima</Label>
-                    <input id="notaMin" type="text" name="notaMin" class="form-control" placeholder="ej:5.5">
-                    <br></br>
+            <form action="/api/editarPlantilla" method="post" enctype="multipart/form-data">
+                <div class="d-flex justify-content-around">
+                    <div style="max-width: 40%;">
+                        <Label for="nombreCertificado">Nombre Plantilla</Label>
+                        <input id="nombreCertificado" name="nombreCertificado" type="text" class="form-control" placeholder="Nombre de la plantilla">
+                        <Label for="descripcion">Descripcion Plantilla</Label>
+                        <input id="descripcion" type="text" name="descripcion" class="form-control" placeholder="Descripcion de la plantilla">
+                        <input type="checkbox" id="cambiarLogo" name="cambiarLogo" value="true" onclick="toggleInputFile('inputLogo', this)">
+                        <label for="cambiarLogo">Cambiar Logo</label>
+                        <!-- Input file para subir el nuevo logo -->
+                        <div id="inputLogo" style="display: none;">
+                            <label for="pathLogo">Nuevo Logo</label>
+                            <input type="file" name="pathLogo" id="pathLogo" class="form-control" >
+                        </div>
+                    </div>
+                    <div style="max-width: 40%;">
+                        <Label for="asistenciaMin">Asistencia Minima</Label>
+                        <input id="asistenciaMin" type="text" name="asistenciaMin" class="form-control" placeholder="ej:60">
+                        <Label for="notaMin">Nota Minima</Label>
+                        <input id="notaMin" type="text" name="notaMin" class="form-control" placeholder="ej:5.5">
+                        <input type="checkbox" id="cambiarPlantilla" name="cambiarPlantilla" value="true" onclick="toggleInputFile('inputPlantilla', this)">
+                        <label for="cambiarPlantilla">Cambiar Plantilla</label>
+                        <!-- Input file para subir la nueva plantilla -->
+                        <div id="inputPlantilla" style="display: none;">
+                            <label for="pathArchivo">Nueva Plantilla(.pptx)</label>
+                            <input type="file" name="pathArchivo" id="pathArchivo" class="form-control" accept=".pptx">
+                        </div>
+                    </div>
                 </div>
-                <div class="d-flex justify-content-around ">
-                    <a href="/dataBasePlantilla" class="btn btn-primary">Cancelar</a>
-                    <a href="api/dataBasePlantilla/Plantilla/${plantilla.id}/borrar" class="btn btn-danger">Borrar de todos modos</a>
+                <div class="d-flex justify-content-between pt-2">
+                    <a href="/dataBasePlantilla" class="btn btn-warning">Cancelar</a>
+                    <input type="hidden" name="id" id="id" value="${plantilla.id}">
+                    <input type="submit" class="btn btn-success" value="Enviar">
                 </div>
             </form>
         </div>
     </div>
+    <script>
+        // Función para mostrar u ocultar el input file
+        function toggleInputFile(inputId, checkbox) {
+            const inputDiv = document.getElementById(inputId);
+            if (checkbox.checked) {
+                inputDiv.style.display = 'block'; // Mostrar input file
+            } else {
+                inputDiv.style.display = 'none';  // Ocultar input file
+            }
+        }
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Rellenar cada campo con su valor correspondiente
+            document.getElementById('nombreCertificado').value = "${plantilla.nombreCertificado}";
+            document.getElementById('descripcion').value = "${plantilla.descripcion}";
+            document.getElementById('asistenciaMin').value = "${plantilla.asistenciaMin}";
+            document.getElementById('notaMin').value = "${plantilla.notaMin}";
+        });
+    </script>
     <footer class="text-center p-3 bg-light" style="height: 15vh; z-index: 1;">
         <p>Contacto: [Dirección, Teléfono, Correo]</p>
         <div>

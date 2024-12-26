@@ -30,8 +30,6 @@ public class Plantilla {
 
     private String descripcion;
 
-    private String tipoArchivo; 
-
     private String pathArchivo;
 
     private String pathLogo;
@@ -61,7 +59,6 @@ public class Plantilla {
         this.id = id;
         this.nombreCertificado = nombreCertificado;
         this.descripcion = descripcion;
-        this.tipoArchivo = tipoArchivo;
         this.pathArchivo = pathArchivo;
         this.pathLogo = pathLogo;
         this.asistenciaMin = asistenciaMin;
@@ -112,22 +109,6 @@ public class Plantilla {
     public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
     }
-
-
-
-
-    public String getTipoArchivo() {
-        return tipoArchivo;
-    }
-
-
-
-
-    public void setTipoArchivo(String tipoArchivo) {
-        this.tipoArchivo = tipoArchivo;
-    }
-
-
 
 
     public String getPathArchivo() {
