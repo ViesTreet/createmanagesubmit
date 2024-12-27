@@ -38,6 +38,8 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xslf.usermodel.XMLSlideShow;
 import org.apache.poi.xslf.usermodel.XSLFShape;
 import org.apache.poi.xslf.usermodel.XSLFSlide;
+import org.apache.poi.xslf.usermodel.XSLFTextParagraph;
+import org.apache.poi.xslf.usermodel.XSLFTextRun;
 import org.apache.poi.xslf.usermodel.XSLFTextShape;
 import org.jodconverter.core.office.OfficeException;
 import org.jodconverter.local.JodConverter;
@@ -61,6 +63,7 @@ import com.vt.createmanagesubmit.repositorios.RepositorioPlantillas;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Service
 public class ServicioArchivos {
@@ -353,7 +356,30 @@ public class ServicioArchivos {
                     String shapeName = textShape.getShapeName();
                     if (alumnoData.containsKey(shapeName)) {
                         String textToSet = alumnoData.get(shapeName);
-                        textShape.setText(textToSet != null ? textToSet : "");
+                        textShape.clearText(); // Limpia el texto existente
+
+                // Añade un nuevo párrafo y establece el texto
+                        XSLFTextParagraph paragraph = textShape.addNewTextParagraph();
+                        XSLFTextRun textRun = paragraph.addNewTextRun();
+                        textRun.setText(textToSet != null ? textToSet : "");
+
+                    // Aplica el formato basado en el nombre del shape
+                        switch (shapeName) {
+                            case "nombreAsistente":
+                                textRun.setFontFamily("Arial");
+                                textRun.setFontSize(24.0); // Tamaño específico para nombreAsistente
+                                break;
+                            case "nombreCurso":
+                                textRun.setFontFamily("Times New Roman");
+                                textRun.setFontSize(20.0); // Tamaño específico para nombreCurso
+                                break;
+                            // Agrega más casos según sea necesario para otros shapes
+                            default:
+                                textRun.setFontFamily("Arial");
+                                textRun.setFontSize(12.0); // Tamaño por defecto
+                                break;
+
+                        }
                     }
                 }
             }
@@ -396,7 +422,7 @@ public class ServicioArchivos {
 
         // Generar código QR con la URL y el ID encriptado
         String encryptedId = encryptStudentId(alumno.getId().toString());
-        String qrCodeText = "/api/generar/" + encryptedId;
+        String qrCodeText = "http://localhost:8080/api/generar/" + encryptedId;
         ByteArrayOutputStream qrCodeOutputStream = generateQRCodeImage(qrCodeText, 200, 200);
         byte[] qrCodeBytes = qrCodeOutputStream.toByteArray();
 
@@ -458,4 +484,121 @@ public class ServicioArchivos {
 
         
     }
+
+    public Long decryptStudentId(String encryptedId) throws Exception {
+        // Define una clave secreta para la encriptación
+        String secretKey = "mySuperSecretKey"; // Usa una clave más segura y almacénala adecuadamente
+    
+        // Inicia la lógica de desencriptación
+        try {
+            byte[] decodedEncryptedId = Base64.getDecoder().decode(encryptedId); // Decodifica el ID en Base64
+            MessageDigest sha = MessageDigest.getInstance("SHA-1");
+            byte[] key = secretKey.getBytes("UTF-8");
+            sha.update(key);
+            key = sha.digest();
+            key = Arrays.copyOf(key, 16); // Usar solo los primeros 128 bits
+    
+            SecretKeySpec secretKeySpec = new SecretKeySpec(key, "AES");
+            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+            cipher.init(Cipher.DECRYPT_MODE, secretKeySpec);
+    
+            // Desencripta el ID
+            byte[] decrypted = cipher.doFinal(decodedEncryptedId);
+    
+            // Convierte el byte array desencriptado en un Long
+            String decryptedString = new String(decrypted, "UTF-8");
+            return Long.parseLong(decryptedString); // Devuelve el Long desencriptado
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Exception("Error al desencriptar el ID del alumno.");
+        }
+    }
+    
+
+    @Async
+    public void generateCertificateQR(Alumno alumno, HttpServletResponse response) throws Exception {
+        // Obtén la plantilla asociada al alumno
+        Plantilla plantilla = alumno.getPlantilla();
+        if (plantilla == null) {
+            throw new Exception("No hay una plantilla asociada al Alumno con ID " + alumno.getId());
+        }
+
+        // Carga la plantilla PPTX desde pathArchivo
+        String templatePath = plantilla.getPathArchivo();
+
+        // Carga el archivo PPTX usando Apache POI
+        XMLSlideShow ppt;
+        try (FileInputStream inputStream = new FileInputStream(templatePath)) {
+            ppt = new XMLSlideShow(inputStream);
+        }
+
+        // Crea un mapa de los datos del alumno que se usarán para rellenar las shapes
+        Map<String, String> alumnoData = new HashMap<>();
+        alumnoData.put("nombreAsistente", alumno.getNombreAsistente());
+        alumnoData.put("nombreCurso", alumno.getNombreCurso());
+        alumnoData.put("numeroHoras", alumno.getNumeroHoras());
+        alumnoData.put("notaAprovacion", alumno.getNotaAprovacion());
+        alumnoData.put("diasCursos", alumno.getDiasCursos());
+        alumnoData.put("relator", alumno.getRelator());
+        alumnoData.put("asistencia", alumno.getAsistencia());
+
+        // Modifica las shapes con los nombres correspondientes
+        for (XSLFSlide slide : ppt.getSlides()) {
+            for (XSLFShape shape : slide.getShapes()) {
+                if (shape instanceof XSLFTextShape) {
+                    XSLFTextShape textShape = (XSLFTextShape) shape;
+                    String shapeName = textShape.getShapeName();
+                    if (alumnoData.containsKey(shapeName)) {
+                        String textToSet = alumnoData.get(shapeName);
+                        textShape.setText(textToSet != null ? textToSet : "");
+                    }
+                }
+            }
+        }
+
+        // Guarda el PPTX modificado en un archivo temporal
+        String tempPptxPath = "temp/" + alumno.getId() + ".pptx";
+        File tempDir = new File("temp");
+        if (!tempDir.exists()) {
+            tempDir.mkdirs();
+        }
+        try (FileOutputStream out = new FileOutputStream(tempPptxPath)) {
+            ppt.write(out);
+        }
+
+        // Convierte el PPTX a PDF usando JODConverter
+        String tempPdfPath = "temp/" + alumno.getId() + ".pdf";
+        LocalOfficeManager officeManager = LocalOfficeManager.builder()
+                .install()
+                .build();
+        try {
+            officeManager.start();
+            JodConverter.convert(new File(tempPptxPath))
+                    .to(new File(tempPdfPath))
+                    .execute();
+        } catch (OfficeException e) {
+            e.printStackTrace();
+        } finally {
+            if (officeManager != null) {
+                officeManager.stop();
+            }
+        }
+
+        // Leer el PDF generado como array de bytes
+        byte[] pdfBytes = Files.readAllBytes(Paths.get(tempPdfPath));
+
+        // Eliminar los archivos temporales
+        new File(tempPptxPath).delete();
+        new File(tempPdfPath).delete();
+
+        // Configurar la respuesta HTTP para enviar el PDF como archivo descargable
+        response.setContentType("application/pdf");
+        response.setHeader("Content-Disposition", "attachment; filename=\"certificado-" + alumno.getId() + ".pdf\"");
+        response.getOutputStream().write(pdfBytes);
+        response.getOutputStream().flush();
+        response.getOutputStream().close();
+
+    }
+
+    
 }

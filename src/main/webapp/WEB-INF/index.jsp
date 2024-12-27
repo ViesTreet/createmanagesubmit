@@ -15,16 +15,16 @@
         <div class="card p-4" style="width: 100%; max-width: 400px;">
             <div class="card-body">
                 <h5 class="card-title text-center">Iniciar Sesión</h5>
-                <form action="/login" method="POST">
+                <form action="/login" method="post">
                     <div class="mb-3">
-                        <label for="email" class="form-label">Correo Electrónico</label>
-                        <input type="email" class="form-control" id="email" placeholder="nombre@ejemplo.com">
+                        <label for="correo" class="form-label">Correo Electrónico</label>
+                        <input type="email" class="form-control" id="correo" name="correo" placeholder="nombre@ejemplo.com">
                     </div>
                     <div class="mb-3">
-                        <label for="password" class="form-label">Contraseña</label>
-                        <input type="password" class="form-control" id="password" placeholder="Contraseña">
+                        <label for="contrasena" class="form-label">Contraseña</label>
+                        <input type="password" class="form-control" name="contrasena" id="contrasena" placeholder="Contraseña">
                     </div>
-                    <button type="submit" class="btn btn-primary w-100">Ingresar</button>
+                    <input type="submit" class="btn btn-primary w-100" value="Ingresar"> 
                 </form>
             </div>
         </div>

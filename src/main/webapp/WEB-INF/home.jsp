@@ -28,7 +28,7 @@
         <a href="/dataBaseAlumno" class="btn btn-primary btn-custom">Base de datos alumno</a>
         <a href="/addAlumnoBase" class="btn btn-primary btn-custom">Agregar alumno base de datos</a>
         <a href="/dataBasePlantilla" class="btn btn-secondary btn-custom">Base de datos plantilla</a>
-        <a href="/addPlantillaBase" class="btn btn-secondary btn-custom">Agregar plantilla base de datos</a>
+        <a href="/dataBaseAdmin" class="btn btn-secondary btn-custom">Administradores</a>
         <button class="btn btn-light btn-custom">Documentación</button>
     </main>
     <footer class="text-center p-3 bg-light" style="height: 15vh;">

@@ -8,6 +8,8 @@ import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
@@ -18,10 +20,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.vt.createmanagesubmit.modelos.Admin;
 import com.vt.createmanagesubmit.modelos.Alumno;
 import com.vt.createmanagesubmit.modelos.Plantilla;
+import com.vt.createmanagesubmit.repositorios.RepositorioAdmin;
 import com.vt.createmanagesubmit.repositorios.RepositorioAlumnos;
 import com.vt.createmanagesubmit.repositorios.RepositorioPlantillas;
+
+
 
 @Service
 public class Servicio {
@@ -33,8 +39,14 @@ public class Servicio {
     private RepositorioPlantillas repoPlanti;
 
     @Autowired
+    private RepositorioAdmin repoAdmin;
+
+    @Autowired
     @Lazy
     private ServicioArchivos servicioAr;
+
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
 
     public static String CORREO_EMPRESA = "example@example.com";
 
@@ -135,6 +147,23 @@ public class Servicio {
 
     public Optional<Plantilla> plantillaPorNombre(String nombre){
         return repoPlanti.findByNombreCertificado(nombre);
+    }
+
+    public List<Admin> todasLosAdmin(){
+        return repoAdmin.findAll();
+    }
+
+    public Admin adminPorId(Long id){
+        Admin admin = repoAdmin.findById(id).orElse(null);
+        return admin;
+
+    }
+
+    public void borrarAdminPorId(Long id){
+        Admin admin = repoAdmin.findById(id).orElse(null);
+        if(!admin.getCorreo().trim().equals("admin@admin.com")){
+            repoAdmin.delete(admin);
+        }
     }
 
     public Alumno funcionEstadoManual(Alumno nuevoAlumno){
@@ -376,7 +405,7 @@ public class Servicio {
     }
 
     public String clonarArchivo(String archivoExistente, String subdirectorio) throws IOException {
-        Path sourcePath = Paths.get(STATIC_DIRECTORY + archivoExistente);
+        Path sourcePath = Paths.get(archivoExistente);
         String timestamp = String.valueOf(System.currentTimeMillis());
         String newFileName = "clon_" +timestamp+"_"+ sourcePath.getFileName().toString();
         String relativePath = subdirectorio + newFileName;
@@ -389,6 +418,31 @@ public class Servicio {
         Files.copy(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
 
         return STATIC_DIRECTORY+relativePath;
+    }
+
+    public void registrarAdmin(String correo,String nombre, String password) {
+        // Encriptar la contraseña
+        String passwordEncriptada = passwordEncoder.encode(password);
+
+        Admin admin = new Admin();
+
+        admin.setCorreo(correo);
+        admin.setNombre(nombre);
+        admin.setContrasena(passwordEncriptada);
+
+        repoAdmin.save(admin);
+    }
+
+    
+    public Admin passwordConfirmacion(String correoLogin,String passwordLogin){
+        Optional<Admin> adminOptional = repoAdmin.findByCorreo(correoLogin);
+        if(adminOptional.isPresent()){
+            Admin admin = adminOptional.get();
+            if(BCrypt.checkpw(passwordLogin, admin.getContrasena())){
+                return admin;
+            }
+        }
+        return null;
     }
 
 }

@@ -11,10 +11,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.vt.createmanagesubmit.modelos.Admin;
 import com.vt.createmanagesubmit.modelos.Alumno;
 import com.vt.createmanagesubmit.modelos.Plantilla;
 import com.vt.createmanagesubmit.servicios.Servicio;
 import com.vt.createmanagesubmit.servicios.ServicioArchivos;
+
+import jakarta.servlet.http.HttpSession;
+
 
 
 
@@ -35,27 +39,58 @@ public class ControladorBase {
 
     @GetMapping("/")
     public String index() {
-        
+        if(servicio.adminPorId(1L)==null){
+            servicio.registrarAdmin("admin@admin.com", "admin", "qwerty");
+        }
         return "index.jsp";
     }
+
+    @PostMapping("/login")
+    public String login(HttpSession session,@RequestParam("correo")String Correo, @RequestParam("contrasena")String password) {
+        Admin admin = servicio.passwordConfirmacion(Correo, password);
+        if(admin != null){
+            session.setAttribute("usuarioEnSesion", admin);
+            return "redirect:/home";
+        }else{
+            return "redirect:/";
+        }
+        
+    }
+    
     
     @GetMapping("/home")
-    public String home() {
+    public String home(HttpSession session) {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+	    if (usuarioTemporal == null) {
+	        return "redirect:/";  
+	    }
         return "home.jsp";
     }
     
     @GetMapping("/add")
-    public String subirABaseDeDatos() {
+    public String subirABaseDeDatos(HttpSession session) {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+	    if (usuarioTemporal == null) {
+	        return "redirect:/";  
+	    }
         return "add.jsp";
     }
 
     @GetMapping("/dataBaseAlumno")
-    public String baseDeDatos() {
+    public String baseDeDatos(HttpSession session) {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+	    if (usuarioTemporal == null) {
+	        return "redirect:/";  
+	    }
         return "databaseAlumno.jsp";
     }
     
     @GetMapping("/dataBaseAlumno/buscarAlumno")
-    public String busquedaAlumno(@RequestParam("filtro") String filtro, @RequestParam("busqueda") String busqueda, Model model) {
+    public String busquedaAlumno(@RequestParam("filtro") String filtro, @RequestParam("busqueda") String busqueda, Model model,HttpSession session) {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+	    if (usuarioTemporal == null) {
+	        return "redirect:/";  
+	    }
         // Pasar los parámetros al modelo para usarlos en el JSP
         model.addAttribute("filtro", filtro);
         model.addAttribute("busqueda", busqueda);
@@ -63,7 +98,11 @@ public class ControladorBase {
     }
 
     @GetMapping("/dataBasePlantilla/buscarPlantilla")
-    public String busquedaPlantilla(@RequestParam("busqueda")String busqueda,Model model) {
+    public String busquedaPlantilla(@RequestParam("busqueda")String busqueda,Model model,HttpSession session) {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+	    if (usuarioTemporal == null) {
+	        return "redirect:/";  
+	    }
         List<Plantilla> plantillas = servicio.todasLasPlantillas();
         model.addAttribute("plantillas",plantillas);
         model.addAttribute("busqueda",busqueda);
@@ -72,7 +111,11 @@ public class ControladorBase {
     
 
     @GetMapping("/dataBaseAlumno/alumno/{id}")
-    public String alumnoDatos(@PathVariable("id")Long id,Model model) {
+    public String alumnoDatos(@PathVariable("id")Long id,Model model,HttpSession session) {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+	    if (usuarioTemporal == null) {
+	        return "redirect:/";  
+	    }
         Alumno alumno = servicio.alumnoPorId(id);
         model.addAttribute("alumno",alumno);
         return "alumnoDatos.jsp";
@@ -80,7 +123,11 @@ public class ControladorBase {
     
 
     @GetMapping("/addAlumnoBase")
-    public String AgregarAlumno(Model model) {
+    public String AgregarAlumno(Model model,HttpSession session) {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+	    if (usuarioTemporal == null) {
+	        return "redirect:/";  
+	    }
         List<Plantilla> plantillas=servicio.todasLasPlantillas();
         model.addAttribute("plantillas",plantillas);
         return "addAlumno.jsp";
@@ -104,8 +151,12 @@ public String agregarAlumno(
     @RequestParam(name = "rut") String rut,
     @RequestParam(name = "correo") String correo,
     @RequestParam(name = "plantilla") Long plantilla,
-    Model model
+    Model model,HttpSession session
 ) {
+    Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+	    if (usuarioTemporal == null) {
+	        return "redirect:/";  
+	    }
     Alumno nuevoAlumno = new Alumno();
     nuevoAlumno.setAsistencia(asistencia);
     nuevoAlumno.setCliente(cliente);
@@ -145,14 +196,22 @@ public String agregarAlumno(
 
     
     @GetMapping("/addAlumnoBase/excel")
-    public String addAlumnoExcel(Model model) {
+    public String addAlumnoExcel(Model model,HttpSession session) {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+	    if (usuarioTemporal == null) {
+	        return "redirect:/";  
+	    }
         List<Plantilla> plantillas = servicio.todasLasPlantillas();
         model.addAttribute("plantillas",plantillas);
         return "addAlumnoExcel.jsp";
     }
 
     @GetMapping("/dataBaseAlumno/alumno/{id}/editar")
-    public String editarAlumno(@PathVariable("id")Long id,Model model) {
+    public String editarAlumno(@PathVariable("id")Long id,Model model,HttpSession session) {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+	    if (usuarioTemporal == null) {
+	        return "redirect:/";  
+	    }
         List<Plantilla> plantillas = servicio.todasLasPlantillas();
         Alumno alumno = servicio.alumnoPorId(id);
         model.addAttribute("alumno",alumno);
@@ -179,8 +238,12 @@ public String agregarAlumno(
             @RequestParam("rut") String rut,
             @RequestParam("correo") String correo,
             @RequestParam("plantilla") Long plantillaId,
-            Model model) {
+            Model model,HttpSession session) {
         
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+        if (usuarioTemporal == null) {
+            return "redirect:/";  
+        }
         // Llamar al servicio para procesar los datos
         servicio.editarAlumno(
                 id, nombreAsistente, nombreCurso, diasCursos, numeroHoras, 
@@ -192,24 +255,45 @@ public String agregarAlumno(
     }
     
     @GetMapping("/dataBasePlantilla")
-    public String dataBasePlantilla(Model model) {
+    public String dataBasePlantilla(Model model,HttpSession session) {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+	    if (usuarioTemporal == null) {
+	        return "redirect:/";  
+	    }
         List<Plantilla> plantillas = servicio.todasLasPlantillas();
         model.addAttribute("plantillas",plantillas);
         return "databasePlantilla.jsp";
     }
 
     @GetMapping("/dataBasePlantilla/plantilla/{id}/borrar")
-    public String borrarPlantilla(@PathVariable("id")Long id,Model model) {
+    public String borrarPlantilla(@PathVariable("id")Long id,Model model,HttpSession session) {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+	    if (usuarioTemporal == null) {
+	        return "redirect:/";  
+	    }
         Plantilla plantilla = servicio.plantillaPorId(id);
         model.addAttribute("plantilla",plantilla);
         return "borrarPlantilla.jsp";
     }
 
     @GetMapping("/dataBasePlantilla/plantilla/{id}/editar")
-    public String editarPlantilla(@PathVariable("id")Long id,Model model) {
+    public String editarPlantilla(@PathVariable("id")Long id,Model model,HttpSession session) {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+	    if (usuarioTemporal == null) {
+	        return "redirect:/";  
+	    }
         Plantilla plantilla = servicio.plantillaPorId(id);
         model.addAttribute("plantilla",plantilla);
         return "editarPlantilla.jsp";
+    }
+    
+    @GetMapping("/dataBaseAdmin")
+    public String dataBaseAdministrador(HttpSession session) {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+	    if (usuarioTemporal == null) {
+	        return "redirect:/";  
+	    }
+        return "databaseAdmin.jsp";
     }
     
     
