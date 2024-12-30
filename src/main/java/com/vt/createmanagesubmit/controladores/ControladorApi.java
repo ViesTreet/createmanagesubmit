@@ -1,6 +1,7 @@
 package com.vt.createmanagesubmit.controladores;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -317,27 +318,15 @@ public class ControladorApi {
         return new RedirectView("/");
     }
 
-    @PostMapping("/generar/{id}")
-    public void generarQR(@PathVariable("id")String idEncriptada,HttpServletResponse response) {
-        Long id = 9999999L;
+    @GetMapping("/generar/{id}")
+    public CompletableFuture<ResponseEntity<String>> generarQR(@PathVariable("id") String idEncriptada, HttpServletResponse response) {
         try {
-            id = servicioAr.decryptStudentId(idEncriptada);
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        try {
-            Alumno alumno = ser.alumnoPorId(id);
-            if (alumno == null) {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND, "Alumno no encontrado.");
-                return;
-            }
-            servicioAr.generateCertificateQR(alumno, response);
+            return servicioAr.generateCertificateQR(idEncriptada, response).thenApply(result -> ResponseEntity.ok("Certificado generado correctamente"));
         } catch (Exception e) {
             e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            return null;
         }
-        
-        return;
     }
     
     

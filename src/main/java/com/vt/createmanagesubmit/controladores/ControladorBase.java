@@ -17,6 +17,7 @@ import com.vt.createmanagesubmit.modelos.Plantilla;
 import com.vt.createmanagesubmit.servicios.Servicio;
 import com.vt.createmanagesubmit.servicios.ServicioArchivos;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 
@@ -295,7 +296,17 @@ public String agregarAlumno(
 	    }
         return "databaseAdmin.jsp";
     }
-    
+
+    @GetMapping("/dataBaseAlumno/download")
+    public String downloadDataBaseAlumno(HttpServletResponse response){
+        try {
+            servicioAr.exportToExcel(response);
+            return "hola";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "error";
+        }
+    }
     
     
 }

@@ -41,6 +41,7 @@ import org.apache.poi.xslf.usermodel.XSLFSlide;
 import org.apache.poi.xslf.usermodel.XSLFTextParagraph;
 import org.apache.poi.xslf.usermodel.XSLFTextRun;
 import org.apache.poi.xslf.usermodel.XSLFTextShape;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jodconverter.core.office.OfficeException;
 import org.jodconverter.local.JodConverter;
 import org.jodconverter.local.office.LocalOfficeManager;
@@ -51,11 +52,13 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
+import com.vt.createmanagesubmit.dto.AlumnoDTO;
 import com.vt.createmanagesubmit.modelos.Alumno;
 import com.vt.createmanagesubmit.modelos.Plantilla;
 import com.vt.createmanagesubmit.repositorios.RepositorioAlumnos;
@@ -423,6 +426,7 @@ public class ServicioArchivos {
         // Generar código QR con la URL y el ID encriptado
         String encryptedId = encryptStudentId(alumno.getId().toString());
         String qrCodeText = "http://localhost:8080/api/generar/" + encryptedId;
+        System.out.println(qrCodeText);
         ByteArrayOutputStream qrCodeOutputStream = generateQRCodeImage(qrCodeText, 200, 200);
         byte[] qrCodeBytes = qrCodeOutputStream.toByteArray();
 
@@ -431,25 +435,6 @@ public class ServicioArchivos {
         return CompletableFuture.completedFuture(null);
     }
 
-    private String encryptStudentId(String studentId) throws Exception {
-        // Define una clave secreta para la encriptación
-        String secretKey = "mySuperSecretKey"; // Debes usar una clave más segura y almacenarla de forma segura
-        MessageDigest sha = null;
-        try {
-            byte[] key = secretKey.getBytes("UTF-8");
-            sha = MessageDigest.getInstance("SHA-1");
-            key = sha.digest(key);
-            key = Arrays.copyOf(key, 16); // Usar solo los primeros 128 bits
-            SecretKeySpec secretKeySpec = new SecretKeySpec(key, "AES");
-            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-            cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec);
-            byte[] encrypted = cipher.doFinal(studentId.getBytes("UTF-8"));
-            return Base64.getEncoder().encodeToString(encrypted);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new Exception("Error al encriptar el ID del alumno.");
-        }
-    }
 
     private ByteArrayOutputStream generateQRCodeImage(String text, int width, int height) throws WriterException, IOException {
         QRCodeWriter qrCodeWriter = new QRCodeWriter();
@@ -484,8 +469,30 @@ public class ServicioArchivos {
 
         
     }
+    
+    @Async
+    private String encryptStudentId(String studentId) throws Exception {
+        // Define una clave secreta para la encriptación
+        String secretKey = "mySuperSecretKey"; // Debes usar una clave más segura y almacenarla de forma segura
+        MessageDigest sha = null;
+        try {
+            byte[] key = secretKey.getBytes("UTF-8");
+            sha = MessageDigest.getInstance("SHA-1");
+            key = sha.digest(key);
+            key = Arrays.copyOf(key, 16); // Usar solo los primeros 128 bits
+            SecretKeySpec secretKeySpec = new SecretKeySpec(key, "AES");
+            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+            cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec);
+            byte[] encrypted = cipher.doFinal(studentId.getBytes("UTF-8"));
+            return Base64.getEncoder().encodeToString(encrypted);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Exception("Error al encriptar el ID del alumno.");
+        }
+    }
 
-    public Long decryptStudentId(String encryptedId) throws Exception {
+    @Async
+    private Long decryptStudentId(String encryptedId) throws Exception {
         // Define una clave secreta para la encriptación
         String secretKey = "mySuperSecretKey"; // Usa una clave más segura y almacénala adecuadamente
     
@@ -514,9 +521,13 @@ public class ServicioArchivos {
         }
     }
     
-
     @Async
-    public void generateCertificateQR(Alumno alumno, HttpServletResponse response) throws Exception {
+    @Transactional
+    public CompletableFuture<Void> generateCertificateQR(String IdEncriptada, HttpServletResponse response) throws Exception {
+        Long alumnoId = decryptStudentId(IdEncriptada);
+        // Obtén el alumno por ID
+        Alumno alumno = alumnoRepo.findById(alumnoId).orElseThrow(() -> new Exception("Alumno no encontrado con ID " + alumnoId));
+
         // Obtén la plantilla asociada al alumno
         Plantilla plantilla = alumno.getPlantilla();
         if (plantilla == null) {
@@ -597,8 +608,67 @@ public class ServicioArchivos {
         response.getOutputStream().write(pdfBytes);
         response.getOutputStream().flush();
         response.getOutputStream().close();
+        return CompletableFuture.completedFuture(null);
 
     }
 
-    
+    public void exportToExcel(HttpServletResponse response) throws IOException {
+        // Obtener la lista de alumnos
+        List<Alumno> alumnos = alumnoRepo.findAll();
+
+        // Crear un nuevo libro de Excel
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("Alumnos");
+
+        // Crear la fila de cabecera
+        Row headerRow = sheet.createRow(0);
+        String[] headers = {"Nombre Asistente", "Nombre Curso", "Días Curso", "Número Horas", "Correlativo Interno", 
+                            "Cliente", "Obra", "Código", "Nota Aprobación", "Relator", "Asistencia", "Estado", 
+                            "Diploma", "RUT", "Correo", "Plantilla"};
+        
+        for (int i = 0; i < headers.length; i++) {
+            Cell cell = headerRow.createCell(i);
+            cell.setCellValue(headers[i]);
+        }
+
+        // Llenar los datos de los alumnos
+        int rowNum = 1;
+        for (Alumno alumno : alumnos) {
+            AlumnoDTO alumnoDTO = new AlumnoDTO(alumno);
+            Row row = sheet.createRow(rowNum++);
+
+            // Usar una función auxiliar para manejar los nulls
+            row.createCell(0).setCellValue(safeGet(alumnoDTO.getNombreAsistente()));
+            row.createCell(1).setCellValue(safeGet(alumnoDTO.getNombreCurso()));
+            row.createCell(2).setCellValue(safeGet(alumnoDTO.getDiasCursos()));
+            row.createCell(3).setCellValue(safeGet(alumnoDTO.getNumeroHoras()));
+            row.createCell(4).setCellValue(safeGet(alumnoDTO.getNumeroCorrelativoInterno()));
+            row.createCell(5).setCellValue(safeGet(alumnoDTO.getCliente()));
+            row.createCell(6).setCellValue(safeGet(alumnoDTO.getObra()));
+            row.createCell(7).setCellValue(safeGet(alumnoDTO.getCodigo()));
+            row.createCell(8).setCellValue(safeGet(alumnoDTO.getNotaAprovacion()));
+            row.createCell(9).setCellValue(safeGet(alumnoDTO.getRelator()));
+            row.createCell(10).setCellValue(safeGet(alumnoDTO.getAsistencia()));
+            row.createCell(11).setCellValue(safeGet(alumnoDTO.getEstado()));
+            row.createCell(12).setCellValue(safeGet(alumnoDTO.getDiploma()));
+            row.createCell(13).setCellValue(safeGet(alumnoDTO.getRut()));
+            row.createCell(14).setCellValue(safeGet(alumnoDTO.getCorreo()));
+            row.createCell(15).setCellValue(safeGet(alumnoDTO.getPlantilla()));
+        }
+
+        // Configuración de la respuesta HTTP para descargar el archivo Excel
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=alumnos.xlsx");
+
+        // Escribir el archivo Excel en la respuesta HTTP
+        workbook.write(response.getOutputStream());
+        workbook.close();
+    }
+
+    // Función auxiliar para manejar nulls y devolver un espacio vacío
+    private String safeGet(String value) {
+        return value == null ? "" : value;
+    }
 }
+
+    
