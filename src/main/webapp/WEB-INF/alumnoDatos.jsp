@@ -53,6 +53,18 @@
                 <a class="btn btn-danger" href="/dataBaseAlumno/alumno/${alumno.id}/borrar">Borrar</a>
             </div>
         </div>
+        <script>
+            function showAlert(message) {
+                if (message && message.trim() !== "") { 
+                    alert(message);
+                }
+            }
+        </script>
+        <c:if test="${not empty error}">
+            <script>
+                showAlert("${error}");
+            </script>
+        </c:if>
     </main>
     <footer class="text-center p-3 bg-light" style="height: 15vh;">
         <p>Contacto: [Dirección, Teléfono, Correo]</p>

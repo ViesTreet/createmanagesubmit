@@ -32,7 +32,7 @@
                     </div>
                     <div class="pb-2 pt-2">
                         <label for="plantillaNombre">Elegir la plantilla a usar</label>
-                        <select name="plantillaNombre" id="plantillaNombre">
+                        <select name="plantillaNombre" id="plantillaNombre" class="form-select">
                             <option value="excel">Usar plantillas del excel</option>
                             <c:forEach items="${plantillas}" var="plantilla">
                                 <option value="${plantilla.nombreCertificado}">${plantilla.nombreCertificado}</option>
@@ -41,7 +41,7 @@
                     </div>
                     <div class="pb-2 pt-2">
                         <label for="estadoExcel">Elegir el estado de los alumnos</label>
-                        <select name="estadoExcel" id="estadoExcel">
+                        <select name="estadoExcel" id="estadoExcel" class="form-select">
                             <option value="Eexcel">Usar estado del excel</option>
                             <option value="Eauto">Automatico</option>
                             <option value="aprobado">Aprobado</option>
@@ -50,7 +50,7 @@
                     </div>
                     <div class="pb-2 pt-2">
                         <label for="estadoDiplomaExcel">Acciones a realizar</label>
-                        <select name="estadoDiplomaExcel" id="estadoDiplomaExcel">
+                        <select name="estadoDiplomaExcel" id="estadoDiplomaExcel" class="form-select">
                             <option value="diploExcel">Realizar segun excel</option>
                             <option value="enviarApro">Enviar(APROBADOS)</option>
                             <option value="enviarTodos">Enviar(TODOS)</option>
@@ -65,6 +65,18 @@
                 </form>
             </div>
         </div>
+        <script>
+            function showAlert(message) {
+                if (message && message.trim() !== "") { 
+                    alert(message);
+                }
+            }
+        </script>
+        <c:if test="${not empty error}">
+            <script>
+                showAlert("${error}");
+            </script>
+        </c:if>
     </main>
     <footer class="text-center p-3 bg-light" style="height: 15vh;">
         <p>Contacto: [Dirección, Teléfono, Correo]</p>

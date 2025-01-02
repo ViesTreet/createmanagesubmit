@@ -316,6 +316,18 @@
             }
         }
     </script>
+    <script>
+        function showAlert(message) {
+            if (message && message.trim() !== "") { 
+                alert(message);
+            }
+        }
+    </script>
+    <c:if test="${not empty error}">
+        <script>
+            showAlert("${error}");
+        </script>
+    </c:if>
     <footer class="text-center p-3 bg-light" style="height: 15vh; z-index: 1;">
         <p>Contacto: [Dirección, Teléfono, Correo]</p>
         <div>

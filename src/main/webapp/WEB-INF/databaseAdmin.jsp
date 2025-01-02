@@ -186,22 +186,6 @@
             setInterval(cargarDatos, 30000);
         });
     </script>
-    
-    
-    <script>
-        document.getElementById('buscarLink').addEventListener('click', function(event) {
-        // Prevenir el comportamiento por defecto del enlace
-            event.preventDefault();
-
-            const busqueda = document.querySelector('[name="busquedaPlantilla"]').value;
-
-            // Construye la URL dinámica usando concatenación de strings
-            const url = 'dataBasePlantilla/buscarPlantilla?busqueda=' + encodeURIComponent(busqueda);
-
-            // Redirige al enlace generado
-            window.location.href = url;
-        });
-    </script>
     <script>
         // Función que detecta la tecla Enter
         function submitOnEnter(event, buttonId) {
@@ -280,6 +264,18 @@
             }
         }
     </script>
+    <script>
+        function showAlert(message) {
+            if (message && message.trim() !== "") { 
+                alert(message);
+            }
+        }
+    </script>
+    <c:if test="${not empty error}">
+        <script>
+            showAlert("${error}");
+        </script>
+    </c:if>
     <footer class="text-center p-3 bg-light" style="height: 15vh; z-index: 1;">
         <p>Contacto: [Dirección, Teléfono, Correo]</p>
         <div>

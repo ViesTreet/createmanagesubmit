@@ -194,6 +194,18 @@
             }
         }
     </script>
+    <script>
+        function showAlert(message) {
+            if (message && message.trim() !== "") { 
+                alert(message);
+            }
+        }
+    </script>
+    <c:if test="${not empty error}">
+        <script>
+            showAlert("${error}");
+        </script>
+    </c:if>
     
 </body>
 </html>

@@ -20,6 +20,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.vt.createmanagesubmit.exceptions.MissingAdminIdException;
+import com.vt.createmanagesubmit.exceptions.MissingAlumnoIdException;
+import com.vt.createmanagesubmit.exceptions.MissingNameOrRutException;
+import com.vt.createmanagesubmit.exceptions.MissingTemplateException;
 import com.vt.createmanagesubmit.modelos.Admin;
 import com.vt.createmanagesubmit.modelos.Alumno;
 import com.vt.createmanagesubmit.modelos.Plantilla;
@@ -62,8 +66,13 @@ public class Servicio {
     }
 
     public void borrarAlumnoPorId(Long id){
-        Alumno alumno = repoAlum.findById(id).orElse(null);
-        repoAlum.delete(alumno);
+        Optional<Alumno> optAlumno = repoAlum.findById(id);
+        if(optAlumno.isPresent()){
+            Alumno alumno = optAlumno.get();
+            repoAlum.delete(alumno);
+        }else{
+            throw new MissingAlumnoIdException("No se encontró el alumno a borrar.");
+        }
     }
 
     public Page<Alumno> todosLosAlumnos(){
@@ -126,20 +135,32 @@ public class Servicio {
     }
 
     public Plantilla plantillaPorId(Long id){
-        return repoPlanti.findById(id).orElse(null);
+        if(id == null){
+            throw new MissingTemplateException("La plantilla no existe o no hay ninguna seleccionada");
+        }
+        Optional<Plantilla> optPlantilla = repoPlanti.findById(id);
+        if(optPlantilla.isPresent()){
+            Plantilla plantilla = optPlantilla.get();
+            return plantilla;
+        }else{
+            throw new MissingTemplateException("La plantilla no existe.");
+        }
     }
 
     public void guardarPlantilla(Plantilla plantilla){
         repoPlanti.save(plantilla);
     }
 
-    public void borrarPlantillaPorId(Long id){
+    public void borrarPlantillaPorId(Long id) throws IOException{
+        if(id == null){
+            throw new IOException("No se encontró la plantilla.");
+        }
         Plantilla plantilla = plantillaPorId(id);
-        Path deletePlantillaPath = Paths.get(STATIC_DIRECTORY + plantilla.getPathArchivo());
+        Path deletePlantillaPath = Paths.get(plantilla.getPathArchivo());
         try {
             Files.deleteIfExists(deletePlantillaPath);
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ex) {
+            throw new IOException("No se encontró la ruta de la plantilla.",ex);
         }
         repoPlanti.delete(plantilla);
     }
@@ -158,11 +179,27 @@ public class Servicio {
 
     }
 
-    public void borrarAdminPorId(Long id){
-        Admin admin = repoAdmin.findById(id).orElse(null);
-        if(!admin.getCorreo().trim().equals("admin@admin.com")){
-            repoAdmin.delete(admin);
+    public Admin adminPorCorreo(String correo){
+        Optional<Admin> optAdmin = repoAdmin.findByCorreo(correo);
+        if(optAdmin.isPresent()){
+            Admin admin = optAdmin.get();
+            return admin;
+        }else{
+            return null;
         }
+    }
+
+    public void borrarAdminPorId(Long id){
+        Optional<Admin> optAdmin = repoAdmin.findById(id);
+        if(optAdmin.isPresent()){
+            Admin admin = optAdmin.get();
+            if(!admin.getCorreo().trim().equals("admin@admin.com")){
+                repoAdmin.delete(admin);
+            }
+        }else{
+            throw new MissingAdminIdException("No se encontro al administrador");
+        }
+        
     }
 
     public Alumno funcionEstadoManual(Alumno nuevoAlumno){
@@ -249,7 +286,7 @@ public class Servicio {
             nuevoAlumno.setRut(null);
         }
 
-        if (nuevoAlumno.getNombreAsistente() != null && !nuevoAlumno.getNombreAsistente().trim().isEmpty()) {
+        if ((nuevoAlumno.getNombreAsistente() != null && !nuevoAlumno.getNombreAsistente().trim().isEmpty())||(nuevoAlumno.getRut() != null && !nuevoAlumno.getRut().trim().isEmpty())) {
             String estadoFormulario = nuevoAlumno.getEstado().trim();
     
             // Si el estado es 'auto', realizamos la evaluación automática
@@ -278,56 +315,50 @@ public class Servicio {
             repoAlum.save(nuevoAlumno);
             return nuevoAlumno;
         }else{
-            return null;
+            throw new MissingNameOrRutException("Uno de los dos campos(Nombre o Rut) debe tener contenido para guardar un alumno.");
         }
     }
 
-    public void editarAlumno(
-            Long id,
-            String nombreAsistente,
-            String nombreCurso,
-            String diasCursos,
-            String numeroHoras,
-            String numeroCorrelativoInterno,
-            String cliente,
-            String obra,
-            String codigo,
-            String notaAprovacion,
-            String relator,
-            String asistencia,
-            String estado,
-            String diploma,
-            String rut,
-            String correo,
-            Long plantillaId) {
+    public void editarAlumno(Long id,String nombreAsistente,String nombreCurso,String diasCursos,String numeroHoras,String numeroCorrelativoInterno,String cliente,String obra,String codigo,String notaAprovacion,String relator,String asistencia,String estado,String diploma,String rut,String correo,Long plantillaId) {
 
-        // Crear o actualizar el objeto Alumno
-        Alumno alumno = repoAlum.findById(id).orElse(null);
+        Optional<Alumno> optalumno = repoAlum.findById(id);
+        if(optalumno.isPresent()){
+            Alumno alumno = optalumno.get();
+            alumno.setNombreAsistente(normalizarValor(nombreAsistente));
+            alumno.setNombreCurso(normalizarValor(nombreCurso));
+            alumno.setDiasCursos(normalizarValor(diasCursos));
+            alumno.setNumeroHoras(normalizarValor(numeroHoras));
+            alumno.setNumeroCorrelativoInterno(normalizarValor(numeroCorrelativoInterno));
+            alumno.setCliente(normalizarValor(cliente));
+            alumno.setObra(normalizarValor(obra));
+            alumno.setCodigo(normalizarValor(codigo));
+            alumno.setNotaAprovacion(normalizarValor(notaAprovacion));
+            alumno.setRelator(normalizarValor(relator));
+            alumno.setAsistencia(normalizarValor(asistencia));
+            alumno.setDiploma(normalizarValor(diploma));
+            alumno.setRut(normalizarValor(rut));
+            alumno.setCorreo(normalizarValor(correo));
+            if((alumno.getNombreAsistente()!=null && !alumno.getNombreAsistente().trim().isEmpty())||(alumno.getRut() != null && !alumno.getRut().trim().isEmpty())){
+                Optional<Plantilla> optplantilla = repoPlanti.findById(plantillaId);
+                if (optplantilla.isPresent()){
+                    Plantilla plantilla = optplantilla.get();
+                    alumno.setPlantilla((plantilla));
+                    if(!estado.equals("auto")){
+                        alumno.setEstado(normalizarValor(estado));
+                    }else{
+                        alumno = funcionEstadoManual(alumno);
+                    }
 
-        alumno.setNombreAsistente(normalizarValor(nombreAsistente));
-        alumno.setNombreCurso(normalizarValor(nombreCurso));
-        alumno.setDiasCursos(normalizarValor(diasCursos));
-        alumno.setNumeroHoras(normalizarValor(numeroHoras));
-        alumno.setNumeroCorrelativoInterno(normalizarValor(numeroCorrelativoInterno));
-        alumno.setCliente(normalizarValor(cliente));
-        alumno.setObra(normalizarValor(obra));
-        alumno.setCodigo(normalizarValor(codigo));
-        alumno.setNotaAprovacion(normalizarValor(notaAprovacion));
-        alumno.setRelator(normalizarValor(relator));
-        alumno.setAsistencia(normalizarValor(asistencia));
-        alumno.setDiploma(normalizarValor(diploma));
-        alumno.setRut(normalizarValor(rut));
-        alumno.setCorreo(normalizarValor(correo));
-        Plantilla plantilla = repoPlanti.findById(plantillaId).orElse(null);
-        alumno.setPlantilla((plantilla));
-        if(!estado.equals("auto")){
-            alumno.setEstado(normalizarValor(estado));
+                    repoAlum.save(alumno);
+                }else{
+                    throw new MissingTemplateException("No se encontró la plantilla seleccionada");
+                }
+            }else{
+                throw new MissingNameOrRutException("Uno de los dos campos(Nombre o Rut) debe tener contenido para guardar un alumno.");
+            }
         }else{
-            alumno = funcionEstadoManual(alumno);
+            throw new MissingAlumnoIdException("No se encontró al alumno a editar");
         }
-
-        // Lógica adicional, como guardar en la base de datos, etc.
-        repoAlum.save(alumno);
     }
 
 

@@ -1,8 +1,11 @@
 package com.vt.createmanagesubmit.controladores;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
+import org.jodconverter.core.office.OfficeException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.MediaType;
@@ -16,6 +19,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.vt.createmanagesubmit.exceptions.CertificateGenerationException;
+import com.vt.createmanagesubmit.exceptions.MissingAdminIdException;
+import com.vt.createmanagesubmit.exceptions.MissingAlumnoIdException;
+import com.vt.createmanagesubmit.exceptions.MissingNameOrRutException;
+import com.vt.createmanagesubmit.exceptions.MissingTemplateException;
 import com.vt.createmanagesubmit.modelos.Admin;
 import com.vt.createmanagesubmit.modelos.Alumno;
 import com.vt.createmanagesubmit.modelos.Plantilla;
@@ -105,8 +113,12 @@ public class ControladorBase {
 	        return "redirect:/";  
 	    }
         Alumno alumno = servicio.alumnoPorId(id);
-        model.addAttribute("alumno",alumno);
-        return "alumnoDatos.jsp";
+        if(alumno != null){
+            model.addAttribute("alumno",alumno);
+            return "alumnoDatos.jsp";
+        }else{
+            return "redirect:/dataBaseAlumno";
+        }
     }
     
 
@@ -122,25 +134,7 @@ public class ControladorBase {
     }
 
     @PostMapping("/dataBaseAlumno/agregarAlumno")
-    public String agregarAlumno(
-    @RequestParam(name = "nombreAsistente") String nombreAsistente,
-    @RequestParam("curso")String curso,
-    @RequestParam(name = "diasCursos") String diasCursos,
-    @RequestParam(name = "numeroHoras") String numeroHoras,
-    @RequestParam(name = "numeroCorrelativoInterno") String numeroCorrelativoInterno,
-    @RequestParam(name = "cliente") String cliente,
-    @RequestParam(name = "obra") String obra,
-    @RequestParam(name = "codigo") String codigo,
-    @RequestParam(name = "notaAprovacion") String notaAprovacion,
-    @RequestParam(name = "relator") String relator,
-    @RequestParam(name = "asistencia") String asistencia,
-    @RequestParam(name = "estado") String estado,
-    @RequestParam(name = "diploma") String diploma,
-    @RequestParam(name = "rut") String rut,
-    @RequestParam(name = "correo") String correo,
-    @RequestParam(name = "plantilla") Long plantilla,
-    Model model,HttpSession session
-    ) {
+    public String agregarAlumno(@RequestParam(name = "nombreAsistente") String nombreAsistente,@RequestParam("curso")String curso,@RequestParam(name = "diasCursos") String diasCursos,@RequestParam(name = "numeroHoras") String numeroHoras,@RequestParam(name = "numeroCorrelativoInterno") String numeroCorrelativoInterno,@RequestParam(name = "cliente") String cliente,@RequestParam(name = "obra") String obra,@RequestParam(name = "codigo") String codigo,@RequestParam(name = "notaAprovacion") String notaAprovacion,@RequestParam(name = "relator") String relator,@RequestParam(name = "asistencia") String asistencia,@RequestParam(name = "estado") String estado,@RequestParam(name = "diploma") String diploma,@RequestParam(name = "rut") String rut,@RequestParam(name = "correo") String correo,@RequestParam(name = "plantilla",required = false) Long plantilla,Model model,HttpSession session) {
     Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
 	    if (usuarioTemporal == null) {
 	        return "redirect:/";  
@@ -160,17 +154,26 @@ public class ControladorBase {
     nuevoAlumno.setObra(obra);
     nuevoAlumno.setRelator(relator);
     nuevoAlumno.setRut(rut);
-    Plantilla plantillausuario = servicio.plantillaPorId(plantilla);
-    nuevoAlumno.setPlantilla(plantillausuario);
+    List<Plantilla> plantillas=servicio.todasLasPlantillas();
+    model.addAttribute("plantillas",plantillas);
+    try {
+        Plantilla plantillausuario = servicio.plantillaPorId(plantilla);
+        nuevoAlumno.setPlantilla(plantillausuario);
+    } catch (MissingTemplateException ex) {
+        model.addAttribute("error", ex.getMessage());
+        return "addAlumno.jsp";
+    }
 
-    nuevoAlumno=servicio.comprobarYGuardar(nuevoAlumno,diploma);
+    try {
+        nuevoAlumno=servicio.comprobarYGuardar(nuevoAlumno,diploma);
     if(diploma.equals("enviar")){
         if(nuevoAlumno.getEstado().equals("aprobado")){
             try {
                 servicioAr.generateCertificateForAlumno(nuevoAlumno);
                 nuevoAlumno.setDiploma("enviado");
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (Exception ex) {
+                model.addAttribute("error", ex.getMessage());
+                return "addAlumno.jsp";
             }
         }else{
             nuevoAlumno.setDiploma("noEnviado");
@@ -180,6 +183,11 @@ public class ControladorBase {
     }
     servicio.registrarNuevoAlumno(nuevoAlumno);
     return "redirect:/dataBaseAlumno/addAlumnoBase";
+    } catch (MissingNameOrRutException ex) {
+        model.addAttribute("error", ex.getMessage());
+        return "addAlumno.jsp";
+    }
+    
     }
 
     
@@ -195,14 +203,13 @@ public class ControladorBase {
     }
 
     @PostMapping(value = "/dataBaseAlumno/uploadAlumnoExcel", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public String subirExcel(@RequestPart("file") MultipartFile file, 
-     @RequestParam(value = "estadoDiplomaExcel", required = false) String estadoDiplomaExcel, 
-     @RequestParam(value = "plantillaNombre") String plantilla, 
-     @RequestParam(value = "estadoExcel") String estadoExcel,HttpSession session) {
+    public String subirExcel(@RequestPart("file") MultipartFile file, @RequestParam(value = "estadoDiplomaExcel", required = false) String estadoDiplomaExcel, @RequestParam(value = "plantillaNombre") String plantilla, @RequestParam(value = "estadoExcel") String estadoExcel,HttpSession session,Model model) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
 	    if (usuarioTemporal != null) {
             if (file.isEmpty()) {
-                return "redirect:/error";
+                List<Plantilla> plantillas = servicio.todasLasPlantillas();
+                model.addAttribute("plantillas",plantillas);
+                model.addAttribute("error", "El excel esta vacio.");
             }
             try {
                 // Leer el contenido del archivo en un arreglo de bytes
@@ -213,9 +220,11 @@ public class ControladorBase {
 
                 // Redirigir inmediatamente sin esperar a que termine el procesamiento
                 return "redirect:/dataBaseAlumno";
-            } catch (Exception e) {
-                e.printStackTrace();
-                return "redirect:/error";
+            } catch (IOException ex) {
+                List<Plantilla> plantillas = servicio.todasLasPlantillas();
+                model.addAttribute("plantillas",plantillas);
+                model.addAttribute("error", ex.getMessage());
+                return "addAlumnoExcel.jsp";
             }
         }
         return "redirect:/";
@@ -235,42 +244,28 @@ public class ControladorBase {
     }
     
     @PostMapping("/dataBaseAlumno/editarAlumno")
-    public String editarAlumno(
-            @RequestParam("id") Long id,
-            @RequestParam("nombreAsistente") String nombreAsistente,
-            @RequestParam("nombreCurso") String nombreCurso,
-            @RequestParam("diasCursos") String diasCursos,
-            @RequestParam("numeroHoras") String numeroHoras,
-            @RequestParam("numeroCorrelativoInterno") String numeroCorrelativoInterno,
-            @RequestParam("cliente") String cliente,
-            @RequestParam("obra") String obra,
-            @RequestParam("codigo") String codigo,
-            @RequestParam("notaAprovacion") String notaAprovacion,
-            @RequestParam("relator") String relator,
-            @RequestParam("asistencia") String asistencia,
-            @RequestParam("estado") String estado,
-            @RequestParam("diploma") String diploma,
-            @RequestParam("rut") String rut,
-            @RequestParam("correo") String correo,
-            @RequestParam("plantilla") Long plantillaId,
-            Model model,HttpSession session) {
+    public String editarAlumno(@RequestParam("id") Long id,@RequestParam("nombreAsistente") String nombreAsistente,@RequestParam("nombreCurso") String nombreCurso,@RequestParam("diasCursos") String diasCursos,@RequestParam("numeroHoras") String numeroHoras,@RequestParam("numeroCorrelativoInterno") String numeroCorrelativoInterno,@RequestParam("cliente") String cliente,@RequestParam("obra") String obra,@RequestParam("codigo") String codigo,@RequestParam("notaAprovacion") String notaAprovacion,@RequestParam("relator") String relator,@RequestParam("asistencia") String asistencia,@RequestParam("estado") String estado,@RequestParam("diploma") String diploma,@RequestParam("rut") String rut,@RequestParam("correo") String correo,@RequestParam("plantilla") Long plantillaId,Model model,HttpSession session) {
         
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuarioTemporal == null) {
             return "redirect:/";  
         }
-        // Llamar al servicio para procesar los datos
-        servicio.editarAlumno(
-                id, nombreAsistente, nombreCurso, diasCursos, numeroHoras, 
-                numeroCorrelativoInterno, cliente, obra, codigo, notaAprovacion,
-                relator, asistencia, estado, diploma, rut, correo, plantillaId);
+        try {
+            servicio.editarAlumno(id, nombreAsistente, nombreCurso, diasCursos, numeroHoras, numeroCorrelativoInterno, cliente, obra, codigo, notaAprovacion,relator, asistencia, estado, diploma, rut, correo, plantillaId);
+            return "redirect:/dataBaseAlumno/alumno/"+id;  
 
-        // Redirigir o mostrar una página de confirmación
-        return "redirect:/dataBaseAlumno/alumno/"+id;
+        } catch (MissingTemplateException | MissingAlumnoIdException | MissingNameOrRutException ex) {
+            List<Plantilla> plantillas = servicio.todasLasPlantillas();
+            Alumno alumno = servicio.alumnoPorId(id);
+            model.addAttribute("alumno",alumno);
+            model.addAttribute("plantillas",plantillas);
+            model.addAttribute("error", ex.getMessage());
+            return "editarAlumno.jsp";
+        }
     }
 
     @GetMapping("/dataBaseAlumno/alumno/{id}/borrar")
-    public String borrarAlumnoIdApi(@PathVariable("id")Long id,HttpSession session) {
+    public String borrarAlumnoId(@PathVariable("id")Long id,HttpSession session) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
 	    if (usuarioTemporal != null) {
             servicio.borrarAlumnoPorId(id);
@@ -280,33 +275,40 @@ public class ControladorBase {
     }
 
     @GetMapping("/dataBaseAlumno/download")
-    public String downloadDataBaseAlumno(HttpServletResponse response){
+    public String downloadDataBaseAlumno(HttpServletResponse response,Model model,HttpSession session){
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+	    if (usuarioTemporal == null) {
+	        return "redirect:/";  
+	    }
         try {
             servicioAr.exportToExcel(response);
-            return "hola";
+            return "redirect:/dataBaseAlumno";
         } catch (Exception e) {
             e.printStackTrace();
-            return "error";
+            model.addAttribute("error", "Ocurrió un error al descargar la base de datos");
+            return "databaseAlumno.jsp";
         }
     }
 
     @GetMapping("/dataBaseAlumno/generateCertificado/{id}")
-    public String certificadoPorIdApi(@PathVariable("id")Long id,HttpSession session) {
+    public String certificadoPorId(@PathVariable("id")Long id,HttpSession session,Model model) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
 	    if (usuarioTemporal != null) {
             try {
                 servicioAr.generateCertificatesById(id);
                 return "redirect:/dataBaseAlumno/alumno/"+id;
-            } catch (Exception e) {
-                e.printStackTrace();
-                return "redirect:/error";
+            } catch (Exception ex) {
+                Alumno alumno = servicio.alumnoPorId(id);
+                model.addAttribute("alumno",alumno);
+                model.addAttribute("error", ex.getMessage());
+                return "alumnoDatos.jsp";
             }
         }
         return "redirect:/";
     }
     
     @GetMapping("/dataBaseAlumno/enviarRestantes")
-    public String enviarRestantes(HttpSession session) {
+    public String enviarRestantes(HttpSession session,Model model) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
 	    if (usuarioTemporal != null) {
             try {
@@ -314,7 +316,8 @@ public class ControladorBase {
                 return "redirect:/dataBaseAlumno";
             } catch (Exception e) {
                 e.printStackTrace();
-                return "redirect:/error";
+                model.addAttribute("error", "Ocurrió un error al mandar los restantes.");
+                return "databaseAlumno.jsp";
             }
         }
         return "redirect:/";
@@ -348,22 +351,18 @@ public class ControladorBase {
     }
 
     @PostMapping("/dataBasePlantilla/nuevaPlantilla")
-    public String crearNuevaPlantilla(
-            @RequestParam String nombreCertificado,
-            @RequestParam String descripcion,
-            @RequestParam String asistenciaMin,
-            @RequestParam String notaMin,
-            @RequestParam(required = false) MultipartFile pathLogo,
-            @RequestParam(required = false) MultipartFile pathArchivo,
-            @RequestParam(required = false) String pathLogoS,
-            @RequestParam(required = false) String pathArchivoS,
-            @RequestParam(defaultValue = "false") boolean clonarLogo,
-            @RequestParam(defaultValue = "false") boolean clonarPlantilla,HttpSession session) {
+    public String crearNuevaPlantilla(@RequestParam String nombreCertificado,@RequestParam String descripcion,@RequestParam String asistenciaMin,@RequestParam String notaMin,@RequestParam(required = false) MultipartFile pathLogo,@RequestParam(required = false) MultipartFile pathArchivo,@RequestParam(required = false) String pathLogoS,@RequestParam(required = false) String pathArchivoS,@RequestParam(defaultValue = "false") boolean clonarLogo,@RequestParam(defaultValue = "false") boolean clonarPlantilla,HttpSession session,Model model) {
 
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuarioTemporal != null) {
+            Optional<Plantilla> optPlantilla = servicio.plantillaPorNombre(nombreCertificado);
+            if(optPlantilla.isPresent()){
+                model.addAttribute("error", "El nombre de la plantilla tiene que ser único, no se puede repetir.");
+                List<Plantilla> plantillas = servicio.todasLasPlantillas();
+                model.addAttribute("plantillas",plantillas);
+                return "databasePlantilla.jsp";
+            }
             try {
-                // Crear una nueva plantilla
                 Plantilla nuevaPlantilla = new Plantilla();
                 nuevaPlantilla.setNombreCertificado(nombreCertificado);
                 nuevaPlantilla.setDescripcion(descripcion);
@@ -405,16 +404,21 @@ public class ControladorBase {
                     throw new IllegalArgumentException("Debe proporcionar una plantilla válida para guardar.");
                 }
 
-                // Guardar en la base de datos
+                
                 servicio.guardarPlantilla(nuevaPlantilla);
+                return "redirect:/dataBasePlantilla"; 
 
 
             } catch (Exception e) {
                 e.printStackTrace();
+                model.addAttribute("error", "Ocurrió un error al guardar la nueva plantilla");
+                List<Plantilla> plantillas = servicio.todasLasPlantillas();
+                model.addAttribute("plantillas",plantillas);
+                return "databasePlantilla.jsp";
             }
-            return "redirect:/dataBasePlantilla"; 
+            
         }
-        return "redirect:/error";
+        return "redirect:/";
     }
 
     @GetMapping("/dataBasePlantilla/plantilla/{id}/borrar")
@@ -428,14 +432,22 @@ public class ControladorBase {
         return "borrarPlantilla.jsp";
     }
 
-    @GetMapping("/dataBasePlantilla/Plantilla/{id}/borrar")
-    public String borrarPlantillaId(@PathVariable("id")Long id,HttpSession session){
+    @GetMapping("/dataBasePlantilla/borrar/{id}")
+    public String borrarPlantillaId(@PathVariable("id")Long id,HttpSession session,Model model){
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
 	    if (usuarioTemporal != null) {
-            servicio.borrarPlantillaPorId(id);
-            return "redirect:/dataBasePlantilla";
+            try {
+                servicio.borrarPlantillaPorId(id);
+                return "redirect:/dataBasePlantilla";
+            } catch (IOException ex) {  
+                model.addAttribute("error", ex);
+                List<Plantilla> plantillas = servicio.todasLasPlantillas();
+                model.addAttribute("plantillas",plantillas);
+                return "databasePlantilla.jsp";
+            }
+            
         }
-        return "redirect:/error";
+        return "redirect:/";
     }
 
     @GetMapping("/dataBasePlantilla/plantilla/{id}/editar")
@@ -450,10 +462,32 @@ public class ControladorBase {
     }
 
     @PostMapping("/dataBasePlantilla/editarPlantilla")
-    public String editarPlantilla(@RequestParam("id") Long id,@RequestParam(value = "cambiarLogo", required = false) boolean cambiarLogo,@RequestParam(value = "cambiarPlantilla", required = false) boolean cambiarPlantilla,@RequestParam(value = "pathLogo", required = false) MultipartFile nuevoLogo,@RequestParam(value = "pathArchivo", required = false) MultipartFile nuevaPlantilla,@RequestParam(value = "nombreCertificado")String nombre,@RequestParam(value = "descripcion")String descripcion,@RequestParam(value = "asistenciaMin")String asistencia,@RequestParam(value = "notaMin")String nota ,HttpSession session) {  
+    public String editarPlantilla(@RequestParam("id") Long id,@RequestParam(value = "cambiarLogo", required = false) boolean cambiarLogo,@RequestParam(value = "cambiarPlantilla", required = false) boolean cambiarPlantilla,@RequestParam(value = "pathLogo", required = false) MultipartFile nuevoLogo,@RequestParam(value = "pathArchivo", required = false) MultipartFile nuevaPlantilla,@RequestParam(value = "nombreCertificado")String nombre,@RequestParam(value = "descripcion")String descripcion,@RequestParam(value = "asistenciaMin")String asistencia,@RequestParam(value = "notaMin")String nota ,HttpSession session,Model model) {  
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
 	    if (usuarioTemporal != null) {   
             Plantilla plantilla = servicio.plantillaPorId(id);
+            String nombreAntiguo = plantilla.getNombreCertificado();
+            boolean error;
+            if(nombreAntiguo.equals(nombre)){
+                error = false;
+            }else{
+                Optional<Plantilla> optPlantilla = servicio.plantillaPorNombre(nombre);
+                if(optPlantilla.isPresent()){
+                    error = true;
+                }else{
+                    error = false;
+                }
+            }
+            if(nombre.trim().isEmpty()){
+                error=true;
+            }
+            if(error){
+                model.addAttribute("error", "El nombre tiene que ser unicó y no puede estar vacio");
+                Plantilla plantillaError = servicio.plantillaPorId(id);
+                model.addAttribute("plantilla",plantillaError);
+                return "editarPlantilla.jsp";
+
+            }
             plantilla.setNombreCertificado(nombre);
             plantilla.setDescripcion(descripcion);
             if(asistencia.isBlank()){
@@ -476,12 +510,14 @@ public class ControladorBase {
                 if (cambiarPlantilla && nuevaPlantilla != null && !nuevaPlantilla.isEmpty()) {
                     servicio.cambiarPlantilla(id, nuevaPlantilla);
                 }
+                return "redirect:/dataBasePlantilla"; 
             } catch (Exception e) {
                 e.printStackTrace();
-                return "redirect:/error";
+                model.addAttribute("error", "Error al guardar la plantilla.");
+                Plantilla plantillaError = servicio.plantillaPorId(id);
+                model.addAttribute("plantilla",plantillaError);
+                return "editarPlantilla.jsp";
             }
-
-            return "redirect:/dataBasePlantilla"; 
         }
         return "redirect:/";
     }
@@ -499,24 +535,34 @@ public class ControladorBase {
     }
 
     @GetMapping("/dataBaseAdmin/{id}/borrar")
-    public String borrarAdmin(@PathVariable("id")Long id,HttpSession session) {
+    public String borrarAdmin(@PathVariable("id")Long id,HttpSession session,Model model) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
 	    if (usuarioTemporal != null) {
-            servicio.borrarAdminPorId(id);
-            return "redirect:/dataBaseAdmin";
+            try {
+                servicio.borrarAdminPorId(id);
+                return "redirect:/dataBaseAdmin";
+            } catch (MissingAdminIdException ex) {
+                model.addAttribute("error", ex.getMessage());
+                return "databaseAdmin.jsp";
+            }
+            
         }
-        return "redirect:/error";
+        return "redirect:/";
     }
 
     @PostMapping("/dataBaseAdmin/nuevoAdmin")
-    public String crearNuevoAdmin(@RequestParam(value = "correo")String correo,@RequestParam(value = "nombre")String nombre,@RequestParam(value = "contrasena")String password,HttpSession session) {
+    public String crearNuevoAdmin(@RequestParam(value = "correo")String correo,@RequestParam(value = "nombre")String nombre,@RequestParam(value = "contrasena")String password,HttpSession session,Model model) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
 	    if (usuarioTemporal != null) {
-            servicio.registrarAdmin(correo,nombre,password);
-        
-            return "redirect:/dataBaseAdmin";
+            if(servicio.adminPorCorreo(correo)==null){
+                servicio.registrarAdmin(correo,nombre,password);
+                return "redirect:/dataBaseAdmin";
+            }else{
+                model.addAttribute("error", "El correo de los administradores no se pueden repetir");
+                return "databaseAdmin.jsp";
+            }
         }
-        return "redirect:/error";
+        return "redirect:/";
     }
     
     //----------------------Otros-------------------------------------

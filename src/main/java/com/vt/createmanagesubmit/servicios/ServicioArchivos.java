@@ -59,6 +59,7 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.vt.createmanagesubmit.dto.AlumnoDTO;
+import com.vt.createmanagesubmit.exceptions.CertificateGenerationException;
 import com.vt.createmanagesubmit.modelos.Alumno;
 import com.vt.createmanagesubmit.modelos.Plantilla;
 import com.vt.createmanagesubmit.repositorios.RepositorioAlumnos;
@@ -183,8 +184,8 @@ public class ServicioArchivos {
             }
             workbook.close();
             fileInputStream.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ex) {
+            throw new IOException("Error al procesar el excel, verifique los datos.",ex);
         }
         
         return CompletableFuture.completedFuture(null);
@@ -318,9 +319,14 @@ public class ServicioArchivos {
     public void generateCertificatesById(Long id) throws Exception {
         Alumno alumno = alumnoRepo.findById(id).orElse(null);
         if (alumno != null) {
-            generateCertificateForAlumno(alumno);
-            alumno.setDiploma("enviado");
-            alumnoRepo.save(alumno);
+            try {
+                generateCertificateForAlumno(alumno);
+                alumno.setDiploma("enviado");
+                alumnoRepo.save(alumno);
+            } catch (Exception ex) {
+                throw new CertificateGenerationException("Ocurrió un error al generar el certificado.");
+            }
+            
         }
     }
 
@@ -329,7 +335,7 @@ public class ServicioArchivos {
         // Obtén la plantilla asociada al alumno
         Plantilla plantilla = alumno.getPlantilla();
         if (plantilla == null) {
-            throw new Exception("No hay una plantilla asociada al Alumno con ID " + alumno.getId());
+            throw new Exception("No hay una plantilla asociada al Alumno " + alumno.getNombreAsistente());
         }
 
         // Carga la plantilla PPTX desde pathArchivo
@@ -409,7 +415,7 @@ public class ServicioArchivos {
                     .to(new File(tempPdfPath))
                     .execute();
         } catch (OfficeException e) {
-            e.printStackTrace();
+            throw new OfficeException ("Ocurrió un error inesperado al generar el PPT",e);
         } finally {
             if (officeManager != null) {
                 officeManager.stop();
