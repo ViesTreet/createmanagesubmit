@@ -25,7 +25,7 @@
         <div class="card" style="width: 30vw;">
             <div class="card-body">
                 <h4 class="card-title text-center">Agregar nuevo excel</h4>
-                <form action="/api/uploadAlumnoExcel" method="POST" enctype="multipart/form-data">
+                <form action="/dataBaseAlumno/uploadAlumnoExcel" method="POST" enctype="multipart/form-data">
                     <div class="pb-2 pt-2">
                         <label for="file">Selecciona un archivo Excel:</label>
                         <input class="form-control" type="file" id="file" name="file" accept=".xls,.xlsx" required>

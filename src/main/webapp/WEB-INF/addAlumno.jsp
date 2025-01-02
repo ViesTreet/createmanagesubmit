@@ -25,7 +25,7 @@
         <div class="card" style="width: 70vw;">
             <div class="card-body" style="width: 100%;">
                 <h4 class="card-title text-center">Agregar nuevo alumno</h4>
-                <form action="/agregarAlumno" method="post">
+                <form action="/dataBaseAlumno/agregarAlumno" method="post">
                     <div class="d-flex justify-content-between">
                         <div style="max-width: 33%;">
                             <div>
@@ -116,7 +116,7 @@
                             <input type="checkbox" name="guardar" id="guardar" onchange="guardarDatos()">
                         </div>
                         <input class="btn btn-success" type="submit" value="Añadir">
-                        <a href="addAlumnoBase/excel" class="btn btn-primary">Agregar usando excel</a>
+                        <a href="/dataBaseAlumno/addAlumnoBase/excel" class="btn btn-primary">Agregar usando excel</a>
                     </div>
                     
                 </form>

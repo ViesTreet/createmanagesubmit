@@ -164,7 +164,7 @@
     
                             // Agregar el botón borrar solo si admin.nombre no es "admin"
                             if (admin.correo !== "admin@admin.com") {
-                                fila += "<td>" + "<a class='btn btn-danger' href='/api/dataBaseAdmin/" + admin.id + "/borrar'>Borrar</a>" + "</td>";
+                                fila += "<td>" + "<a class='btn btn-danger' href='/dataBaseAdmin/" + admin.id + "/borrar'>Borrar</a>" + "</td>";
                             } else {
                                 fila += "<td></td>"; // Dejar la celda vacía si es "admin"
                             }
@@ -218,7 +218,7 @@
                 <button class="btn btn-danger" onclick="closeForm()">Cerrar</button>
             </div>
             <h2 class="text-center pb-2">Crear Admin</h2>
-            <form action="/api/nuevoAdmin" method="post">
+            <form action="/dataBaseAdmin/nuevoAdmin" method="post">
                 <div class="d-flex justify-content-center">
                     <div style="max-width: 100%;">
                         <div class="pb-2">

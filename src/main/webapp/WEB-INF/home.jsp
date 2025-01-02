@@ -26,7 +26,7 @@
     <main class="d-flex flex-column align-items-center justify-content-center" style="height: 90vh;">
         <h1 class="text-center">Bienvenido a E-VOLUTION</h1>
         <a href="/dataBaseAlumno" class="btn btn-primary btn-custom">Base de datos alumno</a>
-        <a href="/addAlumnoBase" class="btn btn-primary btn-custom">Agregar alumno base de datos</a>
+        <a href="/dataBaseAlumno/addAlumnoBase" class="btn btn-primary btn-custom">Agregar alumno base de datos</a>
         <a href="/dataBasePlantilla" class="btn btn-secondary btn-custom">Base de datos plantilla</a>
         <a href="/dataBaseAdmin" class="btn btn-secondary btn-custom">Administradores</a>
         <button class="btn btn-light btn-custom">Documentación</button>

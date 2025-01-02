@@ -139,7 +139,6 @@ public class Servicio {
         try {
             Files.deleteIfExists(deletePlantillaPath);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         repoPlanti.delete(plantilla);

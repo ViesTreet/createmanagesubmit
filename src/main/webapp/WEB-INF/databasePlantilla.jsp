@@ -222,7 +222,7 @@
                 <button class="btn btn-danger" onclick="closeForm()">Cerrar</button>
             </div>
             <h2 class="text-center pb-2">Crear plantilla</h2>
-            <form action="/api/nuevaPlantilla" method="post" enctype="multipart/form-data">
+            <form action="/dataBasePlantilla/nuevaPlantilla" method="post" enctype="multipart/form-data">
                 <div class="d-flex justify-content-around">
                     <div style="max-width: 40%;">
                         <label for="nombreCertificado">Nombre Plantilla</label>

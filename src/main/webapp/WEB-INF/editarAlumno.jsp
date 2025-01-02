@@ -26,7 +26,7 @@
         <div class="card" style="width: 70vw;">
             <div class="card-body" style="width: 100%;">
                 <h4 class="card-title text-center">Editar Alumno ${alumnoJson.nombreAsistente}</h4>
-                <form action="/editarAlumno" method="post" modelAttribute="alumno">
+                <form action="/dataBaseAlumno/editarAlumno" method="post" modelAttribute="alumno">
                     <div class="d-flex justify-content-between">
                         <div style="max-width: 33%;">
                             <div>

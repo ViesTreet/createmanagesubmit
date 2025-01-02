@@ -49,8 +49,8 @@
             </div>
             <div class="d-flex justify-content-between">
                 <a class="btn btn-primary" href="/dataBaseAlumno/alumno/${alumno.id}/editar">Editar</a>
-                <a class="btn btn-success" href="/api/generateCert/${alumno.id}">Enviar</a>
-                <a class="btn btn-danger" href="/api/dataBaseAlumno/alumno/${alumno.id}/borrar">Borrar</a>
+                <a class="btn btn-success" href="/dataBaseAlumno/generateCertificado/${alumno.id}">Enviar</a>
+                <a class="btn btn-danger" href="/dataBaseAlumno/alumno/${alumno.id}/borrar">Borrar</a>
             </div>
         </div>
     </main>

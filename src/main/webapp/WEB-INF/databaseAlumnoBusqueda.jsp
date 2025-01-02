@@ -142,7 +142,7 @@
             <div>
                 <a class="btn btn-warning" href="/dataBaseAlumno">Regresar</a>
                 <button class="btn btn-primary" onclick="openForm()">Enviar restantes</button>
-                <a class="btn btn-success" href="/addAlumnoBase">+</a>
+                <a class="btn btn-success" href="/dataBaseAlumno/addAlumnoBase">+</a>
             </div>
         </div>
         <div id="contenedorTabla" style="overflow-y: auto; max-height: 70vh; max-width: 95vw;">
@@ -244,7 +244,7 @@
                 <button class="btn btn-danger" onclick="closeForm()">Cerrar</button>
             </div>
             <h2 class="text-center pb-2">Alumnos que se enviarán:</h2>
-            <form action="/api/enviarRestantes" method="get">
+            <form action="/dataBaseAlumno/enviarRestantes" method="get">
                 <div id="alumnosNoEnviados"></div>
                 <div class="d-flex justify-content-center">
                     <input class="btn btn-success" type="submit" value="Enviar">

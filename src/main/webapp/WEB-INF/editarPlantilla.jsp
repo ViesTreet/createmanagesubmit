@@ -130,7 +130,7 @@
             <div class="card-body">
                 <div class="card-title"><h4 class="text-center">Editar plantilla: ${plantilla.nombreCertificado}</h4></div>
             </div>
-            <form action="/api/editarPlantilla" method="post" enctype="multipart/form-data">
+            <form action="/dataBasePlantilla/editarPlantilla" method="post" enctype="multipart/form-data">
                 <div class="d-flex justify-content-around">
                     <div style="max-width: 40%;">
                         <Label for="nombreCertificado">Nombre Plantilla</Label>
