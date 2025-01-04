@@ -37,7 +37,7 @@ public class ServicioApi {
         return "nombreNoEncontrado";
     }
 
-    private String formatearNombre(String nombre) {
+    public String formatearNombre(String nombre) {
         if (nombre == null || nombre.isEmpty()) {
             return nombre;
         }

@@ -168,6 +168,7 @@ public class ControladorBase {
     nuevoAlumno.setObra(obra);
     nuevoAlumno.setRelator(relator);
     nuevoAlumno.setRut(rut);
+    nombreAsistente = servicioApi.formatearNombre(nombreAsistente);
     if(rutificador && !rut.trim().isEmpty() && rut != null){
         String nombreRutificado = servicioApi.obtenerNombrePorRut(rut);
         if(!nombreRutificado.trim().equals("nombreNoEncontrado")){
@@ -285,6 +286,7 @@ public class ControladorBase {
             return "redirect:/";  
         }
         try {
+            nombreAsistente = servicioApi.formatearNombre(nombreAsistente);
             servicio.editarAlumno(id, nombreAsistente, nombreCurso, diasCursos, numeroHoras, numeroCorrelativoInterno, cliente, obra, codigo, notaAprovacion,relator, asistencia, estado, diploma, rut, correo, plantillaId);
             return "redirect:/dataBaseAlumno/alumno/"+id;  
 
@@ -599,6 +601,13 @@ public class ControladorBase {
     }
     
     //----------------------Otros-------------------------------------
+    @GetMapping("/generarCertificadoQr/{id}")
+    public String getMethodName(@PathVariable("id") String idEncriptada, HttpServletResponse response, Model model) {
+        model.addAttribute("id", idEncriptada);
+        return "generarCertificadoQr.jsp";
+    }
+    
+    
     @GetMapping("/generar/{id}")
     public CompletableFuture<ResponseEntity<String>> generarQR(@PathVariable("id") String idEncriptada, HttpServletResponse response) {
         try {

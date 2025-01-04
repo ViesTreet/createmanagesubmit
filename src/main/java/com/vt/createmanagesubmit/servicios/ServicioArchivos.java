@@ -233,6 +233,7 @@ public class ServicioArchivos {
             case "número":
                 break;
             case "nombre asistente":
+                valorCelda = servicioApi.formatearNombre(valorCelda);
                 alumno.setNombreAsistente(valorCelda);
                 break;
             case "nombre curso":
@@ -321,6 +322,7 @@ public class ServicioArchivos {
 
                     }
                 }
+                break;
             default:
                 // Ignorar columnas no reconocidas
                 break;
@@ -509,7 +511,7 @@ public class ServicioArchivos {
 
         // Generar código QR con la URL y el ID encriptado
         String encryptedId = encryptStudentId(alumno.getId().toString());
-        String qrCodeText = "http://localhost:8080/api/generar/" + encryptedId;
+        String qrCodeText = "http://localhost:8080/generarCertificadoQr/" + encryptedId;
         System.out.println(qrCodeText);
         ByteArrayOutputStream qrCodeOutputStream = generateQRCodeImage(qrCodeText, 200, 200);
         byte[] qrCodeBytes = qrCodeOutputStream.toByteArray();
@@ -556,8 +558,7 @@ public class ServicioArchivos {
     
     @Async
     private String encryptStudentId(String studentId) throws Exception {
-        // Define una clave secreta para la encriptación
-        String secretKey = "mySuperSecretKey"; // Debes usar una clave más segura y almacenarla de forma segura
+        String secretKey = "eFSan7jbftsl2P6";
         MessageDigest sha = null;
         try {
             byte[] key = secretKey.getBytes("UTF-8");
@@ -568,34 +569,45 @@ public class ServicioArchivos {
             Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
             cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec);
             byte[] encrypted = cipher.doFinal(studentId.getBytes("UTF-8"));
-            return Base64.getEncoder().encodeToString(encrypted);
+    
+            // Codifica en Base64
+            String base64Encrypted = Base64.getEncoder().encodeToString(encrypted);
+            
+            // Reemplaza caracteres para hacerla segura para URL
+            base64Encrypted = base64Encrypted.replace("/", "_").replace("+", "-");
+            
+            return base64Encrypted;
         } catch (Exception e) {
             e.printStackTrace();
             throw new Exception("Error al encriptar el ID del alumno.");
         }
     }
+    
 
     @Async
     private Long decryptStudentId(String encryptedId) throws Exception {
-        // Define una clave secreta para la encriptación
-        String secretKey = "mySuperSecretKey"; // Usa una clave más segura y almacénala adecuadamente
-    
-        // Inicia la lógica de desencriptación
+        String secretKey = "eFSan7jbftsl2P6"; // Usa una clave más segura y almacénala adecuadamente
+
         try {
-            byte[] decodedEncryptedId = Base64.getDecoder().decode(encryptedId); // Decodifica el ID en Base64
+            // Reemplaza los caracteres seguros para URL por los originales
+            encryptedId = encryptedId.replace("_", "/").replace("-", "+");
+
+            // Decodifica el ID en Base64
+            byte[] decodedEncryptedId = Base64.getDecoder().decode(encryptedId);
+
             MessageDigest sha = MessageDigest.getInstance("SHA-1");
             byte[] key = secretKey.getBytes("UTF-8");
             sha.update(key);
             key = sha.digest();
             key = Arrays.copyOf(key, 16); // Usar solo los primeros 128 bits
-    
+        
             SecretKeySpec secretKeySpec = new SecretKeySpec(key, "AES");
             Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
             cipher.init(Cipher.DECRYPT_MODE, secretKeySpec);
-    
+        
             // Desencripta el ID
             byte[] decrypted = cipher.doFinal(decodedEncryptedId);
-    
+        
             // Convierte el byte array desencriptado en un Long
             String decryptedString = new String(decrypted, "UTF-8");
             return Long.parseLong(decryptedString); // Devuelve el Long desencriptado
@@ -604,6 +616,7 @@ public class ServicioArchivos {
             throw new Exception("Error al desencriptar el ID del alumno.");
         }
     }
+
     
     @Async
     @Transactional
