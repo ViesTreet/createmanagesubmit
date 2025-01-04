@@ -4,14 +4,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
+    <title>Error</title>
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link rel="stylesheet" href="/css/styleCustom.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         .btn-custom {
             width: 100%;
             max-width: 300px;
             margin: 10px 0;
+        }
+        .error-icon {
+            font-size: 5rem;
+            color: #dc3545;
         }
     </style>
 </head>
@@ -19,18 +24,17 @@
     <header class="d-flex align-items-center justify-content-between p-3 bg-light" style="height: 10vh;">
         <div class="logo"><img src="/images/Logobgremove.png" alt="[LOGO]"></div>
         <nav>
-            <a href="#" class="mx-2">Inicio</a>
-            <a href="#" class="mx-2">Funciones</a>
-            <a href="#" class="mx-2">Contacto</a>
+            <a href="/" class="mx-2">Inicio</a>
+            <a href="/funciones" class="mx-2">Funciones</a>
+            <a href="/contacto" class="mx-2">Contacto</a>
         </nav>
     </header>
     <main class="d-flex flex-column align-items-center justify-content-center" style="height: 90vh;">
-        <h1 class="text-center">Bienvenido a E-VOLUTION</h1>
-        <a href="/dataBaseAlumno" class="btn btn-primary btn-custom">Base de datos alumno</a>
-        <a href="/dataBaseAlumno/addAlumnoBase" class="btn btn-primary btn-custom">Agregar alumno base de datos</a>
-        <a href="/dataBasePlantilla" class="btn btn-secondary btn-custom">Base de datos plantilla</a>
-        <a href="/dataBaseAdmin" class="btn btn-secondary btn-custom">Administradores</a>
-        <button class="btn btn-light btn-custom">Documentación</button>
+        <i class="fas fa-exclamation-triangle error-icon"></i>
+        <h1 class="text-center">Oops! Algo salió mal.</h1>
+        <p class="text-center">Lo sentimos, pero la página que buscas no existe o ha ocurrido un error.</p>
+        <a href="/" class="btn btn-primary btn-custom">Volver al Inicio</a>
+        <a href="/contacto" class="btn btn-secondary btn-custom">Contactar Soporte</a>
     </main>
     <footer class="text-center p-3 bg-light" style="height: 15vh;">
         <p>Contacto: [Dirección, Teléfono, Correo]</p>

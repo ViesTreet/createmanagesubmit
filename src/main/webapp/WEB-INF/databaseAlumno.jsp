@@ -1,13 +1,14 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
     <title>Lista de Alumnos</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Importar CSS de Bootstrap -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/styleCustom.css">
     <!-- Importar jQuery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>  
     <!-- Importar JS de Bootstrap -->
@@ -129,7 +130,7 @@
         <h2 class="text-center">Base de datos Alumnos</h2>
         <div class="d-flex align-items-center justify-content-between pb-1" style="max-width: 95vw;">
             <div>
-                <form id="alumnoBuscador" class="col-12">
+                <form id="alumnoBuscador" class="d-flex col-12">
                     <select id="filtroBusquedaAlumno" class="form-select" name="filtroBusquedaAlumno">
                         <option value="rut">Rut</option>
                         <option value="nombreAsistente">Nombre Asistente</option>
@@ -147,6 +148,7 @@
             <div>
                 <button class="btn btn-primary" onclick="openForm()">Enviar restantes</button>
                 <a class="btn btn-success" href="/dataBaseAlumno/addAlumnoBase">+</a>
+                <button id="downloadBtn" href="/dataBaseAlumno/download" class="btn btn-secondary">Descargar base de datos</button>
             </div>
         </div>
         <div id="contenedorTabla" style="overflow-y: auto; max-height: 70vh; max-width: 95vw;">
@@ -186,7 +188,17 @@
                         contenedorNoEnviados.empty(); // Limpiar el contenedor antes de agregar nuevos datos
     
                         $.each(data, function (i, alumno) {
-                            // Crear una fila de tabla para todos los alumnos
+                            
+                            var correoText = "sin correo"; // Valor por defecto
+
+                            if (alumno.correo) { // Verifica si el correo existe
+                                if (alumno.correo === "example@example.com") {
+                                    correoText = "correo empresa";
+                                } else {
+                                    correoText = "con correo";
+                                }
+                            }
+
                             var fila = "<tr>" +
                                 "<td><a href='/dataBaseAlumno/alumno/" + alumno.id + "'>" + (alumno.nombreAsistente != null ? alumno.nombreAsistente : "") + "</a></td>" +
                                 "<td>" + (alumno.nombreCurso != null ? alumno.nombreCurso : "") + "</td>" +
@@ -195,14 +207,14 @@
                                 "<td>" + (alumno.relator != null ? alumno.relator : "") + "</td>" +
                                 "<td>" + (alumno.estado != null ? alumno.estado : "") + "</td>" +
                                 "<td>" + (alumno.rut != null ? alumno.rut : "") + "</td>" +
-                                "<td>" + (alumno.correo != null ? alumno.correo : "") + "</td>" +
+                                "<td>" + correoText + "</td>" +
                                 "<td>" + (alumno.plantilla != null ? alumno.plantilla : "") + "</td>" +
                                 "<td>" + (alumno.diploma != null ? alumno.diploma : "") + "</td>" +
                                 "</tr>";
                             tbody.append(fila);
     
                             // Si el estado es "noEnviado", agregar un <p> al contenedor
-                            if (alumno.diploma === "noEnviado" && alumno.estado ==="aprobado") {
+                            if (alumno.diploma === "noEnviado" && alumno.estado ==="aprobado" && alumno.plantilla != "Error en encontrar plantilla") {
                                 var parrafo = "<p>Alumno: " + (alumno.nombreAsistente != null ? alumno.nombreAsistente : "Desconocido") + " Del curso: "+(alumno.nombreCurso != null ? alumno.nombreCurso : "Desconocido")+" se le enviara el certificado <br></br>";
                                 contenedorNoEnviados.append(parrafo);
                             }
@@ -272,6 +284,35 @@
         function closeForm() {
             document.getElementById('overlay').style.display = 'none';
         }
+    </script>
+    <script>
+        document.getElementById("downloadBtn").addEventListener("click", function(event) {
+            // Evitar que el enlace siga su ruta y provoque una descarga adicional
+            event.preventDefault();
+        
+            // Prevenir clics adicionales
+            const button = event.target;
+            button.disabled = true;
+        
+            // Crear un enlace temporal para la descarga
+            const link = document.createElement("a");
+            link.href = "/dataBaseAlumno/download"; // Endpoint de descarga
+            // No es necesario establecer 'download' ya que el servidor ya envía el nombre del archivo
+            // link.setAttribute("download", "alumnos.xlsx"); 
+        
+            // Asegurar que el enlace no sea visible
+            link.style.display = "none";
+            document.body.appendChild(link);
+        
+            // Simular clic en el enlace
+            link.click();
+        
+            // Eliminar el enlace del DOM después de usarlo
+            setTimeout(() => {
+                document.body.removeChild(link);
+                button.disabled = false; // Reactivar el botón
+            }, 100);
+        });
     </script>
     <script>
         function showAlert(message) {

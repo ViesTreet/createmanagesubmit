@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Datos Alumno</title>
     <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/styleCustom.css">
 </head>
 <body>
     <header class="d-flex align-items-center justify-content-between p-3 bg-light" style="height: 10vh;">

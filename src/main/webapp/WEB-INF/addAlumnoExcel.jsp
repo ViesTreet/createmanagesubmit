@@ -8,6 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agregar a la base de datos con excel</title>
     <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/styleCustom.css">
     <style>
 
     </style>
@@ -55,6 +56,14 @@
                             <option value="enviarApro">Enviar(APROBADOS)</option>
                             <option value="enviarTodos">Enviar(TODOS)</option>
                             <option value="noEnviar">No enviar</option>
+                        </select>
+                    </div>
+                    <div class="pb-2 pt-2">
+                        <label for="rutificador">Rutificador</label>
+                        <select name="rutificador" id="rutificador" class="form-select">
+                            <option value="rutiExcel">Realizar segun excel</option>
+                            <option value="rutiTodos">Rutificar Todos</option>
+                            <option value="rutiNinguno">No rutificar</option>
                         </select>
                     </div>
                     <div class="d-flex align-items-end justify-content-between pb-2 pt-2">

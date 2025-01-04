@@ -8,6 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inicio</title>
     <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/styleCustom.css">
     <style>
 
     </style>
@@ -25,7 +26,7 @@
         <div class="card" style="width: 70vw;">
             <div class="card-body" style="width: 100%;">
                 <h4 class="card-title text-center">Agregar nuevo alumno</h4>
-                <form action="/dataBaseAlumno/agregarAlumno" method="post">
+                <form action="/dataBaseAlumno/agregarAlumno" method="post" onsubmit="return guardarDatos()">
                     <div class="d-flex justify-content-between">
                         <div style="max-width: 33%;">
                             <div>
@@ -93,7 +94,9 @@
                             </div>
                             <div>
                                 <label for="rut">Rut</label>
-                                <input type="text" name="rut" id="rut" class="form-control" placeholder="11.111.111-1">
+                                <input type="text" name="rut" id="rut" class="form-control" placeholder="11111111-1(sin puntos)">
+                                <input id="rutificador" name="rutificador" type="checkbox">
+                                <label for="rutificador">Usar rutificador</label>
                             </div>
                             <div>
                                 <label for="correo">Correo</label>
@@ -113,7 +116,7 @@
                     <div class="d-flex align-items-center justify-content-between pt-1">
                         <div>
                             <label style="font-size: 10px;">Guardar datos comunes</label>
-                            <input type="checkbox" name="guardar" id="guardar" onchange="guardarDatos()">
+                            <input type="checkbox" name="guardar" id="guardar">
                         </div>
                         <input class="btn btn-success" type="submit" value="Añadir">
                         <a href="/dataBaseAlumno/addAlumnoBase/excel" class="btn btn-primary">Agregar usando excel</a>
@@ -177,7 +180,7 @@
         function guardarDatos() {
             var guardar = document.getElementById('guardar').checked;
             var campos = ['curso', 'diasCursos', 'numeroHoras', 'numeroCorrelativoInterno', 'cliente', 'obra', 'codigo', 'asistencia', 'estado', 'diploma', 'plantilla', 'relator'];
-        
+
             if (guardar) {
                 campos.forEach(function(campo) {
                     var elemento = document.getElementById(campo);
@@ -192,7 +195,25 @@
                 });
                 eraseCookie('datosGuardados');
             }
+            return true; // Permitir que el formulario se envíe
         }
+
+                // Función para formatear el RUT
+        function formatearRut() {
+            var input = document.getElementById('rut');
+            var rut = input.value.replace(/\./g, '').replace('-', '');
+        
+            if (rut.length > 3) {
+                var cuerpo = rut.slice(0, -1);
+                var dv = rut.slice(-1);
+                input.value = cuerpo + '-' + dv;
+            } else {
+                input.value = rut;
+            }
+        }
+
+        // Agrega un evento 'input' al campo 'rut'
+        document.getElementById('rut').addEventListener('input', formatearRut);
     </script>
     <script>
         function showAlert(message) {

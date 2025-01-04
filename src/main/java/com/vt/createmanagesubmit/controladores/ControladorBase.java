@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-import org.jodconverter.core.office.OfficeException;
+import org.eclipse.angus.mail.handlers.image_gif;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.MediaType;
@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.vt.createmanagesubmit.exceptions.CertificateGenerationException;
 import com.vt.createmanagesubmit.exceptions.MissingAdminIdException;
 import com.vt.createmanagesubmit.exceptions.MissingAlumnoIdException;
 import com.vt.createmanagesubmit.exceptions.MissingNameOrRutException;
@@ -28,6 +27,7 @@ import com.vt.createmanagesubmit.modelos.Admin;
 import com.vt.createmanagesubmit.modelos.Alumno;
 import com.vt.createmanagesubmit.modelos.Plantilla;
 import com.vt.createmanagesubmit.servicios.Servicio;
+import com.vt.createmanagesubmit.servicios.ServicioApi;
 import com.vt.createmanagesubmit.servicios.ServicioArchivos;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -51,11 +51,19 @@ public class ControladorBase {
     @Autowired
     private ServicioArchivos servicioAr;
 
+    @Autowired
+    private ServicioApi servicioApi;
+
     //-----------------------Acciones comunes-----------------------------
     @GetMapping("/")
     public String index() {
-        if(servicio.adminPorId(1L)==null){
+        if(servicio.adminPorCorreo("admin@admin.com")==null){
             servicio.registrarAdmin("admin@admin.com", "admin", "qwerty");
+        }
+        if(!servicio.plantillaPorNombre("Error en encontrar plantilla").isPresent()){
+            Plantilla nuevaPlantilla = new Plantilla();
+            nuevaPlantilla.setNombreCertificado("Error en encontrar plantilla");
+            servicio.guardarPlantilla(nuevaPlantilla);
         }
         return "index.jsp";
     }
@@ -81,6 +89,13 @@ public class ControladorBase {
 	    }
         return "home.jsp";
     }
+
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/";
+    }
+    
 
     //-------------------------------------------------------------------------
     
@@ -134,7 +149,7 @@ public class ControladorBase {
     }
 
     @PostMapping("/dataBaseAlumno/agregarAlumno")
-    public String agregarAlumno(@RequestParam(name = "nombreAsistente") String nombreAsistente,@RequestParam("curso")String curso,@RequestParam(name = "diasCursos") String diasCursos,@RequestParam(name = "numeroHoras") String numeroHoras,@RequestParam(name = "numeroCorrelativoInterno") String numeroCorrelativoInterno,@RequestParam(name = "cliente") String cliente,@RequestParam(name = "obra") String obra,@RequestParam(name = "codigo") String codigo,@RequestParam(name = "notaAprovacion") String notaAprovacion,@RequestParam(name = "relator") String relator,@RequestParam(name = "asistencia") String asistencia,@RequestParam(name = "estado") String estado,@RequestParam(name = "diploma") String diploma,@RequestParam(name = "rut") String rut,@RequestParam(name = "correo") String correo,@RequestParam(name = "plantilla",required = false) Long plantilla,Model model,HttpSession session) {
+    public String agregarAlumno(@RequestParam(name = "nombreAsistente") String nombreAsistente,@RequestParam("curso")String curso,@RequestParam(name = "diasCursos") String diasCursos,@RequestParam(name = "numeroHoras") String numeroHoras,@RequestParam(name = "numeroCorrelativoInterno") String numeroCorrelativoInterno,@RequestParam(name = "cliente") String cliente,@RequestParam(name = "obra") String obra,@RequestParam(name = "codigo") String codigo,@RequestParam(name = "notaAprovacion") String notaAprovacion,@RequestParam(name = "relator") String relator,@RequestParam(name = "asistencia") String asistencia,@RequestParam(name = "estado") String estado,@RequestParam(name = "diploma") String diploma,@RequestParam(name = "rut") String rut,@RequestParam(name = "correo") String correo,@RequestParam(name = "plantilla",required = false) Long plantilla,@RequestParam(value = "rutificador", defaultValue = "false") boolean rutificador,Model model,HttpSession session) {
     Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
 	    if (usuarioTemporal == null) {
 	        return "redirect:/";  
@@ -146,7 +161,6 @@ public class ControladorBase {
     nuevoAlumno.setCorreo(correo);
     nuevoAlumno.setDiasCursos(diasCursos);
     nuevoAlumno.setEstado(estado);
-    nuevoAlumno.setNombreAsistente(nombreAsistente);
     nuevoAlumno.setNombreCurso(curso);
     nuevoAlumno.setNotaAprovacion(notaAprovacion);
     nuevoAlumno.setNumeroCorrelativoInterno(numeroCorrelativoInterno);
@@ -154,6 +168,26 @@ public class ControladorBase {
     nuevoAlumno.setObra(obra);
     nuevoAlumno.setRelator(relator);
     nuevoAlumno.setRut(rut);
+    if(rutificador && !rut.trim().isEmpty() && rut != null){
+        String nombreRutificado = servicioApi.obtenerNombrePorRut(rut);
+        if(!nombreRutificado.trim().equals("nombreNoEncontrado")){
+            nuevoAlumno.setNombreAsistente(nombreRutificado);
+        }else{
+            if(!nombreAsistente.trim().isEmpty()&&nombreAsistente != null){
+                nuevoAlumno.setNombreAsistente(nombreAsistente);
+            }else{
+                model.addAttribute("error", "El nombre no pudo ser encontrado.");
+                return "addAlumno.jsp";
+            }
+        }
+    }else{
+        if(!nombreAsistente.trim().isEmpty()&&nombreAsistente != null){
+            nuevoAlumno.setNombreAsistente(nombreAsistente);
+        }else{
+            model.addAttribute("error", "El nombre no fue ingresado.");
+            return "addAlumno.jsp";
+        }
+    }
     List<Plantilla> plantillas=servicio.todasLasPlantillas();
     model.addAttribute("plantillas",plantillas);
     try {
@@ -203,7 +237,7 @@ public class ControladorBase {
     }
 
     @PostMapping(value = "/dataBaseAlumno/uploadAlumnoExcel", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public String subirExcel(@RequestPart("file") MultipartFile file, @RequestParam(value = "estadoDiplomaExcel", required = false) String estadoDiplomaExcel, @RequestParam(value = "plantillaNombre") String plantilla, @RequestParam(value = "estadoExcel") String estadoExcel,HttpSession session,Model model) {
+    public String subirExcel(@RequestPart("file") MultipartFile file, @RequestParam(value = "estadoDiplomaExcel", required = false) String estadoDiplomaExcel, @RequestParam(value = "plantillaNombre") String plantilla, @RequestParam(value = "estadoExcel") String estadoExcel,@RequestParam(value="rutificador")String rutificador,HttpSession session,Model model) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
 	    if (usuarioTemporal != null) {
             if (file.isEmpty()) {
@@ -216,7 +250,7 @@ public class ControladorBase {
                 byte[] fileBytes = file.getBytes();
 
                 // Llamar al método asíncrono y pasarle los bytes del archivo
-                servicioAr.leerExcelYGuardarEnBD(fileBytes, estadoDiplomaExcel, plantilla, estadoExcel);
+                servicioAr.leerExcelYGuardarEnBD(fileBytes, estadoDiplomaExcel, plantilla, estadoExcel, rutificador);
 
                 // Redirigir inmediatamente sin esperar a que termine el procesamiento
                 return "redirect:/dataBaseAlumno";
@@ -275,20 +309,19 @@ public class ControladorBase {
     }
 
     @GetMapping("/dataBaseAlumno/download")
-    public String downloadDataBaseAlumno(HttpServletResponse response,Model model,HttpSession session){
+    public void downloadDataBaseAlumno(HttpServletResponse response, HttpSession session) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
-	    if (usuarioTemporal == null) {
-	        return "redirect:/";  
-	    }
+        if (usuarioTemporal == null) {
+            throw new IllegalStateException("No autorizado"); // Manejar el caso de no autenticado
+        }
         try {
             servicioAr.exportToExcel(response);
-            return "redirect:/dataBaseAlumno";
         } catch (Exception e) {
             e.printStackTrace();
-            model.addAttribute("error", "Ocurrió un error al descargar la base de datos");
-            return "databaseAlumno.jsp";
+            // Maneja el error aquí, por ejemplo, escribe un mensaje de error en el response.
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
-    }
+    }    
 
     @GetMapping("/dataBaseAlumno/generateCertificado/{id}")
     public String certificadoPorId(@PathVariable("id")Long id,HttpSession session,Model model) {

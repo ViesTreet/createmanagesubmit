@@ -83,12 +83,16 @@ public class ServicioArchivos {
     private Servicio servicio;
 
     @Autowired
+    @Lazy
+    private ServicioApi servicioApi;
+
+    @Autowired
     private JavaMailSender javaMailSender;
 
     String correoEmpresa = Servicio.CORREO_EMPRESA;
 
     @Async
-    public CompletableFuture<Void> leerExcelYGuardarEnBD(byte[] fileBytes, String estadoDiplomaExcel, String plantilla, String estadoExcel) throws IOException {
+    public CompletableFuture<Void> leerExcelYGuardarEnBD(byte[] fileBytes, String estadoDiplomaExcel, String plantilla, String estadoExcel, String rutificador) throws IOException {
         try (InputStream fileInputStream = new ByteArrayInputStream(fileBytes)){
             Workbook workbook = WorkbookFactory.create(fileInputStream);
 
@@ -121,7 +125,7 @@ public class ServicioArchivos {
                         int indiceColumna = celda.getColumnIndex();
                         String nombreColumna = mapaColumnas.get(indiceColumna);
                         if (nombreColumna != null) {
-                            asignarValorAtributo(alumno, nombreColumna, celda);
+                            asignarValorAtributo(alumno, nombreColumna, celda, rutificador);
                         }
                     }
 
@@ -138,16 +142,20 @@ public class ServicioArchivos {
                             alumno.setCorreo("javito12ulloa@gmail.com");
                         }
 
-                        if (alumno.getEstado() == null) {
+                        if (alumno.getEstado() == null || alumno.getEstado().trim().isEmpty()) {
                             alumno.setEstado("revisionManual");
                         }
 
-                        if (!alumno.getEstado().equals("Eexcel")) {
+                        if (!estadoExcel.equals("Eexcel")) {
                             if (estadoExcel.equals("Eauto")) {
                                 alumno = servicio.funcionEstadoManual(alumno);
                             } else {
                                 alumno.setEstado(estadoExcel);
                             }
+                        }
+
+                        if (alumno.getEstado() == null || alumno.getEstado().trim().isEmpty() || alumno.getEstado().trim().equals("Eexcel")) {
+                            alumno.setEstado("revisionManual");
                         }
 
                         if (!estadoDiplomaExcel.equals("diploExcel")) {
@@ -161,6 +169,31 @@ public class ServicioArchivos {
                                 alumno.setDiploma("enviado");
                             }
                         }
+                        if(rutificador.trim().equals("rutiTodos")){
+                            if(!alumno.getRut().trim().isEmpty() && alumno.getRut() != null){
+                                String rutFormateado = formatearRut(alumno.getRut());
+                                String nombreRutificado = servicioApi.obtenerNombrePorRut(rutFormateado);
+                                if(!nombreRutificado.trim().equals("nombreNoEncontrado")){
+                                    alumno.setNombreAsistente(nombreRutificado);
+                                }
+        
+                            }
+                        }
+
+                        if(alumno.getPlantilla() == null){
+                            Optional<Plantilla> optPlantilla = servicio.plantillaPorNombre("Error en encontrar plantilla");
+                            if(optPlantilla.isPresent()){
+                                Plantilla plantilla3 = optPlantilla.get();
+                                alumno.setPlantilla(plantilla3);
+                            }else{
+                                Plantilla plantilla3 = servicio.plantillaPorId(1L);
+                                alumno.setPlantilla(plantilla3);
+                            }
+                        }
+
+                        if(alumno.getDiploma() == null || alumno.getDiploma().trim().isEmpty()){
+                            alumno.setDiploma("noEnviado");
+                        }
 
                         alumnoRepo.save(alumno);
 
@@ -171,7 +204,7 @@ public class ServicioArchivos {
                                 e.printStackTrace();
                             }
                         } else if (estadoDiplomaExcel.equals("enviarApro")) {
-                            if (alumno.getEstado().equals("aprobado")) {
+                            if (alumno.getEstado().equals("aprobado")&&alumno.getDiploma().equals("noEnviado")) {
                                 try {
                                     generateCertificateForAlumno(alumno);
                                 } catch (Exception e) {
@@ -191,7 +224,7 @@ public class ServicioArchivos {
         return CompletableFuture.completedFuture(null);
     }
 
-    private void asignarValorAtributo(Alumno alumno, String nombreColumna, Cell celda) {
+    private void asignarValorAtributo(Alumno alumno, String nombreColumna, Cell celda, String rutificar) {
         // Obtén el valor de la celda como String
         String valorCelda = obtenerValorCeldaComoString(celda);
 
@@ -252,7 +285,8 @@ public class ServicioArchivos {
                 }
                 break;
             case "rut":
-                alumno.setRut(valorCelda);
+                String rutForma = formatearRut(valorCelda);
+                alumno.setRut(rutForma);
                 break;
             case "correo":
                 alumno.setCorreo(valorCelda);
@@ -275,6 +309,18 @@ public class ServicioArchivos {
                     }
                 }
                 break;
+            case "rutificador":
+            case "Rutificador":
+                if(rutificar.trim().equals("rutiExcel")){
+                    if((valorCelda.trim().equalsIgnoreCase("si")) && (!alumno.getRut().trim().isEmpty() && alumno.getRut() != null)){
+                        String rutFormateado = formatearRut(alumno.getRut());
+                        String nombreRutificado = servicioApi.obtenerNombrePorRut(rutFormateado);
+                        if(!nombreRutificado.trim().equals("nombreNoEncontrado")){
+                            alumno.setNombreAsistente(nombreRutificado);
+                        }
+
+                    }
+                }
             default:
                 // Ignorar columnas no reconocidas
                 break;
@@ -290,7 +336,14 @@ public class ServicioArchivos {
                     Date date = celda.getDateCellValue();
                     return new SimpleDateFormat("yyyy-MM-dd").format(date);
                 } else {
-                    return String.valueOf(celda.getNumericCellValue());
+                    double valorNumerico = celda.getNumericCellValue();
+                    if (valorNumerico == Math.floor(valorNumerico)) {
+                    // Si el número no tiene decimales (entero), lo convertimos sin decimales
+                        return String.format("%.0f", valorNumerico);
+                    } else {
+                    // Si tiene decimales, se conserva el formato decimal
+                        return String.valueOf(valorNumerico);
+                }
                 }
             case BOOLEAN:
                 return String.valueOf(celda.getBooleanCellValue());
@@ -305,13 +358,38 @@ public class ServicioArchivos {
         }
     }
 
-    
+    public String formatearRut(String rut) {
+        if (rut == null || rut.trim().isEmpty()) {
+            return rut;  
+        }
+
+        
+        String rutSinPuntos = rut.replaceAll("\\.", "");
+
+        
+        if (!rutSinPuntos.contains("-")) {
+            int largoRut = rutSinPuntos.length();
+            if (largoRut > 1) {
+                rutSinPuntos = rutSinPuntos.substring(0, largoRut - 1) + "-" + rutSinPuntos.charAt(largoRut - 1);
+            }
+        }
+
+        return rutSinPuntos;
+    }
+
     public void generateCertificatesAll() throws Exception {
         List<Alumno> alumnos = alumnoRepo.findAllByDiplomaAndEstado("noEnviado", "aprobado");
+        Optional<Plantilla> optPlantilla = servicio.plantillaPorNombre("Error en encontrar plantilla");
+        Plantilla plantillaError = new Plantilla();
+        if(optPlantilla.isPresent()){
+            plantillaError = optPlantilla.get();
+        }
         for (Alumno alumno : alumnos) {
-            generateCertificateForAlumno(alumno);
-            alumno.setDiploma("enviado");
-            alumnoRepo.save(alumno);
+            if(alumno.getPlantilla() != plantillaError){
+                generateCertificateForAlumno(alumno);
+                alumno.setDiploma("enviado");
+                alumnoRepo.save(alumno);
+            }
         }
     }
 
