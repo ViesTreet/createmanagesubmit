@@ -168,6 +168,8 @@ public class ControladorBase {
     nuevoAlumno.setObra(obra);
     nuevoAlumno.setRelator(relator);
     nuevoAlumno.setRut(rut);
+    List<Plantilla> plantillas=servicio.todasLasPlantillas();
+    model.addAttribute("plantillas",plantillas);
     nombreAsistente = servicioApi.formatearNombre(nombreAsistente);
     if(rutificador && !rut.trim().isEmpty() && rut != null){
         String nombreRutificado = servicioApi.obtenerNombrePorRut(rut);
@@ -189,8 +191,7 @@ public class ControladorBase {
             return "addAlumno.jsp";
         }
     }
-    List<Plantilla> plantillas=servicio.todasLasPlantillas();
-    model.addAttribute("plantillas",plantillas);
+    
     try {
         Plantilla plantillausuario = servicio.plantillaPorId(plantilla);
         nuevoAlumno.setPlantilla(plantillausuario);
