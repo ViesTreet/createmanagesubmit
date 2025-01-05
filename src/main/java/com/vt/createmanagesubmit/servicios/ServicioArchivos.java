@@ -1,6 +1,9 @@
 package com.vt.createmanagesubmit.servicios;
 
+import java.awt.Font;
 import java.awt.Color;
+import java.awt.font.FontRenderContext;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -427,7 +430,7 @@ public class ServicioArchivos {
             ppt = new XMLSlideShow(inputStream);
         }
 
-        // Crea un mapa de los datos del alumno que se usarán para rellenar las shapes
+        // Crea un mapa de los datos del alumno que se usarán para reemplazar en los placeholders
         Map<String, String> alumnoData = new HashMap<>();
         alumnoData.put("nombreAsistente", alumno.getNombreAsistente());
         alumnoData.put("nombreCurso", alumno.getNombreCurso());
@@ -437,37 +440,28 @@ public class ServicioArchivos {
         alumnoData.put("relator", alumno.getRelator());
         alumnoData.put("asistencia", alumno.getAsistencia());
 
-        // Modifica las shapes con los nombres correspondientes
+        // Modifica las shapes reemplazando los placeholders ${atributo} por los valores correspondientes
         for (XSLFSlide slide : ppt.getSlides()) {
             for (XSLFShape shape : slide.getShapes()) {
                 if (shape instanceof XSLFTextShape) {
                     XSLFTextShape textShape = (XSLFTextShape) shape;
-                    String shapeName = textShape.getShapeName();
-                    if (alumnoData.containsKey(shapeName)) {
-                        String textToSet = alumnoData.get(shapeName);
-                        textShape.clearText(); // Limpia el texto existente
+                    List<XSLFTextParagraph> paragraphs = textShape.getTextParagraphs();
+                    for (XSLFTextParagraph paragraph : paragraphs) {
+                        List<XSLFTextRun> textRuns = paragraph.getTextRuns();
+                        for (XSLFTextRun textRun : textRuns) {
+                            String text = textRun.getRawText();
+                            if (text.contains("${")) {
+                                for (Map.Entry<String, String> entry : alumnoData.entrySet()) {
+                                    String placeholder = "${" + entry.getKey() + "}";
+                                    if (text.contains(placeholder)) {
+                                        text = text.replace(placeholder, entry.getValue() != null ? entry.getValue() : "");
+                                        textRun.setText(text);
 
-                // Añade un nuevo párrafo y establece el texto
-                        XSLFTextParagraph paragraph = textShape.addNewTextParagraph();
-                        XSLFTextRun textRun = paragraph.addNewTextRun();
-                        textRun.setText(textToSet != null ? textToSet : "");
-
-                    // Aplica el formato basado en el nombre del shape
-                        switch (shapeName) {
-                            case "nombreAsistente":
-                                textRun.setFontFamily("Arial");
-                                textRun.setFontSize(24.0); // Tamaño específico para nombreAsistente
-                                break;
-                            case "nombreCurso":
-                                textRun.setFontFamily("Times New Roman");
-                                textRun.setFontSize(20.0); // Tamaño específico para nombreCurso
-                                break;
-                            // Agrega más casos según sea necesario para otros shapes
-                            default:
-                                textRun.setFontFamily("Arial");
-                                textRun.setFontSize(12.0); // Tamaño por defecto
-                                break;
-
+                                        // Ajustar tamaño de fuente para que el texto se ajuste a la forma
+                                        ajustarTamanoFuente(textShape, textRun);
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -484,6 +478,9 @@ public class ServicioArchivos {
             ppt.write(out);
         }
 
+        // Cierra el PPTX para eliminar el warning
+        ppt.close();
+
         // Convierte el PPTX a PDF usando JODConverter
         String tempPdfPath = "temp/" + alumno.getId() + ".pdf";
         LocalOfficeManager officeManager = LocalOfficeManager.builder()
@@ -495,7 +492,7 @@ public class ServicioArchivos {
                     .to(new File(tempPdfPath))
                     .execute();
         } catch (OfficeException e) {
-            throw new OfficeException ("Ocurrió un error inesperado al generar el PPT",e);
+            throw new OfficeException("Ocurrió un error inesperado al generar el PPT", e);
         } finally {
             if (officeManager != null) {
                 officeManager.stop();
@@ -512,25 +509,64 @@ public class ServicioArchivos {
         // Generar código QR con la URL y el ID encriptado
         String encryptedId = encryptStudentId(alumno.getId().toString());
         String qrCodeText = "http://localhost:8080/generarCertificadoQr/" + encryptedId;
-        System.out.println(qrCodeText);
+
         ByteArrayOutputStream qrCodeOutputStream = generateQRCodeImage(qrCodeText, 200, 200);
         byte[] qrCodeBytes = qrCodeOutputStream.toByteArray();
 
         // Enviar correo electrónico al alumno con el PDF y el código QR como adjuntos
         sendEmailWithAttachments(alumno.getCorreo(), "Certificado de Curso", "Estimado " + alumno.getNombreAsistente() + ", adjuntamos su certificado y código QR.", pdfBytes, qrCodeBytes);
+
         return CompletableFuture.completedFuture(null);
     }
 
+    private void ajustarTamanoFuente(XSLFTextShape textShape, XSLFTextRun textRun) {
+        Double fontSize = textRun.getFontSize();
+        if (fontSize == null || fontSize <= 0) {
+            fontSize = 12.0; // Tamaño por defecto si no está establecido
+        }
+    
+        // Obtener las dimensiones del contenedor
+        double shapeWidth = textShape.getAnchor().getWidth();
+        double shapeHeight = textShape.getAnchor().getHeight();
+        
+        // Reemplazar el carácter especial por saltos de línea
+        String text = textRun.getRawText().replace("|", "\n");
+    
+        // Ajustar el tamaño de fuente mientras el texto no quepa en la forma
+        while (!textoCabeEnForma(text, fontSize, shapeWidth, shapeHeight) && fontSize > 5) {
+            fontSize -= 1;
+            textRun.setFontSize(fontSize);
+        }
+    }
+    
+    
+    private boolean textoCabeEnForma(String text, double fontSize, double shapeWidth, double shapeHeight) {
+        // Crear un objeto Font para medir el texto
+        String fontFamily = "Arial"; // Usa una fuente por defecto o toma del textRun si es necesario
+        Font font = new Font(fontFamily, Font.PLAIN, (int) fontSize);
+    
+        // Crear un objeto FontRenderContext
+        FontRenderContext frc = new FontRenderContext(null, true, true);
+    
+        // Calcular las dimensiones del texto
+        Rectangle2D textBounds = font.getStringBounds(text, frc);
+    
+        // Comparar las dimensiones del texto con las de la forma
+        return textBounds.getWidth() <= shapeWidth && textBounds.getHeight() <= shapeHeight;
+    }
+    
 
     private ByteArrayOutputStream generateQRCodeImage(String text, int width, int height) throws WriterException, IOException {
         QRCodeWriter qrCodeWriter = new QRCodeWriter();
         BitMatrix bitMatrix = qrCodeWriter.encode(text, BarcodeFormat.QR_CODE, width, height);
+
         BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 bufferedImage.setRGB(x, y, bitMatrix.get(x, y) ? Color.BLACK.getRGB() : Color.WHITE.getRGB());
             }
         }
+
         ByteArrayOutputStream pngOutputStream = new ByteArrayOutputStream();
         ImageIO.write(bufferedImage, "PNG", pngOutputStream);
         return pngOutputStream;
@@ -552,10 +588,8 @@ public class ServicioArchivos {
         helper.addAttachment("codigoQR.png", qrCodeResource);
 
         javaMailSender.send(message);
-
-        
     }
-    
+
     @Async
     private String encryptStudentId(String studentId) throws Exception {
         String secretKey = "eFSan7jbftsl2P6";
@@ -569,13 +603,12 @@ public class ServicioArchivos {
             Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
             cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec);
             byte[] encrypted = cipher.doFinal(studentId.getBytes("UTF-8"));
-    
+
             // Codifica en Base64
             String base64Encrypted = Base64.getEncoder().encodeToString(encrypted);
-            
+
             // Reemplaza caracteres para hacerla segura para URL
             base64Encrypted = base64Encrypted.replace("/", "_").replace("+", "-");
-            
             return base64Encrypted;
         } catch (Exception e) {
             e.printStackTrace();
@@ -620,8 +653,9 @@ public class ServicioArchivos {
     
     @Async
     @Transactional
-    public CompletableFuture<Void> generateCertificateQR(String IdEncriptada, HttpServletResponse response) throws Exception {
-        Long alumnoId = decryptStudentId(IdEncriptada);
+    public CompletableFuture<Void> generateCertificateQR(String idEncriptada, HttpServletResponse response) throws Exception {
+        Long alumnoId = decryptStudentId(idEncriptada);
+
         // Obtén el alumno por ID
         Alumno alumno = alumnoRepo.findById(alumnoId).orElseThrow(() -> new Exception("Alumno no encontrado con ID " + alumnoId));
 
@@ -640,7 +674,7 @@ public class ServicioArchivos {
             ppt = new XMLSlideShow(inputStream);
         }
 
-        // Crea un mapa de los datos del alumno que se usarán para rellenar las shapes
+        // Crea un mapa de los datos del alumno que se usarán para reemplazar en los placeholders
         Map<String, String> alumnoData = new HashMap<>();
         alumnoData.put("nombreAsistente", alumno.getNombreAsistente());
         alumnoData.put("nombreCurso", alumno.getNombreCurso());
@@ -650,15 +684,29 @@ public class ServicioArchivos {
         alumnoData.put("relator", alumno.getRelator());
         alumnoData.put("asistencia", alumno.getAsistencia());
 
-        // Modifica las shapes con los nombres correspondientes
+        // Modifica las shapes reemplazando los placeholders ${atributo} por los valores correspondientes
         for (XSLFSlide slide : ppt.getSlides()) {
             for (XSLFShape shape : slide.getShapes()) {
                 if (shape instanceof XSLFTextShape) {
                     XSLFTextShape textShape = (XSLFTextShape) shape;
-                    String shapeName = textShape.getShapeName();
-                    if (alumnoData.containsKey(shapeName)) {
-                        String textToSet = alumnoData.get(shapeName);
-                        textShape.setText(textToSet != null ? textToSet : "");
+                    List<XSLFTextParagraph> paragraphs = textShape.getTextParagraphs();
+                    for (XSLFTextParagraph paragraph : paragraphs) {
+                        List<XSLFTextRun> textRuns = paragraph.getTextRuns();
+                        for (XSLFTextRun textRun : textRuns) {
+                            String text = textRun.getRawText();
+                            if (text.contains("${")) {
+                                for (Map.Entry<String, String> entry : alumnoData.entrySet()) {
+                                    String placeholder = "${" + entry.getKey() + "}";
+                                    if (text.contains(placeholder)) {
+                                        text = text.replace(placeholder, entry.getValue() != null ? entry.getValue() : "");
+                                        textRun.setText(text);
+
+                                        // Ajustar tamaño de fuente para que el texto se ajuste a la forma
+                                        ajustarTamanoFuente(textShape, textRun);
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -673,6 +721,9 @@ public class ServicioArchivos {
         try (FileOutputStream out = new FileOutputStream(tempPptxPath)) {
             ppt.write(out);
         }
+
+        // Cierra el PPTX para eliminar el warning
+        ppt.close();
 
         // Convierte el PPTX a PDF usando JODConverter
         String tempPdfPath = "temp/" + alumno.getId() + ".pdf";
@@ -705,9 +756,10 @@ public class ServicioArchivos {
         response.getOutputStream().write(pdfBytes);
         response.getOutputStream().flush();
         response.getOutputStream().close();
-        return CompletableFuture.completedFuture(null);
 
+        return CompletableFuture.completedFuture(null);
     }
+
 
     public void exportToExcel(HttpServletResponse response) throws IOException {
         // Obtener la lista de alumnos

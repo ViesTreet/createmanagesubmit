@@ -31,6 +31,7 @@
         <a href="/dataBasePlantilla" class="btn btn-secondary btn-custom">Base de datos plantilla</a>
         <a href="/dataBaseAdmin" class="btn btn-secondary btn-custom">Administradores</a>
         <button class="btn btn-light btn-custom">Documentación</button>
+        <a href="/logout" class="btn btn-danger btn-custom">Cerrar sesión</a>
     </main>
     <footer class="text-center p-3 bg-light" style="height: 15vh;">
         <p>Contacto: [Dirección, Teléfono, Correo]</p>

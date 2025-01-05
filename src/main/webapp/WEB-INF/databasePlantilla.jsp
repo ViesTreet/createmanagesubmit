@@ -166,16 +166,20 @@
                         tbody.empty(); // Limpiar la tabla antes de agregar nuevos datos
     
                         $.each(data, function (i, plantilla) {
+                            // Verificar si el nombreCertificado es "Error en encontrar plantilla"
+                            if (plantilla.nombreCertificado === "Error en encontrar plantilla") {
+                                return; // Si es así, omitir esta fila
+                            }
+    
                             // Crear una fila de tabla para todos los alumnos
                             var fila = "<tr>" +
                                 "<td>" + (plantilla.nombreCertificado != null ? plantilla.nombreCertificado : "") + "</td>" +
                                 "<td>" + (plantilla.descripcion != null ? plantilla.descripcion : "") + "</td>" +
                                 "<td>" + (plantilla.asistenciaMin != null ? plantilla.asistenciaMin : "") + "</td>" +
                                 "<td>" + (plantilla.notaMin != null ? plantilla.notaMin : "") + "</td>" +
-                                "<td class='d-flex justify-content-around'><a class='btn btn-primary' href='/dataBasePlantilla/plantilla/"+ plantilla.id+"/editar'>Editar</a><a href='/dataBasePlantilla/plantilla/"+ plantilla.id+"/borrar' class='btn btn-danger'>Borrar</a></td>" +
+                                "<td class='d-flex justify-content-around'><a class='btn btn-primary' href='/dataBasePlantilla/plantilla/"+ plantilla.id +"/editar'>Editar</a><a href='/dataBasePlantilla/plantilla/"+ plantilla.id +"/borrar' class='btn btn-danger'>Borrar</a></td>" +
                                 "</tr>";
                             tbody.append(fila);
-    
                         });
                     },
                     error: function (error) {
@@ -191,6 +195,7 @@
             setInterval(cargarDatos, 30000);
         });
     </script>
+    
     
     </script>
     <script>

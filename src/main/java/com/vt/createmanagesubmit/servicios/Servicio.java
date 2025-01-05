@@ -156,13 +156,17 @@ public class Servicio {
             throw new IOException("No se encontró la plantilla.");
         }
         Plantilla plantilla = plantillaPorId(id);
-        Path deletePlantillaPath = Paths.get(plantilla.getPathArchivo());
-        try {
-            Files.deleteIfExists(deletePlantillaPath);
-        } catch (IOException ex) {
-            throw new IOException("No se encontró la ruta de la plantilla.",ex);
+        if(!plantilla.getNombreCertificado().trim().equals("Error en encontrar plantilla")){
+            Path deletePlantillaPath = Paths.get(plantilla.getPathArchivo());
+            try {
+                Files.deleteIfExists(deletePlantillaPath);
+            } catch (IOException ex) {
+                throw new IOException("No se encontró la ruta de la plantilla.",ex);
+            }
+            List<Alumno> alumnos = plantilla.getAlumnos();
+            repoAlum.deleteAll(alumnos);
+            repoPlanti.delete(plantilla);
         }
-        repoPlanti.delete(plantilla);
     }
 
     public Optional<Plantilla> plantillaPorNombre(String nombre){

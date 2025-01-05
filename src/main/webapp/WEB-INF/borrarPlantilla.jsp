@@ -130,7 +130,7 @@
         <div class="card col-5">
             <div class="card-body">
                 <div class="card-title"><h4 class="text-center">¿Borrar plantilla: ${plantilla.nombreCertificado}?</h4></div>
-                <p>Borrar una plantilla en uso puede ocacionar que todos los alumno relacionados con esta pierdan la referencia.</p>
+                <p>Al borrar la plantilla también se borrará todos los alumnos relacionados a esta plantilla.</p>
             </div>
             <div class="d-flex justify-content-around ">
                 <a href="/dataBasePlantilla" class="btn btn-primary">Cancelar</a>
