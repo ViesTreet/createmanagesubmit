@@ -511,10 +511,8 @@ public class ServicioArchivos {
         byte[] pdfBytes = Files.readAllBytes(Paths.get(tempPdfPath));
 
         // Eliminar los archivos temporales
-        /* 
         new File(tempPptxPath).delete();
         new File(tempPdfPath).delete();
-        */
 
         // Generar código QR con la URL y el ID encriptado
         String encryptedId = encryptStudentId(alumno.getId().toString());
