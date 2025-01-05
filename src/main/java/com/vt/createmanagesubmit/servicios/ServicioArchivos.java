@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
@@ -407,6 +408,7 @@ public class ServicioArchivos {
                 alumno.setDiploma("enviado");
                 alumnoRepo.save(alumno);
             } catch (Exception ex) {
+                ex.printStackTrace();
                 throw new CertificateGenerationException("Ocurrió un error al generar el certificado.");
             }
             
@@ -446,27 +448,33 @@ public class ServicioArchivos {
                 if (shape instanceof XSLFTextShape) {
                     XSLFTextShape textShape = (XSLFTextShape) shape;
                     List<XSLFTextParagraph> paragraphs = textShape.getTextParagraphs();
-                    for (XSLFTextParagraph paragraph : paragraphs) {
+                    List<XSLFTextParagraph> paragraphsCopy = new ArrayList<>(paragraphs); // Mantener esta línea como mencionaste
+        
+                    for (XSLFTextParagraph paragraph : paragraphsCopy) {
                         List<XSLFTextRun> textRuns = paragraph.getTextRuns();
                         for (XSLFTextRun textRun : textRuns) {
                             String text = textRun.getRawText();
                             if (text.contains("${")) {
+                                String newText = text;
+                                // Reemplazar todos los placeholders en el texto del textRun
                                 for (Map.Entry<String, String> entry : alumnoData.entrySet()) {
                                     String placeholder = "${" + entry.getKey() + "}";
-                                    if (text.contains(placeholder)) {
-                                        text = text.replace(placeholder, entry.getValue() != null ? entry.getValue() : "");
-                                        textRun.setText(text);
-
-                                        // Ajustar tamaño de fuente para que el texto se ajuste a la forma
-                                        ajustarTamanoFuente(textShape, textRun);
+                                    if (newText.contains(placeholder)) {
+                                        String replacement = entry.getValue() != null ? entry.getValue() : "";
+                                        replacement = replacement.replace("|", "\n"); // Reemplazar "|" con saltos de línea
+                                        newText = newText.replace(placeholder, replacement);
                                     }
                                 }
+                                textRun.setText(newText); // Establecer el nuevo texto conservando los atributos
+                                // Llamar al método para ajustar el tamaño de fuente
+                                ajustarTamanoFuente(textShape, textRun);
                             }
                         }
                     }
                 }
             }
         }
+        
 
         // Guarda el PPTX modificado en un archivo temporal
         String tempPptxPath = "temp/" + alumno.getId() + ".pptx";
@@ -503,8 +511,10 @@ public class ServicioArchivos {
         byte[] pdfBytes = Files.readAllBytes(Paths.get(tempPdfPath));
 
         // Eliminar los archivos temporales
+        /* 
         new File(tempPptxPath).delete();
         new File(tempPdfPath).delete();
+        */
 
         // Generar código QR con la URL y el ID encriptado
         String encryptedId = encryptStudentId(alumno.getId().toString());
