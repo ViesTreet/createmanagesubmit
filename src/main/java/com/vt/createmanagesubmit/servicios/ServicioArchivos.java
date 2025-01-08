@@ -1,8 +1,6 @@
 package com.vt.createmanagesubmit.servicios;
 
 import java.awt.Color;
-import java.awt.Font;
-import java.awt.font.FontRenderContext;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -31,7 +29,6 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import javax.imageio.ImageIO;
 
-import org.apache.poi.sl.usermodel.TextParagraph.TextAlign;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.DateUtil;
@@ -74,7 +71,6 @@ import com.vt.createmanagesubmit.repositorios.RepositorioPlantillas;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Service
@@ -682,151 +678,6 @@ public class ServicioArchivos {
         // Copia otras propiedades adicionales si lo necesitas
     }
 
-    private double determineFontSizeForLines(String[] lines, XSLFTextShape textShape, double shapeWidth, double shapeHeight) {
-        // Usa la línea más larga para determinar el tamaño de fuente
-        String longestLine = "";
-        for (String line : lines) {
-            if (line.length() > longestLine.length()) {
-                longestLine = line;
-            }
-        }
-
-        Double fontSize = textShape.getTextParagraphs().get(0).getTextRuns().get(0).getFontSize();
-        if (fontSize == null || fontSize <= 0) {
-            fontSize = 12.0; // Tamaño de fuente por defecto si no está establecido
-        }
-
-        // Ajusta el tamaño de fuente hasta que el texto quepa en el shape
-        while (!doesTextFit(longestLine, fontSize, shapeWidth, shapeHeight) && fontSize > 5) {
-            fontSize -= 0.5;
-        }
-        return fontSize;
-    }
-
-    private boolean doesTextFit(String text, double fontSize, double shapeWidth, double shapeHeight) {
-        // Verifica si el texto cabe en las dimensiones del shape
-        String fontFamily = "Arial"; // Puedes obtener la fuente real si lo necesitas
-
-        Font font = new Font(fontFamily, Font.PLAIN, (int)Math.round(fontSize));
-        FontRenderContext frc = new FontRenderContext(null, true, true);
-
-        Rectangle2D textBounds = font.getStringBounds(text, frc);
-
-        return textBounds.getWidth() <= shapeWidth && textBounds.getHeight() <= shapeHeight;
-    }
-
-    private void replacePlaceholders(XSLFTextShape textShape, Map<String, String> data) {
-        List<XSLFTextParagraph> paragraphsCopy = new ArrayList<>(textShape.getTextParagraphs());
-        List<XSLFTextParagraph> newParagraphs = new ArrayList<>();
-        
-        for (XSLFTextParagraph paragraph : paragraphsCopy) {
-            List<XSLFTextRun> textRuns = new ArrayList<>(paragraph.getTextRuns());
-            
-            for (XSLFTextRun textRun : textRuns) {
-                String text = textRun.getRawText();
-                if (text.contains("${")) {
-                    String newText = text;
-                    for (Map.Entry<String, String> entry : data.entrySet()) {
-                        String placeholder = "${" + entry.getKey() + "}";
-                        if (newText.contains(placeholder)) {
-                            String replacement = entry.getValue() != null ? entry.getValue() : "";
-                            newText = newText.replace(placeholder, replacement.replace("|", "\n"));
-                        }
-                    }
-    
-                    // Si el texto tiene saltos de línea
-                    if (newText.contains("\n")) {
-                        // Dividir el texto en líneas
-                        String[] lines = newText.split("\n");
-    
-                        // Crear un nuevo párrafo para cada línea, manteniendo las propiedades originales
-                        for (String line : lines) {
-                            XSLFTextParagraph newParagraph = textShape.addNewTextParagraph();
-                            XSLFTextRun newRun = newParagraph.addNewTextRun();
-                            copyTextRunProperties(textRun, newRun);
-                            newRun.setText(line);
-                            newParagraphs.add(newParagraph);
-                        }
-    
-                        // Eliminar el TextRun original
-                        paragraph.removeTextRun(textRun);
-                    } else {
-                        // Si no hay saltos de línea, simplemente reemplazar el texto
-                        textRun.setText(newText);
-                    }
-                }
-            }
-        }
-    
-        // Añadir los nuevos párrafos al final
-        for (XSLFTextParagraph newParagraph : newParagraphs) {
-            textShape.addNewTextParagraph().addNewTextRun().setText(newParagraph.getText());
-        }
-    }
-    
-    private void copyTextRunProperties(XSLFTextRun source, XSLFTextRun target) {
-        target.setFontColor(source.getFontColor());
-        target.setFontSize(source.getFontSize());
-        target.setFontFamily(source.getFontFamily());
-        target.setBold(source.isBold());
-        target.setItalic(source.isItalic());
-        target.setUnderlined(source.isUnderlined());
-        target.setHighlightColor(source.getHighlightColor());
-    }
-    
-    
-    
-    
-    
-    
-    // Método para alinear el texto del shape `nombreCurso`
-    private void alignNombreCursoShape(XSLFTextShape textShape) {
-        System.out.println("Procesando shape: " + textShape.getShapeName());
-        for (XSLFTextParagraph paragraph : textShape.getTextParagraphs()) {
-            System.out.println("Texto del párrafo antes de alinear: " + paragraph.getText());
-            paragraph.setTextAlign(TextAlign.CENTER); // Aplicar alineación
-            System.out.println("Alineación aplicada al párrafo.");
-        }
-    }
-    
-
-    private void ajustarTamanoFuente(XSLFTextShape textShape, XSLFTextRun textRun) {
-        Double fontSize = textRun.getFontSize();
-        if (fontSize == null || fontSize <= 0) {
-            fontSize = 12.0; // Tamaño por defecto si no está establecido
-        }
-    
-        // Obtener las dimensiones del contenedor
-        double shapeWidth = textShape.getAnchor().getWidth();
-        double shapeHeight = textShape.getAnchor().getHeight();
-        
-        // Reemplazar el carácter especial por saltos de línea
-        String text = textRun.getRawText().replace("|", "\n");
-    
-        // Ajustar el tamaño de fuente mientras el texto no quepa en la forma
-        while (!textoCabeEnForma(text, fontSize, shapeWidth, shapeHeight) && fontSize > 5) {
-            fontSize -= 1;
-            textRun.setFontSize(fontSize);
-        }
-    }
-    
-    
-    private boolean textoCabeEnForma(String text, double fontSize, double shapeWidth, double shapeHeight) {
-        // Crear un objeto Font para medir el texto
-        String fontFamily = "Arial"; // Usa una fuente por defecto o toma del textRun si es necesario
-        Font font = new Font(fontFamily, Font.PLAIN, (int) fontSize);
-    
-        // Crear un objeto FontRenderContext
-        FontRenderContext frc = new FontRenderContext(null, true, true);
-    
-        // Calcular las dimensiones del texto
-        Rectangle2D textBounds = font.getStringBounds(text, frc);
-    
-        // Comparar las dimensiones del texto con las de la forma
-        return textBounds.getWidth() <= shapeWidth && textBounds.getHeight() <= shapeHeight;
-    }
-    
-
     private ByteArrayOutputStream generateQRCodeImage(String text, int width, int height) throws WriterException, IOException {
         QRCodeWriter qrCodeWriter = new QRCodeWriter();
         BitMatrix bitMatrix = qrCodeWriter.encode(text, BarcodeFormat.QR_CODE, width, height);
@@ -926,25 +777,25 @@ public class ServicioArchivos {
     @Transactional
     public CompletableFuture<Void> generateCertificateQR(String idEncriptada, HttpServletResponse response) throws Exception {
         Long alumnoId = decryptStudentId(idEncriptada);
-    
+
         // Obtén el alumno por ID
         Alumno alumno = alumnoRepo.findById(alumnoId).orElseThrow(() -> new Exception("Alumno no encontrado con ID " + alumnoId));
-    
+
         // Obtén la plantilla asociada al alumno
         Plantilla plantilla = alumno.getPlantilla();
         if (plantilla == null) {
             throw new Exception("No hay una plantilla asociada al Alumno " + alumno.getNombreAsistente());
         }
-    
+
         // Carga la plantilla PPTX desde pathArchivo
         String templatePath = plantilla.getPathArchivo();
-    
+
         // Carga el archivo PPTX usando Apache POI
         XMLSlideShow ppt;
         try (FileInputStream inputStream = new FileInputStream(templatePath)) {
             ppt = new XMLSlideShow(inputStream);
         }
-    
+
         // Crea un mapa de los datos del alumno que se usarán para reemplazar en los placeholders
         Map<String, String> alumnoData = new HashMap<>();
         alumnoData.put("nombreAsistente", alumno.getNombreAsistente());
@@ -954,12 +805,12 @@ public class ServicioArchivos {
         alumnoData.put("diasCursos", alumno.getDiasCursos());
         alumnoData.put("relator", alumno.getRelator());
         alumnoData.put("asistencia", alumno.getAsistencia());
-    
+
         // Procesa las slides y shapes
         for (XSLFSlide slide : ppt.getSlides()) {
             List<XSLFShape> shapesToRemove = new ArrayList<>();
             List<XSLFShape> shapes = new ArrayList<>(slide.getShapes()); // Crea una copia de la lista de shapes
-        
+
             for (XSLFShape shape : shapes) {
                 if (shape instanceof XSLFTextShape) {
                     XSLFTextShape textShape = (XSLFTextShape) shape;
@@ -970,57 +821,57 @@ public class ServicioArchivos {
                     }
                 }
             }
-        
+
             // Elimina las shapes marcadas después de la iteración
             for (XSLFShape shapeToRemove : shapesToRemove) {
                 slide.removeShape(shapeToRemove);
             }
         }
-    
+
         // Guarda el PPTX modificado en un archivo temporal
         File tempPptxFile = File.createTempFile("certificado-", ".pptx");
         try (FileOutputStream out = new FileOutputStream(tempPptxFile)) {
             ppt.write(out);
         }
-    
+
         // Cierra el PPTX para evitar problemas
         ppt.close();
-    
+
         // Convierte el PPTX a PDF usando JODConverter
         File tempPdfFile = File.createTempFile("certificado-", ".pdf");
-    
+
         LocalOfficeManager officeManager = LocalOfficeManager.builder()
                 .install()
                 .build();
-    
+
         try {
             officeManager.start();
             JodConverter.convert(tempPptxFile)
                     .to(tempPdfFile)
                     .execute();
-        
+
             // Leer el PDF generado como array de bytes
             byte[] pdfBytes = Files.readAllBytes(tempPdfFile.toPath());
-        
+
             // Configurar la respuesta HTTP para enviar el PDF como archivo descargable
             response.setContentType("application/pdf");
             response.setHeader("Content-Disposition", "attachment; filename=\"certificado-" + alumno.getId() + ".pdf\"");
-        
+
             response.getOutputStream().write(pdfBytes);
             response.getOutputStream().flush();
-        
+
          } catch (OfficeException e) {
              throw new OfficeException("Ocurrió un error inesperado al generar el PDF", e);
          } finally {
              if (officeManager != null) {
                  officeManager.stop();
              }
-         
+
              // Eliminar los archivos temporales
              tempPptxFile.delete();
              tempPdfFile.delete();
          }
-     
+
          return CompletableFuture.completedFuture(null);
     }
 
