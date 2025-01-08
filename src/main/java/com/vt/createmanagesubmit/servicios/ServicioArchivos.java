@@ -43,6 +43,7 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xslf.usermodel.XMLSlideShow;
 import org.apache.poi.xslf.usermodel.XSLFShape;
 import org.apache.poi.xslf.usermodel.XSLFSlide;
+import org.apache.poi.xslf.usermodel.XSLFTextBox;
 import org.apache.poi.xslf.usermodel.XSLFTextParagraph;
 import org.apache.poi.xslf.usermodel.XSLFTextRun;
 import org.apache.poi.xslf.usermodel.XSLFTextShape;
@@ -455,23 +456,27 @@ public class ServicioArchivos {
         alumnoData.put("relator", alumno.getRelator());
         alumnoData.put("asistencia", alumno.getAsistencia());
 
-        // Modifica las shapes reemplazando los placeholders ${atributo} por los valores correspondientes
+        // Procesa las slides y shapes
         for (XSLFSlide slide : ppt.getSlides()) {
-            for (XSLFShape shape : slide.getShapes()) {
+            List<XSLFShape> shapesToRemove = new ArrayList<>();
+        
+            // Crea una copia de la lista de shapes
+            List<XSLFShape> shapes = new ArrayList<>(slide.getShapes());
+        
+            for (XSLFShape shape : shapes) {
                 if (shape instanceof XSLFTextShape) {
                     XSLFTextShape textShape = (XSLFTextShape) shape;
-                    replacePlaceholders(textShape, alumnoData);
+                    try {
+                        processTextShape(slide, textShape, alumnoData, shapesToRemove);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
-        }
-    
-        // Paso 2: Aplicar alineación a `nombreCurso`
-        for (XSLFSlide slide : ppt.getSlides()) {
-            for (XSLFShape shape : slide.getShapes()) {
-                if (shape instanceof XSLFTextShape) {
-                    XSLFTextShape textShape = (XSLFTextShape) shape;
-                    alignNombreCursoShape(textShape);
-                }
+        
+            // Elimina las shapes marcadas después de la iteración
+            for (XSLFShape shapeToRemove : shapesToRemove) {
+                slide.removeShape(shapeToRemove);
             }
         }
     
@@ -512,7 +517,7 @@ public class ServicioArchivos {
 
         // Eliminar los archivos temporales
         
-        new File(tempPptxPath).delete();
+        //new File(tempPptxPath).delete();
         new File(tempPdfPath).delete();
 
         // Generar código QR con la URL y el ID encriptado
@@ -526,6 +531,182 @@ public class ServicioArchivos {
         sendEmailWithAttachments(alumno.getCorreo(), "Certificado de Curso", "Estimado " + alumno.getNombreAsistente() + ", adjuntamos su certificado y código QR.", pdfBytes, qrCodeBytes);
 
         return CompletableFuture.completedFuture(null);
+    }
+
+    private void processTextShape(XSLFSlide slide, XSLFTextShape textShape, Map<String, String> data, List<XSLFShape> shapesToRemove) throws Exception {
+        boolean placeholderFound = false;
+        String placeholderKey = null;
+        String replacementText = null;
+        XSLFTextParagraph sourceParagraph = null; // Para almacenar el párrafo original
+    
+        // Recorre los párrafos y runs en busca de placeholders
+        for (XSLFTextParagraph paragraph : textShape.getTextParagraphs()) {
+            for (XSLFTextRun textRun : paragraph.getTextRuns()) {
+                String text = textRun.getRawText();
+                if (text.contains("${")) {
+                    for (Map.Entry<String, String> entry : data.entrySet()) {
+                        String placeholder = "${" + entry.getKey() + "}";
+                        if (text.contains(placeholder)) {
+                            placeholderFound = true;
+                            placeholderKey = entry.getKey();
+                            replacementText = entry.getValue() != null ? entry.getValue() : "";
+                            sourceParagraph = paragraph; // Guarda el párrafo original
+                            break;
+                        }
+                    }
+                }
+                if (placeholderFound) {
+                    break;
+                }
+            }
+            if (placeholderFound) {
+                break;
+            }
+        }
+    
+        if (placeholderFound) {
+            // Determina si el texto contiene '|'
+            if (replacementText.contains("|")) {
+                // El texto contiene saltos de línea, hay que dividir y crear nuevas shapes
+                shapesToRemove.add(textShape); // Marca el shape original para eliminarlo
+    
+                String[] lines = replacementText.split("\\|");
+                int numberOfLines = lines.length;
+    
+                // Obtiene la posición y dimensiones del shape original
+                Rectangle2D anchor = textShape.getAnchor();
+                double totalHeight = anchor.getHeight();
+                double shapeWidth = anchor.getWidth();
+                double shapeX = anchor.getX();
+                double shapeY = anchor.getY();
+    
+                // Calcula la altura de cada nuevo shape sin espacio entre líneas
+                double shapeHeight = totalHeight / numberOfLines;
+    
+                // Para cada línea, crea un nuevo shape
+                for (int i = 0; i < numberOfLines; i++) {
+                    String line = lines[i];
+    
+                    // Crea un nuevo shape
+                    XSLFTextBox newShape = slide.createTextBox();
+    
+                    // Establece la posición y tamaño
+                    Rectangle2D newAnchor = new Rectangle2D.Double(
+                        shapeX,
+                        shapeY + i * shapeHeight,
+                        shapeWidth,
+                        shapeHeight
+                    );
+                    newShape.setAnchor(newAnchor);
+    
+                    // Copia las propiedades del shape original
+                    copyShapeProperties(textShape, newShape);
+    
+                    // Establece el texto
+                    XSLFTextParagraph newParagraph = newShape.addNewTextParagraph();
+                    copyParagraphProperties(sourceParagraph, newParagraph); // Copia las propiedades del párrafo
+    
+                    XSLFTextRun newRun = newParagraph.addNewTextRun();
+                    newRun.setText(line);
+    
+                    // Aplica las propiedades de fuente
+                    applyFontProperties(textShape, newRun);
+                }
+            } else {
+                // El texto no contiene saltos de línea, simplemente reemplaza el placeholder
+                for (XSLFTextParagraph paragraph : textShape.getTextParagraphs()) {
+                    for (XSLFTextRun textRun : paragraph.getTextRuns()) {
+                        String text = textRun.getRawText();
+                        String placeholder = "${" + placeholderKey + "}";
+                        if (text.contains(placeholder)) {
+                            String newText = text.replace(placeholder, replacementText);
+                            textRun.setText(newText);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    private void copyShapeProperties(XSLFTextShape sourceShape, XSLFTextShape targetShape) {
+        // Copia las propiedades del shape original al nuevo shape
+        targetShape.setFillColor(sourceShape.getFillColor());
+        targetShape.setLineColor(sourceShape.getLineColor());
+        targetShape.setLineWidth(sourceShape.getLineWidth());
+        targetShape.setVerticalAlignment(sourceShape.getVerticalAlignment());
+        targetShape.setInsets(sourceShape.getInsets());
+        targetShape.setTextDirection(sourceShape.getTextDirection());
+        targetShape.setTextAutofit(sourceShape.getTextAutofit());
+        targetShape.setRotation(sourceShape.getRotation());
+        // Copia el nombre del shape si es necesario
+        //targetShape.setShapeName(sourceShape.getShapeName());
+        // Copia otras propiedades adicionales si lo necesitas
+    }
+    
+    private void copyParagraphProperties(XSLFTextParagraph sourceParagraph, XSLFTextParagraph targetParagraph) {
+        // Copiar alineación y otras propiedades del párrafo
+        targetParagraph.setTextAlign(sourceParagraph.getTextAlign());
+        targetParagraph.setBullet(sourceParagraph.isBullet());
+        //targetParagraph.setBulletAutoNumber(sourceParagraph.isBulletAutoNumber());
+        targetParagraph.setBulletCharacter(sourceParagraph.getBulletCharacter());
+        targetParagraph.setBulletFont(sourceParagraph.getBulletFont());
+        targetParagraph.setIndent(sourceParagraph.getIndent());
+        targetParagraph.setLeftMargin(sourceParagraph.getLeftMargin());
+        targetParagraph.setRightMargin(sourceParagraph.getRightMargin());
+        targetParagraph.setIndentLevel(sourceParagraph.getIndentLevel());
+        targetParagraph.setLineSpacing(sourceParagraph.getLineSpacing());
+        targetParagraph.setSpaceAfter(sourceParagraph.getSpaceAfter());
+        targetParagraph.setSpaceBefore(sourceParagraph.getSpaceBefore());
+        //targetParagraph.setDefaultTabSize(sourceParagraph.getDefaultTabSize());
+        // Copia otras propiedades adicionales si lo necesitas
+    }
+    
+    private void applyFontProperties(XSLFTextShape sourceShape, XSLFTextRun targetRun) {
+        // Copia las propiedades de fuente del shape original
+        XSLFTextParagraph sourceParagraph = sourceShape.getTextParagraphs().get(0);
+        XSLFTextRun sourceRun = sourceParagraph.getTextRuns().get(0);
+    
+        targetRun.setFontFamily(sourceRun.getFontFamily());
+        targetRun.setFontColor(sourceRun.getFontColor());
+        targetRun.setBold(sourceRun.isBold());
+        targetRun.setItalic(sourceRun.isItalic());
+        targetRun.setUnderlined(sourceRun.isUnderlined());
+        targetRun.setFontSize(sourceRun.getFontSize());
+        targetRun.setCharacterSpacing(sourceRun.getCharacterSpacing());
+        // Copia otras propiedades adicionales si lo necesitas
+    }
+
+    private double determineFontSizeForLines(String[] lines, XSLFTextShape textShape, double shapeWidth, double shapeHeight) {
+        // Usa la línea más larga para determinar el tamaño de fuente
+        String longestLine = "";
+        for (String line : lines) {
+            if (line.length() > longestLine.length()) {
+                longestLine = line;
+            }
+        }
+
+        Double fontSize = textShape.getTextParagraphs().get(0).getTextRuns().get(0).getFontSize();
+        if (fontSize == null || fontSize <= 0) {
+            fontSize = 12.0; // Tamaño de fuente por defecto si no está establecido
+        }
+
+        // Ajusta el tamaño de fuente hasta que el texto quepa en el shape
+        while (!doesTextFit(longestLine, fontSize, shapeWidth, shapeHeight) && fontSize > 5) {
+            fontSize -= 0.5;
+        }
+        return fontSize;
+    }
+
+    private boolean doesTextFit(String text, double fontSize, double shapeWidth, double shapeHeight) {
+        // Verifica si el texto cabe en las dimensiones del shape
+        String fontFamily = "Arial"; // Puedes obtener la fuente real si lo necesitas
+
+        Font font = new Font(fontFamily, Font.PLAIN, (int)Math.round(fontSize));
+        FontRenderContext frc = new FontRenderContext(null, true, true);
+
+        Rectangle2D textBounds = font.getStringBounds(text, frc);
+
+        return textBounds.getWidth() <= shapeWidth && textBounds.getHeight() <= shapeHeight;
     }
 
     private void replacePlaceholders(XSLFTextShape textShape, Map<String, String> data) {
