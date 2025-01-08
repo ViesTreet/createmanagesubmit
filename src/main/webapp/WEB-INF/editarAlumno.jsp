@@ -23,7 +23,6 @@
         </nav>
     </header>
     <main class="d-flex flex-column align-items-center justify-content-center" style="height: 90vh;">
-        <div class="d-flex justify-content-end" style="width: 70vw;"><a class="btn btn-warning" href="/dataBaseAlumno/alumno/${alumno.id}">Regresar</a></div>
         <div class="card" style="width: 70vw;">
             <div class="card-body" style="width: 100%;">
                 <h4 class="card-title text-center">Editar Alumno ${alumnoJson.nombreAsistente}</h4>
@@ -134,10 +133,13 @@
             document.getElementById('cliente').value = "${alumno.cliente}";
             document.getElementById('obra').value = "${alumno.obra}";
             document.getElementById('codigo').value = "${alumno.codigo}";
+            document.getElementById('correo').value = "${alumno.correo}";
             document.getElementById('notaAprovacion').value = "${alumno.notaAprovacion}";
             document.getElementById('relator').value = "${alumno.relator}";
             document.getElementById('diploma').value = "${alumno.diploma}";
             document.getElementById('asistencia').value = "${alumno.asistencia}";
+            document.getElementById('rut').value = "${alumno.rut}";
+            document.getElementById('plantilla').value = "${alumno.plantilla.id}";
         
             // Manejo especial para el campo 'estado'
             var estadoValue = "${alumno.estado}";
@@ -150,6 +152,21 @@
         
             // Continuar rellenando otros campos...
         });
+    </script>
+    <script>
+        function formatearRut() {
+            var input = document.getElementById('rut');
+            var rut = input.value.replace(/\./g, '').replace('-', '');
+        
+            if (rut.length > 3) {
+                var cuerpo = rut.slice(0, -1);
+                var dv = rut.slice(-1);
+                input.value = cuerpo + '-' + dv;
+            } else {
+                input.value = rut;
+            }
+        }
+        document.getElementById('rut').addEventListener('input', formatearRut);
     </script>
     <script>
         function showAlert(message) {
