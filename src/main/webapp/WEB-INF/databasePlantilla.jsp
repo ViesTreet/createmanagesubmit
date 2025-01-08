@@ -20,6 +20,7 @@
         }
 
         td{
+            overflow-x: auto;
             font-size: 11px;
         }
 
@@ -105,6 +106,7 @@
             }
 
             td{
+                overflow-x: auto;
                 font-size: 12px;
             }
 
@@ -119,9 +121,9 @@
     <header class="d-flex align-items-center justify-content-between p-3 bg-light" style="height: 10vh; z-index: 1;" >
         <a href="/home" class="logo"><img src="/images/Logobgremove.png" alt="[LOGO]"></a>
         <nav>
-            <a href="/home" class="mx-2">Inicio</a>
-            <a href="/documentacion" class="mx-2">Funciones</a>
-            <a href="#" class="mx-2">Contacto</a>
+            <a href="/home" class="btn btn-primary mx-2">Regresar</a>
+            <a href="/home" class="btn btn-primary mx-2">Inicio</a>
+            <a href="/documentacion/databasePlantilla" class="btn btn-primary mx-2">Documentación</a>
         </nav>
     </header>
     <div id="contenderBase" class="container pt-2 pb-2" style="height: 90vh;">
@@ -138,7 +140,7 @@
             </div>
         </div>
         <div id="contenedorTabla" style="overflow-y: auto; max-height: 70vh; max-width: 95vw;">
-            <table class="table table-hover table-sm table-bordered mb-5" style="table-layout: fixed; height: 100%;" id="tablaPlantilla">
+            <table class="table table-hover table-bordered mb-5" style="table-layout: fixed; height: 100%;" id="tablaPlantilla">
                 <thead class="thead-dark">
                     <tr>
                         <th>Nombre Plantilla</th>

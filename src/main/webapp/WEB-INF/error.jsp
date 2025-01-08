@@ -24,9 +24,6 @@
     <header class="d-flex align-items-center justify-content-between p-3 bg-light" style="height: 10vh;">
         <div class="logo"><img src="/images/Logobgremove.png" alt="[LOGO]"></div>
         <nav>
-            <a href="/" class="mx-2">Inicio</a>
-            <a href="/funciones" class="mx-2">Funciones</a>
-            <a href="/contacto" class="mx-2">Contacto</a>
         </nav>
     </header>
     <main class="d-flex flex-column align-items-center justify-content-center" style="height: 90vh;">
@@ -34,7 +31,6 @@
         <h1 class="text-center">Oops! Algo salió mal.</h1>
         <p class="text-center">Lo sentimos, pero la página que buscas no existe o ha ocurrido un error.</p>
         <a href="/" class="btn btn-primary btn-custom">Volver al Inicio</a>
-        <a href="/contacto" class="btn btn-secondary btn-custom">Contactar Soporte</a>
     </main>
     <footer class="text-center p-3 bg-light" style="height: 15vh;">
         <p>Contacto: [Dirección, Teléfono, Correo]</p>

@@ -19,9 +19,8 @@
     <header class="d-flex align-items-center justify-content-between p-3 bg-light" style="height: 10vh;">
         <div class="logo"><img src="/images/Logobgremove.png" alt="[LOGO]"></div>
         <nav>
-            <a href="#" class="mx-2">Inicio</a>
-            <a href="#" class="mx-2">Funciones</a>
-            <a href="#" class="mx-2">Contacto</a>
+            <a href="/home" class="btn btn-primary mx-2">Inicio</a>
+            <a href="/documentacion/home" class="btn btn-primary mx-2">Documentación</a>
         </nav>
     </header>
     <main class="d-flex flex-column align-items-center justify-content-center" style="height: 90vh;">
@@ -30,7 +29,7 @@
         <a href="/dataBaseAlumno/addAlumnoBase" class="btn btn-primary btn-custom">Agregar alumno base de datos</a>
         <a href="/dataBasePlantilla" class="btn btn-secondary btn-custom">Base de datos plantilla</a>
         <a href="/dataBaseAdmin" class="btn btn-secondary btn-custom">Administradores</a>
-        <button class="btn btn-light btn-custom">Documentación</button>
+        <a href="/documentacion" class="btn btn-light btn-custom">Documentación</a>
         <a href="/logout" class="btn btn-danger btn-custom">Cerrar sesión</a>
     </main>
     <footer class="text-center p-3 bg-light" style="height: 15vh;">

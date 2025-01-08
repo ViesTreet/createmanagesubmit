@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inicio</title>
+    <title>Editar Alumno</title>
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link rel="stylesheet" href="/css/styleCustom.css">
     <style>
@@ -17,9 +17,9 @@
     <header class="d-flex align-items-center justify-content-between p-3 bg-light" style="height: 10vh;">
         <div class="logo"><a href="/home"><img src="/images/Logobgremove.png" alt="[LOGO]"></div></a>
         <nav>
-            <a href="#" class="mx-2">Inicio</a>
-            <a href="#" class="mx-2">Funciones</a>
-            <a href="#" class="mx-2">Contacto</a>
+            <a href="/dataBaseAlumno/alumno/${alumno.id}" class="btn btn-primary mx-2">Regresar</a>
+            <a href="/home" class="btn btn-primary mx-2">Inicio</a>
+            <a href="/documentacion/editarAlumno" class="btn btn-primary mx-2">Documentación</a>
         </nav>
     </header>
     <main class="d-flex flex-column align-items-center justify-content-center" style="height: 90vh;">

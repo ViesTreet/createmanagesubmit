@@ -1,7 +1,7 @@
 package com.vt.createmanagesubmit.servicios;
 
-import java.awt.Font;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -31,6 +31,7 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import javax.imageio.ImageIO;
 
+import org.apache.poi.sl.usermodel.TextParagraph.TextAlign;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.DateUtil;
@@ -46,6 +47,7 @@ import org.apache.poi.xslf.usermodel.XSLFTextParagraph;
 import org.apache.poi.xslf.usermodel.XSLFTextRun;
 import org.apache.poi.xslf.usermodel.XSLFTextShape;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.hibernate.Hibernate;
 import org.jodconverter.core.office.OfficeException;
 import org.jodconverter.local.JodConverter;
 import org.jodconverter.local.office.LocalOfficeManager;
@@ -198,21 +200,24 @@ public class ServicioArchivos {
                         if(alumno.getDiploma() == null || alumno.getDiploma().trim().isEmpty()){
                             alumno.setDiploma("noEnviado");
                         }
-
-                        alumnoRepo.save(alumno);
-
-                        if (estadoDiplomaExcel.equals("enviarTodos")) {
-                            try {
-                                generateCertificateForAlumno(alumno);
-                            } catch (Exception e) {
-                                e.printStackTrace();
+                        if(!alumno.getNombreAsistente().isEmpty()){
+                            alumnoRepo.save(alumno);
+                            if(estadoDiplomaExcel.equals("enviarApro")&&estadoExcel.equals("aprobado")){
+                                estadoDiplomaExcel = "enviarTodos";
                             }
-                        } else if (estadoDiplomaExcel.equals("enviarApro")) {
-                            if (alumno.getEstado().equals("aprobado")&&alumno.getDiploma().equals("noEnviado")) {
+                            if (estadoDiplomaExcel.equals("enviarTodos")) {
                                 try {
                                     generateCertificateForAlumno(alumno);
                                 } catch (Exception e) {
                                     e.printStackTrace();
+                                }
+                            } else if (estadoDiplomaExcel.equals("enviarApro")) {
+                                if (alumno.getEstado().equals("aprobado")&&alumno.getDiploma().equals("noEnviado")) {
+                                    try {
+                                        generateCertificateForAlumno(alumno);
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
                                 }
                             }
                         }
@@ -383,6 +388,8 @@ public class ServicioArchivos {
         return rutSinPuntos;
     }
 
+    @Async
+    @Transactional
     public void generateCertificatesAll() throws Exception {
         List<Alumno> alumnos = alumnoRepo.findAllByDiplomaAndEstado("noEnviado", "aprobado");
         Optional<Plantilla> optPlantilla = servicio.plantillaPorNombre("Error en encontrar plantilla");
@@ -399,10 +406,16 @@ public class ServicioArchivos {
         }
     }
 
-    
+    @Async
+    @Transactional
     public void generateCertificatesById(Long id) throws Exception {
-        Alumno alumno = alumnoRepo.findById(id).orElse(null);
+        Alumno alumno = alumnoRepo.findById(id).orElseThrow(() -> new Exception("Alumno no encontrado con ID: " + id));
+
         if (alumno != null) {
+            Plantilla plantilla = alumno.getPlantilla();
+            if (plantilla != null) {
+                Hibernate.initialize(plantilla);
+            }
             try {
                 generateCertificateForAlumno(alumno);
                 alumno.setDiploma("enviado");
@@ -447,34 +460,21 @@ public class ServicioArchivos {
             for (XSLFShape shape : slide.getShapes()) {
                 if (shape instanceof XSLFTextShape) {
                     XSLFTextShape textShape = (XSLFTextShape) shape;
-                    List<XSLFTextParagraph> paragraphs = textShape.getTextParagraphs();
-                    List<XSLFTextParagraph> paragraphsCopy = new ArrayList<>(paragraphs); // Mantener esta línea como mencionaste
-        
-                    for (XSLFTextParagraph paragraph : paragraphsCopy) {
-                        List<XSLFTextRun> textRuns = paragraph.getTextRuns();
-                        for (XSLFTextRun textRun : textRuns) {
-                            String text = textRun.getRawText();
-                            if (text.contains("${")) {
-                                String newText = text;
-                                // Reemplazar todos los placeholders en el texto del textRun
-                                for (Map.Entry<String, String> entry : alumnoData.entrySet()) {
-                                    String placeholder = "${" + entry.getKey() + "}";
-                                    if (newText.contains(placeholder)) {
-                                        String replacement = entry.getValue() != null ? entry.getValue() : "";
-                                        replacement = replacement.replace("|", "\n"); // Reemplazar "|" con saltos de línea
-                                        newText = newText.replace(placeholder, replacement);
-                                    }
-                                }
-                                textRun.setText(newText); // Establecer el nuevo texto conservando los atributos
-                                // Llamar al método para ajustar el tamaño de fuente
-                                ajustarTamanoFuente(textShape, textRun);
-                            }
-                        }
-                    }
+                    replacePlaceholders(textShape, alumnoData);
                 }
             }
         }
-        
+    
+        // Paso 2: Aplicar alineación a `nombreCurso`
+        for (XSLFSlide slide : ppt.getSlides()) {
+            for (XSLFShape shape : slide.getShapes()) {
+                if (shape instanceof XSLFTextShape) {
+                    XSLFTextShape textShape = (XSLFTextShape) shape;
+                    alignNombreCursoShape(textShape);
+                }
+            }
+        }
+    
 
         // Guarda el PPTX modificado en un archivo temporal
         String tempPptxPath = "temp/" + alumno.getId() + ".pptx";
@@ -511,6 +511,7 @@ public class ServicioArchivos {
         byte[] pdfBytes = Files.readAllBytes(Paths.get(tempPdfPath));
 
         // Eliminar los archivos temporales
+        
         new File(tempPptxPath).delete();
         new File(tempPdfPath).delete();
 
@@ -526,6 +527,81 @@ public class ServicioArchivos {
 
         return CompletableFuture.completedFuture(null);
     }
+
+    private void replacePlaceholders(XSLFTextShape textShape, Map<String, String> data) {
+        List<XSLFTextParagraph> paragraphsCopy = new ArrayList<>(textShape.getTextParagraphs());
+        List<XSLFTextParagraph> newParagraphs = new ArrayList<>();
+        
+        for (XSLFTextParagraph paragraph : paragraphsCopy) {
+            List<XSLFTextRun> textRuns = new ArrayList<>(paragraph.getTextRuns());
+            
+            for (XSLFTextRun textRun : textRuns) {
+                String text = textRun.getRawText();
+                if (text.contains("${")) {
+                    String newText = text;
+                    for (Map.Entry<String, String> entry : data.entrySet()) {
+                        String placeholder = "${" + entry.getKey() + "}";
+                        if (newText.contains(placeholder)) {
+                            String replacement = entry.getValue() != null ? entry.getValue() : "";
+                            newText = newText.replace(placeholder, replacement.replace("|", "\n"));
+                        }
+                    }
+    
+                    // Si el texto tiene saltos de línea
+                    if (newText.contains("\n")) {
+                        // Dividir el texto en líneas
+                        String[] lines = newText.split("\n");
+    
+                        // Crear un nuevo párrafo para cada línea, manteniendo las propiedades originales
+                        for (String line : lines) {
+                            XSLFTextParagraph newParagraph = textShape.addNewTextParagraph();
+                            XSLFTextRun newRun = newParagraph.addNewTextRun();
+                            copyTextRunProperties(textRun, newRun);
+                            newRun.setText(line);
+                            newParagraphs.add(newParagraph);
+                        }
+    
+                        // Eliminar el TextRun original
+                        paragraph.removeTextRun(textRun);
+                    } else {
+                        // Si no hay saltos de línea, simplemente reemplazar el texto
+                        textRun.setText(newText);
+                    }
+                }
+            }
+        }
+    
+        // Añadir los nuevos párrafos al final
+        for (XSLFTextParagraph newParagraph : newParagraphs) {
+            textShape.addNewTextParagraph().addNewTextRun().setText(newParagraph.getText());
+        }
+    }
+    
+    private void copyTextRunProperties(XSLFTextRun source, XSLFTextRun target) {
+        target.setFontColor(source.getFontColor());
+        target.setFontSize(source.getFontSize());
+        target.setFontFamily(source.getFontFamily());
+        target.setBold(source.isBold());
+        target.setItalic(source.isItalic());
+        target.setUnderlined(source.isUnderlined());
+        target.setHighlightColor(source.getHighlightColor());
+    }
+    
+    
+    
+    
+    
+    
+    // Método para alinear el texto del shape `nombreCurso`
+    private void alignNombreCursoShape(XSLFTextShape textShape) {
+        System.out.println("Procesando shape: " + textShape.getShapeName());
+        for (XSLFTextParagraph paragraph : textShape.getTextParagraphs()) {
+            System.out.println("Texto del párrafo antes de alinear: " + paragraph.getText());
+            paragraph.setTextAlign(TextAlign.CENTER); // Aplicar alineación
+            System.out.println("Alineación aplicada al párrafo.");
+        }
+    }
+    
 
     private void ajustarTamanoFuente(XSLFTextShape textShape, XSLFTextRun textRun) {
         Double fontSize = textRun.getFontSize();

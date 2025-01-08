@@ -13,13 +13,12 @@
     <header class="d-flex align-items-center justify-content-between p-3 bg-light" style="height: 10vh;">
         <div class="logo"><img src="/images/Logobgremove.png" alt="[LOGO]"></div>
         <nav>
-            <a href="#" class="mx-2">Inicio</a>
-            <a href="#" class="mx-2">Funciones</a>
-            <a href="#" class="mx-2">Contacto</a>
+            <a href="/dataBaseAlumno" class="btn btn-primary mx-2">Regresar</a>
+            <a href="/home" class="btn btn-primary mx-2">Inicio</a>
+            <a href="/documentacion/alumnoDatos" class="btn btn-primary mx-2">Documentación</a>
         </nav>
     </header>
     <main class="d-flex flex-column align-items-center justify-content-center" style="height: 90vh;">
-        <div class="d-flex justify-content-end" style="width: 70vw;"><a class="btn btn-warning" href="/dataBaseAlumno">Regresar</a></div>
         <div class="card" style="width: 70vw;">
             <div class="card-body">
                 <div class="card-title text-center"><h3>Datos del alumno ${alumno.nombreAsistente}</h3></div>
