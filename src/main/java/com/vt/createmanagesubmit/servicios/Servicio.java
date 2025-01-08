@@ -374,85 +374,107 @@ public class Servicio {
         // Obtener la plantilla desde la BD
         Plantilla plantilla = repoPlanti.findById(idPlantilla)
                 .orElseThrow(() -> new IllegalArgumentException("Plantilla no encontrada"));
-
-        // Ruta absoluta para guardar el nuevo archivo
-        String relativePath = "/logos/" + nuevoLogo.getOriginalFilename();
+    
+        // Verificar si ya existe un archivo con el mismo nombre
+        String originalFilename = nuevoLogo.getOriginalFilename();
+        String relativePath = "/logos/" + generarNombreUnico(originalFilename, "/logos/");
         Path logoPath = Paths.get(STATIC_DIRECTORY + relativePath);
-
+    
         // Crear directorios si no existen
         Files.createDirectories(logoPath.getParent());
-
+    
         // Guardar el archivo en el sistema
         Files.write(logoPath, nuevoLogo.getBytes());
-
+    
         // Borrar el archivo anterior
         if (plantilla.getPathLogo() != null) {
             Path oldLogoPath = Paths.get(STATIC_DIRECTORY + plantilla.getPathLogo());
             Files.deleteIfExists(oldLogoPath);
         }
-
+    
         // Actualizar la ruta en la BD
-        plantilla.setPathLogo(STATIC_DIRECTORY+relativePath);
+        plantilla.setPathLogo(STATIC_DIRECTORY + relativePath);
         repoPlanti.save(plantilla);
     }
-
+    
     public void cambiarPlantilla(Long idPlantilla, MultipartFile nuevaPlantilla) throws IOException {
         // Obtener la plantilla desde la BD
         Plantilla plantilla = repoPlanti.findById(idPlantilla)
                 .orElseThrow(() -> new IllegalArgumentException("Plantilla no encontrada"));
-
-        // Ruta absoluta para guardar el nuevo archivo
-        String relativePath = "/plantillas/" + nuevaPlantilla.getOriginalFilename();
+    
+        // Verificar si ya existe un archivo con el mismo nombre
+        String originalFilename = nuevaPlantilla.getOriginalFilename();
+        String relativePath = "/plantillas/" + generarNombreUnico(originalFilename, "/plantillas/");
         Path plantillaPath = Paths.get(STATIC_DIRECTORY + relativePath);
-
+    
         // Crear directorios si no existen
         Files.createDirectories(plantillaPath.getParent());
-
+    
         // Guardar el archivo en el sistema
-        if(!plantilla.getPathArchivo().equals(relativePath)){
-            Files.write(plantillaPath, nuevaPlantilla.getBytes());
-        }
+        Files.write(plantillaPath, nuevaPlantilla.getBytes());
+    
         // Borrar el archivo anterior
         if (plantilla.getPathArchivo() != null && !plantilla.getPathArchivo().equals(relativePath)) {
             Path oldPlantillaPath = Paths.get(STATIC_DIRECTORY + plantilla.getPathArchivo());
-            System.out.println(oldPlantillaPath);
             Files.deleteIfExists(oldPlantillaPath);
         }
-
+    
         // Actualizar la ruta en la BD
-        System.out.println(STATIC_DIRECTORY+relativePath);
         plantilla.setPathArchivo(STATIC_DIRECTORY + relativePath);
         repoPlanti.save(plantilla);
     }
-
+    
     public String guardarArchivo(MultipartFile archivo, String subdirectorio) throws IOException {
-        String relativePath = subdirectorio + archivo.getOriginalFilename();
+        String originalFilename = archivo.getOriginalFilename();
+        String relativePath = subdirectorio + generarNombreUnico(originalFilename, subdirectorio);
         Path fullPath = Paths.get(STATIC_DIRECTORY + relativePath);
-
+    
         // Crear directorios si no existen
         Files.createDirectories(fullPath.getParent());
-
+    
         // Guardar el archivo
         Files.write(fullPath, archivo.getBytes());
-
-        return STATIC_DIRECTORY+relativePath;
+    
+        return STATIC_DIRECTORY + relativePath;
     }
-
+    
+    private String generarNombreUnico(String originalFilename, String subdirectorio) throws IOException {
+        Path directoryPath = Paths.get(STATIC_DIRECTORY + subdirectorio);
+    
+        // Asegurarnos de que el directorio existe
+        Files.createDirectories(directoryPath);
+    
+        // Ruta del archivo inicial
+        Path filePath = directoryPath.resolve(originalFilename);
+    
+        // Si el archivo ya existe, generar un nuevo nombre
+        if (Files.exists(filePath)) {
+            String baseName = originalFilename.contains(".") ? originalFilename.substring(0, originalFilename.lastIndexOf('.')) : originalFilename;
+            String extension = originalFilename.contains(".") ? originalFilename.substring(originalFilename.lastIndexOf('.')) : "";
+            String timestamp = String.valueOf(System.currentTimeMillis());
+            return baseName + "_" + timestamp + extension;
+        }
+    
+        // Si no existe, devolver el nombre original
+        return originalFilename;
+    }
+    
     public String clonarArchivo(String archivoExistente, String subdirectorio) throws IOException {
         Path sourcePath = Paths.get(archivoExistente);
         String timestamp = String.valueOf(System.currentTimeMillis());
-        String newFileName = "clon_" +timestamp+"_"+ sourcePath.getFileName().toString();
+        String newFileName = "clon_" + timestamp + "_" + sourcePath.getFileName().toString();
         String relativePath = subdirectorio + newFileName;
         Path destinationPath = Paths.get(STATIC_DIRECTORY + relativePath);
-
+    
         // Crear directorios si no existen
         Files.createDirectories(destinationPath.getParent());
-
+    
         // Copiar el archivo
         Files.copy(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
-
-        return STATIC_DIRECTORY+relativePath;
+    
+        return STATIC_DIRECTORY + relativePath;
     }
+    
 
     public void registrarAdmin(String correo,String nombre, String password) {
         // Encriptar la contraseña

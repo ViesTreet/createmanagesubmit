@@ -1,11 +1,13 @@
 package com.vt.createmanagesubmit.controladores;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-import org.eclipse.angus.mail.handlers.image_gif;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.MediaType;
@@ -541,10 +543,14 @@ public class ControladorBase {
             servicio.guardarPlantilla(plantilla);   
             try {
                 if (cambiarLogo && nuevoLogo != null && !nuevoLogo.isEmpty()) {
+                    Path logoPathAntiguo = Paths.get(plantilla.getPathLogo());
                     servicio.cambiarLogo(id, nuevoLogo);
+                    Files.deleteIfExists(logoPathAntiguo);
                 }
                 if (cambiarPlantilla && nuevaPlantilla != null && !nuevaPlantilla.isEmpty()) {
+                    Path plantillaPathAntiguo = Paths.get(plantilla.getPathArchivo());
                     servicio.cambiarPlantilla(id, nuevaPlantilla);
+                    Files.deleteIfExists(plantillaPathAntiguo);
                 }
                 return "redirect:/dataBasePlantilla"; 
             } catch (Exception e) {
