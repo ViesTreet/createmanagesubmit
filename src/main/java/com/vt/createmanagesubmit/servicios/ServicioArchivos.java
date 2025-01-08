@@ -74,6 +74,7 @@ import com.vt.createmanagesubmit.repositorios.RepositorioPlantillas;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Service
@@ -517,7 +518,7 @@ public class ServicioArchivos {
 
         // Eliminar los archivos temporales
         
-        //new File(tempPptxPath).delete();
+        new File(tempPptxPath).delete();
         new File(tempPdfPath).delete();
 
         // Generar código QR con la URL y el ID encriptado
@@ -572,46 +573,51 @@ public class ServicioArchivos {
     
                 String[] lines = replacementText.split("\\|");
                 int numberOfLines = lines.length;
-    
+
                 // Obtiene la posición y dimensiones del shape original
                 Rectangle2D anchor = textShape.getAnchor();
                 double totalHeight = anchor.getHeight();
                 double shapeWidth = anchor.getWidth();
                 double shapeX = anchor.getX();
-                double shapeY = anchor.getY();
-    
-                // Calcula la altura de cada nuevo shape sin espacio entre líneas
-                double shapeHeight = totalHeight / numberOfLines;
-    
+                double shapeY = anchor.getY()-11.0;
+
+                // Ajusta la altura de cada nuevo shape, considerando un pequeño margen entre líneas
+                double margin = 2.0; // Ajusta este valor según sea necesario
+                double shapeHeight = (totalHeight - (margin * (numberOfLines - 1))) / numberOfLines;
+
                 // Para cada línea, crea un nuevo shape
                 for (int i = 0; i < numberOfLines; i++) {
                     String line = lines[i];
-    
-                    // Crea un nuevo shape
-                    XSLFTextBox newShape = slide.createTextBox();
-    
-                    // Establece la posición y tamaño
+                
+                    // Calcula la nueva posición Y considerando el margen entre líneas
+                    double newY = shapeY + i * (shapeHeight + margin);
+                
+                    // Establece la posición y tamaño del nuevo shape
                     Rectangle2D newAnchor = new Rectangle2D.Double(
                         shapeX,
-                        shapeY + i * shapeHeight,
+                        newY,
                         shapeWidth,
                         shapeHeight
                     );
+                
+                    // Crea un nuevo shape
+                    XSLFTextBox newShape = slide.createTextBox();
                     newShape.setAnchor(newAnchor);
-    
+                
                     // Copia las propiedades del shape original
                     copyShapeProperties(textShape, newShape);
-    
+                
                     // Establece el texto
                     XSLFTextParagraph newParagraph = newShape.addNewTextParagraph();
                     copyParagraphProperties(sourceParagraph, newParagraph); // Copia las propiedades del párrafo
-    
+                
                     XSLFTextRun newRun = newParagraph.addNewTextRun();
                     newRun.setText(line);
-    
+                
                     // Aplica las propiedades de fuente
                     applyFontProperties(textShape, newRun);
                 }
+
             } else {
                 // El texto no contiene saltos de línea, simplemente reemplaza el placeholder
                 for (XSLFTextParagraph paragraph : textShape.getTextParagraphs()) {
@@ -920,25 +926,25 @@ public class ServicioArchivos {
     @Transactional
     public CompletableFuture<Void> generateCertificateQR(String idEncriptada, HttpServletResponse response) throws Exception {
         Long alumnoId = decryptStudentId(idEncriptada);
-
+    
         // Obtén el alumno por ID
         Alumno alumno = alumnoRepo.findById(alumnoId).orElseThrow(() -> new Exception("Alumno no encontrado con ID " + alumnoId));
-
+    
         // Obtén la plantilla asociada al alumno
         Plantilla plantilla = alumno.getPlantilla();
         if (plantilla == null) {
-            throw new Exception("No hay una plantilla asociada al Alumno con ID " + alumno.getId());
+            throw new Exception("No hay una plantilla asociada al Alumno " + alumno.getNombreAsistente());
         }
-
+    
         // Carga la plantilla PPTX desde pathArchivo
         String templatePath = plantilla.getPathArchivo();
-
+    
         // Carga el archivo PPTX usando Apache POI
         XMLSlideShow ppt;
         try (FileInputStream inputStream = new FileInputStream(templatePath)) {
             ppt = new XMLSlideShow(inputStream);
         }
-
+    
         // Crea un mapa de los datos del alumno que se usarán para reemplazar en los placeholders
         Map<String, String> alumnoData = new HashMap<>();
         alumnoData.put("nombreAsistente", alumno.getNombreAsistente());
@@ -948,83 +954,75 @@ public class ServicioArchivos {
         alumnoData.put("diasCursos", alumno.getDiasCursos());
         alumnoData.put("relator", alumno.getRelator());
         alumnoData.put("asistencia", alumno.getAsistencia());
-
-        // Modifica las shapes reemplazando los placeholders ${atributo} por los valores correspondientes
+    
+        // Procesa las slides y shapes
         for (XSLFSlide slide : ppt.getSlides()) {
-            for (XSLFShape shape : slide.getShapes()) {
+            List<XSLFShape> shapesToRemove = new ArrayList<>();
+            List<XSLFShape> shapes = new ArrayList<>(slide.getShapes()); // Crea una copia de la lista de shapes
+        
+            for (XSLFShape shape : shapes) {
                 if (shape instanceof XSLFTextShape) {
                     XSLFTextShape textShape = (XSLFTextShape) shape;
-                    List<XSLFTextParagraph> paragraphs = textShape.getTextParagraphs();
-                    for (XSLFTextParagraph paragraph : paragraphs) {
-                        List<XSLFTextRun> textRuns = paragraph.getTextRuns();
-                        for (XSLFTextRun textRun : textRuns) {
-                            String text = textRun.getRawText();
-                            if (text.contains("${")) {
-                                for (Map.Entry<String, String> entry : alumnoData.entrySet()) {
-                                    String placeholder = "${" + entry.getKey() + "}";
-                                    if (text.contains(placeholder)) {
-                                        text = text.replace(placeholder, entry.getValue() != null ? entry.getValue() : "");
-                                        textRun.setText(text);
-
-                                        // Ajustar tamaño de fuente para que el texto se ajuste a la forma
-                                        ajustarTamanoFuente(textShape, textRun);
-                                    }
-                                }
-                            }
-                        }
+                    try {
+                        processTextShape(slide, textShape, alumnoData, shapesToRemove);
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
             }
+        
+            // Elimina las shapes marcadas después de la iteración
+            for (XSLFShape shapeToRemove : shapesToRemove) {
+                slide.removeShape(shapeToRemove);
+            }
         }
-
+    
         // Guarda el PPTX modificado en un archivo temporal
-        String tempPptxPath = "temp/" + alumno.getId() + ".pptx";
-        File tempDir = new File("temp");
-        if (!tempDir.exists()) {
-            tempDir.mkdirs();
-        }
-        try (FileOutputStream out = new FileOutputStream(tempPptxPath)) {
+        File tempPptxFile = File.createTempFile("certificado-", ".pptx");
+        try (FileOutputStream out = new FileOutputStream(tempPptxFile)) {
             ppt.write(out);
         }
-
-        // Cierra el PPTX para eliminar el warning
+    
+        // Cierra el PPTX para evitar problemas
         ppt.close();
-
+    
         // Convierte el PPTX a PDF usando JODConverter
-        String tempPdfPath = "temp/" + alumno.getId() + ".pdf";
+        File tempPdfFile = File.createTempFile("certificado-", ".pdf");
+    
         LocalOfficeManager officeManager = LocalOfficeManager.builder()
                 .install()
                 .build();
+    
         try {
             officeManager.start();
-            JodConverter.convert(new File(tempPptxPath))
-                    .to(new File(tempPdfPath))
+            JodConverter.convert(tempPptxFile)
+                    .to(tempPdfFile)
                     .execute();
-        } catch (OfficeException e) {
-            e.printStackTrace();
-        } finally {
-            if (officeManager != null) {
-                officeManager.stop();
-            }
-        }
-
-        // Leer el PDF generado como array de bytes
-        byte[] pdfBytes = Files.readAllBytes(Paths.get(tempPdfPath));
-
-        // Eliminar los archivos temporales
-        new File(tempPptxPath).delete();
-        new File(tempPdfPath).delete();
-
-        // Configurar la respuesta HTTP para enviar el PDF como archivo descargable
-        response.setContentType("application/pdf");
-        response.setHeader("Content-Disposition", "attachment; filename=\"certificado-" + alumno.getId() + ".pdf\"");
-        response.getOutputStream().write(pdfBytes);
-        response.getOutputStream().flush();
-        response.getOutputStream().close();
-
-        return CompletableFuture.completedFuture(null);
+        
+            // Leer el PDF generado como array de bytes
+            byte[] pdfBytes = Files.readAllBytes(tempPdfFile.toPath());
+        
+            // Configurar la respuesta HTTP para enviar el PDF como archivo descargable
+            response.setContentType("application/pdf");
+            response.setHeader("Content-Disposition", "attachment; filename=\"certificado-" + alumno.getId() + ".pdf\"");
+        
+            response.getOutputStream().write(pdfBytes);
+            response.getOutputStream().flush();
+        
+         } catch (OfficeException e) {
+             throw new OfficeException("Ocurrió un error inesperado al generar el PDF", e);
+         } finally {
+             if (officeManager != null) {
+                 officeManager.stop();
+             }
+         
+             // Eliminar los archivos temporales
+             tempPptxFile.delete();
+             tempPdfFile.delete();
+         }
+     
+         return CompletableFuture.completedFuture(null);
     }
-
 
     public void exportToExcel(HttpServletResponse response) throws IOException {
         // Obtener la lista de alumnos
