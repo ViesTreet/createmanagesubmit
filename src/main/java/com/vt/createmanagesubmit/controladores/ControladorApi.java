@@ -1,5 +1,6 @@
 package com.vt.createmanagesubmit.controladores;
 
+import java.net.http.HttpHeaders;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -156,7 +158,54 @@ public class ControladorApi {
         timestamps.add(currentTime);
         return ResponseEntity.ok("Descarga permitida.");
     }
-    
+
+    /*@PostMapping("/dataBasePlantilla/probarPlantilla")
+    public CompletableFuture<ResponseEntity<byte[]>> probarPlantilla(HttpSession session,HttpServletResponse response,
+            @RequestParam("nombreAsistente") String nombreAsistente,
+            @RequestParam("curso") String nombreCurso,
+            @RequestParam("diasCursos") String diasCursos,
+            @RequestParam("numeroHoras") String numeroHoras,
+            @RequestParam("cliente") String cliente,
+            @RequestParam("obra") String obra,
+            @RequestParam("notaAprovacion") String notaAprovacion,
+            @RequestParam("relator") String relator,
+            @RequestParam("asistencia") String asistencia,
+            @RequestParam("id") Long plantillaId) {
+
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+        if (usuarioTemporal == null) {
+            throw new IllegalStateException("No autorizado"); // Manejar el caso de no autenticado
+        }
+
+        // Crear una nueva instancia de Alumno
+        Alumno alumno = new Alumno();
+        alumno.setNombreAsistente(nombreAsistente);
+        alumno.setNombreCurso(nombreCurso);
+        alumno.setDiasCursos(diasCursos);
+        alumno.setNumeroHoras(numeroHoras);
+        alumno.setCliente(cliente);
+        alumno.setObra(obra);
+        alumno.setNotaAprovacion(notaAprovacion);
+        alumno.setRelator(relator);
+        alumno.setAsistencia(asistencia);
+
+        Plantilla plantilla = ser.plantillaPorId(plantillaId);
+        alumno.setPlantilla(plantilla);
+
+        try {
+            servicioAr.probarCertificadosServicio(alumno, response);
+            ttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_PDF);
+    headers.setContentDispositionFormData("attachment", "certificado-" + alumno.getId() + ".pdf");
+
+    return ResponseEntity.ok()
+                         .headers(headers)
+                         .body(pdfBytes);
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+    }
+*/
 }
 
 

@@ -126,12 +126,12 @@ public class Servicio {
     }
 
     public List<Plantilla> buscarPlantillaPorCriterio(String dato){
-        List<Plantilla> plantillas = repoPlanti.findAllByNombreCertificadoContaining(dato);
+        List<Plantilla> plantillas = repoPlanti.findAllByNombreCertificadoContainingOrderByUpdatedAtDesc(dato);
         return plantillas;
     }
     
     public List<Plantilla> todasLasPlantillas(){
-        return repoPlanti.findAll();
+        return repoPlanti.findAllByOrderByUpdatedAtDesc();
     }
 
     public Plantilla plantillaPorId(Long id){
@@ -174,7 +174,7 @@ public class Servicio {
     }
 
     public List<Admin> todasLosAdmin(){
-        return repoAdmin.findAll();
+        return repoAdmin.findAllByOrderByUpdatedAtDesc();
     }
 
     public Admin adminPorId(Long id){

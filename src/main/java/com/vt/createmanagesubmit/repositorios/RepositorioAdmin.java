@@ -9,7 +9,7 @@ import com.vt.createmanagesubmit.modelos.Admin;
 
 public interface RepositorioAdmin extends JpaRepository<Admin,Long>{
 
-    List<Admin> findAll();
+    List<Admin> findAllByOrderByUpdatedAtDesc();
 
     Optional<Admin> findByCorreo(String correo);
 }

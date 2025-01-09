@@ -875,6 +875,104 @@ public class ServicioArchivos {
          return CompletableFuture.completedFuture(null);
     }
 
+    @Async
+    @Transactional
+    public CompletableFuture<Void> probarCertificadosServicio(Alumno alumno, HttpServletResponse response) throws Exception {
+
+        // Obtén la plantilla asociada al alumno
+        Plantilla plantilla = alumno.getPlantilla();
+        if (plantilla == null) {
+            throw new Exception("No hay una plantilla asociada al Alumno " + alumno.getNombreAsistente());
+        }
+
+        // Carga la plantilla PPTX desde pathArchivo
+        String templatePath = plantilla.getPathArchivo();
+
+        // Carga el archivo PPTX usando Apache POI
+        XMLSlideShow ppt;
+        try (FileInputStream inputStream = new FileInputStream(templatePath)) {
+            ppt = new XMLSlideShow(inputStream);
+        }
+
+        // Crea un mapa de los datos del alumno que se usarán para reemplazar en los placeholders
+        Map<String, String> alumnoData = new HashMap<>();
+        alumnoData.put("nombreAsistente", alumno.getNombreAsistente());
+        alumnoData.put("nombreCurso", alumno.getNombreCurso());
+        alumnoData.put("numeroHoras", alumno.getNumeroHoras());
+        alumnoData.put("notaAprovacion", alumno.getNotaAprovacion());
+        alumnoData.put("diasCursos", alumno.getDiasCursos());
+        alumnoData.put("relator", alumno.getRelator());
+        alumnoData.put("asistencia", alumno.getAsistencia());
+
+        // Procesa las slides y shapes
+        for (XSLFSlide slide : ppt.getSlides()) {
+            List<XSLFShape> shapesToRemove = new ArrayList<>();
+            List<XSLFShape> shapes = new ArrayList<>(slide.getShapes()); // Crea una copia de la lista de shapes
+
+            for (XSLFShape shape : shapes) {
+                if (shape instanceof XSLFTextShape) {
+                    XSLFTextShape textShape = (XSLFTextShape) shape;
+                    try {
+                        processTextShape(slide, textShape, alumnoData, shapesToRemove);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            // Elimina las shapes marcadas después de la iteración
+            for (XSLFShape shapeToRemove : shapesToRemove) {
+                slide.removeShape(shapeToRemove);
+            }
+        }
+
+        // Guarda el PPTX modificado en un archivo temporal
+        File tempPptxFile = File.createTempFile("certificado-", ".pptx");
+        try (FileOutputStream out = new FileOutputStream(tempPptxFile)) {
+            ppt.write(out);
+        }
+
+        // Cierra el PPTX para evitar problemas
+        ppt.close();
+
+        // Convierte el PPTX a PDF usando JODConverter
+        File tempPdfFile = File.createTempFile("certificado-", ".pdf");
+
+        LocalOfficeManager officeManager = LocalOfficeManager.builder()
+                .install()
+                .build();
+
+        try {
+            officeManager.start();
+            JodConverter.convert(tempPptxFile)
+                    .to(tempPdfFile)
+                    .execute();
+
+            // Leer el PDF generado como array de bytes
+            byte[] pdfBytes = Files.readAllBytes(tempPdfFile.toPath());
+
+            // Configurar la respuesta HTTP para enviar el PDF como archivo descargable
+            response.setContentType("application/pdf");
+            response.setHeader("Content-Disposition", "attachment; filename=\"certificado-" + alumno.getId() + ".pdf\"");
+
+            response.getOutputStream().write(pdfBytes);
+            response.getOutputStream().flush();
+
+         } catch (OfficeException e) {
+             throw new OfficeException("Ocurrió un error inesperado al generar el PDF", e);
+         } finally {
+             if (officeManager != null) {
+                 officeManager.stop();
+             }
+
+             // Eliminar los archivos temporales
+             tempPptxFile.delete();
+             tempPdfFile.delete();
+         }
+
+         return CompletableFuture.completedFuture(null);
+    }
+
     public void exportToExcel(HttpServletResponse response) throws IOException {
         // Obtener la lista de alumnos
         List<Alumno> alumnos = alumnoRepo.findAll();

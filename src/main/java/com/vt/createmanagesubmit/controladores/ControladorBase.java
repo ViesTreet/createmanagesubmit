@@ -564,6 +564,18 @@ public class ControladorBase {
         return "redirect:/";
     }
 
+    @GetMapping("/dataBasePlantilla/plantilla/{id}/probar")
+    public String probarPlantilla(@PathVariable("id")Long id,Model model,HttpSession session) {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+	    if (usuarioTemporal == null) {
+	        return "redirect:/";  
+	    }
+        Plantilla plantilla = servicio.plantillaPorId(id);
+        model.addAttribute("plantilla", plantilla);
+        return "probarPlantilla.jsp";
+    }
+
+
     //-----------------------------------------------------------------------
 
     //-------------------------Admins----------------------------------------
@@ -614,15 +626,5 @@ public class ControladorBase {
         return "generarCertificadoQr.jsp";
     }
     
-    
-    @GetMapping("/generar/{id}")
-    public CompletableFuture<ResponseEntity<String>> generarQR(@PathVariable("id") String idEncriptada, HttpServletResponse response) {
-        try {
-            return servicioAr.generateCertificateQR(idEncriptada, response).thenApply(result -> ResponseEntity.ok("Certificado generado correctamente"));
-        } catch (Exception e) {
-            e.printStackTrace();
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            return null;
-        }
-    }
+
 }
