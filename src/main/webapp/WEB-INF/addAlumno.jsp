@@ -40,12 +40,12 @@
                                 <input type="text" name="curso" id="curso" class="form-control" placeholder="curso1,curso2,etc...">
                             </div>
                             <div>
-                                <label for="diasCursos">Dias del curso</label>
-                                <input type="text" name="diasCursos" id="diasCursos" class="form-control" placeholder="dd/m/aa-dd/m/aa">
+                                <label for="diasCursos">Días del curso</label>
+                                <input type="text" name="diasCursos" id="diasCursos" class="form-control" placeholder="fecha">
                             </div>
                             <div>
-                                <label for="numeroHoras">Numero de horas</label>
-                                <input type="text" name="numeroHoras" id="numeroHoras" class="form-control" placeholder="N° horas">
+                                <label for="numeroHoras">Duración del curso</label>
+                                <input type="text" name="numeroHoras" id="numeroHoras" class="form-control" placeholder="Duración">
                             </div>
                             <div>
                                 <label for="numeroCorrelativoInterno">Numero correlativo interno</label>
@@ -66,8 +66,8 @@
                                 <input type="text" name="codigo" id="codigo" class="form-control" placeholder="Codigo">
                             </div>
                             <div>
-                                <label for="notaAprovacion">Nota aprovacion</label>
-                                <input type="text" name="notaAprovacion" id="notaAprovacion" class="form-control" placeholder="Ej: 7.0">
+                                <label for="notaAprobacion">Nota aprobación</label>
+                                <input type="text" name="notaAprobacion" id="notaAprobacion" class="form-control" placeholder="Ej: 7.0">
                             </div>
                             <div>
                                 <label for="relator">Relator</label>

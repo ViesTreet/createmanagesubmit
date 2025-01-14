@@ -143,7 +143,7 @@ public class ServicioArchivos {
                         }
 
                         if (alumno.getCorreo() == null || alumno.getCorreo().trim().isEmpty() || alumno.getCorreo().trim().isBlank()) {
-                            alumno.setCorreo("javito12ulloa@gmail.com");
+                            alumno.setCorreo(correoEmpresa);
                         }
 
                         if (alumno.getEstado() == null || alumno.getEstado().trim().isEmpty()) {
@@ -198,6 +198,8 @@ public class ServicioArchivos {
                         if(alumno.getDiploma() == null || alumno.getDiploma().trim().isEmpty()){
                             alumno.setDiploma("noEnviado");
                         }
+                        String nombre = alumno.getNombreAsistente().trim().toUpperCase();
+                        alumno.setNombreAsistente(nombre);
                         if(!alumno.getNombreAsistente().isEmpty()){
                             alumnoRepo.save(alumno);
                             if(estadoDiplomaExcel.equals("enviarApro")&&estadoExcel.equals("aprobado")){
@@ -246,12 +248,19 @@ public class ServicioArchivos {
             case "nombre curso":
                 alumno.setNombreCurso(valorCelda);
                 break;
+            case "días curso":
+            case "días del curso":
             case "dias curso":
+            case "dias del curso":
                 alumno.setDiasCursos(valorCelda);
                 break;
             case "nº de horas":
             case "numero horas":
-                alumno.setNumeroHoras(valorCelda);
+            case "duracion del curso":
+            case "duracion curso":
+            case "duración del curso":
+            case "duración curso":
+                alumno.setDuracion(valorCelda);
                 break;
             case "nº correlativo interno":
             case "numero correlativo interno":
@@ -268,9 +277,10 @@ public class ServicioArchivos {
                 break;
             case "nota aprobación":
             case "nota aprobacion":
-                alumno.setNotaAprovacion(valorCelda);
+                alumno.setNotaAprobacion(valorCelda);
                 break;
             case "relator":
+            case "profesor":
                 alumno.setRelator(valorCelda);
                 break;
             case "asistencia":
@@ -447,8 +457,8 @@ public class ServicioArchivos {
         Map<String, String> alumnoData = new HashMap<>();
         alumnoData.put("nombreAsistente", alumno.getNombreAsistente());
         alumnoData.put("nombreCurso", alumno.getNombreCurso());
-        alumnoData.put("numeroHoras", alumno.getNumeroHoras());
-        alumnoData.put("notaAprovacion", alumno.getNotaAprovacion());
+        alumnoData.put("numeroHoras", alumno.getDuracion());
+        alumnoData.put("notaAprovacion", alumno.getNotaAprobacion());
         alumnoData.put("diasCursos", alumno.getDiasCursos());
         alumnoData.put("relator", alumno.getRelator());
         alumnoData.put("asistencia", alumno.getAsistencia());
@@ -800,8 +810,8 @@ public class ServicioArchivos {
         Map<String, String> alumnoData = new HashMap<>();
         alumnoData.put("nombreAsistente", alumno.getNombreAsistente());
         alumnoData.put("nombreCurso", alumno.getNombreCurso());
-        alumnoData.put("numeroHoras", alumno.getNumeroHoras());
-        alumnoData.put("notaAprovacion", alumno.getNotaAprovacion());
+        alumnoData.put("numeroHoras", alumno.getDuracion());
+        alumnoData.put("notaAprovacion", alumno.getNotaAprobacion());
         alumnoData.put("diasCursos", alumno.getDiasCursos());
         alumnoData.put("relator", alumno.getRelator());
         alumnoData.put("asistencia", alumno.getAsistencia());
@@ -898,8 +908,8 @@ public class ServicioArchivos {
         Map<String, String> alumnoData = new HashMap<>();
         alumnoData.put("nombreAsistente", alumno.getNombreAsistente());
         alumnoData.put("nombreCurso", alumno.getNombreCurso());
-        alumnoData.put("numeroHoras", alumno.getNumeroHoras());
-        alumnoData.put("notaAprovacion", alumno.getNotaAprovacion());
+        alumnoData.put("numeroHoras", alumno.getDuracion());
+        alumnoData.put("notaAprobacion", alumno.getNotaAprobacion());
         alumnoData.put("diasCursos", alumno.getDiasCursos());
         alumnoData.put("relator", alumno.getRelator());
         alumnoData.put("asistencia", alumno.getAsistencia());

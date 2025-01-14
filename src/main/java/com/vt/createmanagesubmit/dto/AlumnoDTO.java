@@ -49,12 +49,12 @@ public class AlumnoDTO {
         this.nombreAsistente = alumno.getNombreAsistente();
         this.nombreCurso = alumno.getNombreCurso();
         this.diasCursos = alumno.getDiasCursos();
-        this.numeroHoras = alumno.getNumeroHoras();
+        this.numeroHoras = alumno.getDuracion();
         this.numeroCorrelativoInterno = alumno.getNumeroCorrelativoInterno();
         this.cliente = alumno.getCliente();
         this.obra = alumno.getObra();
         this.codigo = alumno.getCodigo();
-        this.notaAprovacion = alumno.getNotaAprovacion();
+        this.notaAprovacion = alumno.getNotaAprobacion();
         this.relator = alumno.getRelator();
         this.asistencia = alumno.getAsistencia();
         this.estado = alumno.getEstado();

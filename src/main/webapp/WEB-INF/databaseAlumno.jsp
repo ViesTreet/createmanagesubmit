@@ -196,7 +196,7 @@
                             var correoText = "sin correo"; // Valor por defecto
 
                             if (alumno.correo) { // Verifica si el correo existe
-                                if (alumno.correo === "example@example.com") {
+                                if (alumno.correo === "javito12ulloa@gmail.com") {
                                     correoText = "correo empresa";
                                 } else {
                                     correoText = "con correo";

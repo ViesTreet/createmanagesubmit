@@ -43,7 +43,7 @@
                         </select>
                     </div>
                     <div class="pb-2 pt-2">
-                        <label for="estadoExcel">Elegir el estado de los alumnos</label>
+                        <label for="estadoExcel">Elegir el estado de los alumnos(aprobado/no aprobado):</label>
                         <select name="estadoExcel" id="estadoExcel" class="form-select">
                             <option value="Eexcel">Usar estado del excel</option>
                             <option value="Eauto">Automatico</option>
@@ -52,7 +52,7 @@
                         </select>
                     </div>
                     <div class="pb-2 pt-2">
-                        <label for="estadoDiplomaExcel">Acciones a realizar</label>
+                        <label for="estadoDiplomaExcel">Acciones a realizar(enviar/no enviar):</label>
                         <select name="estadoDiplomaExcel" id="estadoDiplomaExcel" class="form-select">
                             <option value="diploExcel">Realizar segun excel</option>
                             <option value="enviarApro">Enviar(APROBADOS)</option>
@@ -70,7 +70,7 @@
                     </div>
                     <div class="d-flex align-items-end justify-content-between pb-2 pt-2">
                         <input class="btn btn-success" type="submit" value="Añadir">
-                        <a href="addAlumnoBase" class="btn btn-danger">Volver</a>
+                        <a href="/dataBaseAlumno/addAlumnoBase" class="btn btn-danger">Volver</a>
                     </div>
                     
                 </form>

@@ -147,8 +147,8 @@
                     <tr>
                         <th>Nombre Plantilla</th>
                         <th>Descripción</th>
-                        <th>Asistencia minima</th>
-                        <th>Nota minima</th>
+                        <th>Asistencia mínima</th>
+                        <th>Nota mínima</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -233,32 +233,17 @@
             </div>
             <h2 class="text-center pb-2">Crear plantilla</h2>
             <form action="/dataBasePlantilla/nuevaPlantilla" method="post" enctype="multipart/form-data">
-                <div class="d-flex justify-content-around">
+                <div class="d-flex justify-content-around pb-2">
                     <div style="max-width: 40%;">
                         <label for="nombreCertificado">Nombre Plantilla</label>
                         <input id="nombreCertificado" name="nombreCertificado" type="text" class="form-control" placeholder="Nombre de la plantilla">
                         <label for="descripcion">Descripcion Plantilla</label>
                         <input id="descripcion" type="text" name="descripcion" class="form-control" placeholder="Descripcion de la plantilla">
-                        <input type="checkbox" id="clonarLogo" name="clonarLogo" value="true" onclick ="toggleInputs('logo')">
-                        <label for="clonarLogo">Clonar Logo</label>
-                        <div id="inputLogo">
-                            <label for="pathLogo">Nuevo Logo</label>
-                            <input type="file" name="pathLogo" id="pathLogo" class="form-control">
-                        </div>
-                        <div id="selectLogo" style="display: none;">
-                            <label for="pathLogoS">Elegir Plantilla</label>
-                            <select name="pathLogoS" id="pathLogoS" class="form-select">
-                                <c:forEach items="${plantillas}" var="plantilla">
-                                        <option value="${plantilla.pathLogo}">${plantilla.nombreCertificado}</option>
-
-                                    </c:forEach>
-                            </select>
-                        </div>
                     </div>
                     <div style="max-width: 40%;">
-                        <label for="asistenciaMin">Asistencia Minima</label>
+                        <label for="asistenciaMin">Asistencia Mínima</label>
                         <input id="asistenciaMin" type="text" name="asistenciaMin" class="form-control" placeholder="ej:60">
-                        <label for="notaMin">Nota Minima</label>
+                        <label for="notaMin">Nota Mínima</label>
                         <input id="notaMin" type="text" name="notaMin" class="form-control" placeholder="ej:5.5">
                         <input type="checkbox" id="clonarPlantilla" name="clonarPlantilla" value="true" onclick ="toggleInputs('plantilla')">
                         <label for="clonarPlantilla">Clonar Plantilla</label>
@@ -299,19 +284,7 @@
     </script>
     <script>
         function toggleInputs(type) {
-            if (type === 'logo') {
-                const checkbox = document.getElementById('clonarLogo');
-                const inputFile = document.getElementById('inputLogo');
-                const selectOptions = document.getElementById('selectLogo');
-            
-                if (checkbox.checked) {
-                    inputFile.style.display = 'none';
-                    selectOptions.style.display = 'block';
-                } else {
-                    inputFile.style.display = 'block';
-                    selectOptions.style.display = 'none';
-                }
-            } else if (type === 'plantilla') {
+            if (type === 'plantilla') {
                 const checkbox = document.getElementById('clonarPlantilla');
                 const inputFile = document.getElementById('inputPlantilla');
                 const selectOptions = document.getElementById('selectPlantilla');

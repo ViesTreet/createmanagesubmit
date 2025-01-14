@@ -32,8 +32,6 @@ public class Plantilla {
 
     private String pathArchivo;
 
-    private String pathLogo;
-
     private int asistenciaMin;
 
     private float notaMin; 
@@ -60,7 +58,6 @@ public class Plantilla {
         this.nombreCertificado = nombreCertificado;
         this.descripcion = descripcion;
         this.pathArchivo = pathArchivo;
-        this.pathLogo = pathLogo;
         this.asistenciaMin = asistenciaMin;
         this.notaMin = notaMin;
         this.alumnos = alumnos;
@@ -123,22 +120,7 @@ public class Plantilla {
     }
 
 
-
-
-    public String getPathLogo() {
-        return pathLogo;
-    }
-
-
-
-
-    public void setPathLogo(String pathLogo) {
-        this.pathLogo = pathLogo;
-    }
-
-
-
-
+    
     public int getAsistenciaMin() {
         return asistenciaMin;
     }

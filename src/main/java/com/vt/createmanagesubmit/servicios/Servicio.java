@@ -52,7 +52,7 @@ public class Servicio {
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
 
-    public static String CORREO_EMPRESA = "example@example.com";
+    public static String CORREO_EMPRESA = "javito12ulloa@gmail.com";
 
     private static final String STATIC_DIRECTORY = "src/main/resources/static";
 
@@ -207,13 +207,13 @@ public class Servicio {
     }
 
     public Alumno funcionEstadoManual(Alumno nuevoAlumno){
-        boolean tieneNota = nuevoAlumno.getNotaAprovacion() != null && !nuevoAlumno.getNotaAprovacion().trim().isEmpty();
+        boolean tieneNota = nuevoAlumno.getNotaAprobacion() != null && !nuevoAlumno.getNotaAprobacion().trim().isEmpty();
         boolean tieneAsistencia = nuevoAlumno.getAsistencia() != null && !nuevoAlumno.getAsistencia().trim().isEmpty();
         boolean aprobado = false;
         try {
             if (tieneNota && !tieneAsistencia) {
                 // Solo nota
-                float nota = Float.parseFloat(nuevoAlumno.getNotaAprovacion().trim());
+                float nota = Float.parseFloat(nuevoAlumno.getNotaAprobacion().trim());
                 if (nota >= nuevoAlumno.getPlantilla().getNotaMin()) {
                     aprobado = true;
                 }
@@ -225,7 +225,7 @@ public class Servicio {
                 }
             } else if (tieneNota && tieneAsistencia) {
                 // Ambos
-                float nota = Float.parseFloat(nuevoAlumno.getNotaAprovacion().trim());
+                float nota = Float.parseFloat(nuevoAlumno.getNotaAprobacion().trim());
                 int asistenciaAlumno = Integer.parseInt(nuevoAlumno.getAsistencia().trim());
                 if (nota >= nuevoAlumno.getPlantilla().getNotaMin() && asistenciaAlumno >= nuevoAlumno.getPlantilla().getAsistenciaMin()) {
                     aprobado = true;
@@ -271,14 +271,14 @@ public class Servicio {
         if(nuevoAlumno.getNombreCurso().trim().isEmpty()){
             nuevoAlumno.setNombreCurso(null);
         }
-        if(nuevoAlumno.getNotaAprovacion().trim().isEmpty()){
-            nuevoAlumno.setNotaAprovacion(null);
+        if(nuevoAlumno.getNotaAprobacion().trim().isEmpty()){
+            nuevoAlumno.setNotaAprobacion(null);
         }
         if(nuevoAlumno.getNumeroCorrelativoInterno().trim().isEmpty()){
             nuevoAlumno.setNumeroCorrelativoInterno(null);
         }
-        if(nuevoAlumno.getNumeroHoras().trim().isEmpty()){
-            nuevoAlumno.setNumeroHoras(null);
+        if(nuevoAlumno.getDuracion().trim().isEmpty()){
+            nuevoAlumno.setDuracion(null);
         }
         if(nuevoAlumno.getObra().trim().isEmpty()){
             nuevoAlumno.setObra(null);
@@ -304,18 +304,8 @@ public class Servicio {
                 nuevoAlumno.setCorreo(CORREO_EMPRESA);
             }
     
-            // Formateo de la fecha
-            if (nuevoAlumno.getDiasCursos() != null && nuevoAlumno.getDiasCursos().contains("-")) {
-                String[] fechaPartes = nuevoAlumno.getDiasCursos().trim().split("-");
-                String fechaFormateada = "entre el " + fechaPartes[0] + " al " + fechaPartes[1];
-                nuevoAlumno.setDiasCursos(fechaFormateada);
-            }
-    
-            // Añadir 'horas' al número de horas
-            if (nuevoAlumno.getNumeroHoras() != null && !nuevoAlumno.getNumeroHoras().trim().isEmpty()) {
-                nuevoAlumno.setNumeroHoras(nuevoAlumno.getNumeroHoras().trim() + " horas");
-            }
-            
+            String nombre=nuevoAlumno.getNombreAsistente().trim().toUpperCase();
+            nuevoAlumno.setNombreAsistente(nombre);
             repoAlum.save(nuevoAlumno);
             return nuevoAlumno;
         }else{
@@ -328,15 +318,19 @@ public class Servicio {
         Optional<Alumno> optalumno = repoAlum.findById(id);
         if(optalumno.isPresent()){
             Alumno alumno = optalumno.get();
+            nombreAsistente = nombreAsistente.trim().toUpperCase();
+            if (correo.trim().isEmpty()){
+                correo = CORREO_EMPRESA;
+            }
             alumno.setNombreAsistente(normalizarValor(nombreAsistente));
             alumno.setNombreCurso(normalizarValor(nombreCurso));
             alumno.setDiasCursos(normalizarValor(diasCursos));
-            alumno.setNumeroHoras(normalizarValor(numeroHoras));
+            alumno.setDuracion(normalizarValor(numeroHoras));
             alumno.setNumeroCorrelativoInterno(normalizarValor(numeroCorrelativoInterno));
             alumno.setCliente(normalizarValor(cliente));
             alumno.setObra(normalizarValor(obra));
             alumno.setCodigo(normalizarValor(codigo));
-            alumno.setNotaAprovacion(normalizarValor(notaAprovacion));
+            alumno.setNotaAprobacion(normalizarValor(notaAprovacion));
             alumno.setRelator(normalizarValor(relator));
             alumno.setAsistencia(normalizarValor(asistencia));
             alumno.setDiploma(normalizarValor(diploma));
@@ -370,32 +364,6 @@ public class Servicio {
         return StringUtils.hasText(valor) ? valor.trim() : null;
     }
 
-    public void cambiarLogo(Long idPlantilla, MultipartFile nuevoLogo) throws IOException {
-        // Obtener la plantilla desde la BD
-        Plantilla plantilla = repoPlanti.findById(idPlantilla)
-                .orElseThrow(() -> new IllegalArgumentException("Plantilla no encontrada"));
-    
-        // Verificar si ya existe un archivo con el mismo nombre
-        String originalFilename = nuevoLogo.getOriginalFilename();
-        String relativePath = "/logos/" + generarNombreUnico(originalFilename, "/logos/");
-        Path logoPath = Paths.get(STATIC_DIRECTORY + relativePath);
-    
-        // Crear directorios si no existen
-        Files.createDirectories(logoPath.getParent());
-    
-        // Guardar el archivo en el sistema
-        Files.write(logoPath, nuevoLogo.getBytes());
-    
-        // Borrar el archivo anterior
-        if (plantilla.getPathLogo() != null) {
-            Path oldLogoPath = Paths.get(STATIC_DIRECTORY + plantilla.getPathLogo());
-            Files.deleteIfExists(oldLogoPath);
-        }
-    
-        // Actualizar la ruta en la BD
-        plantilla.setPathLogo(STATIC_DIRECTORY + relativePath);
-        repoPlanti.save(plantilla);
-    }
     
     public void cambiarPlantilla(Long idPlantilla, MultipartFile nuevaPlantilla) throws IOException {
         // Obtener la plantilla desde la BD

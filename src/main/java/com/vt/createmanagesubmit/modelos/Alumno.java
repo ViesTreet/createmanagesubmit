@@ -34,7 +34,7 @@ public class Alumno {
 
     private String diasCursos;
 
-    private String numeroHoras;
+    private String duracion;
 
     private String numeroCorrelativoInterno;
 
@@ -44,7 +44,7 @@ public class Alumno {
 
     private String codigo;
 
-    private String notaAprovacion;
+    private String notaAprobacion;
 
     private String relator;
 
@@ -85,9 +85,9 @@ public class Alumno {
         this.id = id;
         this.nombreAsistente = nombreAsistente;
         this.nombreCurso = nombreCurso;
-        this.notaAprovacion = notaAprovacion;
+        this.notaAprobacion = notaAprovacion;
         this.numeroCorrelativoInterno = numeroCorrelativoInterno;
-        this.numeroHoras = numeroHoras;
+        this.duracion = numeroHoras;
         this.obra = obra;
         this.plantilla = plantilla;
         this.relator = relator;
@@ -127,12 +127,12 @@ public class Alumno {
         this.diasCursos = diasCursos;
     }
 
-    public String getNumeroHoras() {
-        return numeroHoras;
+    public String getDuracion() {
+        return duracion;
     }
 
-    public void setNumeroHoras(String numeroHoras) {
-        this.numeroHoras = numeroHoras;
+    public void setDuracion(String numeroHoras) {
+        this.duracion = numeroHoras;
     }
 
     public String getNumeroCorrelativoInterno() {
@@ -167,12 +167,12 @@ public class Alumno {
         this.codigo = codigo;
     }
 
-    public String getNotaAprovacion() {
-        return notaAprovacion;
+    public String getNotaAprobacion() {
+        return notaAprobacion;
     }
 
-    public void setNotaAprovacion(String notaAprovacion) {
-        this.notaAprovacion = notaAprovacion;
+    public void setNotaAprobacion(String notaAprovacion) {
+        this.notaAprobacion = notaAprovacion;
     }
 
     public String getRelator() {
@@ -261,9 +261,9 @@ public class Alumno {
     @Override
     public String toString() {
         return "Alumno [id=" + id + ", nombreAsistente=" + nombreAsistente + ", nombreCurso=" + nombreCurso
-                + ", diasCursos=" + diasCursos + ", numeroHoras=" + numeroHoras + ", numeroCorrelativoInterno="
+                + ", diasCursos=" + diasCursos + ", numeroHoras=" + duracion + ", numeroCorrelativoInterno="
                 + numeroCorrelativoInterno + ", cliente=" + cliente + ", obra=" + obra + ", codigo=" + codigo
-                + ", notaAprovacion=" + notaAprovacion + ", relator=" + relator + ", asistencia=" + asistencia
+                + ", notaAprovacion=" + notaAprobacion + ", relator=" + relator + ", asistencia=" + asistencia
                 + ", estado=" + estado + ", diploma=" + diploma + ", rut=" + rut + ", correo=" + correo + ", plantilla="
                 + plantilla + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + "]";
     }

@@ -141,18 +141,11 @@
                         <input id="nombreCertificado" name="nombreCertificado" type="text" class="form-control" placeholder="Nombre de la plantilla">
                         <Label for="descripcion">Descripcion Plantilla</Label>
                         <input id="descripcion" type="text" name="descripcion" class="form-control" placeholder="Descripcion de la plantilla">
-                        <input type="checkbox" id="cambiarLogo" name="cambiarLogo" value="true" onclick="toggleInputFile('inputLogo', this)">
-                        <label for="cambiarLogo">Cambiar Logo</label>
-                        <!-- Input file para subir el nuevo logo -->
-                        <div id="inputLogo" style="display: none;">
-                            <label for="pathLogo">Nuevo Logo</label>
-                            <input type="file" name="pathLogo" id="pathLogo" class="form-control" >
-                        </div>
                     </div>
                     <div style="max-width: 40%;">
-                        <Label for="asistenciaMin">Asistencia Minima</Label>
+                        <Label for="asistenciaMin">Asistencia Mínima</Label>
                         <input id="asistenciaMin" type="text" name="asistenciaMin" class="form-control" placeholder="ej:60">
-                        <Label for="notaMin">Nota Minima</Label>
+                        <Label for="notaMin">Nota Mínima</Label>
                         <input id="notaMin" type="text" name="notaMin" class="form-control" placeholder="ej:5.5">
                         <input type="checkbox" id="cambiarPlantilla" name="cambiarPlantilla" value="true" onclick="toggleInputFile('inputPlantilla', this)">
                         <label for="cambiarPlantilla">Cambiar Plantilla</label>

@@ -41,17 +41,7 @@ public class ServicioApi {
         if (nombre == null || nombre.isEmpty()) {
             return nombre;
         }
-        // Divide el nombre en palabras y capitaliza cada una
-        String[] palabras = nombre.toLowerCase().split(" ");
-        StringBuilder nombreFormateado = new StringBuilder();
-
-        for (String palabra : palabras) {
-            if (!palabra.isEmpty()) {
-                nombreFormateado.append(Character.toUpperCase(palabra.charAt(0)))
-                                .append(palabra.substring(1))
-                                .append(" ");
-            }
-        }
+        String nombreFormateado = nombre.trim().toUpperCase();
 
         return nombreFormateado.toString().trim();
     }
