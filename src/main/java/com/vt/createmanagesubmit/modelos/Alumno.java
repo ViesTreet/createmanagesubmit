@@ -38,6 +38,8 @@ public class Alumno {
 
     private String numeroCorrelativoInterno;
 
+    private String modalidad;
+
     private String cliente;
 
     private String obra;
@@ -73,7 +75,7 @@ public class Alumno {
     public Alumno() {
     }
 
-    public Alumno(String asistencia, String cliente, String codigo, String correo, Date createdAt, String diasCursos, String diploma, String estado, Long id, String nombreAsistente, String nombreCurso, String notaAprovacion, String numeroCorrelativoInterno, String numeroHoras, String obra, Plantilla plantilla, String relator, String rut, Date updatedAt) {
+    public Alumno(String asistencia, String cliente, String codigo, String correo, Date createdAt, String diasCursos, String diploma, String estado, Long id, String nombreAsistente, String nombreCurso, String notaAprovacion, String numeroCorrelativoInterno, String modalidad, String numeroHoras, String obra, Plantilla plantilla, String relator, String rut, Date updatedAt) {
         this.asistencia = asistencia;
         this.cliente = cliente;
         this.codigo = codigo;
@@ -87,6 +89,7 @@ public class Alumno {
         this.nombreCurso = nombreCurso;
         this.notaAprobacion = notaAprovacion;
         this.numeroCorrelativoInterno = numeroCorrelativoInterno;
+        this.modalidad = modalidad;
         this.duracion = numeroHoras;
         this.obra = obra;
         this.plantilla = plantilla;
@@ -141,6 +144,14 @@ public class Alumno {
 
     public void setNumeroCorrelativoInterno(String numeroCorrelativoInterno) {
         this.numeroCorrelativoInterno = numeroCorrelativoInterno;
+    }
+
+    public String getModalidad() {
+        return modalidad;
+    }
+
+    public void setModalidad(String Modalidad) {
+        this.modalidad = Modalidad;
     }
 
     public String getCliente() {
@@ -262,7 +273,7 @@ public class Alumno {
     public String toString() {
         return "Alumno [id=" + id + ", nombreAsistente=" + nombreAsistente + ", nombreCurso=" + nombreCurso
                 + ", diasCursos=" + diasCursos + ", numeroHoras=" + duracion + ", numeroCorrelativoInterno="
-                + numeroCorrelativoInterno + ", cliente=" + cliente + ", obra=" + obra + ", codigo=" + codigo
+                + numeroCorrelativoInterno +", modalidad="+ modalidad +", cliente=" + cliente + ", obra=" + obra + ", codigo=" + codigo
                 + ", notaAprovacion=" + notaAprobacion + ", relator=" + relator + ", asistencia=" + asistencia
                 + ", estado=" + estado + ", diploma=" + diploma + ", rut=" + rut + ", correo=" + correo + ", plantilla="
                 + plantilla + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + "]";

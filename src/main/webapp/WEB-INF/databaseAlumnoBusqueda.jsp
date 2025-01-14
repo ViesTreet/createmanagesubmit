@@ -139,6 +139,7 @@
                         <option value="cliente">Cliente</option>
                         <option value="obra">Obra</option>
                         <option value="relator">Relator</option>
+                        <option value="correlativo">Correlativo</option>
                     </select>
                     <input id="busquedaAlumno" type="search"  class ="col-5" onkeydown="submitOnEnter(event, 'buscarLink')" placeholder="Buscar" name="busquedaAlumno"/>
                     <a id="buscarLink" href="#" class="btn btn-outline-primary">Buscar</a>
@@ -154,8 +155,8 @@
             <table class="table table-hover table-bordered mb-5" style="table-layout: fixed; height: 100%;" id="tablaAlumnos">
                 <thead class="thead-dark">
                     <tr>
-                        <th>Nombre Asistente</th>
-                        <th>Nombre Curso</th>
+                        <th>Nombre</th>
+                        <th>Curso</th>
                         <th>Cliente</th>
                         <th>Obra</th>
                         <th>Relator</th>
@@ -164,6 +165,7 @@
                         <th>Correo</th>
                         <th>Plantilla</th>
                         <th>Diploma</th>
+                        <th>Correlativo</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -208,6 +210,7 @@
                                 "<td>" + correoText + "</td>" +
                                 "<td>"+ (alumno.plantilla != null ? alumno.plantilla : "") +"</td>"+
                                 "<td>"+ (alumno.diploma != null ? alumno.diploma : "") +"</td>"+
+                                "<td>" + (alumno.numeroCorrelativoInterno != null ? alumno.numeroCorrelativoInterno : "") + "</td>" +
                             "</tr>";
                             tbody.append(fila);
 

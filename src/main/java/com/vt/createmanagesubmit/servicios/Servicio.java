@@ -118,6 +118,9 @@ public class Servicio {
             case "relator":
                 listaResultante = repoAlum.findByRelatorContaining(dato, pageable); // Usando Containing
                 break;
+            case "correlativo":
+                listaResultante = repoAlum.findByNumeroCorrelativoInterno(dato, pageable);
+                break;
             default:
                 listaResultante = repoAlum.findAll(PageRequest.of(0, 200, Sort.by("updatedAt").descending()));
                 break;
@@ -246,6 +249,14 @@ public class Servicio {
         return nuevoAlumno;
     }
 
+    public void numeroCorrelativoAuto(Alumno alumno){
+        int year = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR);
+        Long idC = alumno.getId();
+        alumno.setNumeroCorrelativoInterno(year+"-"+idC);
+        repoAlum.save(alumno);
+
+    }
+
     public Alumno comprobarYGuardar(Alumno nuevoAlumno,String orden) {
         if(nuevoAlumno.getAsistencia().trim().isEmpty()){
             nuevoAlumno.setAsistencia(null);
@@ -274,9 +285,6 @@ public class Servicio {
         if(nuevoAlumno.getNotaAprobacion().trim().isEmpty()){
             nuevoAlumno.setNotaAprobacion(null);
         }
-        if(nuevoAlumno.getNumeroCorrelativoInterno().trim().isEmpty()){
-            nuevoAlumno.setNumeroCorrelativoInterno(null);
-        }
         if(nuevoAlumno.getDuracion().trim().isEmpty()){
             nuevoAlumno.setDuracion(null);
         }
@@ -288,6 +296,9 @@ public class Servicio {
         }
         if(nuevoAlumno.getRut().trim().isEmpty()){
             nuevoAlumno.setRut(null);
+        }
+        if(nuevoAlumno.getModalidad().trim().isEmpty()){
+            nuevoAlumno.setModalidad(null);
         }
 
         if ((nuevoAlumno.getNombreAsistente() != null && !nuevoAlumno.getNombreAsistente().trim().isEmpty())||(nuevoAlumno.getRut() != null && !nuevoAlumno.getRut().trim().isEmpty())) {
@@ -307,13 +318,14 @@ public class Servicio {
             String nombre=nuevoAlumno.getNombreAsistente().trim().toUpperCase();
             nuevoAlumno.setNombreAsistente(nombre);
             repoAlum.save(nuevoAlumno);
+            numeroCorrelativoAuto(nuevoAlumno);
             return nuevoAlumno;
         }else{
             throw new MissingNameOrRutException("Uno de los dos campos(Nombre o Rut) debe tener contenido para guardar un alumno.");
         }
     }
 
-    public void editarAlumno(Long id,String nombreAsistente,String nombreCurso,String diasCursos,String numeroHoras,String numeroCorrelativoInterno,String cliente,String obra,String codigo,String notaAprovacion,String relator,String asistencia,String estado,String diploma,String rut,String correo,Long plantillaId) {
+    public void editarAlumno(Long id,String nombreAsistente,String nombreCurso,String diasCursos,String numeroHoras,String cliente,String obra,String codigo,String notaAprovacion,String relator,String asistencia,String estado,String diploma,String rut,String modalidad,String correo,Long plantillaId) {
 
         Optional<Alumno> optalumno = repoAlum.findById(id);
         if(optalumno.isPresent()){
@@ -326,9 +338,9 @@ public class Servicio {
             alumno.setNombreCurso(normalizarValor(nombreCurso));
             alumno.setDiasCursos(normalizarValor(diasCursos));
             alumno.setDuracion(normalizarValor(numeroHoras));
-            alumno.setNumeroCorrelativoInterno(normalizarValor(numeroCorrelativoInterno));
             alumno.setCliente(normalizarValor(cliente));
             alumno.setObra(normalizarValor(obra));
+            alumno.setModalidad(normalizarValor(modalidad));
             alumno.setCodigo(normalizarValor(codigo));
             alumno.setNotaAprobacion(normalizarValor(notaAprovacion));
             alumno.setRelator(normalizarValor(relator));

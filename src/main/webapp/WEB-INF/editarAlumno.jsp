@@ -48,8 +48,8 @@
                                 <input type="text" name="numeroHoras" id="numeroHoras" class="form-control" placeholder="Duración">
                             </div>
                             <div>
-                                <label for="numeroCorrelativoInterno">Numero correlativo interno</label>
-                                <input type="text" name="numeroCorrelativoInterno" id="numeroCorrelativoInterno" class="form-control" placeholder="N° Correlativo interno">
+                                <label for="modalidad">Modalidad</label>
+                                <input type="text" name="modalidad" id="modalidad" class="form-control" placeholder="virtual">
                             </div>
                         </div>
                         <div style="max-width: 33%;">
@@ -130,8 +130,7 @@
             document.getElementById('nombreAsistente').value = "${alumno.nombreAsistente}";
             document.getElementById('nombreCurso').value = "${alumno.nombreCurso}";
             document.getElementById('diasCursos').value = "${alumno.diasCursos}";
-            document.getElementById('numeroHoras').value = "${alumno.numeroHoras}";
-            document.getElementById('numeroCorrelativoInterno').value = "${alumno.numeroCorrelativoInterno}";
+            document.getElementById('numeroHoras').value = "${alumno.duracion}";
             document.getElementById('cliente').value = "${alumno.cliente}";
             document.getElementById('obra').value = "${alumno.obra}";
             document.getElementById('codigo').value = "${alumno.codigo}";
@@ -141,6 +140,7 @@
             document.getElementById('diploma').value = "${alumno.diploma}";
             document.getElementById('asistencia').value = "${alumno.asistencia}";
             document.getElementById('rut').value = "${alumno.rut}";
+            document.getElementById('modalidad').value = "${alumno.modalidad}";
             document.getElementById('plantilla').value = "${alumno.plantilla.id}";
         
             // Manejo especial para el campo 'estado'

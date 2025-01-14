@@ -30,14 +30,15 @@
                     <p><strong>Nombre del alumno:</strong> ${alumno.nombreAsistente}</p>
                     <p><strong>Nombre del curso:</strong> ${alumno.nombreCurso}</p>
                     <p><strong>Días del curso:</strong> ${alumno.diasCursos}</p>
-                    <p><strong>Duración del curso</strong> ${alumno.numeroHoras}</p>
+                    <p><strong>Duración del curso</strong> ${alumno.duracion}</p>
                     <p><strong>Número correlativo interno:</strong> ${alumno.numeroCorrelativoInterno}</p>
                     <p><strong>Cliente:</strong> ${alumno.cliente}</p>
                     <p><strong>Obra:</strong> ${alumno.obra}</p>
                     <p><strong>Código:</strong> ${alumno.codigo}</p>
+                    <p><strong>Modalidad:</strong> ${alumno.modalidad}</p>
+                    <p><strong>Nota de aprobación:</strong> ${alumno.notaAprobacion}</p>
                 </div>
                 <div style="max-width: 50%;">
-                    <p><strong>Nota de aprobación:</strong> ${alumno.notaAprobacion}</p>
                     <p><strong>Relator:</strong> ${alumno.relator}</p>
                     <p><strong>Asistencia:</strong> ${alumno.asistencia}</p>
                     <p><strong>Estado:</strong> ${alumno.estado}</p>
@@ -45,6 +46,7 @@
                     <p><strong>RUT:</strong> ${alumno.rut}</p>
                     <p><strong>Correo electrónico:</strong> ${alumno.correo}</p>
                     <p><strong>Plantilla:</strong> ${alumno.plantilla != null ? alumno.plantilla.nombreCertificado : 'N/A'}</p>
+                    <p><strong>Plantilla(lugar y fecha):</strong> ${alumno.plantilla != null ? alumno.plantilla.lugarYFecha : 'N/A'}</p>
                     <p><strong>Fecha de creación:</strong> ${alumno.createdAt}</p>
                     <p><strong>Fecha de actualización:</strong> ${alumno.updatedAt}</p>
                 </div>

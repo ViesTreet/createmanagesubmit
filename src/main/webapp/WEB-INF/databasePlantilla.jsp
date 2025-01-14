@@ -149,6 +149,7 @@
                         <th>Descripción</th>
                         <th>Asistencia mínima</th>
                         <th>Nota mínima</th>
+                        <th>Lugar y fecha</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -181,6 +182,7 @@
                                 "<td>" + (plantilla.descripcion != null ? plantilla.descripcion : "") + "</td>" +
                                 "<td>" + (plantilla.asistenciaMin != null ? plantilla.asistenciaMin : "") + "</td>" +
                                 "<td>" + (plantilla.notaMin != null ? plantilla.notaMin : "") + "</td>" +
+                                "<td>" + (plantilla.lugarYFecha != null ? plantilla.lugarYFecha : "") + "</td>" +
                                 "<td class='d-flex justify-content-around'><a class='btn btn-primary' href='/dataBasePlantilla/plantilla/"+ plantilla.id +"/editar'>Editar</a><a href='/dataBasePlantilla/plantilla/"+ plantilla.id +"/probar' class='btn btn-secondary'>Probar</a><a href='/dataBasePlantilla/plantilla/"+ plantilla.id +"/borrar' class='btn btn-danger'>Borrar</a></td>" +
                                 "</tr>";
                             tbody.append(fila);
@@ -239,6 +241,8 @@
                         <input id="nombreCertificado" name="nombreCertificado" type="text" class="form-control" placeholder="Nombre de la plantilla">
                         <label for="descripcion">Descripcion Plantilla</label>
                         <input id="descripcion" type="text" name="descripcion" class="form-control" placeholder="Descripcion de la plantilla">
+                        <label for="lugarYFecha">Lugar y fecha</label>
+                        <input type="text" name="lugarYFecha" id="lugarYFecha" class="form-control" placeholder="ej:Santiago,2023">
                     </div>
                     <div style="max-width: 40%;">
                         <label for="asistenciaMin">Asistencia Mínima</label>

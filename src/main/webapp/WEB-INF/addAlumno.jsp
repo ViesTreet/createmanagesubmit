@@ -48,8 +48,8 @@
                                 <input type="text" name="numeroHoras" id="numeroHoras" class="form-control" placeholder="Duración">
                             </div>
                             <div>
-                                <label for="numeroCorrelativoInterno">Numero correlativo interno</label>
-                                <input type="text" name="numeroCorrelativoInterno" id="numeroCorrelativoInterno" class="form-control" placeholder="N° Correlativo interno">
+                                <label for="modalidad">Modalidad</label>
+                                <input type="text" name="modalidad" id="modalidad" class="form-control" placeholder="virtual">
                             </div>
                         </div>
                         <div style="max-width: 33%;">
@@ -163,7 +163,7 @@
         }
 
         window.onload = function() {
-            var campos = ['curso', 'diasCursos', 'numeroHoras', 'numeroCorrelativoInterno', 'cliente', 'obra', 'codigo', 'asistencia', 'estado', 'diploma', 'plantilla', 'relator'];
+            var campos = ['curso', 'diasCursos', 'numeroHoras', 'numeroCorrelativoInterno','modalidad', 'cliente', 'obra', 'codigo', 'asistencia', 'estado', 'diploma', 'plantilla', 'relator'];
         
             campos.forEach(function(campo) {
                 var valor = getCookie(campo);
@@ -182,7 +182,7 @@
 
         function guardarDatos() {
             var guardar = document.getElementById('guardar').checked;
-            var campos = ['curso', 'diasCursos', 'numeroHoras', 'numeroCorrelativoInterno', 'cliente', 'obra', 'codigo', 'asistencia', 'estado', 'diploma', 'plantilla', 'relator'];
+            var campos = ['curso', 'diasCursos', 'numeroHoras', 'numeroCorrelativoInterno','modalidad', 'cliente', 'obra', 'codigo', 'asistencia', 'estado', 'diploma', 'plantilla', 'relator'];
 
             if (guardar) {
                 campos.forEach(function(campo) {

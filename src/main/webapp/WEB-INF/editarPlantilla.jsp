@@ -141,6 +141,8 @@
                         <input id="nombreCertificado" name="nombreCertificado" type="text" class="form-control" placeholder="Nombre de la plantilla">
                         <Label for="descripcion">Descripcion Plantilla</Label>
                         <input id="descripcion" type="text" name="descripcion" class="form-control" placeholder="Descripcion de la plantilla">
+                        <label for="lugarYFecha">Lugar y fecha</label>
+                        <input type="text" name="lugarYFecha" id="lugarYFecha" class="form-control" placeholder="ej:Santiago,2023">
                     </div>
                     <div style="max-width: 40%;">
                         <Label for="asistenciaMin">Asistencia Mínima</Label>
@@ -182,6 +184,7 @@
             document.getElementById('descripcion').value = "${plantilla.descripcion}";
             document.getElementById('asistenciaMin').value = "${plantilla.asistenciaMin}";
             document.getElementById('notaMin').value = "${plantilla.notaMin}";
+            document.getElementById('lugarYFecha').value = "${plantilla.lugarYFecha}";
         });
     </script>
     <script>

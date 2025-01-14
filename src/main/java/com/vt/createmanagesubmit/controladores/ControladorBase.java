@@ -153,7 +153,7 @@ public class ControladorBase {
     }
 
     @PostMapping("/dataBaseAlumno/agregarAlumno")
-    public String agregarAlumno(@RequestParam(name = "nombreAsistente") String nombreAsistente,@RequestParam("curso")String curso,@RequestParam(name = "diasCursos") String diasCursos,@RequestParam(name = "numeroHoras") String numeroHoras,@RequestParam(name = "numeroCorrelativoInterno") String numeroCorrelativoInterno,@RequestParam(name = "cliente") String cliente,@RequestParam(name = "obra") String obra,@RequestParam(name = "codigo") String codigo,@RequestParam(name = "notaAprobacion") String notaAprobacion,@RequestParam(name = "relator") String relator,@RequestParam(name = "asistencia") String asistencia,@RequestParam(name = "estado") String estado,@RequestParam(name = "diploma") String diploma,@RequestParam(name = "rut") String rut,@RequestParam(name = "correo") String correo,@RequestParam(name = "plantilla",required = false) Long plantilla,@RequestParam(value = "rutificador", defaultValue = "false") boolean rutificador,Model model,HttpSession session) {
+    public String agregarAlumno(@RequestParam(name = "nombreAsistente") String nombreAsistente,@RequestParam("curso")String curso,@RequestParam(name = "diasCursos") String diasCursos,@RequestParam(name = "numeroHoras") String numeroHoras,@RequestParam(name = "cliente") String cliente,@RequestParam(name = "obra") String obra,@RequestParam(name = "codigo") String codigo,@RequestParam(name = "notaAprobacion") String notaAprobacion,@RequestParam(name = "relator") String relator,@RequestParam(name = "asistencia") String asistencia,@RequestParam(name = "estado") String estado,@RequestParam(name = "diploma") String diploma,@RequestParam(value="modalidad") String modalidad,@RequestParam(name = "rut") String rut,@RequestParam(name = "correo") String correo,@RequestParam(name = "plantilla",required = false) Long plantilla,@RequestParam(value = "rutificador", defaultValue = "false") boolean rutificador,Model model,HttpSession session) {
     Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
 	    if (usuarioTemporal == null) {
 	        return "redirect:/";  
@@ -167,8 +167,8 @@ public class ControladorBase {
     nuevoAlumno.setEstado(estado);
     nuevoAlumno.setNombreCurso(curso);
     nuevoAlumno.setNotaAprobacion(notaAprobacion);
-    nuevoAlumno.setNumeroCorrelativoInterno(numeroCorrelativoInterno);
     nuevoAlumno.setDuracion(numeroHoras);
+    nuevoAlumno.setModalidad(modalidad);
     nuevoAlumno.setObra(obra);
     nuevoAlumno.setRelator(relator);
     nuevoAlumno.setRut(rut);
@@ -284,7 +284,7 @@ public class ControladorBase {
     }
     
     @PostMapping("/dataBaseAlumno/editarAlumno")
-    public String editarAlumno(@RequestParam("id") Long id,@RequestParam("nombreAsistente") String nombreAsistente,@RequestParam("nombreCurso") String nombreCurso,@RequestParam("diasCursos") String diasCursos,@RequestParam("numeroHoras") String numeroHoras,@RequestParam("numeroCorrelativoInterno") String numeroCorrelativoInterno,@RequestParam("cliente") String cliente,@RequestParam("obra") String obra,@RequestParam("codigo") String codigo,@RequestParam("notaAprobacion") String notaAprobacion,@RequestParam("relator") String relator,@RequestParam("asistencia") String asistencia,@RequestParam("estado") String estado,@RequestParam("diploma") String diploma,@RequestParam("rut") String rut,@RequestParam("correo") String correo,@RequestParam("plantilla") Long plantillaId,Model model,HttpSession session) {
+    public String editarAlumno(@RequestParam("id") Long id,@RequestParam("nombreAsistente") String nombreAsistente,@RequestParam("nombreCurso") String nombreCurso,@RequestParam("diasCursos") String diasCursos,@RequestParam("numeroHoras") String numeroHoras,@RequestParam("cliente") String cliente,@RequestParam("obra") String obra,@RequestParam("codigo") String codigo,@RequestParam("notaAprobacion") String notaAprobacion,@RequestParam("relator") String relator,@RequestParam("modalidad") String modalidad,@RequestParam("asistencia") String asistencia,@RequestParam("estado") String estado,@RequestParam("diploma") String diploma,@RequestParam("rut") String rut,@RequestParam("correo") String correo,@RequestParam("plantilla") Long plantillaId,Model model,HttpSession session) {
         
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuarioTemporal == null) {
@@ -292,7 +292,7 @@ public class ControladorBase {
         }
         try {
             nombreAsistente = servicioApi.formatearNombre(nombreAsistente);
-            servicio.editarAlumno(id, nombreAsistente, nombreCurso, diasCursos, numeroHoras, numeroCorrelativoInterno, cliente, obra, codigo, notaAprobacion,relator, asistencia, estado, diploma, rut, correo, plantillaId);
+            servicio.editarAlumno(id, nombreAsistente, nombreCurso, diasCursos, numeroHoras, cliente, obra, codigo, notaAprobacion,relator, asistencia, estado, diploma, rut, modalidad, correo, plantillaId);
             return "redirect:/dataBaseAlumno/alumno/"+id;  
 
         } catch (MissingTemplateException | MissingAlumnoIdException | MissingNameOrRutException ex) {
@@ -391,7 +391,7 @@ public class ControladorBase {
     }
 
     @PostMapping("/dataBasePlantilla/nuevaPlantilla")
-    public String crearNuevaPlantilla(@RequestParam String nombreCertificado,@RequestParam String descripcion,@RequestParam String asistenciaMin,@RequestParam String notaMin,@RequestParam(required = false) MultipartFile pathArchivo,@RequestParam(required = false) String pathArchivoS,@RequestParam(defaultValue = "false") boolean clonarPlantilla,HttpSession session,Model model) {
+    public String crearNuevaPlantilla(@RequestParam String nombreCertificado,@RequestParam String descripcion,@RequestParam String asistenciaMin,@RequestParam String notaMin,@RequestParam(required = false) MultipartFile pathArchivo,@RequestParam(required = false) String pathArchivoS,@RequestParam(defaultValue = "false") boolean clonarPlantilla,@RequestParam(value="lugarYFecha")String lugarYFecha,HttpSession session,Model model) {
 
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuarioTemporal != null) {
@@ -406,6 +406,7 @@ public class ControladorBase {
                 Plantilla nuevaPlantilla = new Plantilla();
                 nuevaPlantilla.setNombreCertificado(nombreCertificado);
                 nuevaPlantilla.setDescripcion(descripcion);
+                nuevaPlantilla.setLugarYFecha(lugarYFecha);
                 if(asistenciaMin.isBlank()){
                     nuevaPlantilla.setAsistenciaMin(0);
                 }else{
@@ -489,7 +490,7 @@ public class ControladorBase {
     }
 
     @PostMapping("/dataBasePlantilla/editarPlantilla")
-    public String editarPlantilla(@RequestParam("id") Long id,@RequestParam(value = "cambiarPlantilla", required = false) boolean cambiarPlantilla,@RequestParam(value = "pathArchivo", required = false) MultipartFile nuevaPlantilla,@RequestParam(value = "nombreCertificado")String nombre,@RequestParam(value = "descripcion")String descripcion,@RequestParam(value = "asistenciaMin")String asistencia,@RequestParam(value = "notaMin")String nota ,HttpSession session,Model model) {  
+    public String editarPlantilla(@RequestParam("id") Long id,@RequestParam(value = "cambiarPlantilla", required = false) boolean cambiarPlantilla,@RequestParam(value = "pathArchivo", required = false) MultipartFile nuevaPlantilla,@RequestParam(value = "nombreCertificado")String nombre,@RequestParam(value = "descripcion")String descripcion,@RequestParam(value = "asistenciaMin")String asistencia,@RequestParam(value = "notaMin")String nota,@RequestParam(value="lugarYFecha")String lugarYFecha,HttpSession session,Model model) {  
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
 	    if (usuarioTemporal != null) {   
             Plantilla plantilla = servicio.plantillaPorId(id);
@@ -517,6 +518,7 @@ public class ControladorBase {
             }
             plantilla.setNombreCertificado(nombre);
             plantilla.setDescripcion(descripcion);
+            plantilla.setLugarYFecha(lugarYFecha);
             if(asistencia.isBlank()){
                 plantilla.setAsistenciaMin(0);
             }else{

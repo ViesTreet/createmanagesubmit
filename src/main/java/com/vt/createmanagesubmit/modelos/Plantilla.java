@@ -36,6 +36,8 @@ public class Plantilla {
 
     private float notaMin; 
 
+    private String lugarYFecha;
+
     @OneToMany(mappedBy = "plantilla", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Alumno> alumnos;
 
@@ -53,13 +55,14 @@ public class Plantilla {
 
 
     public Plantilla(Long id, String nombreCertificado, String descripcion, String tipoArchivo, String pathArchivo,
-            String pathLogo, int asistenciaMin, float notaMin, List<Alumno> alumnos, Date createdAt, Date updatedAt) {
+            String pathLogo, int asistenciaMin, float notaMin, String lugarYFecha, List<Alumno> alumnos, Date createdAt, Date updatedAt) {
         this.id = id;
         this.nombreCertificado = nombreCertificado;
         this.descripcion = descripcion;
         this.pathArchivo = pathArchivo;
         this.asistenciaMin = asistenciaMin;
         this.notaMin = notaMin;
+        this.lugarYFecha = lugarYFecha;
         this.alumnos = alumnos;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -144,6 +147,19 @@ public class Plantilla {
 
     public void setNotaMin(float notaMin) {
         this.notaMin = notaMin;
+    }
+
+
+
+    public String getLugarYFecha(){
+        return lugarYFecha;
+    }
+
+
+
+    
+    public void setLugarYFecha(String lugarYFecha){
+        this.lugarYFecha = lugarYFecha;
     }
 
 

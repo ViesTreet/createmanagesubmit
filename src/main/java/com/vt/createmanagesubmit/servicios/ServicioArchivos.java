@@ -202,6 +202,7 @@ public class ServicioArchivos {
                         alumno.setNombreAsistente(nombre);
                         if(!alumno.getNombreAsistente().isEmpty()){
                             alumnoRepo.save(alumno);
+                            servicio.numeroCorrelativoAuto(alumno);
                             if(estadoDiplomaExcel.equals("enviarApro")&&estadoExcel.equals("aprobado")){
                                 estadoDiplomaExcel = "enviarTodos";
                             }
@@ -262,10 +263,6 @@ public class ServicioArchivos {
             case "duración curso":
                 alumno.setDuracion(valorCelda);
                 break;
-            case "nº correlativo interno":
-            case "numero correlativo interno":
-                alumno.setNumeroCorrelativoInterno(valorCelda);
-                break;
             case "cliente":
                 alumno.setCliente(valorCelda);
                 break;
@@ -308,6 +305,9 @@ public class ServicioArchivos {
                 break;
             case "correo":
                 alumno.setCorreo(valorCelda);
+                break;
+            case "modalidad":
+                alumno.setModalidad(valorCelda);
                 break;
             case "plantilla":
                 Optional<Plantilla> plantillaAlumnoOptional = servicio.plantillaPorNombre(valorCelda);
@@ -455,13 +455,16 @@ public class ServicioArchivos {
 
         // Crea un mapa de los datos del alumno que se usarán para reemplazar en los placeholders
         Map<String, String> alumnoData = new HashMap<>();
-        alumnoData.put("nombreAsistente", alumno.getNombreAsistente());
-        alumnoData.put("nombreCurso", alumno.getNombreCurso());
-        alumnoData.put("numeroHoras", alumno.getDuracion());
-        alumnoData.put("notaAprovacion", alumno.getNotaAprobacion());
-        alumnoData.put("diasCursos", alumno.getDiasCursos());
+        alumnoData.put("nombre alumno", alumno.getNombreAsistente());
+        alumnoData.put("curso", alumno.getNombreCurso());
+        alumnoData.put("duracion", alumno.getDuracion());
+        alumnoData.put("nota", alumno.getNotaAprobacion());
+        alumnoData.put("dias curso", alumno.getDiasCursos());
         alumnoData.put("relator", alumno.getRelator());
         alumnoData.put("asistencia", alumno.getAsistencia());
+        alumnoData.put("lugar y fecha", plantilla.getLugarYFecha());
+        alumnoData.put("correlativo", alumno.getNumeroCorrelativoInterno());
+        alumnoData.put("modalidad", alumno.getModalidad());
 
         // Procesa las slides y shapes
         for (XSLFSlide slide : ppt.getSlides()) {
@@ -808,13 +811,16 @@ public class ServicioArchivos {
 
         // Crea un mapa de los datos del alumno que se usarán para reemplazar en los placeholders
         Map<String, String> alumnoData = new HashMap<>();
-        alumnoData.put("nombreAsistente", alumno.getNombreAsistente());
-        alumnoData.put("nombreCurso", alumno.getNombreCurso());
-        alumnoData.put("numeroHoras", alumno.getDuracion());
-        alumnoData.put("notaAprovacion", alumno.getNotaAprobacion());
-        alumnoData.put("diasCursos", alumno.getDiasCursos());
+        alumnoData.put("nombre alumno", alumno.getNombreAsistente());
+        alumnoData.put("curso", alumno.getNombreCurso());
+        alumnoData.put("duracion", alumno.getDuracion());
+        alumnoData.put("nota", alumno.getNotaAprobacion());
+        alumnoData.put("dias curso", alumno.getDiasCursos());
         alumnoData.put("relator", alumno.getRelator());
         alumnoData.put("asistencia", alumno.getAsistencia());
+        alumnoData.put("lugar y fecha", plantilla.getLugarYFecha());
+        alumnoData.put("correlativo", alumno.getNumeroCorrelativoInterno());
+        alumnoData.put("modalidad", alumno.getModalidad());
 
         // Procesa las slides y shapes
         for (XSLFSlide slide : ppt.getSlides()) {
@@ -906,13 +912,16 @@ public class ServicioArchivos {
 
         // Crea un mapa de los datos del alumno que se usarán para reemplazar en los placeholders
         Map<String, String> alumnoData = new HashMap<>();
-        alumnoData.put("nombreAsistente", alumno.getNombreAsistente());
-        alumnoData.put("nombreCurso", alumno.getNombreCurso());
-        alumnoData.put("numeroHoras", alumno.getDuracion());
-        alumnoData.put("notaAprobacion", alumno.getNotaAprobacion());
-        alumnoData.put("diasCursos", alumno.getDiasCursos());
+        alumnoData.put("nombre alumno", alumno.getNombreAsistente());
+        alumnoData.put("curso", alumno.getNombreCurso());
+        alumnoData.put("duracion", alumno.getDuracion());
+        alumnoData.put("nota", alumno.getNotaAprobacion());
+        alumnoData.put("dias curso", alumno.getDiasCursos());
         alumnoData.put("relator", alumno.getRelator());
         alumnoData.put("asistencia", alumno.getAsistencia());
+        alumnoData.put("lugar y fecha", plantilla.getLugarYFecha());
+        alumnoData.put("correlativo", alumno.getNumeroCorrelativoInterno());
+        alumnoData.put("modalidad", alumno.getModalidad());
 
         // Procesa las slides y shapes
         for (XSLFSlide slide : ppt.getSlides()) {
