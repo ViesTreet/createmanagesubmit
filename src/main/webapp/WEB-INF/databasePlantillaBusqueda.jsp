@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <title>Lista de plantilla busqueda</title>
+    <title>Plantillas de diplomas busqueda</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Importar CSS de Bootstrap -->
@@ -129,7 +129,7 @@
         </nav>
     </header>
     <div id="contenderBase" class="container pt-2 pb-2" style="height: 90vh;">
-        <h2 class="text-center">Base de datos Plantillas</h2>
+        <h2 class="text-center">Plantillas de diplomas</h2>
         <div class="d-flex align-items-center justify-content-between pb-1" style="max-width: 95vw;">
             <div>
                 <form id="plantillaBuscador" class="col-12">
@@ -142,14 +142,14 @@
             </div>
         </div>
         <div id="contenedorTabla" style="overflow-y: auto; max-height: 70vh; max-width: 95vw;">
-            <table class="table table-hover table-bordered mb-5" style="table-layout: fixed; height: 100%;" id="tablaPlantilla">
+            <table class="table table-hover table-bordered mb-5" style="table-layout: auto; height: 100%;" id="tablaPlantilla">
                 <thead class="thead-dark">
                     <tr>
                         <th>Nombre Plantilla</th>
                         <th>Descripción</th>
                         <th>Asistencia mínima</th>
                         <th>Nota mínima</th>
-                        <th>Acciones</th>
+                        <th style="width: 25vw;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -178,7 +178,7 @@
                                 "<td>" + (plantilla.nombreCertificado != null ? plantilla.nombreCertificado : "") + "</td>" +                                "<td>" + (plantilla.descripcion != null ? plantilla.descripcion : "") + "</td>" +
                                 "<td>" + (plantilla.asistenciaMin != null ? plantilla.asistenciaMin : "") + "</td>" +
                                 "<td>" + (plantilla.notaMin != null ? plantilla.notaMin : "") + "</td>" +
-                                "<td class='d-flex justify-content-around'><a class='btn btn-primary' href='/dataBasePlantilla/plantilla/"+ plantilla.id+"/editar'>Editar</a><a href='/dataBasePlantilla/plantilla/"+ plantilla.id +"/probar' class='btn btn-secondary'>Probar</a><a href='/dataBasePlantilla/plantilla/"+ plantilla.id+"/borrar' class='btn btn-danger'>Borrar</a></td>" +
+                                "<td class='d-flex justify-content-center flex-wrap' style='width: 25vw;'><a class='btn btn-primary' href='/dataBasePlantilla/plantilla/"+ plantilla.id+"/editar'>Editar</a><a href='/api/dataBasePlantilla/plantilla/"+ plantilla.id +"/descargar' class='btn btn-success'>Descargar</a><a href='/dataBasePlantilla/plantilla/"+ plantilla.id +"/probar' class='btn btn-secondary'>Probar</a><a href='/dataBasePlantilla/plantilla/"+ plantilla.id+"/borrar' class='btn btn-danger'>Borrar</a></td>" +
                                 "</tr>";
                             tbody.append(fila);
     
@@ -297,6 +297,35 @@
                 }
             }
         }
+    </script>
+    <script>
+        document.getElementById("downloadBtn").addEventListener("click", function(event) {
+            // Evitar que el enlace siga su ruta y provoque una descarga adicional
+            event.preventDefault();
+        
+            // Prevenir clics adicionales
+            const button = event.target;
+            button.disabled = true;
+        
+            // Crear un enlace temporal para la descarga
+            const link = document.createElement("a");
+            link.href = "/dataBaseAlumno/download"; // Endpoint de descarga
+            // No es necesario establecer 'download' ya que el servidor ya envía el nombre del archivo
+            // link.setAttribute("download", "alumnos.xlsx"); 
+        
+            // Asegurar que el enlace no sea visible
+            link.style.display = "none";
+            document.body.appendChild(link);
+        
+            // Simular clic en el enlace
+            link.click();
+        
+            // Eliminar el enlace del DOM después de usarlo
+            setTimeout(() => {
+                document.body.removeChild(link);
+                button.disabled = false; // Reactivar el botón
+            }, 100);
+        });
     </script>
     <footer class="text-center p-3 bg-light d-flex justify-content-center align-items-center" style="height: 15vh;">
         <div>

@@ -1,6 +1,9 @@
 package com.vt.createmanagesubmit.controladores;
 
-import java.net.http.HttpHeaders;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -10,11 +13,14 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,6 +37,7 @@ import com.vt.createmanagesubmit.servicios.ServicioArchivos;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.http.HttpHeaders;
 
 
 
@@ -91,6 +98,50 @@ public class ControladorApi {
             return plantilla;
         }
         return null;
+    }
+
+    @GetMapping("/dataBasePlantilla/plantilla/{id}/descargar")
+    public ResponseEntity<Resource> descargarPlantilla(@PathVariable Long id) {
+        // Obtener la plantilla usando el servicio
+        Plantilla plantilla = ser.plantillaPorId(id);
+
+        if (plantilla == null) {
+            // Si la plantilla no existe, devolver 404
+            return ResponseEntity.notFound().build();
+        }
+
+        String pathArchivo = plantilla.getPathArchivo();
+
+        // Asegúrate de que 'pathArchivo' es una ruta absoluta o está correctamente resuelta
+        Path filePath = Paths.get(pathArchivo).toAbsolutePath();
+
+        if (!Files.exists(filePath)) {
+            // Si el archivo no existe, devolver 404
+            return ResponseEntity.notFound().build();
+        }
+
+        try {
+            // Cargar el archivo como un recurso
+            Resource resource = new UrlResource(filePath.toUri());
+
+            if (!resource.exists() || !resource.isReadable()) {
+                // Si el recurso no es accesible, lanzar excepción o manejar el error
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+
+            // Determinar el tipo de contenido
+            String contentType = "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+
+            // Devolver la respuesta con el archivo
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+                    .body(resource);
+
+        } catch (MalformedURLException e) {
+            // Manejar la excepción
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @GetMapping("/datosAdmin")

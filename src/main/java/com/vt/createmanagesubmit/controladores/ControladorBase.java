@@ -561,6 +561,22 @@ public class ControladorBase {
         return "probarPlantilla.jsp";
     }
 
+    @GetMapping("/dataBasePlantilla/download")
+    public void descargarPlantilla(HttpServletResponse response, HttpSession session) {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+        if (usuarioTemporal == null) {
+            throw new IllegalStateException("No autorizado"); // Manejar el caso de no autenticado
+        }
+        try {
+            servicioAr.exportToExcel(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Maneja el error aquí, por ejemplo, escribe un mensaje de error en el response.
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
+    }    
+
+
 
     //-----------------------------------------------------------------------
 

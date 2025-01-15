@@ -175,7 +175,26 @@
 		    <groupId>org.jodconverter</groupId>
 		    <artifactId>jodconverter-local</artifactId>
 		    <version>4.4.8</version>
+		    <exclusions>
+		        <exclusion>
+		            <groupId>org.openoffice</groupId>
+		            <artifactId>juh</artifactId>
+		        </exclusion>
+		        <exclusion>
+		            <groupId>org.openoffice</groupId>
+		            <artifactId>jurt</artifactId>
+		        </exclusion>
+		        <exclusion>
+		            <groupId>org.openoffice</groupId>
+		            <artifactId>ridl</artifactId>
+		        </exclusion>
+		        <exclusion>
+		            <groupId>org.openoffice</groupId>
+		            <artifactId>unoil</artifactId>
+		        </exclusion>
+		    </exclusions>
 		</dependency>
+
 
 		<!-- https://mvnrepository.com/artifact/org.jodconverter/jodconverter-core -->
 		<dependency>
@@ -193,20 +212,8 @@
 		<!-- https://mvnrepository.com/artifact/org.libreoffice/libreoffice -->
 		<dependency>
 		    <groupId>org.libreoffice</groupId>
-			<artifactId>libreoffice</artifactId>
+		    <artifactId>libreoffice</artifactId>
 		    <version>24.2.3</version>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.libreoffice/unoloader -->
-		<dependency>
-		    <groupId>org.libreoffice</groupId>
-		    <artifactId>unoloader</artifactId>
-		    <version>24.2.3</version>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.java-websocket/Java-WebSocket -->
-		<dependency>
-		    <groupId>org.java-websocket</groupId>
-		    <artifactId>Java-WebSocket</artifactId>
-		    <version>1.6.0</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.springframework.security/spring-security-crypto -->
 		<dependency>

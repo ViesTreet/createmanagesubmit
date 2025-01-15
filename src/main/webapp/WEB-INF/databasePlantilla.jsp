@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <title>Lista de Plantilla</title>
+    <title>Plantillas de diplomas</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Importar CSS de Bootstrap -->
@@ -112,7 +112,7 @@
                 font-size: 12px;
             }
 
-            #tablaAlumnos{
+            #tablaPlantilla{
                 width: 250vw;
             }
         }
@@ -129,7 +129,7 @@
         </nav>
     </header>
     <div id="contenderBase" class="container pt-2 pb-2" style="height: 90vh;">
-        <h2 class="text-center">Base de datos Plantillas</h2>
+        <h2 class="text-center">Plantillas de diplomas</h2>
         <div class="d-flex align-items-center justify-content-between pb-1" style="max-width: 95vw;">
             <div>
                 <form id="plantillaBuscador" class="col-12">
@@ -150,7 +150,7 @@
                         <th>Asistencia mínima</th>
                         <th>Nota mínima</th>
                         <th>Lugar y fecha</th>
-                        <th>Acciones</th>
+                        <th style="width: 25vw;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -183,7 +183,7 @@
                                 "<td>" + (plantilla.asistenciaMin != null ? plantilla.asistenciaMin : "") + "</td>" +
                                 "<td>" + (plantilla.notaMin != null ? plantilla.notaMin : "") + "</td>" +
                                 "<td>" + (plantilla.lugarYFecha != null ? plantilla.lugarYFecha : "") + "</td>" +
-                                "<td class='d-flex justify-content-around'><a class='btn btn-primary' href='/dataBasePlantilla/plantilla/"+ plantilla.id +"/editar'>Editar</a><a href='/dataBasePlantilla/plantilla/"+ plantilla.id +"/probar' class='btn btn-secondary'>Probar</a><a href='/dataBasePlantilla/plantilla/"+ plantilla.id +"/borrar' class='btn btn-danger'>Borrar</a></td>" +
+                                "<td class='d-flex justify-content-center flex-wrap' style='width: 25vw;'><a class='btn btn-primary' href='/dataBasePlantilla/plantilla/"+ plantilla.id +"/editar'>Editar</a><a href='/api/dataBasePlantilla/plantilla/"+ plantilla.id +"/descargar' class='btn btn-success'>Descargar</a><a href='/dataBasePlantilla/plantilla/"+ plantilla.id +"/probar' class='btn btn-secondary'>Probar</a><a href='/dataBasePlantilla/plantilla/"+ plantilla.id +"/borrar' class='btn btn-danger'>Borrar</a></td>" +
                                 "</tr>";
                             tbody.append(fila);
                         });
