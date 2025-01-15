@@ -36,8 +36,8 @@
                                 <input type="text" name="nombreAsistente" id="nombreAsistente" class="form-control" placeholder="Nombres Apellidos Asistente">
                             </div>
                             <div>
-                                <label for="curso">Cursos</label>
-                                <input type="text" name="curso" id="curso" class="form-control" placeholder="curso1,curso2,etc...">
+                                <label for="nombreCurso">Cursos</label>
+                                <input type="text" name="nombreCurso" id="nombreCurso" class="form-control" placeholder="curso1|curso2|etc...">
                             </div>
                             <div>
                                 <label for="diasCursos">Dias del curso</label>
@@ -46,8 +46,8 @@
                         </div>
                         <div style="max-width: 33%;">
                             <div>
-                                <label for="numeroHoras">Numero de horas</label>
-                                <input type="text" name="numeroHoras" id="numeroHoras" class="form-control" placeholder="N° horas">
+                                <label for="duracion">Duracion</label>
+                                <input type="text" name="duracion" id="duracion" class="form-control" placeholder="3 horas">
                             </div>
                             <div>
                                 <label for="cliente">Cliente</label>
@@ -60,8 +60,8 @@
                         </div>
                         <div style="max-width: 33%;">
                             <div>
-                                <label for="notaAprovacion">Nota aprovacion</label>
-                                <input type="text" name="notaAprovacion" id="notaAprovacion" class="form-control" placeholder="Ej: 7.0">
+                                <label for="notaAprobacion">Nota aprovacion</label>
+                                <input type="text" name="notaAprobacion" id="notaAprobacion" class="form-control" placeholder="Ej: 7.0">
                             </div>
                             <div>
                                 <label for="relator">Relator</label>
@@ -74,7 +74,7 @@
                         </div>
                     </div>
                     <div class="d-flex align-items-center justify-content-center pt-1">
-                        <input type="hidden" value="${plantilla.id}" name="id">
+                        <input type="hidden" value="${plantilla.id}" name="idPlantilla">
                         <input class="btn btn-success" type="submit" value="Probar">
                     </div>
                 </form>
@@ -90,34 +90,41 @@
     </footer>    
     <script>
         document.getElementById('formProbarPlantilla').addEventListener('submit', function(event) {
-            event.preventDefault(); // Evita el envío normal del formulario
+            event.preventDefault(); // Evita que el formulario se envíe de forma tradicional
         
+            // Recopila los datos del formulario
             const formData = new FormData(this);
         
-            fetch('/api/dataBasePlantilla/probarPlantilla', {
+            // Realiza una solicitud fetch para enviar los datos al servidor
+            fetch('/api/probarPlantilla', {
                 method: 'POST',
-                body: formData
+                body: formData,
             })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('Error en la respuesta del servidor');
+                    throw new Error('Error en la respuesta de la red');
                 }
-                return response.blob();
+                return response.blob(); // Obtiene el archivo como Blob
             })
             .then(blob => {
+                // Crea un enlace temporal para iniciar la descarga
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'certificado.pdf'; // Nombre del archivo descargado
+                a.download = 'certificado.pdf'; // Nombre del archivo a descargar
                 document.body.appendChild(a);
                 a.click();
                 a.remove();
+                window.URL.revokeObjectURL(url);
+
+                window.location.href = '/dataBasePlantilla';
             })
             .catch(error => {
                 console.error('Error:', error);
+                alert('Ocurrió un error al generar el certificado.');
             });
         });
-    </script>
+        </script>
     <c:if test="${not empty error}">
         <script>
             showAlert("${error}");

@@ -1,5 +1,15 @@
 package com.vt.createmanagesubmit.servicios;
 
+import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.font.FontRenderContext;
+import java.awt.font.TextLayout;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Dimension2D;
+import java.awt.font.LineBreakMeasurer;
+import java.text.AttributedString;
+import java.awt.font.TextAttribute;
+import java.awt.Dimension;
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -14,6 +24,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
+import java.text.AttributedString;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,6 +40,7 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import javax.imageio.ImageIO;
 
+import org.apache.poi.sl.usermodel.Insets2D;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.DateUtil;
@@ -37,6 +49,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.util.Dimension2DDouble;
 import org.apache.poi.xslf.usermodel.XMLSlideShow;
 import org.apache.poi.xslf.usermodel.XSLFShape;
 import org.apache.poi.xslf.usermodel.XSLFSlide;
@@ -543,6 +556,50 @@ public class ServicioArchivos {
         return CompletableFuture.completedFuture(null);
     }
 
+    private void adjustFontSizeToFit(XSLFTextShape textShape, XSLFTextRun textRun, String text) {
+        double minFontSize = 5.0; // Tamaño mínimo de fuente
+        double maxFontSize = textRun.getFontSize();
+        if (maxFontSize <= 0) {
+            maxFontSize = 18.0;
+        }
+        double fontSize = maxFontSize;
+        Rectangle2D textShapeBounds = textShape.getAnchor();
+    
+        Insets2D insets = textShape.getInsets();
+        double shapeWidth = textShapeBounds.getWidth() - insets.left - insets.right;
+        double shapeHeight = textShapeBounds.getHeight() - insets.top - insets.bottom;
+    
+        Dimension2D size = getTextSize(textShape, textRun, text, fontSize);
+    
+        while ((size.getWidth() > shapeWidth || size.getHeight() > shapeHeight) && fontSize > minFontSize) {
+            fontSize -= 0.5;
+            size = getTextSize(textShape, textRun, text, fontSize);
+        }
+    
+        textRun.setFontSize(fontSize);
+    }
+    
+    private Dimension2D getTextSize(XSLFTextShape textShape, XSLFTextRun textRun, String text, double fontSize) {
+        Font font = new Font(textRun.getFontFamily(), Font.PLAIN, (int) fontSize);
+    
+        // Crear una imagen temporal para obtener el contexto gráfico
+        BufferedImage img = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = img.createGraphics();
+    
+        FontRenderContext frc = g2d.getFontRenderContext();
+        TextLayout layout = new TextLayout(text, font, frc);
+        Rectangle2D bounds = layout.getBounds();
+    
+        g2d.dispose();
+    
+        // Añadir los márgenes internos del shape
+        Insets2D insets = textShape.getInsets();
+        double textWidth = bounds.getWidth() + insets.left + insets.right;
+        double textHeight = bounds.getHeight() + insets.top + insets.bottom;
+    
+        return new Dimension2DDouble(textWidth, textHeight);
+    }
+
     private void processTextShape(XSLFSlide slide, XSLFTextShape textShape, Map<String, String> data, List<XSLFShape> shapesToRemove) throws Exception {
         boolean placeholderFound = false;
         String placeholderKey = null;
@@ -582,53 +639,51 @@ public class ServicioArchivos {
     
                 String[] lines = replacementText.split("\\|");
                 int numberOfLines = lines.length;
-
+    
                 // Obtiene la posición y dimensiones del shape original
                 Rectangle2D anchor = textShape.getAnchor();
                 double totalHeight = anchor.getHeight();
                 double shapeWidth = anchor.getWidth();
                 double shapeX = anchor.getX();
-                double shapeY = anchor.getY()-11.0;
-
+                double shapeY = anchor.getY(); // Eliminé el ajuste de -11.0
+    
                 // Ajusta la altura de cada nuevo shape, considerando un pequeño margen entre líneas
                 double margin = 2.0; // Ajusta este valor según sea necesario
-                double shapeHeight = (totalHeight - (margin * (numberOfLines - 1))) / numberOfLines;
-
+                double shapeHeight = totalHeight / numberOfLines;
+    
                 // Para cada línea, crea un nuevo shape
                 for (int i = 0; i < numberOfLines; i++) {
                     String line = lines[i];
-                
+    
                     // Calcula la nueva posición Y considerando el margen entre líneas
-                    double newY = shapeY + i * (shapeHeight + margin);
-                
+                    double adjustedMargin = i == 0 ? 0 : margin; // Sin margen en el primer shape
+                    double newY = shapeY + i * (shapeHeight + adjustedMargin);
+                    
                     // Establece la posición y tamaño del nuevo shape
                     Rectangle2D newAnchor = new Rectangle2D.Double(
-                        shapeX,
-                        newY,
-                        shapeWidth,
-                        shapeHeight
+                        shapeX, newY, shapeWidth, shapeHeight
                     );
-                
+    
                     // Crea un nuevo shape
                     XSLFTextBox newShape = slide.createTextBox();
                     newShape.setAnchor(newAnchor);
-                
+    
                     // Copia las propiedades del shape original
                     copyShapeProperties(textShape, newShape);
-                
+    
                     // Establece el texto
                     XSLFTextParagraph newParagraph = newShape.addNewTextParagraph();
                     copyParagraphProperties(sourceParagraph, newParagraph); // Copia las propiedades del párrafo
-                
+    
                     XSLFTextRun newRun = newParagraph.addNewTextRun();
                     newRun.setText(line);
-                
-                    // Aplica las propiedades de fuente
+    
+                    // Aplica las propiedades de fuente y ajusta el tamaño si es necesario
                     applyFontProperties(textShape, newRun);
+                    adjustFontSizeToFit(newShape, newRun, line);
                 }
-
             } else {
-                // El texto no contiene saltos de línea, simplemente reemplaza el placeholder
+                // El texto no contiene saltos de línea, simplemente reemplaza el placeholder y ajusta el tamaño
                 for (XSLFTextParagraph paragraph : textShape.getTextParagraphs()) {
                     for (XSLFTextRun textRun : paragraph.getTextRuns()) {
                         String text = textRun.getRawText();
@@ -636,6 +691,9 @@ public class ServicioArchivos {
                         if (text.contains(placeholder)) {
                             String newText = text.replace(placeholder, replacementText);
                             textRun.setText(newText);
+    
+                            // Ajustar el tamaño de la fuente
+                            adjustFontSizeToFit(textShape, textRun, newText);
                         }
                     }
                 }
@@ -893,7 +951,7 @@ public class ServicioArchivos {
 
     @Async
     @Transactional
-    public CompletableFuture<Void> probarCertificadosServicio(Alumno alumno, HttpServletResponse response) throws Exception {
+    public CompletableFuture<byte[]> probarCertificadosServicio(Alumno alumno) throws Exception {
 
         // Obtén la plantilla asociada al alumno
         Plantilla plantilla = alumno.getPlantilla();
@@ -953,7 +1011,7 @@ public class ServicioArchivos {
 
         // Cierra el PPTX para evitar problemas
         ppt.close();
-
+        byte[] pdfBytes = null;
         // Convierte el PPTX a PDF usando JODConverter
         File tempPdfFile = File.createTempFile("certificado-", ".pdf");
 
@@ -967,15 +1025,7 @@ public class ServicioArchivos {
                     .to(tempPdfFile)
                     .execute();
 
-            // Leer el PDF generado como array de bytes
-            byte[] pdfBytes = Files.readAllBytes(tempPdfFile.toPath());
-
-            // Configurar la respuesta HTTP para enviar el PDF como archivo descargable
-            response.setContentType("application/pdf");
-            response.setHeader("Content-Disposition", "attachment; filename=\"certificado-" + alumno.getId() + ".pdf\"");
-
-            response.getOutputStream().write(pdfBytes);
-            response.getOutputStream().flush();
+            pdfBytes = Files.readAllBytes(tempPdfFile.toPath());
 
          } catch (OfficeException e) {
              throw new OfficeException("Ocurrió un error inesperado al generar el PDF", e);
@@ -989,7 +1039,7 @@ public class ServicioArchivos {
              tempPdfFile.delete();
          }
 
-         return CompletableFuture.completedFuture(null);
+         return CompletableFuture.completedFuture(pdfBytes);
     }
 
     public void exportToExcel(HttpServletResponse response) throws IOException {
