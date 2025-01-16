@@ -818,7 +818,7 @@ public class ServicioArchivos {
         "<tr>" +
         "<td style='text-align: center; margin: 20px 0;'>" +
         "<p>Estimado/a <strong>" + capitalizeName(alumno.getNombreAsistente()) + "</strong>:</p>" +
-        "<p>Adjunto encontrarás tu certificado de participación en el/los curso(s) <strong>" + formatCourseName(alumno.getNombreCurso()) + "</strong>, junto con un código QR que te permitirá descargarlo nuevamente desde nuestra página web.</p>" +
+        "<p>Adjunto encontrarás tu certificado de participación en el/los curso(s) <strong>" + formatCourseName(alumno.getNombreCurso()) + "</strong>. Junto con un código QR que te permitirá descargarlo nuevamente desde nuestra página web.</p>" +
         "<p>También puedes descargar tu certificado escaneando el siguiente código QR:</p>" +
         "</td>" +
         "</tr>" +
