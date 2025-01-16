@@ -18,12 +18,12 @@
 
     <style>
         th{
-            font-size: 13px;
+            font-size: 16px;
         }
 
         td{
             overflow-x: auto;
-            font-size: 11px;
+            font-size: 14px;
         }
 
         #alumnoBuscador{
@@ -122,10 +122,14 @@
 <body>
     <header class="d-flex align-items-center justify-content-between p-3 bg-light" style="height: 10vh; z-index: 1;" >
         <a href="/home" class="logo"><img src="/images/Logobgremove.png" alt="[LOGO]"></a>
-        <nav>
+        <nav class="d-flex justify-content-center align-items-center flex-nowrap">
             <a href="/home" class="btn btn-primary mx-2">Regresar</a>
             <a href="/home" class="btn btn-primary mx-2">Inicio</a>
             <a href="/documentacion/databaseAdmin" class="btn btn-primary mx-2">Documentación</a>
+            <div class="d-flex flex-column justify-content-center align-items-center">
+                <i class="fa-solid fa-user"></i>
+                <p class="p-0 m-0" style="font-size: normal;">${admin.nombre}</p>
+            </div>
         </nav>
     </header>
     <div id="contenderBase" class="container pt-2 pb-2" style="height: 90vh;">
@@ -136,12 +140,12 @@
             </div>
         </div>
         <div id="contenedorTabla" style="overflow-y: auto; max-height: 70vh; max-width: 95vw;">
-            <table class="table table-hover table-bordered mb-5" style="table-layout: fixed; height: 100%;" id="tablaAdmin">
+            <table class="table table-hover table-bordered mb-5" style="table-layout: auto; height: 100%;" id="tablaAdmin">
                 <thead class="thead-dark">
                     <tr>
                         <th>Correo</th>
                         <th>Nombre</th>
-                        <th>Acciones</th>
+                        <th style="width: 10vw;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -169,7 +173,7 @@
     
                             // Agregar el botón borrar solo si admin.nombre no es "admin"
                             if (admin.correo !== "admin@admin.com") {
-                                fila += "<td>" + "<a class='btn btn-danger' href='/dataBaseAdmin/" + admin.id + "/borrar'>Borrar</a>" + "</td>";
+                                fila += "<td style='width: 10vw;'>" + "<a class='btn btn-danger' href='/dataBaseAdmin/" + admin.id + "/borrar'>Borrar</a>" + "</td>";
                             } else {
                                 fila += "<td></td>"; // Dejar la celda vacía si es "admin"
                             }

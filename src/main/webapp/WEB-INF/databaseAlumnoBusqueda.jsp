@@ -119,10 +119,14 @@
 <body>
     <header class="d-flex align-items-center justify-content-between p-3 bg-light" style="height: 10vh; z-index: 1;" >
         <a href="/home" class="logo"><img src="/images/Logobgremove.png" alt="[LOGO]"></a>
-        <nav>
+        <nav class="d-flex justify-content-center align-items-center flex-nowrap">
             <a href="/dataBaseAlumno" class="btn btn-primary mx-2">Regresar</a>
             <a href="/home" class="btn btn-primary mx-2">Inicio</a>
             <a href="/documentacion/databaseAlumnoBusqueda" class="btn btn-primary mx-2">Documentación</a>
+            <div class="d-flex flex-column justify-content-center align-items-center">
+                <i class="fa-solid fa-user"></i>
+                <p class="p-0 m-0" style="font-size: normal;">${admin.nombre}</p>
+            </div>
         </nav>
     </header>
     <div id="contenderBase" class="container pt-2 pb-2" style="height: 90vh;">

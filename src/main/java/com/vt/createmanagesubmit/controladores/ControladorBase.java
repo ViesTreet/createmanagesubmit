@@ -83,11 +83,12 @@ public class ControladorBase {
     
     
     @GetMapping("/home")
-    public String home(HttpSession session) {
+    public String home(HttpSession session,Model model) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
 	    if (usuarioTemporal == null) {
 	        return "redirect:/";  
 	    }
+        model.addAttribute("admin", usuarioTemporal);
         return "home.jsp";
     }
 
@@ -102,11 +103,12 @@ public class ControladorBase {
     
     //--------------------------Alumnos----------------------------------------
     @GetMapping("/dataBaseAlumno")
-    public String baseDeDatos(HttpSession session) {
+    public String baseDeDatos(HttpSession session,Model model) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
 	    if (usuarioTemporal == null) {
 	        return "redirect:/";  
 	    }
+        model.addAttribute("admin", usuarioTemporal);
         return "databaseAlumno.jsp";
     }
     
@@ -119,6 +121,7 @@ public class ControladorBase {
         // Pasar los parámetros al modelo para usarlos en el JSP
         model.addAttribute("filtro", filtro);
         model.addAttribute("busqueda", busqueda);
+        model.addAttribute("admin", usuarioTemporal);
         return "databaseAlumnoBusqueda.jsp";
     }
 
@@ -129,6 +132,7 @@ public class ControladorBase {
 	        return "redirect:/";  
 	    }
         Alumno alumno = servicio.alumnoPorId(id);
+        model.addAttribute("admin", usuarioTemporal);
         if(alumno != null){
             model.addAttribute("alumno",alumno);
             return "alumnoDatos.jsp";
@@ -144,6 +148,7 @@ public class ControladorBase {
 	    if (usuarioTemporal == null) {
 	        return "redirect:/";  
 	    }
+        model.addAttribute("admin", usuarioTemporal);
         List<Plantilla> plantillas=servicio.todasLasPlantillas();
         model.addAttribute("plantillas",plantillas);
         return "addAlumno.jsp";
@@ -155,75 +160,76 @@ public class ControladorBase {
 	    if (usuarioTemporal == null) {
 	        return "redirect:/";  
 	    }
-    Alumno nuevoAlumno = new Alumno();
-    nuevoAlumno.setAsistencia(asistencia);
-    nuevoAlumno.setCliente(cliente);
-    nuevoAlumno.setCodigo(codigo);
-    nuevoAlumno.setCorreo(correo);
-    nuevoAlumno.setDiasCursos(diasCursos);
-    nuevoAlumno.setEstado(estado);
-    nuevoAlumno.setNombreCurso(curso);
-    nuevoAlumno.setNotaAprobacion(notaAprobacion);
-    nuevoAlumno.setDuracion(numeroHoras);
-    nuevoAlumno.setModalidad(modalidad);
-    nuevoAlumno.setObra(obra);
-    nuevoAlumno.setRelator(relator);
-    nuevoAlumno.setRut(rut);
-    List<Plantilla> plantillas=servicio.todasLasPlantillas();
-    model.addAttribute("plantillas",plantillas);
-    nombreAsistente = servicioApi.formatearNombre(nombreAsistente);
-    if(rutificador && !rut.trim().isEmpty() && rut != null){
-        String nombreRutificado = servicioApi.obtenerNombrePorRut(rut);
-        if(!nombreRutificado.trim().equals("nombreNoEncontrado")){
-            nuevoAlumno.setNombreAsistente(nombreRutificado);
+        model.addAttribute("admin", usuarioTemporal);
+        Alumno nuevoAlumno = new Alumno();
+        nuevoAlumno.setAsistencia(asistencia);
+        nuevoAlumno.setCliente(cliente);
+        nuevoAlumno.setCodigo(codigo);
+        nuevoAlumno.setCorreo(correo);
+        nuevoAlumno.setDiasCursos(diasCursos);
+        nuevoAlumno.setEstado(estado);
+        nuevoAlumno.setNombreCurso(curso);
+        nuevoAlumno.setNotaAprobacion(notaAprobacion);
+        nuevoAlumno.setDuracion(numeroHoras);
+        nuevoAlumno.setModalidad(modalidad);
+        nuevoAlumno.setObra(obra);
+        nuevoAlumno.setRelator(relator);
+        nuevoAlumno.setRut(rut);
+        List<Plantilla> plantillas=servicio.todasLasPlantillas();
+        model.addAttribute("plantillas",plantillas);
+        nombreAsistente = servicioApi.formatearNombre(nombreAsistente);
+        if(rutificador && !rut.trim().isEmpty() && rut != null){
+            String nombreRutificado = servicioApi.obtenerNombrePorRut(rut);
+            if(!nombreRutificado.trim().equals("nombreNoEncontrado")){
+                nuevoAlumno.setNombreAsistente(nombreRutificado);
+            }else{
+                if(!nombreAsistente.trim().isEmpty()&&nombreAsistente != null){
+                    nuevoAlumno.setNombreAsistente(nombreAsistente);
+                }else{
+                    model.addAttribute("error", "El nombre no pudo ser encontrado.");
+                    return "addAlumno.jsp";
+                }
+            }
         }else{
             if(!nombreAsistente.trim().isEmpty()&&nombreAsistente != null){
                 nuevoAlumno.setNombreAsistente(nombreAsistente);
             }else{
-                model.addAttribute("error", "El nombre no pudo ser encontrado.");
+                model.addAttribute("error", "El nombre no fue ingresado.");
                 return "addAlumno.jsp";
             }
         }
-    }else{
-        if(!nombreAsistente.trim().isEmpty()&&nombreAsistente != null){
-            nuevoAlumno.setNombreAsistente(nombreAsistente);
-        }else{
-            model.addAttribute("error", "El nombre no fue ingresado.");
+
+        try {
+            Plantilla plantillausuario = servicio.plantillaPorId(plantilla);
+            nuevoAlumno.setPlantilla(plantillausuario);
+        } catch (MissingTemplateException ex) {
+            model.addAttribute("error", ex.getMessage());
             return "addAlumno.jsp";
         }
-    }
-    
-    try {
-        Plantilla plantillausuario = servicio.plantillaPorId(plantilla);
-        nuevoAlumno.setPlantilla(plantillausuario);
-    } catch (MissingTemplateException ex) {
-        model.addAttribute("error", ex.getMessage());
-        return "addAlumno.jsp";
-    }
 
-    try {
-        nuevoAlumno=servicio.comprobarYGuardar(nuevoAlumno,diploma);
-    if(diploma.equals("enviar")){
-        if(nuevoAlumno.getEstado().equals("aprobado")){
-            try {
-                servicioAr.generateCertificateForAlumno(nuevoAlumno);
-                nuevoAlumno.setDiploma("enviado");
-            } catch (Exception ex) {
-                model.addAttribute("error", ex.getMessage());
-                return "addAlumno.jsp";
+        try {
+            nuevoAlumno=servicio.comprobarYGuardar(nuevoAlumno,diploma);
+        if(diploma.equals("enviar")){
+            if(nuevoAlumno.getEstado().equals("aprobado")){
+                try {
+                    servicioAr.generateCertificateForAlumno(nuevoAlumno);
+                    nuevoAlumno.setDiploma("enviado");
+                } catch (Exception ex) {
+                    model.addAttribute("error", ex.getMessage());
+                    return "addAlumno.jsp";
+                }
+            }else{
+                nuevoAlumno.setDiploma("noEnviado");
             }
         }else{
             nuevoAlumno.setDiploma("noEnviado");
         }
-    }else{
-        nuevoAlumno.setDiploma("noEnviado");
-    }
-    servicio.registrarNuevoAlumno(nuevoAlumno);
-    return "redirect:/dataBaseAlumno/addAlumnoBase";
-    } catch (MissingNameOrRutException ex) {
-        model.addAttribute("error", ex.getMessage());
-        return "addAlumno.jsp";
-    }
+        servicio.registrarNuevoAlumno(nuevoAlumno);
+        return "redirect:/dataBaseAlumno/addAlumnoBase";
+        } catch (MissingNameOrRutException ex) {
+            model.addAttribute("error", ex.getMessage());
+            return "addAlumno.jsp";
+        }
     
     }
 
@@ -234,6 +240,7 @@ public class ControladorBase {
 	    if (usuarioTemporal == null) {
 	        return "redirect:/";  
 	    }
+        model.addAttribute("admin", usuarioTemporal);
         List<Plantilla> plantillas = servicio.todasLasPlantillas();
         model.addAttribute("plantillas",plantillas);
         return "addAlumnoExcel.jsp";
@@ -243,6 +250,7 @@ public class ControladorBase {
     public String subirExcel(@RequestPart("file") MultipartFile file, @RequestParam(value = "estadoDiplomaExcel", required = false) String estadoDiplomaExcel, @RequestParam(value = "plantillaNombre") String plantilla, @RequestParam(value = "estadoExcel") String estadoExcel,@RequestParam(value="rutificador")String rutificador,HttpSession session,Model model) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
 	    if (usuarioTemporal != null) {
+            model.addAttribute("admin", usuarioTemporal);
             if (file.isEmpty()) {
                 List<Plantilla> plantillas = servicio.todasLasPlantillas();
                 model.addAttribute("plantillas",plantillas);
@@ -273,6 +281,7 @@ public class ControladorBase {
 	    if (usuarioTemporal == null) {
 	        return "redirect:/";  
 	    }
+        model.addAttribute("admin", usuarioTemporal);
         List<Plantilla> plantillas = servicio.todasLasPlantillas();
         Alumno alumno = servicio.alumnoPorId(id);
         model.addAttribute("alumno",alumno);
@@ -287,6 +296,7 @@ public class ControladorBase {
         if (usuarioTemporal == null) {
             return "redirect:/";  
         }
+        model.addAttribute("admin", usuarioTemporal);
         try {
             nombreAsistente = servicioApi.formatearNombre(nombreAsistente);
             servicio.editarAlumno(id, nombreAsistente, nombreCurso, diasCursos, numeroHoras, cliente, obra, codigo, notaAprobacion,relator, asistencia, estado, diploma, rut, modalidad, correo, plantillaId);
@@ -303,8 +313,9 @@ public class ControladorBase {
     }
 
     @GetMapping("/dataBaseAlumno/alumno/{id}/borrar")
-    public String borrarAlumnoId(@PathVariable("id")Long id,HttpSession session) {
+    public String borrarAlumnoId(@PathVariable("id")Long id,HttpSession session,Model model) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+        model.addAttribute("admin", usuarioTemporal);
 	    if (usuarioTemporal != null) {
             servicio.borrarAlumnoPorId(id);
             return "redirect:/dataBaseAlumno";
@@ -313,11 +324,12 @@ public class ControladorBase {
     }
 
     @GetMapping("/dataBaseAlumno/download")
-    public void downloadDataBaseAlumno(HttpServletResponse response, HttpSession session) {
+    public void downloadDataBaseAlumno(HttpServletResponse response, HttpSession session,Model model) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuarioTemporal == null) {
             throw new IllegalStateException("No autorizado"); // Manejar el caso de no autenticado
         }
+        model.addAttribute("admin", usuarioTemporal);
         try {
             servicioAr.exportToExcel(response);
         } catch (Exception e) {
@@ -331,6 +343,7 @@ public class ControladorBase {
     public String certificadoPorId(@PathVariable("id")Long id,HttpSession session,Model model) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
 	    if (usuarioTemporal != null) {
+            model.addAttribute("admin", usuarioTemporal);
             try {
                 servicioAr.generateCertificatesById(id);
                 return "redirect:/dataBaseAlumno/alumno/"+id;
@@ -348,6 +361,7 @@ public class ControladorBase {
     public String enviarRestantes(HttpSession session,Model model) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
 	    if (usuarioTemporal != null) {
+            model.addAttribute("admin", usuarioTemporal);
             try {
                 servicioAr.generateCertificatesAll();
                 return "redirect:/dataBaseAlumno";
@@ -369,6 +383,7 @@ public class ControladorBase {
 	    if (usuarioTemporal == null) {
 	        return "redirect:/";  
 	    }
+        model.addAttribute("admin", usuarioTemporal);
         List<Plantilla> plantillas = servicio.todasLasPlantillas();
         model.addAttribute("plantillas",plantillas);
         model.addAttribute("busqueda",busqueda);
@@ -382,6 +397,7 @@ public class ControladorBase {
 	    if (usuarioTemporal == null) {
 	        return "redirect:/";  
 	    }
+        model.addAttribute("admin", usuarioTemporal);
         List<Plantilla> plantillas = servicio.todasLasPlantillas();
         model.addAttribute("plantillas",plantillas);
         return "databasePlantilla.jsp";
@@ -392,6 +408,7 @@ public class ControladorBase {
 
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuarioTemporal != null) {
+            model.addAttribute("admin", usuarioTemporal);
             Optional<Plantilla> optPlantilla = servicio.plantillaPorNombre(nombreCertificado);
             if(optPlantilla.isPresent()){
                 model.addAttribute("error", "El nombre de la plantilla tiene que ser único, no se puede repetir.");
@@ -452,6 +469,10 @@ public class ControladorBase {
 	    if (usuarioTemporal == null) {
 	        return "redirect:/";  
 	    }
+        if (!usuarioTemporal.getCorreo().equals("admin@admin.com")){
+            return "redirect:/dataBasePlantilla";
+        }
+        model.addAttribute("admin", usuarioTemporal);
         Plantilla plantilla = servicio.plantillaPorId(id);
         model.addAttribute("plantilla",plantilla);
         return "borrarPlantilla.jsp";
@@ -461,6 +482,10 @@ public class ControladorBase {
     public String borrarPlantillaId(@PathVariable("id")Long id,HttpSession session,Model model){
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
 	    if (usuarioTemporal != null) {
+            if (!usuarioTemporal.getCorreo().equals("admin@admin.com")){
+                return "redirect:/dataBasePlantilla";
+            }
+            model.addAttribute("admin", usuarioTemporal);
             try {
                 servicio.borrarPlantillaPorId(id);
                 return "redirect:/dataBasePlantilla";
@@ -481,6 +506,7 @@ public class ControladorBase {
 	    if (usuarioTemporal == null) {
 	        return "redirect:/";  
 	    }
+        model.addAttribute("admin", usuarioTemporal);
         Plantilla plantilla = servicio.plantillaPorId(id);
         model.addAttribute("plantilla",plantilla);
         return "editarPlantilla.jsp";
@@ -490,6 +516,7 @@ public class ControladorBase {
     public String editarPlantilla(@RequestParam("id") Long id,@RequestParam(value = "cambiarPlantilla", required = false) boolean cambiarPlantilla,@RequestParam(value = "pathArchivo", required = false) MultipartFile nuevaPlantilla,@RequestParam(value = "nombreCertificado")String nombre,@RequestParam(value = "descripcion")String descripcion,@RequestParam(value = "asistenciaMin")String asistencia,@RequestParam(value = "notaMin")String nota,@RequestParam(value="lugarYFecha")String lugarYFecha,HttpSession session,Model model) {  
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
 	    if (usuarioTemporal != null) {   
+            model.addAttribute("admin", usuarioTemporal);
             Plantilla plantilla = servicio.plantillaPorId(id);
             String nombreAntiguo = plantilla.getNombreCertificado();
             boolean error;
@@ -553,17 +580,19 @@ public class ControladorBase {
 	    if (usuarioTemporal == null) {
 	        return "redirect:/";  
 	    }
+        model.addAttribute("admin", usuarioTemporal);
         Plantilla plantilla = servicio.plantillaPorId(id);
         model.addAttribute("plantilla", plantilla);
         return "probarPlantilla.jsp";
     }
 
     @GetMapping("/dataBasePlantilla/download")
-    public void descargarPlantilla(HttpServletResponse response, HttpSession session) {
+    public void descargarPlantilla(HttpServletResponse response, HttpSession session,Model model) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuarioTemporal == null) {
             throw new IllegalStateException("No autorizado"); // Manejar el caso de no autenticado
         }
+        model.addAttribute("admin", usuarioTemporal);
         try {
             servicioAr.exportToExcel(response);
         } catch (Exception e) {
@@ -579,11 +608,12 @@ public class ControladorBase {
 
     //-------------------------Admins----------------------------------------
     @GetMapping("/dataBaseAdmin")
-    public String dataBaseAdministrador(HttpSession session) {
+    public String dataBaseAdministrador(HttpSession session,Model model) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
 	    if (usuarioTemporal == null) {
 	        return "redirect:/";  
 	    }
+        model.addAttribute("admin", usuarioTemporal);
         return "databaseAdmin.jsp";
     }
 
@@ -591,6 +621,7 @@ public class ControladorBase {
     public String borrarAdmin(@PathVariable("id")Long id,HttpSession session,Model model) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
 	    if (usuarioTemporal != null) {
+            model.addAttribute("admin", usuarioTemporal);
             try {
                 servicio.borrarAdminPorId(id);
                 return "redirect:/dataBaseAdmin";
@@ -607,6 +638,7 @@ public class ControladorBase {
     public String crearNuevoAdmin(@RequestParam(value = "correo")String correo,@RequestParam(value = "nombre")String nombre,@RequestParam(value = "contrasena")String password,HttpSession session,Model model) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
 	    if (usuarioTemporal != null) {
+            model.addAttribute("admin", usuarioTemporal);
             if(servicio.adminPorCorreo(correo)==null){
                 servicio.registrarAdmin(correo,nombre,password);
                 return "redirect:/dataBaseAdmin";

@@ -122,10 +122,14 @@
 <body>
     <header class="d-flex align-items-center justify-content-between p-3 bg-light" style="height: 10vh; z-index: 1;" >
         <a href="/home" class="logo"><img src="/images/Logobgremove.png" alt="[LOGO]"></a>
-        <nav>
+        <nav class="d-flex justify-content-center align-items-center flex-nowrap">
             <a href="/dataBasePlantilla" class="btn btn-primary mx-2">Regresar</a>
             <a href="/home" class="btn btn-primary mx-2">Inicio</a>
             <a href="/documentacion/databasePlantillaBusqueda" class="btn btn-primary mx-2">Documentación</a>
+            <div class="d-flex flex-column justify-content-center align-items-center">
+                <i class="fa-solid fa-user"></i>
+                <p class="p-0 m-0" style="font-size: normal;">${admin.nombre}</p>
+            </div>
         </nav>
     </header>
     <div id="contenderBase" class="container pt-2 pb-2" style="height: 90vh;">
@@ -178,8 +182,17 @@
                                 "<td>" + (plantilla.nombreCertificado != null ? plantilla.nombreCertificado : "") + "</td>" +                                "<td>" + (plantilla.descripcion != null ? plantilla.descripcion : "") + "</td>" +
                                 "<td>" + (plantilla.asistenciaMin != null ? plantilla.asistenciaMin : "") + "</td>" +
                                 "<td>" + (plantilla.notaMin != null ? plantilla.notaMin : "") + "</td>" +
-                                "<td class='d-flex justify-content-center flex-wrap' style='width: 25vw;'><a class='btn btn-primary' href='/dataBasePlantilla/plantilla/"+ plantilla.id+"/editar'>Editar</a><a href='/api/dataBasePlantilla/plantilla/"+ plantilla.id +"/descargar' class='btn btn-success'>Descargar</a><a href='/dataBasePlantilla/plantilla/"+ plantilla.id +"/probar' class='btn btn-secondary'>Probar</a><a href='/dataBasePlantilla/plantilla/"+ plantilla.id+"/borrar' class='btn btn-danger'>Borrar</a></td>" +
-                                "</tr>";
+                                "<td class='d-flex justify-content-center flex-nowrap' style='width: 25vw;'>" +
+                                "<a class='btn btn-primary' href='/dataBasePlantilla/plantilla/" + plantilla.id + "/editar'>Editar</a>" +
+                                "<a href='/api/dataBasePlantilla/plantilla/" + plantilla.id + "/descargar' class='btn btn-success'>Descargar</a>" +
+                                "<a href='/dataBasePlantilla/plantilla/" + plantilla.id + "/probar' class='btn btn-secondary'>Probar</a>";
+
+                        // Agregar el botón "Borrar" solo si el correo es admin@admin.com
+                        if (adminCorreo === "admin@admin.com") {
+                            fila += "<a href='/dataBasePlantilla/plantilla/" + plantilla.id + "/borrar' class='btn btn-danger'>Borrar</a>";
+                        }
+
+                        fila += "</td></tr>";
                             tbody.append(fila);
     
                         });

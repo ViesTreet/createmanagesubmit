@@ -564,10 +564,14 @@ public class ServicioArchivos {
         double shapeHeight = textShapeBounds.getHeight() - insets.top - insets.bottom;
     
         Dimension2D size = getTextSize(textShape, textRun, text, fontSize);
-    
+        boolean needsAdjustment = false;
         while ((size.getWidth() > shapeWidth || size.getHeight() > shapeHeight) && fontSize > minFontSize) {
             fontSize -= 0.5;
             size = getTextSize(textShape, textRun, text, fontSize);
+            needsAdjustment = true;
+        }
+        if (needsAdjustment && fontSize > minFontSize) {
+            fontSize -= 2.0; // Margen de seguridad
         }
     
         textRun.setFontSize(fontSize);
