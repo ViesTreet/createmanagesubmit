@@ -545,7 +545,7 @@ public class ServicioArchivos {
         byte[] qrCodeBytes = qrCodeOutputStream.toByteArray();
 
         // Enviar correo electrónico al alumno con el PDF y el código QR como adjuntos
-        sendEmailWithAttachments(alumno.getCorreo(), "Certificado de Curso", "Estimado " + alumno.getNombreAsistente() + ", adjuntamos su certificado y código QR.", pdfBytes, qrCodeBytes);
+        sendEmailWithAttachments(alumno.getCorreo(), "Certificado de Curso",alumno, pdfBytes, qrCodeBytes);
 
         return CompletableFuture.completedFuture(null);
     }
@@ -763,20 +763,94 @@ public class ServicioArchivos {
         return pngOutputStream;
     }
 
-    private void sendEmailWithAttachments(String toEmail, String subject, String body, byte[] pdfBytes, byte[] qrCodeBytes) throws MessagingException {
+    private String capitalizeName(String name) {
+        if (name == null || name.isEmpty()) return name;
+        String[] parts = name.toLowerCase().split(" ");
+        StringBuilder capitalized = new StringBuilder();
+        for (String part : parts) {
+            capitalized.append(part.substring(0, 1).toUpperCase())
+                    .append(part.substring(1)).append(" ");
+        }
+        return capitalized.toString().trim();
+    }
+    
+    private String formatCourseName(String courseName) {
+        if (courseName != null && courseName.contains("|")) {
+            return courseName.replace("|", ", ");
+        }
+        return courseName;
+    }
+
+    private void sendEmailWithAttachments(String toEmail, String subject, Alumno alumno, byte[] pdfBytes, byte[] qrCodeBytes) throws MessagingException {
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
         helper.setTo(toEmail);
         helper.setSubject(subject);
-        helper.setText(body, true); // true indica que es formato HTML
+        byte[] logoBytes=null;
+        try {
+            logoBytes = Files.readAllBytes(Paths.get("src/main/resources/static/images/Logobgremove.png"));
+        } catch (IOException e) {
+
+            e.printStackTrace();
+        }
+        ByteArrayResource logoResource = new ByteArrayResource(logoBytes);
+        String htmlContent = "<!DOCTYPE html>" +
+        "<html lang='es'>" +
+        "<head>" +
+        "<meta charset='UTF-8'>" +
+        "<meta name='viewport' content='width=device-width, initial-scale=1.0'>" +
+        "<title>Document</title>" +
+        "</head>" +
+        "<body style='font-family: Arial, sans-serif; background-color: #f9f9f9; margin: 0; padding: 0;'>" +
+        "<div style='max-width: 600px; margin: 0 auto; background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);'>" +
+        "<table role='presentation' width='100%' style='border-spacing: 0;'>" +
+        "<tr>" +
+        "<td style='text-align: center;'>" +
+        "<img style='width: 234px; height: 58px;' src='cid:logoImage' alt='LOGO'>" +
+        "</td>" +
+        "</tr>" +
+        "<tr>" +
+        "<td style='text-align: center; color: black; padding: 10px 0; border-radius: 8px 8px 0 0;'>" +
+        "<h2>¡Felicitaciones!</h2>" +
+        "<h4>Le hemos emitido un certificado.</h4>" +
+        "</td>" +
+        "</tr>" +
+        "<tr>" +
+        "<td style='text-align: center; margin: 20px 0;'>" +
+        "<p>Estimado/a <strong>" + capitalizeName(alumno.getNombreAsistente()) + "</strong>:</p>" +
+        "<p>Adjunto encontrarás tu certificado de participación en el/los curso(s) <strong>" + formatCourseName(alumno.getNombreCurso()) + "</strong>, junto con un código QR que te permitirá descargarlo nuevamente desde nuestra página web.</p>" +
+        "<p>También puedes descargar tu certificado escaneando el siguiente código QR:</p>" +
+        "</td>" +
+        "</tr>" +
+        "<tr>" +
+        "<td style='text-align: center; margin: 20px 0;'>" +
+        "<img style='width: 200px; height: 200px;' src='cid:qrCodeImage' alt='QR Code'>" +
+        "</td>" +
+        "</tr>" +
+        "<tr>" +
+        "<td style='text-align: center; font-size: 12px; color: #777; margin-top: 20px;'>" +
+        "<p>Si tienes dudas, no dudes en contactarnos a través de <a href='mailto:contacto@e-volution.cl'>contacto@e-volution.cl</a>.</p>" +
+        "</td>" +
+        "</tr>" +
+        "</table>" +
+        "</div>" +
+        "</body>" +
+        "</html>";
+
+        helper.setText(htmlContent, true); // true indica que es formato HTML
 
         // Adjuntar el PDF
         ByteArrayResource pdfResource = new ByteArrayResource(pdfBytes);
         helper.addAttachment("certificado.pdf", pdfResource);
 
+        ByteArrayResource qrCodeResourceHtml = new ByteArrayResource(qrCodeBytes);
+        helper.addInline("qrCodeImage", qrCodeResourceHtml, "image/png");
+
         // Adjuntar el código QR
         ByteArrayResource qrCodeResource = new ByteArrayResource(qrCodeBytes);
         helper.addAttachment("codigoQR.png", qrCodeResource);
+
+        helper.addInline("logoImage", logoResource, "image/png");
 
         javaMailSender.send(message);
     }
