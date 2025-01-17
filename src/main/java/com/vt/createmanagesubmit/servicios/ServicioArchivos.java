@@ -1,11 +1,11 @@
 package com.vt.createmanagesubmit.servicios;
 
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
 import java.awt.geom.Dimension2D;
-import java.awt.Color;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -54,6 +54,7 @@ import org.apache.poi.xslf.usermodel.XSLFTextShape;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.hibernate.Hibernate;
 import org.jodconverter.core.office.OfficeException;
+import org.jodconverter.core.office.OfficeManager;
 import org.jodconverter.local.JodConverter;
 import org.jodconverter.local.office.LocalOfficeManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +64,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.zxing.BarcodeFormat;
@@ -96,6 +98,13 @@ public class ServicioArchivos {
     @Autowired
     @Lazy
     private ServicioApi servicioApi;
+
+    @Autowired
+    @Lazy
+    private ServicioCola servicioCola;
+
+    @Autowired
+    private OfficeManager officeManager;
 
     @Autowired
     private JavaMailSender javaMailSender;
@@ -444,6 +453,7 @@ public class ServicioArchivos {
     }
 
     @Async
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public CompletableFuture<Void> generateCertificateForAlumno(Alumno alumno) throws Exception {
         // Obtén la plantilla asociada al alumno
         Plantilla plantilla = alumno.getPlantilla();
@@ -513,21 +523,12 @@ public class ServicioArchivos {
 
         // Convierte el PPTX a PDF usando JODConverter
         String tempPdfPath = "temp/" + alumno.getId() + ".pdf";
-        LocalOfficeManager officeManager = LocalOfficeManager.builder()
-                .install()
-                .build();
-        try {
-            officeManager.start();
-            JodConverter.convert(new File(tempPptxPath))
-                    .to(new File(tempPdfPath))
-                    .execute();
-        } catch (OfficeException e) {
-            throw new OfficeException("Ocurrió un error inesperado al generar el PPT", e);
-        } finally {
-            if (officeManager != null) {
-                officeManager.stop();
-            }
-        }
+        JodConverter
+                .convert(new File(tempPptxPath))
+                .to(new File(tempPdfPath))
+                .execute();
+
+        
 
         // Leer el PDF generado como array de bytes
         byte[] pdfBytes = Files.readAllBytes(Paths.get(tempPdfPath));
