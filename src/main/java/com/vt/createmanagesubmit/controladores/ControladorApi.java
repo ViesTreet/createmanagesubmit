@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vt.createmanagesubmit.dto.AlumnoDTO;
@@ -167,6 +168,30 @@ public class ControladorApi {
             }
         }
         return null;
+    }
+
+    @PostMapping("/dataBaseAlumno/accionAlumnos")
+    @ResponseBody
+    public ResponseEntity<String> accionAlumnos(@RequestParam("ids") List<Long> ids, @RequestParam("accionElegida") String accionElegida) {
+        if ("descarga".equals(accionElegida)) {
+            for(Long id: ids){
+                Alumno alumno = ser.alumnoPorId(id);
+                System.out.println(id);
+            }
+        } else if ("enviar".equals(accionElegida)) {
+            for(Long id: ids){
+                try {
+                    Alumno alumno = ser.alumnoPorId(id);
+                    servicioAr.generateCertificateForAlumno(alumno);
+                } catch (Exception e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        // Retorna una respuesta apropiada
+        return ResponseEntity.ok("Acción realizada correctamente");
     }
 
     @PostMapping("/dataBaseAlumno/downloadForQr")

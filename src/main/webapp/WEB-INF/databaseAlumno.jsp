@@ -57,6 +57,18 @@
             max-width: 400px;
         }
 
+        .popup2 {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+        }
+
         /* Botón cerrar */
         .close-btn {
             background-color: red;
@@ -154,16 +166,23 @@
                     <a id="buscarLink" href="#" class="btn btn-outline-primary">Buscar</a>
                 </form>
             </div>
-            <div>
-                <button class="btn btn-primary" onclick="openForm()">Enviar restantes</button>
-                <a class="btn btn-success" href="/dataBaseAlumno/addAlumnoBase">+</a>
-                <button id="downloadBtn" href="/dataBaseAlumno/download" class="btn btn-secondary">Descargar base de datos</button>
+            <div id="button-container">
+                <div id="normal-buttons">
+                    <button class="btn btn-primary" onclick="openForm()">Enviar restantes</button>
+                    <a class="btn btn-success" href="/dataBaseAlumno/addAlumnoBase">+</a>
+                    <button id="downloadBtn" href="/dataBaseAlumno/download" class="btn btn-secondary">Descargar base de datos</button>
+                </div>
+                <div id="listo-button" style="display: none;">
+                    <button id="listoBtn" class="btn btn-primary">Listo</button>
+                    <button id="deseleccionarBtn" class="btn btn-warning">Deseleccionar</button>
+                </div>
             </div>
         </div>
         <div id="contenedorTabla" style="overflow-y: auto; max-height: 70vh; max-width: 95vw;">
             <table class="table table-hover table-bordered mb-5" style="table-layout: fixed; height: 100%;" id="tablaAlumnos">
                 <thead class="thead-dark">
                     <tr>
+                        <th style="width: 5vw;"></th>
                         <th>Nombre</th>
                         <th>Curso</th>
                         <th>Cliente</th>
@@ -183,9 +202,78 @@
             </table>
         </div>
     </div>
-
+    
     <script>
         $(document).ready(function () {
+            const checkboxKey = "checkboxStates";
+
+            $('#deseleccionarBtn').on('click', function() {
+              // Deseleccionar todos los checkboxes
+              $('input[type="checkbox"]').prop('checked', false).trigger('change');
+              // Remover los estados guardados en localStorage
+              localStorage.removeItem(checkboxKey);
+            });
+            function saveCheckboxState() {
+                var checkedIds = [];
+                $("#tablaAlumnos input[type='checkbox']:checked").each(function () {
+                    checkedIds.push($(this).val());
+                });
+                localStorage.setItem(checkboxKey, JSON.stringify(checkedIds));
+            }
+        
+            // Agregar un listener para los cambios en los checkboxes
+            $(document).on('change', "#tablaAlumnos input[type='checkbox']", function () {
+                saveCheckboxState();  // Guardar el estado cuando se marca/desmarca un checkbox
+            
+                // Cambiar el color de fondo según el estado del checkbox
+                var alumnoId = $(this).val();
+                var rows = $('tr[data-alumno-id="' + alumnoId + '"]');
+                var tds = rows.find("td");
+            
+                if ($(this).prop("checked")) {
+                    tds.css('background-color', 'lightblue');
+                } else {
+                    tds.css('background-color', '');
+                }
+            
+                updateUIAfterRestore();  // Actualizar botones
+            });
+
+            function restoreCheckboxStates() {
+                const storedIds = JSON.parse(localStorage.getItem(checkboxKey)) || [];
+                $("#tablaAlumnos input[type='checkbox']").each(function () {
+                    var alumnoId = $(this).val();
+                    var rows = $('tr[data-alumno-id="' + alumnoId + '"]');
+                    var tds = rows.find("td");
+                
+                    if (storedIds.includes(alumnoId)) {
+                        $(this).prop("checked", true);
+                        // Cambiar el color de fondo a celeste
+                        tds.css('background-color', 'lightblue');
+                    } else {
+                        $(this).prop("checked", false);
+                        // Restaurar el color de fondo original
+                        tds.css('background-color', '');
+                    }
+                });
+            
+                // Actualizar la visibilidad de los botones
+                updateUIAfterRestore();
+            }
+
+            // Definir la función updateUIAfterRestore()
+            function updateUIAfterRestore() {
+                var anyChecked = $('#tablaAlumnos input[type="checkbox"]:checked').length > 0;
+                if (anyChecked) {
+                    $('#normal-buttons').hide();
+                    $('#listo-button').show();
+                } else {
+                    $('#normal-buttons').show();
+                    $('#listo-button').hide();
+                }
+            }
+
+            
             function cargarDatos() {
                 $.ajax({
                     url: "/api/datosAlumno",
@@ -209,19 +297,21 @@
                                 }
                             }
 
-                            var fila = "<tr>" +
-                                "<td><a href='/dataBaseAlumno/alumno/" + alumno.id + "'>" + (alumno.nombreAsistente != null ? alumno.nombreAsistente : "") + "</a></td>" +
-                                "<td>" + (alumno.nombreCurso != null ? alumno.nombreCurso : "") + "</td>" +
-                                "<td>" + (alumno.cliente != null ? alumno.cliente : "") + "</td>" +
-                                "<td>" + (alumno.obra != null ? alumno.obra : "") + "</td>" +
-                                "<td>" + (alumno.relator != null ? alumno.relator : "") + "</td>" +
-                                "<td>" + (alumno.estado != null ? alumno.estado : "") + "</td>" +
-                                "<td>" + (alumno.rut != null ? alumno.rut : "") + "</td>" +
-                                "<td>" + correoText + "</td>" +
-                                "<td>" + (alumno.plantilla != null ? alumno.plantilla : "") + "</td>" +
-                                "<td>" + (alumno.diploma != null ? alumno.diploma : "") + "</td>" +
-                                "<td>" + (alumno.numeroCorrelativoInterno != null ? alumno.numeroCorrelativoInterno : "") + "</td>" +
-                                "</tr>";
+                            var fila = "<tr data-alumno-id='" + alumno.id + "'>" +
+                            "<td class='d-flex justify-content-center align-items-center' style='width: 5vw; height: 100%;'>" +
+                            "<input type='checkbox' value='" + alumno.id + "'></td>" +
+                            "<td><a href='/dataBaseAlumno/alumno/" + alumno.id + "'>" + (alumno.nombreAsistente != null ? alumno.nombreAsistente : "") + "</a></td>" +
+                            "<td>" + (alumno.nombreCurso != null ? alumno.nombreCurso : "") + "</td>" +
+                            "<td>" + (alumno.cliente != null ? alumno.cliente : "") + "</td>" +
+                            "<td>" + (alumno.obra != null ? alumno.obra : "") + "</td>" +
+                            "<td>" + (alumno.relator != null ? alumno.relator : "") + "</td>" +
+                            "<td>" + (alumno.estado != null ? alumno.estado : "") + "</td>" +
+                            "<td>" + (alumno.rut != null ? alumno.rut : "") + "</td>" +
+                            "<td>" + correoText + "</td>" +
+                            "<td>" + (alumno.plantilla != null ? alumno.plantilla : "") + "</td>" +
+                            "<td>" + (alumno.diploma != null ? alumno.diploma : "") + "</td>" +
+                            "<td>" + (alumno.numeroCorrelativoInterno != null ? alumno.numeroCorrelativoInterno : "") + "</td>" +
+                            "</tr>";
                             tbody.append(fila);
     
                             // Si el estado es "noEnviado", agregar un <p> al contenedor
@@ -230,11 +320,14 @@
                                 contenedorNoEnviados.append(parrafo);
                             }
                         });
+                        restoreCheckboxStates();
+                        updateUIAfterRestore();
                     },
                     error: function (error) {
                         console.log("Error al obtener los datos", error);
                     }
                 });
+
             }
     
             // Cargar datos inicialmente
@@ -243,8 +336,6 @@
             // Actualizar la tabla cada 30 segundos (30000 milisegundos)
             setInterval(cargarDatos, 30000);
         });
-    </script>
-    
     </script>
     <script>
         document.getElementById('buscarLink').addEventListener('click', function(event) {
@@ -323,6 +414,71 @@
                 document.body.removeChild(link);
                 button.disabled = false; // Reactivar el botón
             }, 100);
+        });
+    </script>
+    <div class="overlay" id="selection-overlay" style="display: none;">
+        <div class="popup2">
+            <div class="d-flex justify-content-end">
+                <button class="btn btn-danger" onclick="closeSelectionOverlay()">Cerrar</button>
+            </div>
+            <div class="d-flex justify-content-center align-items-center">
+                <!-- Tarjeta Descargar -->
+                <div class="card mx-2" style="width: 18rem;">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Descargar</h5>
+                        <p class="card-text">Descarga los datos seleccionados en un archivo.</p>
+                        <button class="btn btn-secondary action-btn" data-action="descarga">Descargar</button>
+                    </div>
+                </div>
+                <!-- Tarjeta Enviar -->
+                <div class="card mx-2" style="width: 18rem;">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Enviar</h5>
+                        <p class="card-text">Envía la información a los alumnos seleccionados.</p>
+                        <button class="btn btn-success action-btn" data-action="enviar">Enviar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $('#listoBtn').on('click', function() {
+            $('#selection-overlay').show();
+        });
+        
+        function closeSelectionOverlay() {
+            $('#selection-overlay').hide();
+        }
+    </script>
+    <script>
+        // Manejar clics en los botones de acción dentro del overlay
+        $(document).on('click', '.action-btn', function() {
+            var action = $(this).data('action'); // "descarga" o "enviar"
+            // Obtener la lista de IDs de los alumnos seleccionados
+            var selectedIds = $('input[type="checkbox"]:checked').map(function() {
+                return $(this).val();
+            }).get();
+        
+            // Enviar los datos al backend mediante AJAX
+            $.ajax({
+                url: '/api/dataBaseAlumno/accionAlumnos', // Endpoint en el controlador
+                method: 'POST',
+                data: {
+                    ids: selectedIds,
+                    accionElegida: action
+                },
+                traditional: true, // Para enviar arrays correctamente
+                success: function(response) {
+                    // Manejar respuesta exitosa
+                    closeSelectionOverlay();
+                    // Desmarcar todos los checkboxes y restaurar la interfaz
+                    $('input[type="checkbox"]').prop('checked', false).trigger('change');
+                },
+                error: function(error) {
+                    // Manejar errores
+                    alert('Ocurrió un error: ' + error.statusText);
+                }
+            });
         });
     </script>
     <script>
