@@ -1,40 +1,25 @@
 package com.vt.createmanagesubmit.servicios;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics2D;
-import java.awt.font.FontRenderContext;
-import java.awt.font.TextLayout;
-import java.awt.geom.Dimension2D;
-import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 // Otras importaciones necesarias
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
-import javax.crypto.Cipher;
-import javax.crypto.spec.SecretKeySpec;
-import javax.imageio.ImageIO;
-
-import org.apache.poi.sl.usermodel.Insets2D;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.DateUtil;
@@ -43,34 +28,16 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.apache.poi.util.Dimension2DDouble;
-import org.apache.poi.xslf.usermodel.XMLSlideShow;
-import org.apache.poi.xslf.usermodel.XSLFShape;
-import org.apache.poi.xslf.usermodel.XSLFSlide;
-import org.apache.poi.xslf.usermodel.XSLFTextBox;
-import org.apache.poi.xslf.usermodel.XSLFTextParagraph;
-import org.apache.poi.xslf.usermodel.XSLFTextRun;
-import org.apache.poi.xslf.usermodel.XSLFTextShape;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.hibernate.Hibernate;
-import org.jodconverter.core.office.OfficeException;
 import org.jodconverter.core.office.OfficeManager;
-import org.jodconverter.local.JodConverter;
-import org.jodconverter.local.office.LocalOfficeManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.WriterException;
-import com.google.zxing.common.BitMatrix;
-import com.google.zxing.qrcode.QRCodeWriter;
 import com.vt.createmanagesubmit.dto.AlumnoDTO;
 import com.vt.createmanagesubmit.exceptions.CertificateGenerationException;
 import com.vt.createmanagesubmit.modelos.Alumno;
@@ -78,8 +45,6 @@ import com.vt.createmanagesubmit.modelos.Plantilla;
 import com.vt.createmanagesubmit.repositorios.RepositorioAlumnos;
 import com.vt.createmanagesubmit.repositorios.RepositorioPlantillas;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Service
@@ -403,7 +368,7 @@ public class ServicioArchivos {
         }
 
         
-        String rutSinPuntos = rut.replaceAll("\\.", "");
+        String rutSinPuntos = rut.replaceAll(".", "");
 
         
         if (!rutSinPuntos.contains("-")) {
@@ -451,6 +416,89 @@ public class ServicioArchivos {
                 throw new CertificateGenerationException("Ocurrió un error al generar el certificado.");
             }
             
+        }
+    }
+
+    @Transactional
+    public byte[] generateCertificatesZip(List<Long> ids) throws InterruptedException, ExecutionException, Exception{
+        List<Alumno> alumnos = alumnoRepo.findAllById(ids);
+
+        String timestamp = String.valueOf(System.currentTimeMillis());
+        String folderName = "certificado_" + timestamp;
+        File folder = new File(System.getProperty("java.io.tmpdir"), folderName);
+
+        // Asegúrate de que la carpeta se cree
+        if (!folder.exists()) {
+            folder.mkdirs();
+        }
+
+        try {
+            for (Alumno alumno : alumnos) {
+                byte[] pdfBytes = servicioGenerarCertificado.descargarCertificadosServicio(alumno).get();
+                String safeAlumnoName = alumno.getNombreAsistente().replaceAll("[^a-zA-Z0-9_-]", "_");
+                File pdfFile = new File(folder, "certificado_" + safeAlumnoName + ".pdf");
+
+                // Guardar los bytes del PDF en el archivo
+                try (FileOutputStream fos = new FileOutputStream(pdfFile)) {
+                    fos.write(pdfBytes);
+                }
+            }
+
+            // 3) Comprimir la carpeta entera en un ZIP
+            File zipFile = new File(System.getProperty("java.io.tmpdir"), folderName + ".zip");
+            zipFolder(folder.getAbsolutePath(), zipFile.getAbsolutePath());
+
+            // 4) Leer los bytes del ZIP
+            byte[] zipBytes = Files.readAllBytes(zipFile.toPath());
+
+            // 5) Retornar los bytes del ZIP
+            return zipBytes;
+
+        } finally {
+            // 6) Borra todo (la carpeta temporal y el zip) para limpieza
+            deleteDirectory(folder);
+            File zipFile = new File(System.getProperty("java.io.tmpdir"), folderName + ".zip");
+            if (zipFile.exists()) {
+                zipFile.delete();
+            }
+        }
+    }
+
+    private void zipFolder(String sourceDirPath, String zipFilePath) throws IOException {
+        Path zipFile = Files.createFile(Paths.get(zipFilePath));
+        try (ZipOutputStream zs = new ZipOutputStream(Files.newOutputStream(zipFile))) {
+            Path sourceDir = Paths.get(sourceDirPath);
+            Files.walk(sourceDir)
+                 .filter(path -> !Files.isDirectory(path))
+                 .forEach(path -> {
+                     ZipEntry zipEntry = new ZipEntry(sourceDir.relativize(path).toString());
+                     try {
+                         zs.putNextEntry(zipEntry);
+                         Files.copy(path, zs);
+                         zs.closeEntry();
+                     } catch (IOException e) {
+                         e.printStackTrace();
+                     }
+                 });
+        }
+    }
+    
+    /**
+     * Método para borrar una carpeta con todo su contenido.
+     */
+    private void deleteDirectory(File directory) {
+        if (directory.exists()) {
+            File[] files = directory.listFiles();
+            if (files != null) { 
+                for (File file : files) {
+                    if (file.isDirectory()) {
+                        deleteDirectory(file);
+                    } else {
+                        file.delete();
+                    }
+                }
+            }
+            directory.delete();
         }
     }
 

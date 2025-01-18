@@ -100,7 +100,7 @@ public class ServicioGenerarCertificado {
     public CompletableFuture<Void> generateCertificateForAlumno(Alumno alumno) throws Exception {
         // Obtén la plantilla asociada al alumno
         Plantilla plantilla = alumno.getPlantilla();
-        if (plantilla == null) {
+        if (plantilla == null || plantilla.getNombreCertificado().trim().equals("Error en encontrar plantilla")) {
             throw new Exception("No hay una plantilla asociada al Alumno " + alumno.getNombreAsistente());
         }
 
@@ -122,7 +122,9 @@ public class ServicioGenerarCertificado {
         alumnoData.put("dias curso", alumno.getDiasCursos());
         alumnoData.put("relator", alumno.getRelator());
         alumnoData.put("asistencia", alumno.getAsistencia());
-        alumnoData.put("lugar y fecha", plantilla.getLugarYFecha());
+        if(!plantilla.getLugarYFecha().trim().isEmpty() || plantilla.getLugarYFecha() != null){
+            alumnoData.put("lugar y fecha", plantilla.getLugarYFecha());
+        }
         alumnoData.put("correlativo", alumno.getNumeroCorrelativoInterno());
         alumnoData.put("modalidad", alumno.getModalidad());
 
@@ -195,6 +197,11 @@ public class ServicioGenerarCertificado {
     }
 
     private void adjustFontSizeToFit(XSLFTextShape textShape, XSLFTextRun textRun, String text) {
+        if (text == null || text.isEmpty()) {
+            // Log o manejo del caso
+            System.out.println("Texto vacío o nulo detectado: " + text);
+            return; // No hay nada que ajustar
+        }
         double minFontSize = 5.0; // Tamaño mínimo de fuente
         double maxFontSize = textRun.getFontSize();
         if (maxFontSize <= 0) {
@@ -252,91 +259,82 @@ public class ServicioGenerarCertificado {
         for (XSLFTextParagraph paragraph : textShape.getTextParagraphs()) {
             for (XSLFTextRun textRun : paragraph.getTextRuns()) {
                 String text = textRun.getRawText();
-                if (text.contains("${")) {
-                    for (Map.Entry<String, String> entry : data.entrySet()) {
-                        String placeholder = "${" + entry.getKey() + "}";
-                        if (text.contains(placeholder)) {
-                            placeholderFound = true;
-                            placeholderKey = entry.getKey();
-                            replacementText = entry.getValue() != null ? entry.getValue() : "";
-                            sourceParagraph = paragraph; // Guarda el párrafo original
-                            break;
+                boolean seReemplazoAlgo = false;
+    
+                // Recorremos todos los placeholders que estén en 'data'
+                for (Map.Entry<String, String> entry : data.entrySet()) {
+                    String placeholder = "${" + entry.getKey() + "}";
+                    if (text.contains(placeholder)) {
+                        placeholderFound = true;
+                        placeholderKey = entry.getKey();
+                        replacementText = entry.getValue() != null ? entry.getValue() : "";
+    
+                        // Reemplazar todas las ocurrencias de este placeholder
+                        text = text.replace(placeholder, replacementText);
+                        seReemplazoAlgo = true;
+    
+                        // Guardamos el párrafo original solo la primera vez
+                        if (sourceParagraph == null) {
+                            sourceParagraph = paragraph;
                         }
                     }
                 }
-                if (placeholderFound) {
-                    break;
-                }
-            }
-            if (placeholderFound) {
-                break;
-            }
-        }
     
-        if (placeholderFound) {
-            // Determina si el texto contiene '|'
-            if (replacementText.contains("|")) {
-                // El texto contiene saltos de línea, hay que dividir y crear nuevas shapes
-                shapesToRemove.add(textShape); // Marca el shape original para eliminarlo
+                // Si se hizo algún reemplazo en este textRun
+                if (seReemplazoAlgo) {
+                    // Asignamos el texto ya con todos los placeholders reemplazados
+                    textRun.setText(text);
     
-                String[] lines = replacementText.split("\\|");
-                int numberOfLines = lines.length;
+                    // Verificamos si hay que dividir en múltiples líneas (si hay '|')
+                    if (text.contains("|")) {
+                        shapesToRemove.add(textShape); // Eliminar shape original
+                        String[] lines = text.split("\\|");
     
-                // Obtiene la posición y dimensiones del shape original
-                Rectangle2D anchor = textShape.getAnchor();
-                double totalHeight = anchor.getHeight();
-                double shapeWidth = anchor.getWidth();
-                double shapeX = anchor.getX();
-                double shapeY = anchor.getY(); // Eliminé el ajuste de -11.0
+                        // Obtiene la posición y dimensiones del shape original
+                        Rectangle2D anchor = textShape.getAnchor();
+                        double totalHeight = anchor.getHeight();
+                        double shapeWidth = anchor.getWidth();
+                        double shapeX = anchor.getX();
+                        double shapeY = anchor.getY();
     
-                // Ajusta la altura de cada nuevo shape, considerando un pequeño margen entre líneas
-                double margin = 2.0; // Ajusta este valor según sea necesario
-                double shapeHeight = totalHeight / numberOfLines;
+                        // Ajusta la altura de cada nuevo shape, considerando un pequeño margen entre líneas
+                        double margin = 0.5; // Ajusta este valor según sea necesario
+                        double shapeHeight = totalHeight / lines.length;
     
-                // Para cada línea, crea un nuevo shape
-                for (int i = 0; i < numberOfLines; i++) {
-                    String line = lines[i];
+                        // Para cada línea, crea un nuevo shape
+                        for (int i = 0; i < lines.length; i++) {
+                            String line = lines[i];
     
-                    // Calcula la nueva posición Y considerando el margen entre líneas
-                    double adjustedMargin = i == 0 ? 0 : margin; // Sin margen en el primer shape
-                    double newY = shapeY + i * (shapeHeight + adjustedMargin);
-                    
-                    // Establece la posición y tamaño del nuevo shape
-                    Rectangle2D newAnchor = new Rectangle2D.Double(
-                        shapeX, newY, shapeWidth, shapeHeight
-                    );
+                            // Calcula la nueva posición Y considerando el margen entre líneas
+                            double adjustedMargin = i == 0 ? 0 : margin; // Sin margen en el primer shape
+                            double newY = shapeY + i * (shapeHeight + adjustedMargin);
     
-                    // Crea un nuevo shape
-                    XSLFTextBox newShape = slide.createTextBox();
-                    newShape.setAnchor(newAnchor);
+                            // Establece la posición y tamaño del nuevo shape
+                            Rectangle2D newAnchor = new Rectangle2D.Double(
+                                shapeX, newY, shapeWidth, shapeHeight
+                            );
     
-                    // Copia las propiedades del shape original
-                    copyShapeProperties(textShape, newShape);
+                            // Crea un nuevo shape
+                            XSLFTextBox newShape = slide.createTextBox();
+                            newShape.setAnchor(newAnchor);
     
-                    // Establece el texto
-                    XSLFTextParagraph newParagraph = newShape.addNewTextParagraph();
-                    copyParagraphProperties(sourceParagraph, newParagraph); // Copia las propiedades del párrafo
+                            // Copia las propiedades del shape original
+                            copyShapeProperties(textShape, newShape);
     
-                    XSLFTextRun newRun = newParagraph.addNewTextRun();
-                    newRun.setText(line);
+                            // Establece el texto
+                            XSLFTextParagraph newParagraph = newShape.addNewTextParagraph();
+                            copyParagraphProperties(sourceParagraph, newParagraph); // Copia las propiedades del párrafo
     
-                    // Aplica las propiedades de fuente y ajusta el tamaño si es necesario
-                    applyFontProperties(textShape, newRun);
-                    adjustFontSizeToFit(newShape, newRun, line);
-                }
-            } else {
-                // El texto no contiene saltos de línea, simplemente reemplaza el placeholder y ajusta el tamaño
-                for (XSLFTextParagraph paragraph : textShape.getTextParagraphs()) {
-                    for (XSLFTextRun textRun : paragraph.getTextRuns()) {
-                        String text = textRun.getRawText();
-                        String placeholder = "${" + placeholderKey + "}";
-                        if (text.contains(placeholder)) {
-                            String newText = text.replace(placeholder, replacementText);
-                            textRun.setText(newText);
+                            XSLFTextRun newRun = newParagraph.addNewTextRun();
+                            newRun.setText(line);
     
-                            // Ajustar el tamaño de la fuente
-                            adjustFontSizeToFit(textShape, textRun, newText);
+                            // Aplica las propiedades de fuente y ajusta el tamaño si es necesario
+                            applyFontProperties(textShape, newRun);
+                            adjustFontSizeToFit(newShape, newRun, line);
                         }
+                    } else {
+                        // Texto simple, ajustamos la fuente
+                        adjustFontSizeToFit(textShape, textRun, text);
                     }
                 }
             }
@@ -568,7 +566,7 @@ public class ServicioGenerarCertificado {
 
         // Obtén la plantilla asociada al alumno
         Plantilla plantilla = alumno.getPlantilla();
-        if (plantilla == null) {
+        if (plantilla == null || plantilla.getNombreCertificado().trim().equals("Error en encontrar plantilla")) {
             throw new Exception("No hay una plantilla asociada al Alumno " + alumno.getNombreAsistente());
         }
 
@@ -590,7 +588,9 @@ public class ServicioGenerarCertificado {
         alumnoData.put("dias curso", alumno.getDiasCursos());
         alumnoData.put("relator", alumno.getRelator());
         alumnoData.put("asistencia", alumno.getAsistencia());
-        alumnoData.put("lugar y fecha", plantilla.getLugarYFecha());
+        if(!plantilla.getLugarYFecha().trim().isEmpty() || plantilla.getLugarYFecha() != null){
+            alumnoData.put("lugar y fecha", plantilla.getLugarYFecha());
+        }
         alumnoData.put("correlativo", alumno.getNumeroCorrelativoInterno());
         alumnoData.put("modalidad", alumno.getModalidad());
 
@@ -628,48 +628,31 @@ public class ServicioGenerarCertificado {
         // Convierte el PPTX a PDF usando JODConverter
         File tempPdfFile = File.createTempFile("certificado-", ".pdf");
 
-        LocalOfficeManager officeManager = LocalOfficeManager.builder()
-                .install()
-                .build();
+        JodConverter
+                .convert(tempPptxFile)
+                .to(tempPdfFile)
+                .execute();
 
-        try {
-            officeManager.start();
-            JodConverter.convert(tempPptxFile)
-                    .to(tempPdfFile)
-                    .execute();
-
-            // Leer el PDF generado como array de bytes
-            byte[] pdfBytes = Files.readAllBytes(tempPdfFile.toPath());
-
-            // Configurar la respuesta HTTP para enviar el PDF como archivo descargable
-            response.setContentType("application/pdf");
-            response.setHeader("Content-Disposition", "attachment; filename=\"certificado-" + alumno.getId() + ".pdf\"");
-
-            response.getOutputStream().write(pdfBytes);
-            response.getOutputStream().flush();
-
-         } catch (OfficeException e) {
-             throw new OfficeException("Ocurrió un error inesperado al generar el PDF", e);
-         } finally {
-             if (officeManager != null) {
-                 officeManager.stop();
-             }
-
-             // Eliminar los archivos temporales
-             tempPptxFile.delete();
-             tempPdfFile.delete();
-         }
-
-         return CompletableFuture.completedFuture(null);
+        // Leer el PDF generado como array de bytes
+        byte[] pdfBytes = Files.readAllBytes(tempPdfFile.toPath());
+        // Configurar la respuesta HTTP para enviar el PDF como archivo descargable
+        response.setContentType("application/pdf");
+        response.setHeader("Content-Disposition", "attachment; filename=\"certificado-" + alumno.getId() + ".pdf\"");
+        response.getOutputStream().write(pdfBytes);
+        response.getOutputStream().flush();
+         // Eliminar los archivos temporales
+        tempPptxFile.delete();
+        tempPdfFile.delete();
+        return CompletableFuture.completedFuture(null);
     }
 
     @Async
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public CompletableFuture<byte[]> probarCertificadosServicio(Alumno alumno) throws Exception {
+    public CompletableFuture<byte[]> descargarCertificadosServicio(Alumno alumno) throws Exception {
 
         // Obtén la plantilla asociada al alumno
         Plantilla plantilla = alumno.getPlantilla();
-        if (plantilla == null) {
+        if (plantilla == null || plantilla.getNombreCertificado().trim().equals("Error en encontrar plantilla")) {
             throw new Exception("No hay una plantilla asociada al Alumno " + alumno.getNombreAsistente());
         }
 
@@ -691,7 +674,9 @@ public class ServicioGenerarCertificado {
         alumnoData.put("dias curso", alumno.getDiasCursos());
         alumnoData.put("relator", alumno.getRelator());
         alumnoData.put("asistencia", alumno.getAsistencia());
-        alumnoData.put("lugar y fecha", plantilla.getLugarYFecha());
+        if(!plantilla.getLugarYFecha().trim().isEmpty() || plantilla.getLugarYFecha() != null){
+            alumnoData.put("lugar y fecha", plantilla.getLugarYFecha());
+        }
         alumnoData.put("correlativo", alumno.getNumeroCorrelativoInterno());
         alumnoData.put("modalidad", alumno.getModalidad());
 
@@ -729,29 +714,17 @@ public class ServicioGenerarCertificado {
         // Convierte el PPTX a PDF usando JODConverter
         File tempPdfFile = File.createTempFile("certificado-", ".pdf");
 
-        LocalOfficeManager officeManager = LocalOfficeManager.builder()
-                .install()
-                .build();
+        JodConverter
+                .convert(tempPptxFile)
+                .to(tempPdfFile)
+                .execute();
 
-        try {
-            officeManager.start();
-            JodConverter.convert(tempPptxFile)
-                    .to(tempPdfFile)
-                    .execute();
 
-            pdfBytes = Files.readAllBytes(tempPdfFile.toPath());
-
-         } catch (OfficeException e) {
-             throw new OfficeException("Ocurrió un error inesperado al generar el PDF", e);
-         } finally {
-             if (officeManager != null) {
-                 officeManager.stop();
-             }
-
-             // Eliminar los archivos temporales
-             tempPptxFile.delete();
-             tempPdfFile.delete();
-         }
+        pdfBytes = Files.readAllBytes(tempPdfFile.toPath());
+        // Eliminar los archivos temporales
+        tempPptxFile.delete();
+        tempPdfFile.delete();
+         
 
          return CompletableFuture.completedFuture(pdfBytes);
     }

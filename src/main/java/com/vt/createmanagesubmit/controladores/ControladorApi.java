@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -177,12 +178,28 @@ public class ControladorApi {
 
     @PostMapping("/dataBaseAlumno/accionAlumnos")
     @ResponseBody
-    public ResponseEntity<String> accionAlumnos(@RequestParam("ids") List<Long> ids, @RequestParam("accionElegida") String accionElegida) {
+    public ResponseEntity<byte[]> accionAlumnos(@RequestParam("ids") List<Long> ids, @RequestParam("accionElegida") String accionElegida) {
+        
         if ("descarga".equals(accionElegida)) {
-            for(Long id: ids){
-                Alumno alumno = ser.alumnoPorId(id);
-                System.out.println(id);
+            byte[] zipBytes=null;
+            try {
+                zipBytes = servicioAr.generateCertificatesZip(ids);
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
             }
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"certificados.zip\"");
+            return ResponseEntity.ok()
+                                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                                 .headers(headers)
+                                 .body(zipBytes);
         } else if ("enviar".equals(accionElegida)) {
             for(Long id: ids){
                 try {
@@ -193,10 +210,9 @@ public class ControladorApi {
                     e.printStackTrace();
                 }
             }
+            return ResponseEntity.ok(null);
         }
-
-        // Retorna una respuesta apropiada
-        return ResponseEntity.ok("Acción realizada correctamente");
+        return null;
     }
 
     @PostMapping("/dataBaseAlumno/downloadForQr")
@@ -245,7 +261,8 @@ public class ControladorApi {
     public CompletableFuture<ResponseEntity<byte[]>> probarPlantilla(@ModelAttribute Alumno alumno,@RequestParam("idPlantilla")Long idPlantilla) throws Exception {
         Plantilla plantilla=ser.plantillaPorId(idPlantilla);
         alumno.setPlantilla(plantilla);
-        return servicioGenerarCertificado.probarCertificadosServicio(alumno)
+        alumno.setNombreAsistente(alumno.getNombreAsistente().toUpperCase());
+        return servicioGenerarCertificado.descargarCertificadosServicio(alumno)
                 .thenApply(fileBytes -> {
                     HttpHeaders headers = new HttpHeaders();
                     headers.setContentType(MediaType.APPLICATION_PDF); // Cambia al tipo de archivo que corresponda
