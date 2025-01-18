@@ -418,7 +418,7 @@
     </script>
     <div class="overlay" id="selection-overlay" style="display: none;">
         <div class="popup2">
-            <div class="d-flex justify-content-end">
+            <div class="d-flex justify-content-end pb-2">
                 <button class="btn btn-danger" onclick="closeSelectionOverlay()">Cerrar</button>
             </div>
             <div class="d-flex justify-content-center align-items-center">
