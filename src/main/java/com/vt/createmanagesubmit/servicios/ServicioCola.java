@@ -39,7 +39,7 @@ public class ServicioCola {
 
         if(tipoTarea.equals("generateForAlumno")){
             try {
-                servicioArchivo.generateCertificateForAlumno((Alumno) tarea);
+                //servicioArchivo.generateCertificateForAlumno((Alumno) tarea);
             } catch (Exception e) {
                 e.printStackTrace();
             }

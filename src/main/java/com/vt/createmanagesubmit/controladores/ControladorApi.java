@@ -35,6 +35,7 @@ import com.vt.createmanagesubmit.modelos.Alumno;
 import com.vt.createmanagesubmit.modelos.Plantilla;
 import com.vt.createmanagesubmit.servicios.Servicio;
 import com.vt.createmanagesubmit.servicios.ServicioArchivos;
+import com.vt.createmanagesubmit.servicios.ServicioGenerarCertificado;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -54,6 +55,10 @@ public class ControladorApi {
     @Autowired
     @Lazy
     private ServicioArchivos servicioAr;
+
+    @Autowired
+    @Lazy
+    private ServicioGenerarCertificado servicioGenerarCertificado;
 
     private static final int MAX_DOWNLOADS = 5;
     private static final long TIME_FRAME = 60 * 60 * 1000; // 1 hora
@@ -181,8 +186,8 @@ public class ControladorApi {
         } else if ("enviar".equals(accionElegida)) {
             for(Long id: ids){
                 try {
-                    Alumno alumno = ser.alumnoPorId(id);
-                    servicioAr.generateCertificateForAlumno(alumno);
+                    System.out.println(id);
+                    servicioAr.generateCertificatesById(id);
                 } catch (Exception e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -198,7 +203,7 @@ public class ControladorApi {
     public CompletableFuture<ResponseEntity<?>> downloadCertificateQr(@RequestBody Map<String, String> data, HttpServletResponse response) {
         String id = data.get("id");
         try {
-            return servicioAr.generateCertificateQR(id, response)
+            return servicioGenerarCertificado.generateCertificateQR(id, response)
                 .thenApply(result -> ResponseEntity.ok().build());
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -240,7 +245,7 @@ public class ControladorApi {
     public CompletableFuture<ResponseEntity<byte[]>> probarPlantilla(@ModelAttribute Alumno alumno,@RequestParam("idPlantilla")Long idPlantilla) throws Exception {
         Plantilla plantilla=ser.plantillaPorId(idPlantilla);
         alumno.setPlantilla(plantilla);
-        return servicioAr.probarCertificadosServicio(alumno)
+        return servicioGenerarCertificado.probarCertificadosServicio(alumno)
                 .thenApply(fileBytes -> {
                     HttpHeaders headers = new HttpHeaders();
                     headers.setContentType(MediaType.APPLICATION_PDF); // Cambia al tipo de archivo que corresponda

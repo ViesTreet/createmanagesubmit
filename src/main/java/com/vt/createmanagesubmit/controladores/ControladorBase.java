@@ -28,6 +28,7 @@ import com.vt.createmanagesubmit.modelos.Plantilla;
 import com.vt.createmanagesubmit.servicios.Servicio;
 import com.vt.createmanagesubmit.servicios.ServicioApi;
 import com.vt.createmanagesubmit.servicios.ServicioArchivos;
+import com.vt.createmanagesubmit.servicios.ServicioGenerarCertificado;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -52,6 +53,10 @@ public class ControladorBase {
 
     @Autowired
     private ServicioApi servicioApi;
+
+    @Autowired
+    @Lazy
+    private ServicioGenerarCertificado servicioGenerarCertificado;
 
     String correoEmpresa = Servicio.CORREO_EMPRESA;
 
@@ -212,7 +217,7 @@ public class ControladorBase {
         if(diploma.equals("enviar")){
             if(nuevoAlumno.getEstado().equals("aprobado")){
                 try {
-                    servicioAr.generateCertificateForAlumno(nuevoAlumno);
+                    servicioGenerarCertificado.generateCertificateForAlumno(nuevoAlumno);
                     nuevoAlumno.setDiploma("enviado");
                 } catch (Exception ex) {
                     model.addAttribute("error", ex.getMessage());
