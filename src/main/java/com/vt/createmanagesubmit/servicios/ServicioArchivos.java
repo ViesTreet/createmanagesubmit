@@ -1,14 +1,8 @@
 package com.vt.createmanagesubmit.servicios;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
-// Otras importaciones necesarias
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -16,10 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
-
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.DateUtil;
@@ -30,10 +20,8 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.hibernate.Hibernate;
-import org.jodconverter.core.office.OfficeManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,17 +54,7 @@ public class ServicioArchivos {
 
     @Autowired
     @Lazy
-    private ServicioCola servicioCola;
-
-    @Autowired
-    @Lazy
     private ServicioGenerarCertificado servicioGenerarCertificado;
-
-    @Autowired
-    private OfficeManager officeManager;
-
-    @Autowired
-    private JavaMailSender javaMailSender;
 
     String correoEmpresa = Servicio.CORREO_EMPRESA;
 
@@ -416,89 +394,6 @@ public class ServicioArchivos {
                 throw new CertificateGenerationException("Ocurrió un error al generar el certificado.");
             }
             
-        }
-    }
-
-    @Transactional
-    public byte[] generateCertificatesZip(List<Long> ids) throws InterruptedException, ExecutionException, Exception{
-        List<Alumno> alumnos = alumnoRepo.findAllById(ids);
-
-        String timestamp = String.valueOf(System.currentTimeMillis());
-        String folderName = "certificado_" + timestamp;
-        File folder = new File(System.getProperty("java.io.tmpdir"), folderName);
-
-        // Asegúrate de que la carpeta se cree
-        if (!folder.exists()) {
-            folder.mkdirs();
-        }
-
-        try {
-            for (Alumno alumno : alumnos) {
-                byte[] pdfBytes = servicioGenerarCertificado.descargarCertificadosServicio(alumno).get();
-                String safeAlumnoName = alumno.getNombreAsistente().replaceAll("[^a-zA-Z0-9_-]", "_");
-                File pdfFile = new File(folder, "certificado_" + safeAlumnoName + ".pdf");
-
-                // Guardar los bytes del PDF en el archivo
-                try (FileOutputStream fos = new FileOutputStream(pdfFile)) {
-                    fos.write(pdfBytes);
-                }
-            }
-
-            // 3) Comprimir la carpeta entera en un ZIP
-            File zipFile = new File(System.getProperty("java.io.tmpdir"), folderName + ".zip");
-            zipFolder(folder.getAbsolutePath(), zipFile.getAbsolutePath());
-
-            // 4) Leer los bytes del ZIP
-            byte[] zipBytes = Files.readAllBytes(zipFile.toPath());
-
-            // 5) Retornar los bytes del ZIP
-            return zipBytes;
-
-        } finally {
-            // 6) Borra todo (la carpeta temporal y el zip) para limpieza
-            deleteDirectory(folder);
-            File zipFile = new File(System.getProperty("java.io.tmpdir"), folderName + ".zip");
-            if (zipFile.exists()) {
-                zipFile.delete();
-            }
-        }
-    }
-
-    private void zipFolder(String sourceDirPath, String zipFilePath) throws IOException {
-        Path zipFile = Files.createFile(Paths.get(zipFilePath));
-        try (ZipOutputStream zs = new ZipOutputStream(Files.newOutputStream(zipFile))) {
-            Path sourceDir = Paths.get(sourceDirPath);
-            Files.walk(sourceDir)
-                 .filter(path -> !Files.isDirectory(path))
-                 .forEach(path -> {
-                     ZipEntry zipEntry = new ZipEntry(sourceDir.relativize(path).toString());
-                     try {
-                         zs.putNextEntry(zipEntry);
-                         Files.copy(path, zs);
-                         zs.closeEntry();
-                     } catch (IOException e) {
-                         e.printStackTrace();
-                     }
-                 });
-        }
-    }
-    
-    /**
-     * Método para borrar una carpeta con todo su contenido.
-     */
-    private void deleteDirectory(File directory) {
-        if (directory.exists()) {
-            File[] files = directory.listFiles();
-            if (files != null) { 
-                for (File file : files) {
-                    if (file.isDirectory()) {
-                        deleteDirectory(file);
-                    } else {
-                        file.delete();
-                    }
-                }
-            }
-            directory.delete();
         }
     }
 

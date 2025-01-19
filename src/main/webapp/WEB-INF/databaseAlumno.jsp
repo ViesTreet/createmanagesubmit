@@ -423,19 +423,27 @@
             </div>
             <div class="d-flex justify-content-center align-items-center">
                 <!-- Tarjeta Descargar -->
-                <div class="card mx-2" style="width: 18rem;">
+                <div class="card mx-2" style="width: 18rem; height: 40vh;">
                     <div class="card-body text-center">
-                        <h5 class="card-title">Descargar</h5>
-                        <p class="card-text">Descarga los datos seleccionados en un archivo.</p>
-                        <button class="btn btn-secondary action-btn" data-action="descarga">Descargar</button>
+                        <div class="d-flex justify-content-center align-items-center text-center flex-column" style="height: 80%;">
+                            <h3 class="card-title">Descargar</h3>
+                            <p class="card-text">Descarga los datos seleccionados en un archivo(.zip), puede demorar unos segundos.</p>
+                        </div>
+                        <div style="height: 20%;">
+                            <button class="btn btn-secondary action-btn" data-action="descarga">Descargar</button>
+                        </div>
                     </div>
                 </div>
                 <!-- Tarjeta Enviar -->
-                <div class="card mx-2" style="width: 18rem;">
+                <div class="card mx-2" style="width: 18rem; height: 40vh;">
                     <div class="card-body text-center">
-                        <h5 class="card-title">Enviar</h5>
-                        <p class="card-text">Envía la información a los alumnos seleccionados.</p>
-                        <button class="btn btn-success action-btn" data-action="enviar">Enviar</button>
+                        <div class="d-flex justify-content-center align-items-center text-center flex-column" style="height: 80%;">
+                            <h3 class="card-title pb-1">Enviar</h3>
+                            <p class="card-text">Envía los certificados a los alumnos seleccionados.</p>
+                        </div>
+                        <div style="height: 20%;">
+                            <button class="btn btn-success action-btn" data-action="enviar">Enviar</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -459,26 +467,53 @@
                 return $(this).val();
             }).get();
         
-            // Enviar los datos al backend mediante AJAX
-            $.ajax({
-                url: '/api/dataBaseAlumno/accionAlumnos', // Endpoint en el controlador
+            // Configuración básica del AJAX
+            var ajaxConfig = {
+                url: '/api/dataBaseAlumno/accionAlumnos',
                 method: 'POST',
                 data: {
                     ids: selectedIds,
                     accionElegida: action
                 },
                 traditional: true, // Para enviar arrays correctamente
-                success: function(response) {
-                    // Manejar respuesta exitosa
-                    closeSelectionOverlay();
-                    // Desmarcar todos los checkboxes y restaurar la interfaz
-                    $('input[type="checkbox"]').prop('checked', false).trigger('change');
-                },
                 error: function(error) {
                     // Manejar errores
                     alert('Ocurrió un error: ' + error.statusText);
                 }
-            });
+            };
+        
+            // Lógica específica para descarga
+            if (action === 'descarga') {
+                ajaxConfig.xhrFields = {
+                    responseType: 'blob'
+                };
+                ajaxConfig.success = function(blob, textStatus, xhr) {
+                    // Crear Blob y descargar archivo
+                    let downloadBlob = new Blob([blob], { type: xhr.getResponseHeader('Content-Type') });
+                    let url = window.URL.createObjectURL(downloadBlob);
+                    let link = document.createElement('a');
+                    link.href = url;
+                    link.download = "certificados_" + Date.now() + ".zip";
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    window.URL.revokeObjectURL(url);
+                
+                    // Limpieza de la interfaz
+                    closeSelectionOverlay();
+                    $('input[type="checkbox"]').prop('checked', false).trigger('change');
+                };
+            } else {
+                // Lógica específica para enviar
+                ajaxConfig.success = function(response) {
+                    // Manejar respuesta exitosa
+                    closeSelectionOverlay();
+                    $('input[type="checkbox"]').prop('checked', false).trigger('change');
+                };
+            }
+        
+            // Ejecutar el AJAX con la configuración ajustada
+            $.ajax(ajaxConfig);
         });
     </script>
     <script>

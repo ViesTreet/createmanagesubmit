@@ -36,6 +36,5 @@ public interface RepositorioAlumnos extends JpaRepository<Alumno, Long> {
 
     List<Alumno> findAllByDiplomaAndEstado(String diploma, String estado);
 
-    List<Alumno> findAllById(List<Long> ids);
 }
 

@@ -1,22 +1,28 @@
 package com.vt.createmanagesubmit.controladores;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -41,7 +47,6 @@ import com.vt.createmanagesubmit.servicios.ServicioGenerarCertificado;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import org.springframework.http.HttpHeaders;
 
 
 
@@ -70,7 +75,7 @@ public class ControladorApi {
     @GetMapping("/datosAlumno")
     public List<AlumnoDTO> getDatosAlumno(HttpSession session) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
-	    if (usuarioTemporal != null) {
+        if (usuarioTemporal != null) {
             Page<Alumno> alumnos = ser.todosLosAlumnos();
             return alumnos.getContent().stream().map(AlumnoDTO::new).collect(Collectors.toList());
         }
@@ -80,8 +85,8 @@ public class ControladorApi {
     @GetMapping("/datosAlumno/busquedaAlumno")
     public List<AlumnoDTO> getDatosBusquedaAlumno(@RequestParam String filtro, @RequestParam String busqueda,HttpSession session) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
-	    if (usuarioTemporal != null) {
-	    
+        if (usuarioTemporal != null) {
+        
             Page<Alumno> alumnos = ser.buscarAlumnosPorCriterio(filtro, busqueda); // Implementa este método en tu servicio
             return alumnos.getContent().stream().map(AlumnoDTO::new).collect(Collectors.toList());
         }
@@ -91,7 +96,7 @@ public class ControladorApi {
     @GetMapping("/datosPlantilla")
     public List<Plantilla> getDatosPlantilla(HttpSession session) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
-	    if (usuarioTemporal != null) {
+        if (usuarioTemporal != null) {
             List<Plantilla> plantilla = ser.todasLasPlantillas();
             return plantilla;
         }
@@ -101,7 +106,7 @@ public class ControladorApi {
     @GetMapping("/datosPlantilla/busquedaPlantilla")
     public List<Plantilla> getDatosBusquedaPlantilla(@RequestParam String busqueda,HttpSession session) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
-	    if (usuarioTemporal != null) {
+        if (usuarioTemporal != null) {
             List<Plantilla> plantilla = ser.buscarPlantillaPorCriterio(busqueda);
             return plantilla;
         }
@@ -155,7 +160,7 @@ public class ControladorApi {
     @GetMapping("/datosAdmin")
     public List<Admin> getDatosAdmin(HttpSession session) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
-	    if (usuarioTemporal != null) {
+        if (usuarioTemporal != null) {
             List<Admin> admin = ser.todasLosAdmin();
             return admin;
         }
@@ -165,7 +170,7 @@ public class ControladorApi {
     @GetMapping("/generateCertificates")
     public ResponseEntity<?> generateCertificates(HttpSession session) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
-	    if (usuarioTemporal != null) {
+        if (usuarioTemporal != null) {
             try {
                 servicioAr.generateCertificatesAll();
                 return ResponseEntity.ok("Certificados generados exitosamente.");
@@ -178,39 +183,70 @@ public class ControladorApi {
 
     @PostMapping("/dataBaseAlumno/accionAlumnos")
     @ResponseBody
-    public ResponseEntity<byte[]> accionAlumnos(@RequestParam("ids") List<Long> ids, @RequestParam("accionElegida") String accionElegida) {
+    public ResponseEntity<Resource> accionAlumnos(@RequestParam("ids") List<Long> ids, @RequestParam("accionElegida") String accionElegida) throws InterruptedException, ExecutionException, Exception {
         
         if ("descarga".equals(accionElegida)) {
-            byte[] zipBytes=null;
+            String timestamp = String.valueOf(System.currentTimeMillis());
+            Path tempDir = Files.createTempDirectory("certificados_" + timestamp);
+            
             try {
-                zipBytes = servicioAr.generateCertificatesZip(ids);
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (Exception e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                // Generar certificados y guardarlos en la carpeta
+                for (Long id : ids) {
+                    Alumno alumno = ser.alumnoPorId(id); // Método que debes tener o implementar
+                    byte[] certificadoBytes = servicioGenerarCertificado.descargarCertificadosServicio(alumno).get();
+
+                    // Guardar cada certificado como un archivo PDF en la carpeta temporal
+                    Path certificadoPath = tempDir.resolve("certificado_" + alumno.getNombreAsistente() + ".pdf");
+                    Files.write(certificadoPath, certificadoBytes);
+                }
+
+                // Comprimir la carpeta en un archivo ZIP
+                Path zipFile = Files.createTempFile("certificados_" + timestamp, ".zip");
+                try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(zipFile))) {
+                    Files.walk(tempDir).filter(Files::isRegularFile).forEach(file -> {
+                        ZipEntry zipEntry = new ZipEntry(tempDir.relativize(file).toString());
+                        try {
+                            zos.putNextEntry(zipEntry);
+                            Files.copy(file, zos);
+                            zos.closeEntry();
+                        } catch (IOException e) {
+                            throw new UncheckedIOException(e);
+                        }
+                    });
+                }
+
+                // Preparar el archivo para la descarga
+                Resource resource = new UrlResource(zipFile.toUri());
+                HttpHeaders headers = new HttpHeaders();
+                headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=certificados_" + timestamp + ".zip");
+
+                // Devolver el archivo ZIP como respuesta
+                return ResponseEntity.ok()
+                                     .headers(headers)
+                                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                                     .body(resource);
+
+            } finally {
+                // Limpiar archivos temporales
+                Files.walk(tempDir).sorted(Comparator.reverseOrder()).forEach(path -> {
+                    try {
+                        Files.delete(path);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
             }
-            HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"certificados.zip\"");
-            return ResponseEntity.ok()
-                                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                                 .headers(headers)
-                                 .body(zipBytes);
+            
         } else if ("enviar".equals(accionElegida)) {
             for(Long id: ids){
                 try {
                     System.out.println(id);
                     servicioAr.generateCertificatesById(id);
                 } catch (Exception e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
             }
-            return ResponseEntity.ok(null);
+            
         }
         return null;
     }

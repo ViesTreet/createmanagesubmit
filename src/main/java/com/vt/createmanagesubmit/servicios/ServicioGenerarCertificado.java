@@ -38,10 +38,7 @@ import org.apache.poi.xslf.usermodel.XSLFTextBox;
 import org.apache.poi.xslf.usermodel.XSLFTextParagraph;
 import org.apache.poi.xslf.usermodel.XSLFTextRun;
 import org.apache.poi.xslf.usermodel.XSLFTextShape;
-import org.jodconverter.core.office.OfficeException;
-import org.jodconverter.core.office.OfficeManager;
 import org.jodconverter.local.JodConverter;
-import org.jodconverter.local.office.LocalOfficeManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.ByteArrayResource;
@@ -59,8 +56,6 @@ import com.google.zxing.qrcode.QRCodeWriter;
 import com.vt.createmanagesubmit.modelos.Alumno;
 import com.vt.createmanagesubmit.modelos.Plantilla;
 import com.vt.createmanagesubmit.repositorios.RepositorioAlumnos;
-import com.vt.createmanagesubmit.repositorios.RepositorioPlantillas;
-
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpServletResponse;
@@ -73,22 +68,12 @@ public class ServicioGenerarCertificado {
     private RepositorioAlumnos alumnoRepo;
 
     @Autowired
-    private RepositorioPlantillas plantillaRepo;
-
-    @Autowired
     @Lazy
     private Servicio servicio;
 
     @Autowired
     @Lazy
     private ServicioApi servicioApi;
-
-    @Autowired
-    @Lazy
-    private ServicioCola servicioCola;
-
-    @Autowired
-    private OfficeManager officeManager;
 
     @Autowired
     private JavaMailSender javaMailSender;

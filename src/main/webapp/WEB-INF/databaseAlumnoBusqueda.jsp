@@ -57,6 +57,18 @@
             max-width: 400px;
         }
 
+        .popup2 {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+        }
+
         /* Botón cerrar */
         .close-btn {
             background-color: red;
@@ -149,16 +161,23 @@
                     <a id="buscarLink" href="#" class="btn btn-outline-primary">Buscar</a>
                 </form>
             </div>
-            <div>
-                <a class="btn btn-warning" href="/dataBaseAlumno">Regresar</a>
-                <a class="btn btn-success" href="/dataBaseAlumno/addAlumnoBase">+</a>
-                <button id="downloadBtn" href="/dataBaseAlumno/download" class="btn btn-secondary">Descargar base de datos</button>
+            <div id="button-container">
+                <div id="normal-buttons">
+                    <a class="btn btn-warning" href="/dataBaseAlumno">Regresar</a>
+                    <a class="btn btn-success" href="/dataBaseAlumno/addAlumnoBase">+</a>
+                    <button id="downloadBtn" href="/dataBaseAlumno/download" class="btn btn-secondary">Descargar base de datos</button>
+                </div>
+                <div id="listo-button" style="display: none;">
+                    <button id="listoBtn" class="btn btn-primary">Listo</button>
+                    <button id="deseleccionarBtn" class="btn btn-warning">Deseleccionar</button>
+                </div>
             </div>
         </div>
         <div id="contenedorTabla" style="overflow-y: auto; max-height: 70vh; max-width: 95vw;">
             <table class="table table-hover table-bordered mb-5" style="table-layout: fixed; height: 100%;" id="tablaAlumnos">
                 <thead class="thead-dark">
                     <tr>
+                        <th style="width: 5vw;"></th>
                         <th>Nombre</th>
                         <th>Curso</th>
                         <th>Cliente</th>
@@ -180,7 +199,74 @@
     </div>
 
     <script>
-        $(document).ready(function(){
+        $(document).ready(function () {
+            const checkboxKey = "checkboxStates";
+
+            $('#deseleccionarBtn').on('click', function() {
+              // Deseleccionar todos los checkboxes
+              $('input[type="checkbox"]').prop('checked', false).trigger('change');
+              // Remover los estados guardados en localStorage
+              localStorage.removeItem(checkboxKey);
+            });
+            function saveCheckboxState() {
+                var checkedIds = [];
+                $("#tablaAlumnos input[type='checkbox']:checked").each(function () {
+                    checkedIds.push($(this).val());
+                });
+                localStorage.setItem(checkboxKey, JSON.stringify(checkedIds));
+            }
+        
+            // Agregar un listener para los cambios en los checkboxes
+            $(document).on('change', "#tablaAlumnos input[type='checkbox']", function () {
+                saveCheckboxState();  // Guardar el estado cuando se marca/desmarca un checkbox
+            
+                // Cambiar el color de fondo según el estado del checkbox
+                var alumnoId = $(this).val();
+                var rows = $('tr[data-alumno-id="' + alumnoId + '"]');
+                var tds = rows.find("td");
+            
+                if ($(this).prop("checked")) {
+                    tds.css('background-color', 'lightblue');
+                } else {
+                    tds.css('background-color', '');
+                }
+            
+                updateUIAfterRestore();  // Actualizar botones
+            });
+
+            function restoreCheckboxStates() {
+                const storedIds = JSON.parse(localStorage.getItem(checkboxKey)) || [];
+                $("#tablaAlumnos input[type='checkbox']").each(function () {
+                    var alumnoId = $(this).val();
+                    var rows = $('tr[data-alumno-id="' + alumnoId + '"]');
+                    var tds = rows.find("td");
+                
+                    if (storedIds.includes(alumnoId)) {
+                        $(this).prop("checked", true);
+                        // Cambiar el color de fondo a celeste
+                        tds.css('background-color', 'lightblue');
+                    } else {
+                        $(this).prop("checked", false);
+                        // Restaurar el color de fondo original
+                        tds.css('background-color', '');
+                    }
+                });
+            
+                // Actualizar la visibilidad de los botones
+                updateUIAfterRestore();
+            }
+
+            // Definir la función updateUIAfterRestore()
+            function updateUIAfterRestore() {
+                var anyChecked = $('#tablaAlumnos input[type="checkbox"]:checked').length > 0;
+                if (anyChecked) {
+                    $('#normal-buttons').hide();
+                    $('#listo-button').show();
+                } else {
+                    $('#normal-buttons').show();
+                    $('#listo-button').hide();
+                }
+            }
             // Obtener los valores de filtro y búsqueda del modelo
             var filtro = '<%= request.getAttribute("filtro") %>';
             var busqueda = '<%= request.getAttribute("busqueda") %>';
@@ -203,22 +289,26 @@
                                     correoText = "con correo";
                                 }
                             }
-                            var fila = "<tr>"+
-                                "<td><a href='/dataBaseAlumno/alumno/"+alumno.id+"'>"+ (alumno.nombreAsistente != null ? alumno.nombreAsistente : "") +"</a></td>"+
-                                "<td>"+ (alumno.nombreCurso != null ? alumno.nombreCurso : "") +"</td>"+
-                                "<td>"+ (alumno.cliente != null ? alumno.cliente : "") +"</td>"+
-                                "<td>"+ (alumno.obra != null ? alumno.obra : "") +"</td>"+
-                                "<td>"+ (alumno.relator != null ? alumno.relator : "") +"</td>"+
-                                "<td>"+ (alumno.estado != null ? alumno.estado : "") +"</td>"+
-                                "<td>"+ (alumno.rut != null ? alumno.rut : "") +"</td>"+
-                                "<td>" + correoText + "</td>" +
-                                "<td>"+ (alumno.plantilla != null ? alumno.plantilla : "") +"</td>"+
-                                "<td>"+ (alumno.diploma != null ? alumno.diploma : "") +"</td>"+
-                                "<td>" + (alumno.numeroCorrelativoInterno != null ? alumno.numeroCorrelativoInterno : "") + "</td>" +
+                            var fila = "<tr data-alumno-id='" + alumno.id + "'>" +
+                            "<td class='d-flex justify-content-center align-items-center' style='width: 5vw; height: 100%;'>" +
+                            "<input type='checkbox' value='" + alumno.id + "'></td>" +
+                            "<td><a href='/dataBaseAlumno/alumno/" + alumno.id + "'>" + (alumno.nombreAsistente != null ? alumno.nombreAsistente : "") + "</a></td>" +
+                            "<td>" + (alumno.nombreCurso != null ? alumno.nombreCurso : "") + "</td>" +
+                            "<td>" + (alumno.cliente != null ? alumno.cliente : "") + "</td>" +
+                            "<td>" + (alumno.obra != null ? alumno.obra : "") + "</td>" +
+                            "<td>" + (alumno.relator != null ? alumno.relator : "") + "</td>" +
+                            "<td>" + (alumno.estado != null ? alumno.estado : "") + "</td>" +
+                            "<td>" + (alumno.rut != null ? alumno.rut : "") + "</td>" +
+                            "<td>" + correoText + "</td>" +
+                            "<td>" + (alumno.plantilla != null ? alumno.plantilla : "") + "</td>" +
+                            "<td>" + (alumno.diploma != null ? alumno.diploma : "") + "</td>" +
+                            "<td>" + (alumno.numeroCorrelativoInterno != null ? alumno.numeroCorrelativoInterno : "") + "</td>" +
                             "</tr>";
                             tbody.append(fila);
 
                         });
+                        restoreCheckboxStates();
+                        updateUIAfterRestore();
                     },
                     error: function(error){
                         console.log("Error al obtener los datos", error);
@@ -300,6 +390,118 @@
             }, 100);
         });
     </script>
+    <div class="overlay" id="selection-overlay" style="display: none;">
+        <div class="popup2">
+            <div class="d-flex justify-content-end pb-2">
+                <button class="btn btn-danger" onclick="closeSelectionOverlay()">Cerrar</button>
+            </div>
+            <div class="d-flex justify-content-center align-items-center">
+                <!-- Tarjeta Descargar -->
+                <div class="card mx-2" style="width: 18rem; height: 40vh;">
+                    <div class="card-body text-center">
+                        <div class="d-flex justify-content-center align-items-center text-center flex-column" style="height: 80%;">
+                            <h3 class="card-title">Descargar</h3>
+                            <p class="card-text">Descarga los datos seleccionados en un archivo(.zip), puede demorar unos segundos.</p>
+                        </div>
+                        <div style="height: 20%;">
+                            <button class="btn btn-secondary action-btn" data-action="descarga">Descargar</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Tarjeta Enviar -->
+                <div class="card mx-2" style="width: 18rem; height: 40vh;">
+                    <div class="card-body text-center">
+                        <div class="d-flex justify-content-center align-items-center text-center flex-column" style="height: 80%;">
+                            <h3 class="card-title pb-1">Enviar</h3>
+                            <p class="card-text">Envía los certificados a los alumnos seleccionados.</p>
+                        </div>
+                        <div style="height: 20%;">
+                            <button class="btn btn-success action-btn" data-action="enviar">Enviar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $('#listoBtn').on('click', function() {
+            $('#selection-overlay').show();
+        });
+        
+        function closeSelectionOverlay() {
+            $('#selection-overlay').hide();
+        }
+    </script>
+    <script>
+        // Manejar clics en los botones de acción dentro del overlay
+        $(document).on('click', '.action-btn', function() {
+            var action = $(this).data('action'); // "descarga" o "enviar"
+            // Obtener la lista de IDs de los alumnos seleccionados
+            var selectedIds = $('input[type="checkbox"]:checked').map(function() {
+                return $(this).val();
+            }).get();
+        
+            // Configuración básica del AJAX
+            var ajaxConfig = {
+                url: '/api/dataBaseAlumno/accionAlumnos',
+                method: 'POST',
+                data: {
+                    ids: selectedIds,
+                    accionElegida: action
+                },
+                traditional: true, // Para enviar arrays correctamente
+                error: function(error) {
+                    // Manejar errores
+                    alert('Ocurrió un error: ' + error.statusText);
+                }
+            };
+        
+            // Lógica específica para descarga
+            if (action === 'descarga') {
+                ajaxConfig.xhrFields = {
+                    responseType: 'blob'
+                };
+                ajaxConfig.success = function(blob, textStatus, xhr) {
+                    // Crear Blob y descargar archivo
+                    let downloadBlob = new Blob([blob], { type: xhr.getResponseHeader('Content-Type') });
+                    let url = window.URL.createObjectURL(downloadBlob);
+                    let link = document.createElement('a');
+                    link.href = url;
+                    link.download = "certificados_" + Date.now() + ".zip";
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    window.URL.revokeObjectURL(url);
+                
+                    // Limpieza de la interfaz
+                    closeSelectionOverlay();
+                    $('input[type="checkbox"]').prop('checked', false).trigger('change');
+                };
+            } else {
+                // Lógica específica para enviar
+                ajaxConfig.success = function(response) {
+                    // Manejar respuesta exitosa
+                    closeSelectionOverlay();
+                    $('input[type="checkbox"]').prop('checked', false).trigger('change');
+                };
+            }
+        
+            // Ejecutar el AJAX con la configuración ajustada
+            $.ajax(ajaxConfig);
+        });
+    </script>
+    <script>
+        function showAlert(message) {
+            if (message && message.trim() !== "") { 
+                alert(message);
+            }
+        }
+    </script>
+    <c:if test="${not empty error}">
+        <script>
+            showAlert("${error}");
+        </script>
+    </c:if>
     <footer class="text-center p-3 bg-light d-flex justify-content-center align-items-center" style="height: 15vh;">
         <div>
             <div><i class="fa-solid fa-phone"></i><a href="tel:+56 41 3830944">+56 41 3830944</a></div>
