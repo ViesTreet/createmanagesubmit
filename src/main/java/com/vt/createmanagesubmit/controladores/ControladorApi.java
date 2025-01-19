@@ -114,46 +114,50 @@ public class ControladorApi {
     }
 
     @GetMapping("/dataBasePlantilla/plantilla/{id}/descargar")
-    public ResponseEntity<Resource> descargarPlantilla(@PathVariable Long id) {
-        // Obtener la plantilla usando el servicio
-        Plantilla plantilla = ser.plantillaPorId(id);
-
-        if (plantilla == null) {
-            // Si la plantilla no existe, devolver 404
-            return ResponseEntity.notFound().build();
-        }
-
-        String pathArchivo = plantilla.getPathArchivo();
-
-        // Asegúrate de que 'pathArchivo' es una ruta absoluta o está correctamente resuelta
-        Path filePath = Paths.get(pathArchivo).toAbsolutePath();
-
-        if (!Files.exists(filePath)) {
-            // Si el archivo no existe, devolver 404
-            return ResponseEntity.notFound().build();
-        }
-
-        try {
-            // Cargar el archivo como un recurso
-            Resource resource = new UrlResource(filePath.toUri());
-
-            if (!resource.exists() || !resource.isReadable()) {
-                // Si el recurso no es accesible, lanzar excepción o manejar el error
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    public ResponseEntity<Resource> descargarPlantilla(@PathVariable Long id,HttpSession session) {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+        if (usuarioTemporal != null) {
+            Plantilla plantilla = ser.plantillaPorId(id);
+            
+            if (plantilla == null) {
+                // Si la plantilla no existe, devolver 404
+                return ResponseEntity.notFound().build();
             }
-
-            // Determinar el tipo de contenido
-            String contentType = "application/vnd.openxmlformats-officedocument.presentationml.presentation";
-
-            // Devolver la respuesta con el archivo
-            return ResponseEntity.ok()
-                    .contentType(MediaType.parseMediaType(contentType))
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
-                    .body(resource);
-
-        } catch (MalformedURLException e) {
-            // Manejar la excepción
-            return ResponseEntity.badRequest().build();
+        
+            String pathArchivo = plantilla.getPathArchivo();
+        
+            // Asegúrate de que 'pathArchivo' es una ruta absoluta o está correctamente resuelta
+            Path filePath = Paths.get(pathArchivo).toAbsolutePath();
+        
+            if (!Files.exists(filePath)) {
+                // Si el archivo no existe, devolver 404
+                return ResponseEntity.notFound().build();
+            }
+        
+            try {
+                // Cargar el archivo como un recurso
+                Resource resource = new UrlResource(filePath.toUri());
+            
+                if (!resource.exists() || !resource.isReadable()) {
+                    // Si el recurso no es accesible, lanzar excepción o manejar el error
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+                }
+            
+                // Determinar el tipo de contenido
+                String contentType = "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+            
+                // Devolver la respuesta con el archivo
+                return ResponseEntity.ok()
+                        .contentType(MediaType.parseMediaType(contentType))
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+                        .body(resource);
+            
+            } catch (MalformedURLException e) {
+                // Manejar la excepción
+                return ResponseEntity.badRequest().build();
+            }
+        }else{
+            return null;
         }
     }
 
@@ -183,72 +187,77 @@ public class ControladorApi {
 
     @PostMapping("/dataBaseAlumno/accionAlumnos")
     @ResponseBody
-    public ResponseEntity<Resource> accionAlumnos(@RequestParam("ids") List<Long> ids, @RequestParam("accionElegida") String accionElegida) throws InterruptedException, ExecutionException, Exception {
+    public ResponseEntity<Resource> accionAlumnos(@RequestParam("ids") List<Long> ids, @RequestParam("accionElegida") String accionElegida,HttpSession session) throws InterruptedException, ExecutionException, Exception {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+        if (usuarioTemporal != null) {
         
-        if ("descarga".equals(accionElegida)) {
-            String timestamp = String.valueOf(System.currentTimeMillis());
-            Path tempDir = Files.createTempDirectory("certificados_" + timestamp);
-            
-            try {
-                // Generar certificados y guardarlos en la carpeta
-                for (Long id : ids) {
-                    Alumno alumno = ser.alumnoPorId(id); // Método que debes tener o implementar
-                    byte[] certificadoBytes = servicioGenerarCertificado.descargarCertificadosServicio(alumno).get();
+            if ("descarga".equals(accionElegida)) {
+                String timestamp = String.valueOf(System.currentTimeMillis());
+                Path tempDir = Files.createTempDirectory("certificados_" + timestamp);
 
-                    // Guardar cada certificado como un archivo PDF en la carpeta temporal
-                    Path certificadoPath = tempDir.resolve("certificado_" + alumno.getNombreAsistente() + ".pdf");
-                    Files.write(certificadoPath, certificadoBytes);
-                }
+                try {
+                    // Generar certificados y guardarlos en la carpeta
+                    for (Long id : ids) {
+                        Alumno alumno = ser.alumnoPorId(id); // Método que debes tener o implementar
+                        byte[] certificadoBytes = servicioGenerarCertificado.descargarCertificadosServicio(alumno).get();
 
-                // Comprimir la carpeta en un archivo ZIP
-                Path zipFile = Files.createTempFile("certificados_" + timestamp, ".zip");
-                try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(zipFile))) {
-                    Files.walk(tempDir).filter(Files::isRegularFile).forEach(file -> {
-                        ZipEntry zipEntry = new ZipEntry(tempDir.relativize(file).toString());
+                        // Guardar cada certificado como un archivo PDF en la carpeta temporal
+                        Path certificadoPath = tempDir.resolve("certificado_" + alumno.getNombreAsistente() +"_"+alumno.getNumeroCorrelativoInterno()+ ".pdf");
+                        Files.write(certificadoPath, certificadoBytes);
+                    }
+
+                    // Comprimir la carpeta en un archivo ZIP
+                    Path zipFile = Files.createTempFile("certificados_" + timestamp, ".zip");
+                    try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(zipFile))) {
+                        Files.walk(tempDir).filter(Files::isRegularFile).forEach(file -> {
+                            ZipEntry zipEntry = new ZipEntry(tempDir.relativize(file).toString());
+                            try {
+                                zos.putNextEntry(zipEntry);
+                                Files.copy(file, zos);
+                                zos.closeEntry();
+                            } catch (IOException e) {
+                                throw new UncheckedIOException(e);
+                            }
+                        });
+                    }
+
+                    // Preparar el archivo para la descarga
+                    Resource resource = new UrlResource(zipFile.toUri());
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=certificados_" + timestamp + ".zip");
+
+                    // Devolver el archivo ZIP como respuesta
+                    return ResponseEntity.ok()
+                                         .headers(headers)
+                                         .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                                         .body(resource);
+
+                } finally {
+                    // Limpiar archivos temporales
+                    Files.walk(tempDir).sorted(Comparator.reverseOrder()).forEach(path -> {
                         try {
-                            zos.putNextEntry(zipEntry);
-                            Files.copy(file, zos);
-                            zos.closeEntry();
+                            Files.delete(path);
                         } catch (IOException e) {
-                            throw new UncheckedIOException(e);
+                            e.printStackTrace();
                         }
                     });
                 }
 
-                // Preparar el archivo para la descarga
-                Resource resource = new UrlResource(zipFile.toUri());
-                HttpHeaders headers = new HttpHeaders();
-                headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=certificados_" + timestamp + ".zip");
-
-                // Devolver el archivo ZIP como respuesta
-                return ResponseEntity.ok()
-                                     .headers(headers)
-                                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                                     .body(resource);
-
-            } finally {
-                // Limpiar archivos temporales
-                Files.walk(tempDir).sorted(Comparator.reverseOrder()).forEach(path -> {
+            } else if ("enviar".equals(accionElegida)) {
+                for(Long id: ids){
                     try {
-                        Files.delete(path);
-                    } catch (IOException e) {
+                        System.out.println(id);
+                        servicioAr.generateCertificatesById(id);
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
-                });
-            }
-            
-        } else if ("enviar".equals(accionElegida)) {
-            for(Long id: ids){
-                try {
-                    System.out.println(id);
-                    servicioAr.generateCertificatesById(id);
-                } catch (Exception e) {
-                    e.printStackTrace();
                 }
+
             }
-            
+            return null;
+        }else{
+            return null;
         }
-        return null;
     }
 
     @PostMapping("/dataBaseAlumno/downloadForQr")
@@ -294,23 +303,29 @@ public class ControladorApi {
     }
 
     @PostMapping("/probarPlantilla")
-    public CompletableFuture<ResponseEntity<byte[]>> probarPlantilla(@ModelAttribute Alumno alumno,@RequestParam("idPlantilla")Long idPlantilla) throws Exception {
-        Plantilla plantilla=ser.plantillaPorId(idPlantilla);
-        alumno.setPlantilla(plantilla);
-        alumno.setNombreAsistente(alumno.getNombreAsistente().toUpperCase());
-        return servicioGenerarCertificado.descargarCertificadosServicio(alumno)
-                .thenApply(fileBytes -> {
-                    HttpHeaders headers = new HttpHeaders();
-                    headers.setContentType(MediaType.APPLICATION_PDF); // Cambia al tipo de archivo que corresponda
-                    headers.setContentDispositionFormData("attachment", "certificado.pdf");
-                    return new ResponseEntity<>(fileBytes, headers, HttpStatus.OK);
-                })
-                .exceptionally(ex -> {
-                    // Manejo de errores
-                    ex.printStackTrace();
-                    return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-                });
+    public CompletableFuture<ResponseEntity<byte[]>> probarPlantilla(@ModelAttribute Alumno alumno,@RequestParam("idPlantilla")Long idPlantilla,HttpSession session) throws Exception {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+        if (usuarioTemporal != null) {
+            Plantilla plantilla=ser.plantillaPorId(idPlantilla);
+            alumno.setPlantilla(plantilla);
+            alumno.setNombreAsistente(alumno.getNombreAsistente().toUpperCase());
+            return servicioGenerarCertificado.descargarCertificadosServicio(alumno)
+                    .thenApply(fileBytes -> {
+                        HttpHeaders headers = new HttpHeaders();
+                        headers.setContentType(MediaType.APPLICATION_PDF); // Cambia al tipo de archivo que corresponda
+                        headers.setContentDispositionFormData("attachment", "certificado.pdf");
+                        return new ResponseEntity<>(fileBytes, headers, HttpStatus.OK);
+                    })
+                    .exceptionally(ex -> {
+                        // Manejo de errores
+                        ex.printStackTrace();
+                        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+                    });
+        }else{
+            return null;
+        }
     }
+        
 }
 
 
