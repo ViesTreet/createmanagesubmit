@@ -30,6 +30,7 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.imageio.ImageIO;
 
 import org.apache.poi.sl.usermodel.Insets2D;
+import org.apache.poi.sl.usermodel.TextShape.TextAutofit;
 import org.apache.poi.util.Dimension2DDouble;
 import org.apache.poi.xslf.usermodel.XMLSlideShow;
 import org.apache.poi.xslf.usermodel.XSLFShape;
@@ -219,21 +220,49 @@ public class ServicioGenerarCertificado {
         // Crear una imagen temporal para obtener el contexto gráfico
         BufferedImage img = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = img.createGraphics();
-    
         FontRenderContext frc = g2d.getFontRenderContext();
-        TextLayout layout = new TextLayout(text, font, frc);
-        Rectangle2D bounds = layout.getBounds();
+    
+        Insets2D insets = textShape.getInsets();
+        double shapeWidth = textShape.getAnchor().getWidth() - insets.left - insets.right;
+    
+        // Divide el texto en líneas que se ajustan al ancho del shape
+        List<String> lines = new ArrayList<>();
+        String[] words = text.split(" ");
+        StringBuilder currentLine = new StringBuilder();
+    
+        for (String word : words) {
+            String testLine = currentLine.length() == 0 ? word : currentLine + " " + word;
+            Rectangle2D testBounds = font.getStringBounds(testLine, frc);
+    
+            if (testBounds.getWidth() <= shapeWidth) {
+                currentLine.append(currentLine.length() == 0 ? word : " " + word);
+            } else {
+                lines.add(currentLine.toString());
+                currentLine = new StringBuilder(word);
+            }
+        }
+        if (currentLine.length() > 0) {
+            lines.add(currentLine.toString());
+        }
+    
+        // Calcula el tamaño final del texto con las líneas divididas
+        double textHeight = 0;
+        double maxLineWidth = 0;
+        for (String line : lines) {
+            Rectangle2D lineBounds = font.getStringBounds(line, frc);
+            textHeight += lineBounds.getHeight();
+            maxLineWidth = Math.max(maxLineWidth, lineBounds.getWidth());
+        }
     
         g2d.dispose();
     
-        // Añadir los márgenes internos del shape
-        Insets2D insets = textShape.getInsets();
-        double textWidth = bounds.getWidth() + insets.left + insets.right;
-        double textHeight = bounds.getHeight() + insets.top + insets.bottom;
+        // Devuelve el tamaño total considerando márgenes internos
+        double textWidth = maxLineWidth + insets.left + insets.right;
+        textHeight += insets.top + insets.bottom;
     
         return new Dimension2DDouble(textWidth, textHeight);
     }
-
+    
     private void processTextShape(XSLFSlide slide, XSLFTextShape textShape, Map<String, String> data, List<XSLFShape> shapesToRemove) throws Exception {
         boolean placeholderFound = false;
         String placeholderKey = null;
@@ -302,10 +331,12 @@ public class ServicioGenerarCertificado {
                             // Crea un nuevo shape
                             XSLFTextBox newShape = slide.createTextBox();
                             newShape.setAnchor(newAnchor);
+
+                            
     
                             // Copia las propiedades del shape original
                             copyShapeProperties(textShape, newShape);
-    
+                            newShape.setInsets(new Insets2D(0, 0, 0, 0));
                             // Establece el texto
                             XSLFTextParagraph newParagraph = newShape.addNewTextParagraph();
                             copyParagraphProperties(sourceParagraph, newParagraph); // Copia las propiedades del párrafo
@@ -336,6 +367,8 @@ public class ServicioGenerarCertificado {
         targetShape.setTextDirection(sourceShape.getTextDirection());
         targetShape.setTextAutofit(sourceShape.getTextAutofit());
         targetShape.setRotation(sourceShape.getRotation());
+        targetShape.setWordWrap(true);
+        targetShape.setTextAutofit(TextAutofit.SHAPE);
         // Copia el nombre del shape si es necesario
         //targetShape.setShapeName(sourceShape.getShapeName());
         // Copia otras propiedades adicionales si lo necesitas
