@@ -8,7 +8,10 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -662,5 +665,16 @@ public class ControladorBase {
         return "generarCertificadoQr.jsp";
     }
     
+
+    @GetMapping("/documentacion")
+    public ResponseEntity<byte[]> getPdf() throws IOException {
+        ClassPathResource pdfFile = new ClassPathResource("/static/documentacion/MANUAL E-VOLUTION APP.pdf");
+        byte[] pdfBytes = pdfFile.getInputStream().readAllBytes();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=MANUAL E-VOLUTION APP.pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdfBytes);
+    }
 
 }

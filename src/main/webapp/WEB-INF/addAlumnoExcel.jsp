@@ -21,7 +21,7 @@
         <nav class="d-flex justify-content-center align-items-center flex-nowrap">
             <a href="/dataBaseAlumno/addAlumnoBase" class="btn btn-primary mx-2">Regresar</a>
             <a href="/home" class="btn btn-primary mx-2">Inicio</a>
-            <a href="/documentacion/addAlumnoExcel" class="btn btn-primary mx-2">Documentación</a>
+            <a href="/documentacion" target="_blank" class="btn btn-primary mx-2">Documentación</a>
             <div class="d-flex flex-column justify-content-center align-items-center">
                 <i class="fa-solid fa-user"></i>
                 <p class="p-0 m-0" style="font-size: normal;">${admin.nombre}</p>

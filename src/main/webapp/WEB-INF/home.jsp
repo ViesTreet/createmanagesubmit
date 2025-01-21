@@ -22,7 +22,7 @@
         <a href="/home" class="logo"><img src="/images/Logobgremove.png" alt="[LOGO]"></a>
         <nav class="d-flex justify-content-center align-items-center flex-nowrap">
             <a href="/home" class="btn btn-primary mx-2">Inicio</a>
-            <a href="/documentacion/home" class="btn btn-primary mx-2">Documentación</a>
+            <a href="/documentacion" target="_blank" class="btn btn-primary mx-2">Documentación</a>
             <div class="d-flex flex-column justify-content-center align-items-center">
                 <i class="fa-solid fa-user"></i>
                 <p class="p-0 m-0" style="font-size: normal;">${admin.nombre}</p>
@@ -35,7 +35,7 @@
         <a href="/dataBaseAlumno/addAlumnoBase" class="btn btn-primary btn-custom">Agregar alumno base de datos</a>
         <a href="/dataBasePlantilla" class="btn btn-secondary btn-custom">Plantillas de diplomas</a>
         <a href="/dataBaseAdmin" class="btn btn-secondary btn-custom">Administradores</a>
-        <a href="/documentacion" class="btn btn-light btn-custom">Documentación</a>
+        <a href="/documentacion" target="_blank" class="btn btn-light btn-custom">Documentación</a>
         <a href="/logout" class="btn btn-danger btn-custom">Cerrar sesión</a>
     </main>
     <footer class="text-center p-3 bg-light d-flex justify-content-center align-items-center" style="height: 15vh;">
