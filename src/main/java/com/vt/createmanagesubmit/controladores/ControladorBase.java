@@ -209,6 +209,7 @@ public class ControladorBase {
         nuevoAlumno.setObra(obra);
         nuevoAlumno.setRelator(relator);
         nuevoAlumno.setRut(rut);
+        nuevoAlumno.setUbicacionSubida(usuarioTemporal.getUbicacion());
         List<Plantilla> plantillas=servicio.todasLasPlantillas();
         model.addAttribute("plantillas",plantillas);
         nombreAsistente = servicioApi.formatearNombre(nombreAsistente);
@@ -295,7 +296,7 @@ public class ControladorBase {
                 byte[] fileBytes = file.getBytes();
 
                 // Llamar al método asíncrono y pasarle los bytes del archivo
-                servicioAr.leerExcelYGuardarEnBD(fileBytes, estadoDiplomaExcel, plantilla, estadoExcel, rutificador);
+                servicioAr.leerExcelYGuardarEnBD(fileBytes, estadoDiplomaExcel, plantilla, estadoExcel, rutificador, usuarioTemporal.getUbicacion());
 
                 // Redirigir inmediatamente sin esperar a que termine el procesamiento
                 return "redirect:/dataBaseAlumno";

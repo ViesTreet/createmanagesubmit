@@ -206,7 +206,7 @@
     <script>
         $(document).ready(function () {
             const checkboxKey = "checkboxStates";
-
+            const ubicacionAdmin = "${admin.ubicacion}"; 
             $('#deseleccionarBtn').on('click', function() {
               // Deseleccionar todos los checkboxes
               $('input[type="checkbox"]').prop('checked', false).trigger('change');
@@ -286,38 +286,39 @@
                         contenedorNoEnviados.empty(); // Limpiar el contenedor antes de agregar nuevos datos
     
                         $.each(data, function (i, alumno) {
-                            
-                            var correoText = "sin correo"; // Valor por defecto
-
-                            if (alumno.correo) { // Verifica si el correo existe
-                                if (alumno.correo === "javito12ulloa@gmail.com") {
-                                    correoText = "correo empresa";
-                                } else {
-                                    correoText = "con correo";
+                            if (alumno.ubicacionSubida === ubicacionAdmin) { 
+                                var correoText = "sin correo"; // Valor por defecto
+                                
+                                if (alumno.correo) { // Verifica si el correo existe
+                                    if (alumno.correo === "javito12ulloa@gmail.com") {
+                                        correoText = "correo empresa";
+                                    } else {
+                                        correoText = "con correo";
+                                    }
                                 }
-                            }
-
-                            var fila = "<tr data-alumno-id='" + alumno.id + "'>" +
-                            "<td class='d-flex justify-content-center align-items-center' style='width: 5vw; height: 100%;'>" +
-                            "<input type='checkbox' value='" + alumno.id + "'></td>" +
-                            "<td><a href='/dataBaseAlumno/alumno/" + alumno.id + "'>" + (alumno.nombreAsistente != null ? alumno.nombreAsistente : "") + "</a></td>" +
-                            "<td>" + (alumno.nombreCurso != null ? alumno.nombreCurso : "") + "</td>" +
-                            "<td>" + (alumno.cliente != null ? alumno.cliente : "") + "</td>" +
-                            "<td>" + (alumno.obra != null ? alumno.obra : "") + "</td>" +
-                            "<td>" + (alumno.relator != null ? alumno.relator : "") + "</td>" +
-                            "<td>" + (alumno.estado != null ? alumno.estado : "") + "</td>" +
-                            "<td>" + (alumno.rut != null ? alumno.rut : "") + "</td>" +
-                            "<td>" + correoText + "</td>" +
-                            "<td>" + (alumno.plantilla != null ? alumno.plantilla : "") + "</td>" +
-                            "<td>" + (alumno.diploma != null ? alumno.diploma : "") + "</td>" +
-                            "<td>" + (alumno.numeroCorrelativoInterno != null ? alumno.numeroCorrelativoInterno : "") + "</td>" +
-                            "</tr>";
-                            tbody.append(fila);
-    
-                            // Si el estado es "noEnviado", agregar un <p> al contenedor
-                            if (alumno.diploma === "noEnviado" && alumno.estado ==="aprobado" && alumno.plantilla != "Error en encontrar plantilla") {
-                                var parrafo = "<p>Alumno: " + (alumno.nombreAsistente != null ? alumno.nombreAsistente : "Desconocido") + " Del curso: "+(alumno.nombreCurso != null ? alumno.nombreCurso : "Desconocido")+" se le enviara el certificado <br></br>";
-                                contenedorNoEnviados.append(parrafo);
+                            
+                                var fila = "<tr data-alumno-id='" + alumno.id + "'>" +
+                                "<td class='d-flex justify-content-center align-items-center' style='width: 5vw; height: 100%;'>" +
+                                "<input type='checkbox' value='" + alumno.id + "'></td>" +
+                                "<td><a href='/dataBaseAlumno/alumno/" + alumno.id + "'>" + (alumno.nombreAsistente != null ? alumno.nombreAsistente : "") + "</a></td>" +
+                                "<td>" + (alumno.nombreCurso != null ? alumno.nombreCurso : "") + "</td>" +
+                                "<td>" + (alumno.cliente != null ? alumno.cliente : "") + "</td>" +
+                                "<td>" + (alumno.obra != null ? alumno.obra : "") + "</td>" +
+                                "<td>" + (alumno.relator != null ? alumno.relator : "") + "</td>" +
+                                "<td>" + (alumno.estado != null ? alumno.estado : "") + "</td>" +
+                                "<td>" + (alumno.rut != null ? alumno.rut : "") + "</td>" +
+                                "<td>" + correoText + "</td>" +
+                                "<td>" + (alumno.plantilla != null ? alumno.plantilla : "") + "</td>" +
+                                "<td>" + (alumno.diploma != null ? alumno.diploma : "") + "</td>" +
+                                "<td>" + (alumno.numeroCorrelativoInterno != null ? alumno.numeroCorrelativoInterno : "") + "</td>" +
+                                "</tr>";
+                                tbody.append(fila);
+                                
+                                // Si el estado es "noEnviado", agregar un <p> al contenedor
+                                if (alumno.diploma === "noEnviado" && alumno.estado ==="aprobado" && alumno.plantilla != "Error en encontrar plantilla") {
+                                    var parrafo = "<p>Alumno: " + (alumno.nombreAsistente != null ? alumno.nombreAsistente : "Desconocido") + " Del curso: "+(alumno.nombreCurso != null ? alumno.nombreCurso : "Desconocido")+" se le enviara el certificado <br></br>";
+                                    contenedorNoEnviados.append(parrafo);
+                                }
                             }
                         });
                         restoreCheckboxStates();

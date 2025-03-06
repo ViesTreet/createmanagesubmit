@@ -119,7 +119,7 @@ public class Servicio {
                 listaResultante = repoAlum.findByRelatorContaining(dato, pageable); // Usando Containing
                 break;
             case "correlativo":
-                listaResultante = repoAlum.findByNumeroCorrelativoInterno(dato, pageable);
+                listaResultante = repoAlum.findByNumeroCorrelativoInternoContaining(dato, pageable);
                 break;
             default:
                 listaResultante = repoAlum.findAll(PageRequest.of(0, 200, Sort.by("updatedAt").descending()));
@@ -253,12 +253,16 @@ public class Servicio {
         return nuevoAlumno;
     }
 
-    public void numeroCorrelativoAuto(Alumno alumno){
-        int year = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR);
+    public void numeroCorrelativoAuto(Alumno alumno) {
+        java.util.Calendar calendar = java.util.Calendar.getInstance();
+        int year = calendar.get(java.util.Calendar.YEAR);
+        int month = calendar.get(java.util.Calendar.MONTH) + 1; // Se suma 1 porque enero es 0
         Long idC = alumno.getId();
-        alumno.setNumeroCorrelativoInterno(year+"-"+idC);
+    
+        String numeroCorrelativo = String.format("%d-%02d-%d", year, month, idC);
+        alumno.setNumeroCorrelativoInterno(numeroCorrelativo);
+        
         repoAlum.save(alumno);
-
     }
 
     public Alumno comprobarYGuardar(Alumno nuevoAlumno,String orden) {

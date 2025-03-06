@@ -59,7 +59,7 @@ public class ServicioArchivos {
     String correoEmpresa = Servicio.CORREO_EMPRESA;
 
     @Async
-    public CompletableFuture<Void> leerExcelYGuardarEnBD(byte[] fileBytes, String estadoDiplomaExcel, String plantilla, String estadoExcel, String rutificador) throws IOException {
+    public CompletableFuture<Void> leerExcelYGuardarEnBD(byte[] fileBytes, String estadoDiplomaExcel, String plantilla, String estadoExcel, String rutificador, String ubicacion) throws IOException {
         try (InputStream fileInputStream = new ByteArrayInputStream(fileBytes)){
             Workbook workbook = WorkbookFactory.create(fileInputStream);
 
@@ -164,6 +164,7 @@ public class ServicioArchivos {
                         String nombre = alumno.getNombreAsistente().trim().toUpperCase();
                         alumno.setNombreAsistente(nombre);
                         if(!alumno.getNombreAsistente().isEmpty()){
+                            alumno.setUbicacionSubida(ubicacion);
                             alumnoRepo.save(alumno);
                             servicio.numeroCorrelativoAuto(alumno);
                             if(estadoDiplomaExcel.equals("enviarApro")&&estadoExcel.equals("aprobado")){
@@ -409,7 +410,7 @@ public class ServicioArchivos {
         Row headerRow = sheet.createRow(0);
         String[] headers = {"Nombre Asistente", "Nombre Curso", "Días Curso", "Número Horas", "Correlativo Interno", 
                             "Cliente", "Obra", "Código", "Nota Aprobación", "Relator", "Asistencia", "Estado", 
-                            "Diploma", "RUT", "Correo", "Plantilla"};
+                            "Diploma", "RUT", "Correo", "Plantilla", "Ubiación"};
         
         for (int i = 0; i < headers.length; i++) {
             Cell cell = headerRow.createCell(i);
@@ -439,6 +440,7 @@ public class ServicioArchivos {
             row.createCell(13).setCellValue(safeGet(alumnoDTO.getRut()));
             row.createCell(14).setCellValue(safeGet(alumnoDTO.getCorreo()));
             row.createCell(15).setCellValue(safeGet(alumnoDTO.getPlantilla()));
+            row.createCell(16).setCellValue(safeGet(alumnoDTO.getUbicacionSubida()));
         }
 
         // Configuración de la respuesta HTTP para descargar el archivo Excel

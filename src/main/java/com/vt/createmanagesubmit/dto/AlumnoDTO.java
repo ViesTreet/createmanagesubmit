@@ -40,6 +40,8 @@ public class AlumnoDTO {
 
     private String plantilla;
 
+    private String ubicacionSubida;
+
 	private Date createdAt;
 	
 	private Date updatedAt;
@@ -61,6 +63,7 @@ public class AlumnoDTO {
         this.diploma = alumno.getDiploma();
         this.rut = alumno.getRut();
         this.correo = alumno.getCorreo();
+        this.ubicacionSubida = alumno.getUbicacionSubida();
         this.plantilla = alumno.getPlantilla().getNombreCertificado();
         this.createdAt = alumno.getCreatedAt();
         this.updatedAt = alumno.getUpdatedAt();
@@ -202,6 +205,14 @@ public class AlumnoDTO {
         this.plantilla = plantilla;
     }
 
+    public String getUbicacionSubida() {
+        return ubicacionSubida;
+    }
+
+    public void setUbicacionSubida(String ubicacionSubida) {
+        this.ubicacionSubida = ubicacionSubida;
+    }
+
     public Date getCreatedAt() {
         return createdAt;
     }
@@ -218,6 +229,7 @@ public class AlumnoDTO {
         this.updatedAt = updatedAt;
     }
 
+   
     
 
 }

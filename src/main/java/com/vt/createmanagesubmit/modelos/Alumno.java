@@ -60,6 +60,8 @@ public class Alumno {
 
     private String correo;
 
+    private String ubicacionSubida;
+
     @ManyToOne(fetch = FetchType.LAZY) 
     @JoinColumn(name = "plantilla_id") 
     private Plantilla plantilla;
@@ -75,26 +77,30 @@ public class Alumno {
     public Alumno() {
     }
 
-    public Alumno(String asistencia, String cliente, String codigo, String correo, Date createdAt, String diasCursos, String diploma, String estado, Long id, String nombreAsistente, String nombreCurso, String notaAprovacion, String numeroCorrelativoInterno, String modalidad, String numeroHoras, String obra, Plantilla plantilla, String relator, String rut, Date updatedAt) {
-        this.asistencia = asistencia;
-        this.cliente = cliente;
-        this.codigo = codigo;
-        this.correo = correo;
-        this.createdAt = createdAt;
-        this.diasCursos = diasCursos;
-        this.diploma = diploma;
-        this.estado = estado;
+    public Alumno(Long id, String nombreAsistente, String nombreCurso, String diasCursos, String duracion,
+            String numeroCorrelativoInterno, String modalidad, String cliente, String obra, String codigo,
+            String notaAprobacion, String relator, String asistencia, String estado, String diploma, String rut,
+            String correo, String ubicacionSubida, Plantilla plantilla, Date createdAt, Date updatedAt) {
         this.id = id;
         this.nombreAsistente = nombreAsistente;
         this.nombreCurso = nombreCurso;
-        this.notaAprobacion = notaAprovacion;
+        this.diasCursos = diasCursos;
+        this.duracion = duracion;
         this.numeroCorrelativoInterno = numeroCorrelativoInterno;
         this.modalidad = modalidad;
-        this.duracion = numeroHoras;
+        this.cliente = cliente;
         this.obra = obra;
-        this.plantilla = plantilla;
+        this.codigo = codigo;
+        this.notaAprobacion = notaAprobacion;
         this.relator = relator;
+        this.asistencia = asistencia;
+        this.estado = estado;
+        this.diploma = diploma;
         this.rut = rut;
+        this.correo = correo;
+        this.ubicacionSubida = ubicacionSubida;
+        this.plantilla = plantilla;
+        this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
 
@@ -241,7 +247,14 @@ public class Alumno {
     public void setPlantilla(Plantilla plantilla) {
         this.plantilla = plantilla;
     }
+    public String getUbicacionSubida() {
+        return ubicacionSubida;
+    }
 
+    public void setUbicacionSubida(String ubicacionSubida) {
+        this.ubicacionSubida = ubicacionSubida;
+    }
+    
     public Date getCreatedAt() {
         return createdAt;
     }
