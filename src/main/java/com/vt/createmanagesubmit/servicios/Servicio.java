@@ -176,6 +176,10 @@ public class Servicio {
         return repoPlanti.findByNombreCertificado(nombre);
     }
 
+    public void guardarAdmin(Admin admin){
+        repoAdmin.save(admin);
+    }
+
     public List<Admin> todasLosAdmin(){
         return repoAdmin.findAllByOrderByUpdatedAtDesc();
     }

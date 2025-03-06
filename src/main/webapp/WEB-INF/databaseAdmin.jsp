@@ -135,9 +135,11 @@
     <div id="contenderBase" class="container pt-2 pb-2" style="height: 90vh;">
         <h2 class="text-center">Base de datos Administradores</h2>
         <div class="d-flex align-items-center justify-content-end pb-1" style="max-width: 95vw;">
-            <div>
-                <button class="btn btn-success" onclick="openForm()">Agregar nuevo administradores</button>
-            </div>
+            <c:if test="${admin.correo == 'admin@admin.com'}">
+                <div>
+                    <button class="btn btn-success" onclick="openForm()">Agregar nuevo administradores</button>
+                </div>
+            </c:if>
         </div>
         <div id="contenedorTabla" style="overflow-y: auto; max-height: 70vh; max-width: 95vw;">
             <table class="table table-hover table-bordered mb-5" style="table-layout: auto; height: 100%;" id="tablaAdmin">
@@ -162,18 +164,18 @@
                     method: "GET",
                     success: function (data) {
                         var tbody = $("#tablaAdmin tbody");
-    
+                        var correoUsuarioEnSesion = "${admin.correo}";
                         tbody.empty(); // Limpiar la tabla antes de agregar nuevos datos
     
-                        $.each(data, function (i, admin) {
+                        $.each(data, function (i, admins) {
                             // Crear una fila de tabla
                             var fila = "<tr>" +
-                                "<td>" + (admin.correo != null ? admin.correo : "") + "</td>" +
-                                "<td>" + (admin.nombre != null ? admin.nombre : "") + "</td>";
+                                "<td>" + (admins.correo != null ? admins.correo : "") + "</td>" +
+                                "<td>" + (admins.nombre != null ? admins.nombre : "") + "</td>";
     
                             // Agregar el botón borrar solo si admin.nombre no es "admin"
-                            if (admin.correo !== "admin@admin.com") {
-                                fila += "<td style='width: 10vw;'>" + "<a class='btn btn-danger' href='/dataBaseAdmin/" + admin.id + "/borrar'>Borrar</a>" + "</td>";
+                            if (correoUsuarioEnSesion === "admin@admin.com" && admins.correo !== "admin@admin.com") {
+                                fila += "<td style='width: 10vw;'>" + "<a class='btn btn-danger' href='/dataBaseAdmin/" + admins.id + "/borrar'>Borrar</a>" + "</td>";
                             } else {
                                 fila += "<td></td>"; // Dejar la celda vacía si es "admin"
                             }

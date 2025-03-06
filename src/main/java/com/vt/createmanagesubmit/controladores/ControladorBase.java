@@ -35,6 +35,8 @@ import com.vt.createmanagesubmit.servicios.ServicioGenerarCertificado;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.web.bind.annotation.RequestBody;
+
 
 
 
@@ -80,16 +82,40 @@ public class ControladorBase {
     @PostMapping("/login")
     public String login(HttpSession session,@RequestParam("correo")String Correo, @RequestParam("contrasena")String password) {
         Admin admin = servicio.passwordConfirmacion(Correo, password);
-        if(admin != null){
+        if(admin != null && admin.getUbicacion() != null){
             session.setAttribute("usuarioEnSesion", admin);
             return "redirect:/home";
+        }else if(admin != null && admin.getUbicacion() == null){
+            session.setAttribute("usuarioEnSesion", admin);
+            return "redirect:/ubicacion";
         }else{
             return "redirect:/";
         }
         
     }
     
+    @GetMapping("/ubicacion")
+    public String ubicacion(HttpSession session, Model model) {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+	    if (usuarioTemporal == null) {
+	        return "redirect:/";  
+	    }
+        model.addAttribute("admin",usuarioTemporal);
+        return "ubicacion.jsp";
+    }
     
+    @PostMapping("/actualizarUbicacion")
+    public String actualizarUbicacion(@RequestParam("ubi")String ubicacion, HttpSession session) {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+	    if (usuarioTemporal == null) {
+	        return "redirect:/";  
+	    }
+        usuarioTemporal.setUbicacion(ubicacion);
+        servicio.guardarAdmin(usuarioTemporal);
+        return "redirect:/home";
+    }
+    
+
     @GetMapping("/home")
     public String home(HttpSession session,Model model) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
@@ -631,7 +657,9 @@ public class ControladorBase {
 	    if (usuarioTemporal != null) {
             model.addAttribute("admin", usuarioTemporal);
             try {
-                servicio.borrarAdminPorId(id);
+                if(usuarioTemporal.getCorreo().equals("admin@admin.com")){
+                    servicio.borrarAdminPorId(id);
+                }
                 return "redirect:/dataBaseAdmin";
             } catch (MissingAdminIdException ex) {
                 model.addAttribute("error", ex.getMessage());

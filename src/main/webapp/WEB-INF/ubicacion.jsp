@@ -19,9 +19,8 @@
 </head>
 <body>
     <header class="d-flex align-items-center justify-content-between p-3 bg-light" style="height: 10vh;">
-        <a href="/home" class="logo"><img src="/images/Logobgremove.png" alt="[LOGO]"></a>
+        <a class="logo"><img src="/images/Logobgremove.png" alt="[LOGO]"></a>
         <nav class="d-flex justify-content-center align-items-center flex-nowrap">
-            <a href="/home" class="btn btn-primary mx-2">Inicio</a>
             <a href="/documentacion" target="_blank" class="btn btn-primary mx-2">Documentación</a>
             <div class="d-flex flex-column justify-content-center align-items-center">
                 <i class="fa-solid fa-user"></i>
@@ -29,14 +28,30 @@
             </div>
         </nav>
     </header>
-    <main class="d-flex flex-column align-items-center justify-content-center" style="height: 90vh;">
+    <main class="pb-5 d-flex flex-column align-items-center justify-content-center" style="height: 90vh;">
         <h1 class="text-center pb-1">Bienvenido a <b style="color: #0266ac;">E</b>-VOLUTION</h1>
-        <a href="/dataBaseAlumno" class="btn btn-primary btn-custom">Base de datos alumno</a>
-        <a href="/dataBaseAlumno/addAlumnoBase" class="btn btn-primary btn-custom">Agregar alumno base de datos</a>
-        <a href="/dataBasePlantilla" class="btn btn-secondary btn-custom">Plantillas de diplomas</a>
-        <a href="/dataBaseAdmin" class="btn btn-secondary btn-custom">Administradores</a>
-        <a href="/documentacion" target="_blank" class="btn btn-light btn-custom">Documentación</a>
-        <a href="/logout" class="btn btn-danger btn-custom">Cerrar sesión</a>
+        <h3 class="text-center pb-3">Por favor elija una ubicación</h3>
+        <form class="d-flex flex-wrap justify-content-center" action="/actualizarUbicacion" method="post">
+            <select class="form-select" name="ubi" id="ubi">
+                <option value="arica">Arica y Parinacota</option>
+                <option value="tarapaca">Tarapacá</option>
+                <option value="antofagasta">Antofagasta</option>
+                <option value="atacama">Atacama</option>
+                <option value="coquimbo">Coquimbo</option>
+                <option value="valparaiso">Valparaíso</option>
+                <option value="metropolitana">Metropolitana de Santiago</option>
+                <option value="ohiggins">Libertador General Bernardo O'Higgins</option>
+                <option value="maule">Maule</option>
+                <option value="nuble">Ñuble</option>
+                <option value="biobio">Biobío</option>
+                <option value="araucania">La Araucanía</option>
+                <option value="rios">Los Ríos</option>
+                <option value="lagos">Los Lagos</option>
+                <option value="aysen">Aysén del General Carlos Ibáñez del Campo</option>
+                <option value="magallanes">Magallanes y de la Antártica Chilena</option>
+            </select>
+            <input type="submit" class="mt-2 btn btn-success" value="Seleccionar">
+        </form>
     </main>
     <footer class="text-center p-3 bg-light d-flex justify-content-center align-items-center" style="height: 15vh;">
         <div>

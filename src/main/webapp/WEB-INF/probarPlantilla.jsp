@@ -64,7 +64,7 @@
                         </div>
                         <div style="max-width: 33%;">
                             <div>
-                                <label for="notaAprobacion">Nota aprovacion</label>
+                                <label for="notaAprobacion">Nota aprobación</label>
                                 <input type="text" name="notaAprobacion" id="notaAprobacion" class="form-control" placeholder="Ej: 7.0">
                             </div>
                             <div>

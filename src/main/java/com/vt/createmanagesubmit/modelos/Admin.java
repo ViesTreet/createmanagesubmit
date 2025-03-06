@@ -27,6 +27,8 @@ public class Admin {
 
 	private String contrasena;
 
+	private String ubicacion;
+
     @Column(updatable=false)
 	@DateTimeFormat(pattern="yyyy-MM-dd")
 	private Date createdAt;
@@ -37,14 +39,18 @@ public class Admin {
     public Admin() {
 	}
 
-	public Admin(Long id, String nombre, String correo, String contrasena, Date createdAt, Date updatedAt) {
+	public Admin(Long id, String nombre, String correo, String contrasena, String ubicacion, Date createdAt,
+			Date updatedAt) {
 		this.id = id;
 		this.nombre = nombre;
 		this.correo = correo;
 		this.contrasena = contrasena;
+		this.ubicacion = ubicacion;
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
 	}
+
+
 
 	public Long getId() {
 		return id;
@@ -76,6 +82,14 @@ public class Admin {
 
 	public void setContrasena(String contrasena) {
 		this.contrasena = contrasena;
+	}
+
+	public String getUbicacion() {
+		return ubicacion;
+	}
+
+	public void setUbicacion(String ubicacion) {
+		this.ubicacion = ubicacion;
 	}
 
 	public Date getCreatedAt() {
