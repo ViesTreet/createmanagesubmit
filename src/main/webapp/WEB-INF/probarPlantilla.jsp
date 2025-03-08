@@ -58,8 +58,8 @@
                                 <input type="text" name="cliente" id="cliente" class="form-control" placeholder="Cliente">
                             </div>
                             <div>
-                                <label for="obra">Obra</label>
-                                <input type="text" name="obra" id="obra" class="form-control" placeholder="Obra">
+                                <label for="lugarYfechaEmision">Lugar y/o fecha de emisión</label>
+                                <input type="text" name="lugarYfechaEmision" id="lugarYfechaEmision" class="form-control" placeholder="lugar y fecha de emisión">
                             </div>
                         </div>
                         <div style="max-width: 33%;">

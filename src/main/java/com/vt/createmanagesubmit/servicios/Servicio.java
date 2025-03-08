@@ -112,8 +112,8 @@ public class Servicio {
             case "cliente":
                 listaResultante = repoAlum.findByClienteContaining(dato, pageable); // Usando Containing
                 break;
-            case "obra":
-                listaResultante = repoAlum.findByObraContaining(dato, pageable); // Usando Containing
+            case "identificador":
+                listaResultante = repoAlum.findByIdentificadorContaining(dato, pageable); // Usando Containing
                 break;
             case "relator":
                 listaResultante = repoAlum.findByRelatorContaining(dato, pageable); // Usando Containing
@@ -296,8 +296,8 @@ public class Servicio {
         if(nuevoAlumno.getDuracion().trim().isEmpty()){
             nuevoAlumno.setDuracion(null);
         }
-        if(nuevoAlumno.getObra().trim().isEmpty()){
-            nuevoAlumno.setObra(null);
+        if(nuevoAlumno.getIdentificador().trim().isEmpty()){
+            nuevoAlumno.setIdentificador(null);
         }
         if(nuevoAlumno.getRelator().trim().isEmpty()){
             nuevoAlumno.setRelator(null);
@@ -333,7 +333,7 @@ public class Servicio {
         }
     }
 
-    public void editarAlumno(Long id,String nombreAsistente,String nombreCurso,String diasCursos,String numeroHoras,String cliente,String obra,String codigo,String notaAprovacion,String relator,String asistencia,String estado,String diploma,String rut,String modalidad,String correo,Long plantillaId) {
+    public void editarAlumno(Long id,String nombreAsistente,String nombreCurso,String diasCursos,String numeroHoras,String cliente,String identificador,String codigo,String notaAprovacion,String relator,String asistencia,String estado,String diploma,String rut,String modalidad,String correo,Long plantillaId, String lugarYfechaEmision) {
 
         Optional<Alumno> optalumno = repoAlum.findById(id);
         if(optalumno.isPresent()){
@@ -347,7 +347,7 @@ public class Servicio {
             alumno.setDiasCursos(normalizarValor(diasCursos));
             alumno.setDuracion(normalizarValor(numeroHoras));
             alumno.setCliente(normalizarValor(cliente));
-            alumno.setObra(normalizarValor(obra));
+            alumno.setIdentificador(normalizarValor(identificador));
             alumno.setModalidad(normalizarValor(modalidad));
             alumno.setCodigo(normalizarValor(codigo));
             alumno.setNotaAprobacion(normalizarValor(notaAprovacion));
@@ -356,6 +356,7 @@ public class Servicio {
             alumno.setDiploma(normalizarValor(diploma));
             alumno.setRut(normalizarValor(rut));
             alumno.setCorreo(normalizarValor(correo));
+            alumno.setLugarYfechaEmision(lugarYfechaEmision);
             if((alumno.getNombreAsistente()!=null && !alumno.getNombreAsistente().trim().isEmpty())||(alumno.getRut() != null && !alumno.getRut().trim().isEmpty())){
                 Optional<Plantilla> optplantilla = repoPlanti.findById(plantillaId);
                 if (optplantilla.isPresent()){

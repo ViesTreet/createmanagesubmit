@@ -108,9 +108,7 @@ public class ServicioGenerarCertificado {
         alumnoData.put("dias curso", alumno.getDiasCursos());
         alumnoData.put("relator", alumno.getRelator());
         alumnoData.put("asistencia", alumno.getAsistencia());
-        if(!plantilla.getLugarYFecha().trim().isEmpty() || plantilla.getLugarYFecha() != null){
-            alumnoData.put("lugar y fecha", plantilla.getLugarYFecha());
-        }
+        alumnoData.put("emision", alumno.getLugarYfechaEmision());
         alumnoData.put("correlativo", alumno.getNumeroCorrelativoInterno());
         alumnoData.put("modalidad", alumno.getModalidad());
 
@@ -606,9 +604,7 @@ public class ServicioGenerarCertificado {
         alumnoData.put("dias curso", alumno.getDiasCursos());
         alumnoData.put("relator", alumno.getRelator());
         alumnoData.put("asistencia", alumno.getAsistencia());
-        if(!plantilla.getLugarYFecha().trim().isEmpty() || plantilla.getLugarYFecha() != null){
-            alumnoData.put("lugar y fecha", plantilla.getLugarYFecha());
-        }
+        alumnoData.put("emision", alumno.getLugarYfechaEmision());
         alumnoData.put("correlativo", alumno.getNumeroCorrelativoInterno());
         alumnoData.put("modalidad", alumno.getModalidad());
 
@@ -692,9 +688,7 @@ public class ServicioGenerarCertificado {
         alumnoData.put("dias curso", alumno.getDiasCursos());
         alumnoData.put("relator", alumno.getRelator());
         alumnoData.put("asistencia", alumno.getAsistencia());
-        if(!plantilla.getLugarYFecha().trim().isEmpty() || plantilla.getLugarYFecha() != null){
-            alumnoData.put("lugar y fecha", plantilla.getLugarYFecha());
-        }
+        alumnoData.put("emision", alumno.getLugarYfechaEmision());
         alumnoData.put("correlativo", alumno.getNumeroCorrelativoInterno());
         alumnoData.put("modalidad", alumno.getModalidad());
 

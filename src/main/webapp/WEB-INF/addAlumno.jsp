@@ -55,6 +55,10 @@
                                 <label for="modalidad">Modalidad</label>
                                 <input type="text" name="modalidad" id="modalidad" class="form-control" placeholder="virtual">
                             </div>
+                            <div>
+                                <label for="lugarYfechaEmision">Lugar y/o Fecha de emisión</label>
+                                <input type="text" name="lugarYfechaEmision" id="lugarYfechaEmision" class="form-control" placeholder="2023, Santiago">
+                            </div>
                         </div>
                         <div style="max-width: 33%;">
                             <div>
@@ -62,8 +66,8 @@
                                 <input type="text" name="cliente" id="cliente" class="form-control" placeholder="Cliente">
                             </div>
                             <div>
-                                <label for="obra">Obra</label>
-                                <input type="text" name="obra" id="obra" class="form-control" placeholder="Obra">
+                                <label for="identificador">Identificador</label>
+                                <input type="text" name="identificador" id="identificador" class="form-control" placeholder="identificador">
                             </div>
                             <div>
                                 <label for="codigo">Codigo</label>
@@ -167,7 +171,7 @@
         }
 
         window.onload = function() {
-            var campos = ['curso', 'diasCursos', 'numeroHoras', 'numeroCorrelativoInterno','modalidad', 'cliente', 'obra', 'codigo', 'asistencia', 'estado', 'diploma', 'plantilla', 'relator'];
+            var campos = ['curso', 'diasCursos', 'numeroHoras', 'numeroCorrelativoInterno','modalidad', 'cliente', 'identificador', 'codigo', 'asistencia', 'estado', 'diploma', 'plantilla', 'relator', 'lugarYfechaEmision'];
         
             campos.forEach(function(campo) {
                 var valor = getCookie(campo);
@@ -186,7 +190,7 @@
 
         function guardarDatos() {
             var guardar = document.getElementById('guardar').checked;
-            var campos = ['curso', 'diasCursos', 'numeroHoras', 'numeroCorrelativoInterno','modalidad', 'cliente', 'obra', 'codigo', 'asistencia', 'estado', 'diploma', 'plantilla', 'relator'];
+            var campos = ['curso', 'diasCursos', 'numeroHoras', 'numeroCorrelativoInterno','modalidad', 'cliente', 'identificador', 'codigo', 'asistencia', 'estado', 'diploma', 'plantilla', 'relator', 'lugarYfechaEmision'];
 
             if (guardar) {
                 campos.forEach(function(campo) {

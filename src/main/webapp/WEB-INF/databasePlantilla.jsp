@@ -153,7 +153,6 @@
                         <th>Descripción</th>
                         <th>Asistencia mínima</th>
                         <th>Nota mínima</th>
-                        <th>Lugar y fecha</th>
                         <th style="width: 25vw;">Acciones</th>
                     </tr>
                 </thead>
@@ -186,7 +185,6 @@
                                 "<td>" + (plantilla.descripcion != null ? plantilla.descripcion : "") + "</td>" +
                                 "<td>" + (plantilla.asistenciaMin != null ? plantilla.asistenciaMin : "") + "</td>" +
                                 "<td>" + (plantilla.notaMin != null ? plantilla.notaMin : "") + "</td>" +
-                                "<td>" + (plantilla.lugarYFecha != null ? plantilla.lugarYFecha : "") + "</td>" +
                                 "<td class='d-flex justify-content-center flex-nowrap' style='width: 25vw;'>" +
                                 "<a class='btn btn-primary' href='/dataBasePlantilla/plantilla/" + plantilla.id + "/editar'>Editar</a>" +
                                 "<a href='/api/dataBasePlantilla/plantilla/" + plantilla.id + "/descargar' class='btn btn-success'>Descargar</a>" +
@@ -255,8 +253,6 @@
                         <input id="nombreCertificado" name="nombreCertificado" type="text" class="form-control" placeholder="Nombre de la plantilla">
                         <label for="descripcion">Descripcion Plantilla</label>
                         <input id="descripcion" type="text" name="descripcion" class="form-control" placeholder="Descripcion de la plantilla">
-                        <label for="lugarYFecha">Lugar y fecha</label>
-                        <input type="text" name="lugarYFecha" id="lugarYFecha" class="form-control" placeholder="ej:Santiago,2023">
                     </div>
                     <div style="max-width: 40%;">
                         <label for="asistenciaMin">Asistencia Mínima</label>

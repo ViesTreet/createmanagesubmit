@@ -62,8 +62,8 @@
                                 <input type="text" name="cliente" id="cliente" class="form-control" placeholder="Cliente">
                             </div>
                             <div>
-                                <label for="obra">Obra</label>
-                                <input type="text" name="obra" id="obra" class="form-control" placeholder="Obra">
+                                <label for="identificador">Identificador</label>
+                                <input type="text" name="identificador" id="identificador" class="form-control" placeholder="identificador">
                             </div>
                             <div>
                                 <label for="codigo">Codigo</label>
@@ -136,7 +136,7 @@
             document.getElementById('diasCursos').value = "${alumno.diasCursos}";
             document.getElementById('numeroHoras').value = "${alumno.duracion}";
             document.getElementById('cliente').value = "${alumno.cliente}";
-            document.getElementById('obra').value = "${alumno.obra}";
+            document.getElementById('identificador').value = "${alumno.identificador}";
             document.getElementById('codigo').value = "${alumno.codigo}";
             document.getElementById('correo').value = "${alumno.correo}";
             document.getElementById('notaAprobacion').value = "${alumno.notaAprobacion}";

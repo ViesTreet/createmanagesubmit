@@ -249,8 +249,6 @@
                         <input id="nombreCertificado" name="nombreCertificado" type="text" class="form-control" placeholder="Nombre de la plantilla">
                         <label for="descripcion">Descripcion Plantilla</label>
                         <input id="descripcion" type="text" name="descripcion" class="form-control" placeholder="Descripcion de la plantilla">
-                        <label for="lugarYFecha">Lugar y fecha</label>
-                        <input type="text" name="lugarYFecha" id="lugarYFecha" class="form-control" placeholder="ej:Santiago,2023">
                     </div>
                     <div style="max-width: 40%;">
                         <label for="asistenciaMin">Asistencia Mínima</label>

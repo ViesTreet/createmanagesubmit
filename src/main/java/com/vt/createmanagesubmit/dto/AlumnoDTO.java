@@ -20,7 +20,7 @@ public class AlumnoDTO {
 
     private String cliente;
 
-    private String obra;
+    private String identificador;
 
     private String codigo;
 
@@ -42,6 +42,8 @@ public class AlumnoDTO {
 
     private String ubicacionSubida;
 
+    private String lugarYfechaEmision;
+
 	private Date createdAt;
 	
 	private Date updatedAt;
@@ -54,7 +56,7 @@ public class AlumnoDTO {
         this.numeroHoras = alumno.getDuracion();
         this.numeroCorrelativoInterno = alumno.getNumeroCorrelativoInterno();
         this.cliente = alumno.getCliente();
-        this.obra = alumno.getObra();
+        this.identificador = alumno.getIdentificador();
         this.codigo = alumno.getCodigo();
         this.notaAprovacion = alumno.getNotaAprobacion();
         this.relator = alumno.getRelator();
@@ -64,6 +66,7 @@ public class AlumnoDTO {
         this.rut = alumno.getRut();
         this.correo = alumno.getCorreo();
         this.ubicacionSubida = alumno.getUbicacionSubida();
+        this.lugarYfechaEmision = alumno.getLugarYfechaEmision();
         this.plantilla = alumno.getPlantilla().getNombreCertificado();
         this.createdAt = alumno.getCreatedAt();
         this.updatedAt = alumno.getUpdatedAt();
@@ -125,12 +128,12 @@ public class AlumnoDTO {
         this.cliente = cliente;
     }
 
-    public String getObra() {
-        return obra;
+    public String getIdentificador() {
+        return identificador;
     }
 
-    public void setObra(String obra) {
-        this.obra = obra;
+    public void setIdentificador(String identificador) {
+        this.identificador = identificador;
     }
 
     public String getCodigo() {
@@ -213,6 +216,14 @@ public class AlumnoDTO {
         this.ubicacionSubida = ubicacionSubida;
     }
 
+    public String getLugarYfechaEmision() {
+        return lugarYfechaEmision;
+    }
+
+    public void setLugarYfechaEmision(String lugarYfechaEmision) {
+        this.lugarYfechaEmision = lugarYfechaEmision;
+    }
+
     public Date getCreatedAt() {
         return createdAt;
     }
@@ -228,6 +239,8 @@ public class AlumnoDTO {
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
     }
+
+    
 
    
     

@@ -158,7 +158,7 @@
                         <option value="diploma">Diploma</option>
                         <option value="nombreCurso">Nombre Curso</option>
                         <option value="cliente">Cliente</option>
-                        <option value="obra">Obra</option>
+                        <option value="identificador">Identificador</option>
                         <option value="relator">Relator</option>
                         <option value="correlativo">Correlativo</option>
                     </select>
@@ -186,7 +186,7 @@
                         <th>Nombre</th>
                         <th>Curso</th>
                         <th>Cliente</th>
-                        <th>Obra</th>
+                        <th>ID</th>
                         <th>Relator</th>
                         <th>Estado</th>
                         <th>Rut</th>
@@ -303,7 +303,7 @@
                                 "<td><a href='/dataBaseAlumno/alumno/" + alumno.id + "'>" + (alumno.nombreAsistente != null ? alumno.nombreAsistente : "") + "</a></td>" +
                                 "<td>" + (alumno.nombreCurso != null ? alumno.nombreCurso : "") + "</td>" +
                                 "<td>" + (alumno.cliente != null ? alumno.cliente : "") + "</td>" +
-                                "<td>" + (alumno.obra != null ? alumno.obra : "") + "</td>" +
+                                "<td>" + (alumno.identificador != null ? alumno.identificador : "") + "</td>" +
                                 "<td>" + (alumno.relator != null ? alumno.relator : "") + "</td>" +
                                 "<td>" + (alumno.estado != null ? alumno.estado : "") + "</td>" +
                                 "<td>" + (alumno.rut != null ? alumno.rut : "") + "</td>" +
