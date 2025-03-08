@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.font.FontRenderContext;
-import java.awt.font.TextLayout;
 import java.awt.geom.Dimension2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -57,6 +56,7 @@ import com.google.zxing.qrcode.QRCodeWriter;
 import com.vt.createmanagesubmit.modelos.Alumno;
 import com.vt.createmanagesubmit.modelos.Plantilla;
 import com.vt.createmanagesubmit.repositorios.RepositorioAlumnos;
+
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpServletResponse;
@@ -694,24 +694,7 @@ public class ServicioGenerarCertificado {
 
         // Procesa las slides y shapes
         for (XSLFSlide slide : ppt.getSlides()) {
-            List<XSLFShape> shapesToRemove = new ArrayList<>();
-            List<XSLFShape> shapes = new ArrayList<>(slide.getShapes()); // Crea una copia de la lista de shapes
-
-            for (XSLFShape shape : shapes) {
-                if (shape instanceof XSLFTextShape) {
-                    XSLFTextShape textShape = (XSLFTextShape) shape;
-                    try {
-                        processTextShape(slide, textShape, alumnoData, shapesToRemove);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-            // Elimina las shapes marcadas después de la iteración
-            for (XSLFShape shapeToRemove : shapesToRemove) {
-                slide.removeShape(shapeToRemove);
-            }
+            processSlide(slide, alumnoData);
         }
 
         // Guarda el PPTX modificado en un archivo temporal
@@ -739,6 +722,95 @@ public class ServicioGenerarCertificado {
          
 
          return CompletableFuture.completedFuture(pdfBytes);
+    }
+
+    private void processSlide(XSLFSlide slide, Map<String, String> data) {
+        List<XSLFShape> shapes = new ArrayList<>(slide.getShapes());
+        
+        for (XSLFShape shape : shapes) {
+            if (shape instanceof XSLFTextShape) {
+                processTextShape(slide, (XSLFTextShape) shape, data);
+            }
+        }
+    }
+    
+    private void processTextShape(XSLFSlide slide, XSLFTextShape textShape, Map<String, String> data) {
+        List<XSLFTextParagraph> paragraphs = new ArrayList<>(textShape.getTextParagraphs());
+        
+        for (XSLFTextParagraph paragraph : paragraphs) {
+            String fullText = getFullParagraphText(paragraph);
+            
+            for (Map.Entry<String, String> entry : data.entrySet()) {
+                String placeholder = "${" + entry.getKey() + "}";
+                if (fullText.contains(placeholder)) {
+                    String replacement = entry.getValue() != null ? entry.getValue() : "";
+                    replacePlaceholder(paragraph, placeholder, replacement, textShape);
+                }
+            }
+        }
+    }
+    
+    private String getFullParagraphText(XSLFTextParagraph paragraph) {
+        StringBuilder sb = new StringBuilder();
+        for (XSLFTextRun run : paragraph.getTextRuns()) {
+            sb.append(run.getRawText());
+        }
+        return sb.toString();
+    }
+    
+    private void replacePlaceholder(XSLFTextParagraph paragraph, String placeholder, 
+                                String replacement, XSLFTextShape textShape) { // Añadir textShape como parámetro
+    
+    String originalText = getFullParagraphText(paragraph);
+    String newText = originalText.replace(placeholder, replacement);
+    
+    if (!paragraph.getTextRuns().isEmpty()) {
+        // Conservar primer run como referencia de formato
+        XSLFTextRun sourceRun = paragraph.getTextRuns().get(0);
+        
+        // Eliminar runs adicionales (corregido)
+        List<XSLFTextRun> runs = new ArrayList<>(paragraph.getTextRuns());
+        for (int i = runs.size() - 1; i > 0; i--) { // Eliminar desde el último al primero
+            paragraph.removeTextRun(runs.get(i));
+        }
+        
+        // Dividir texto y manejar saltos de línea
+        String[] lines = newText.split("\\|");
+        sourceRun.setText(lines[0]);
+        
+        // Añadir líneas adicionales (corregido)
+        for (int i = 1; i < lines.length; i++) {
+            // Añadir salto de línea al párrafo (no al text run)
+            paragraph.addLineBreak();
+            XSLFTextRun newRun = paragraph.addNewTextRun();
+            newRun.setText(lines[i]);
+            copyRunProperties(sourceRun, newRun); // Copiar propiedades al nuevo run
+        }
+        
+        adjustParagraphAlignment(paragraph);
+        enableAutoFit(textShape); // Ahora textShape está disponible
+    }
+}
+    
+    private void copyRunProperties(XSLFTextRun source, XSLFTextRun target) {
+        target.setFontFamily(source.getFontFamily());
+        target.setFontSize(source.getFontSize());
+        target.setBold(source.isBold());
+        target.setItalic(source.isItalic());
+        target.setUnderlined(source.isUnderlined());
+        target.setFontColor(source.getFontColor());
+        target.setCharacterSpacing(source.getCharacterSpacing());
+    }
+    
+    private void adjustParagraphAlignment(XSLFTextParagraph paragraph) {
+        paragraph.setTextAlign(paragraph.getTextAlign());
+        paragraph.setBullet(paragraph.isBullet());
+        // Mantener otras propiedades de alineación
+    }
+    
+    private void enableAutoFit(XSLFTextShape shape) {
+        shape.setTextAutofit(TextAutofit.SHAPE);
+        shape.setWordWrap(true);
     }
 
 }
