@@ -173,7 +173,7 @@
                     data: { busqueda: busqueda },
                     success: function (data) {
                         var tbody = $("#tablaPlantilla tbody");
-    
+                        var adminCorreo = "${admin.correo}";
                         tbody.empty(); // Limpiar la tabla antes de agregar nuevos datos
     
                         $.each(data, function (i, plantilla) {

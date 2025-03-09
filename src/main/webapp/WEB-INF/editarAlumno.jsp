@@ -55,6 +55,10 @@
                                 <label for="modalidad">Modalidad</label>
                                 <input type="text" name="modalidad" id="modalidad" class="form-control" placeholder="virtual">
                             </div>
+                            <div>
+                                <label for="lugarYfechaEmision">Lugar y/o Fecha de emisión</label>
+                                <input type="text" name="lugarYfechaEmision" id="lugarYfechaEmision" class="form-control" placeholder="2023, Santiago">
+                            </div>
                         </div>
                         <div style="max-width: 33%;">
                             <div>
@@ -146,6 +150,7 @@
             document.getElementById('rut').value = "${alumno.rut}";
             document.getElementById('modalidad').value = "${alumno.modalidad}";
             document.getElementById('plantilla').value = "${alumno.plantilla.id}";
+            document.getElementById('lugarYfechaEmision').value = "${alumno.lugarYfechaEmision}";
         
             // Manejo especial para el campo 'estado'
             var estadoValue = "${alumno.estado}";

@@ -186,7 +186,6 @@
             document.getElementById('descripcion').value = "${plantilla.descripcion}";
             document.getElementById('asistenciaMin').value = "${plantilla.asistenciaMin}";
             document.getElementById('notaMin').value = "${plantilla.notaMin}";
-            document.getElementById('lugarYFecha').value = "${plantilla.lugarYFecha}";
         });
     </script>
     <script>
