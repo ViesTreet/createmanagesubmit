@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vt.createmanagesubmit.dto.AlumnoDTO;
+import com.vt.createmanagesubmit.dto.filtroDTO;
 import com.vt.createmanagesubmit.modelos.Admin;
 import com.vt.createmanagesubmit.modelos.Alumno;
 import com.vt.createmanagesubmit.modelos.Plantilla;
@@ -80,6 +82,16 @@ public class ControladorApi {
             return alumnos.getContent().stream().map(AlumnoDTO::new).collect(Collectors.toList());
         }
         return null;
+    }
+
+    @PostMapping("/datosAlumno/busquedaMultiFiltro")
+    public List<AlumnoDTO> busquedaMultiFiltro(@RequestBody List<filtroDTO> filtros, HttpSession session) {
+        Admin usuario = (Admin) session.getAttribute("usuarioEnSesion");
+        if (usuario != null) {
+            Page<Alumno> alumnos = ser.buscarConMultiplesFiltros(filtros);
+            return alumnos.getContent().stream().map(AlumnoDTO::new).collect(Collectors.toList());
+        }
+        return Collections.emptyList();
     }
 
     @GetMapping("/datosAlumno/busquedaAlumno")

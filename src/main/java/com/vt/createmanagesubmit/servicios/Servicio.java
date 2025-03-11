@@ -8,7 +8,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -16,10 +15,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.vt.createmanagesubmit.dto.filtroDTO;
 import com.vt.createmanagesubmit.exceptions.MissingAdminIdException;
 import com.vt.createmanagesubmit.exceptions.MissingAlumnoIdException;
 import com.vt.createmanagesubmit.exceptions.MissingNameOrRutException;
@@ -78,7 +80,58 @@ public class Servicio {
     public Page<Alumno> todosLosAlumnos(){
         return repoAlum.findAll(PageRequest.of(0, 200, Sort.by("updatedAt").descending()));
     }
- 
+
+    public Page<Alumno> buscarConMultiplesFiltros(List<filtroDTO> filtros) {
+        Specification<Alumno> spec = Specification.where(null);
+        
+        for (filtroDTO filtro : filtros) {
+            spec = spec.and(crearEspecificacion(filtro));
+        }
+        
+        return repoAlum.findAll(spec, PageRequest.of(0, Integer.MAX_VALUE, Sort.by("updatedAt").descending()));
+    }
+    
+    private Specification<Alumno> crearEspecificacion(filtroDTO filtro) {
+        return (root, query, cb) -> {
+            String campo = filtro.getCampo();
+            String valor = filtro.getValor();
+
+            switch (campo) {
+                case "rut":
+                    return cb.like(root.get("rut"), "%" + valor + "%");
+                case "nombreAsistente":
+                    return cb.like(root.get("nombreAsistente"), "%" + valor + "%");
+                case "nombreCurso":
+                    return cb.like(root.get("nombreCurso"), "%" + valor + "%");
+                case "estado":
+                    if (valor.trim().equalsIgnoreCase("no aprobado") || valor.trim().equalsIgnoreCase("noAprobado")) {
+                        return cb.equal(root.get("estado"), "noAprobado");
+                    } else if (valor.trim().equalsIgnoreCase("aprobado")) {
+                        return cb.equal(root.get("estado"), "aprobado");
+                    } else {
+                        return cb.equal(root.get("estado"), "revisionManual");
+                    }
+                case "diploma":
+                    if (valor.trim().equalsIgnoreCase("enviado")) {
+                        return cb.equal(root.get("diploma"), "enviado");
+                    } else {
+                        return cb.equal(root.get("diploma"), "noEnviado");
+                    }
+                case "cliente":
+                    return cb.like(root.get("cliente"), "%" + valor + "%");
+                case "identificador":
+                    return cb.like(root.get("identificador"), "%" + valor + "%");
+                case "relator":
+                    return cb.like(root.get("relator"), "%" + valor + "%");
+                case "correlativo":
+                    return cb.like(root.get("numeroCorrelativoInterno"), "%" + valor + "%");
+                default:
+                    return cb.conjunction();
+            }
+        };
+    }
+
+
     public Page<Alumno> buscarAlumnosPorCriterio(String filtro, String dato){
         Page<Alumno> listaResultante;
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by("updatedAt").descending());

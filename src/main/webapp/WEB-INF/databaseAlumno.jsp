@@ -96,6 +96,21 @@
             overflow-y: auto; /* Permite el desplazamiento vertical cuando el contenido es grande */
         }
 
+        .filtro-card {
+            background-color: #e9ecef;
+            border-radius: 5px;
+            transition: transform 0.2s;
+        }
+
+        .filtro-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-close {
+            font-size: 0.75rem;
+            padding: 0.25rem;
+        }
+
         @media (min-width: 1024px){
             #contenderBase{
                 max-width: 95vw;
@@ -162,9 +177,10 @@
                         <option value="relator">Relator</option>
                         <option value="correlativo">Correlativo</option>
                     </select>
-                    <input id="busquedaAlumno" type="search"  class ="col-5" onkeydown="submitOnEnter(event, 'buscarLink')" placeholder="Buscar" name="busquedaAlumno"/>
-                    <a id="buscarLink" href="#" class="btn btn-outline-primary">Buscar</a>
+                    <input id="busquedaAlumno" type="search" class="col-5" placeholder="Buscar" name="busquedaAlumno" onkeydown="submitOnEnter(event)"/>
+                    <button type="button" class="btn btn-outline-primary" onclick="agregarFiltro()">Agregar Filtro</button>
                 </form>
+                <div id="filtros-activos" class="d-flex flex-wrap gap-2 mt-2"></div>
             </div>
             <div id="button-container">
                 <div id="normal-buttons">
@@ -202,7 +218,183 @@
             </table>
         </div>
     </div>
+    <script>
+        const checkboxKey = "checkboxStates";
+        let filtrosActivos = [];
     
+        function crearCardFiltro(filtro, valor) {
+            return `<div class="card filtro-card" style="max-width: 300px;">
+                <div class="card-body p-2 d-flex justify-content-between align-items-center">
+                    <span>\${filtro}: \${valor}</span>
+                    <button type="button" class="btn-close" data-filtro="\${filtro}" data-valor="\${valor.replace(/"/g, '&quot;')}"></button>
+                </div>
+            </div>`;
+        }
+
+        // Agregar este evento delegado para los botones de cerrar
+        $(document).on('click', '.btn-close', function() {
+            const filtro = $(this).data('filtro');
+            const valor = $(this).data('valor');
+            removerFiltro(filtro, valor);
+        });
+    
+        function actualizarFiltrosVisibles() {
+            const contenedor = $('#filtros-activos');
+            contenedor.empty();
+            filtrosActivos.forEach(filtro => {
+                contenedor.append(crearCardFiltro(filtro.campo, filtro.valor));
+            });
+        }
+    
+        function agregarFiltro() {
+            const filtro = $('#filtroBusquedaAlumno').val();
+            const valor = $('#busquedaAlumno').val().trim();
+            
+            if (valor) {
+                // Evitar duplicados
+                if (!filtrosActivos.some(f => f.campo === filtro && f.valor === valor)) {
+                    filtrosActivos.push({ campo: filtro, valor: valor });
+                    actualizarFiltrosVisibles();
+                    cargarDatosConFiltros();
+                }
+                $('#busquedaAlumno').val('');
+            }
+        }
+    
+        function removerFiltro(filtro, valor) {
+            filtrosActivos = filtrosActivos.filter(f => !(f.campo === filtro && f.valor === valor));
+            actualizarFiltrosVisibles();
+            cargarDatosConFiltros();
+        }
+    
+        function cargarDatosConFiltros() {
+            $.ajax({
+                url: "/api/datosAlumno/busquedaMultiFiltro",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(filtrosActivos),
+                success: function(data) {
+                    // Actualizar tabla con los datos recibidos
+                    actualizarTabla(data);
+                }
+            });
+        }
+
+        function actualizarTabla(data) {
+            var tbody = $("#tablaAlumnos tbody");
+            const ubicacionAdmin = "${admin.ubicacion}"; 
+            var contenedorNoEnviados = $("#alumnosNoEnviados");
+            tbody.empty();
+            contenedorNoEnviados.empty();
+
+            $.each(data, function(i, alumno) {
+                if (alumno.ubicacionSubida === ubicacionAdmin) { 
+                    var correoText = "sin correo"; // Valor por defecto
+                    
+                    if (alumno.correo) { // Verifica si el correo existe
+                        if (alumno.correo === "javito12ulloa@gmail.com") {
+                            correoText = "correo empresa";
+                        } else {
+                            correoText = "con correo";
+                        }
+                    }
+                
+                    var fila = "<tr data-alumno-id='" + alumno.id + "'>" +
+                    "<td class='d-flex justify-content-center align-items-center' style='width: 5vw; height: 100%;'>" +
+                    "<input type='checkbox' value='" + alumno.id + "'></td>" +
+                    "<td><a href='/dataBaseAlumno/alumno/" + alumno.id + "'>" + (alumno.nombreAsistente != null ? alumno.nombreAsistente : "") + "</a></td>" +
+                    "<td>" + (alumno.nombreCurso != null ? alumno.nombreCurso : "") + "</td>" +
+                    "<td>" + (alumno.cliente != null ? alumno.cliente : "") + "</td>" +
+                    "<td>" + (alumno.identificador != null ? alumno.identificador : "") + "</td>" +
+                    "<td>" + (alumno.relator != null ? alumno.relator : "") + "</td>" +
+                    "<td>" + (alumno.estado != null ? alumno.estado : "") + "</td>" +
+                    "<td>" + (alumno.rut != null ? alumno.rut : "") + "</td>" +
+                    "<td>" + correoText + "</td>" +
+                    "<td>" + (alumno.plantilla != null ? alumno.plantilla : "") + "</td>" +
+                    "<td>" + (alumno.diploma != null ? alumno.diploma : "") + "</td>" +
+                    "<td>" + (alumno.numeroCorrelativoInterno != null ? alumno.numeroCorrelativoInterno : "") + "</td>" +
+                    "</tr>";
+                    tbody.append(fila);
+                    
+                    // Si el estado es "noEnviado", agregar un <p> al contenedor
+                    if (alumno.diploma === "noEnviado" && alumno.estado ==="aprobado" && alumno.plantilla != "Error en encontrar plantilla") {
+                        var parrafo = "<p>Alumno: " + (alumno.nombreAsistente != null ? alumno.nombreAsistente : "Desconocido") + " Del curso: "+(alumno.nombreCurso != null ? alumno.nombreCurso : "Desconocido")+" se le enviara el certificado <br></br>";
+                        contenedorNoEnviados.append(parrafo);
+                    }
+                }
+                var fila = "<tr>..."; 
+                tbody.append(fila);
+            });
+
+            restoreCheckboxStates();
+            updateUIAfterRestore();
+        }
+        $('#deseleccionarBtn').on('click', function() {
+              // Deseleccionar todos los checkboxes
+              $('input[type="checkbox"]').prop('checked', false).trigger('change');
+              // Remover los estados guardados en localStorage
+              localStorage.removeItem(checkboxKey);
+            });
+            function saveCheckboxState() {
+                var checkedIds = [];
+                $("#tablaAlumnos input[type='checkbox']:checked").each(function () {
+                    checkedIds.push($(this).val());
+                });
+                localStorage.setItem(checkboxKey, JSON.stringify(checkedIds));
+            }
+        
+            // Agregar un listener para los cambios en los checkboxes
+            $(document).on('change', "#tablaAlumnos input[type='checkbox']", function () {
+                saveCheckboxState();  // Guardar el estado cuando se marca/desmarca un checkbox
+            
+                // Cambiar el color de fondo según el estado del checkbox
+                var alumnoId = $(this).val();
+                var rows = $('tr[data-alumno-id="' + alumnoId + '"]');
+                var tds = rows.find("td");
+            
+                if ($(this).prop("checked")) {
+                    tds.css('background-color', 'lightblue');
+                } else {
+                    tds.css('background-color', '');
+                }
+            
+                updateUIAfterRestore();  // Actualizar botones
+            });
+
+            function restoreCheckboxStates() {
+                const storedIds = JSON.parse(localStorage.getItem(checkboxKey)) || [];
+                $("#tablaAlumnos input[type='checkbox']").each(function () {
+                    var alumnoId = $(this).val();
+                    var rows = $('tr[data-alumno-id="' + alumnoId + '"]');
+                    var tds = rows.find("td");
+                
+                    if (storedIds.includes(alumnoId)) {
+                        $(this).prop("checked", true);
+                        // Cambiar el color de fondo a celeste
+                        tds.css('background-color', 'lightblue');
+                    } else {
+                        $(this).prop("checked", false);
+                        // Restaurar el color de fondo original
+                        tds.css('background-color', '');
+                    }
+                });
+            
+                // Actualizar la visibilidad de los botones
+                updateUIAfterRestore();
+            }
+
+            // Definir la función updateUIAfterRestore()
+            function updateUIAfterRestore() {
+                var anyChecked = $('#tablaAlumnos input[type="checkbox"]:checked').length > 0;
+                if (anyChecked) {
+                    $('#normal-buttons').hide();
+                    $('#listo-button').show();
+                } else {
+                    $('#normal-buttons').show();
+                    $('#listo-button').hide();
+                }
+            }
+    </script>
     <script>
         $(document).ready(function () {
             const checkboxKey = "checkboxStates";
@@ -335,31 +527,21 @@
             cargarDatos();
     
             // Actualizar la tabla cada 30 segundos (30000 milisegundos)
-            setInterval(cargarDatos, 30000);
-        });
-    </script>
-    <script>
-        document.getElementById('buscarLink').addEventListener('click', function(event) {
-        // Prevenir el comportamiento por defecto del enlace
-            event.preventDefault();
-
-            const filtro = document.querySelector('[name="filtroBusquedaAlumno"]').value;
-            const busqueda = document.querySelector('[name="busquedaAlumno"]').value;
-
-            // Construye la URL dinámica usando concatenación de strings
-            const url = 'dataBaseAlumno/buscarAlumno?filtro=' + encodeURIComponent(filtro) + '&busqueda=' + encodeURIComponent(busqueda);
-
-            // Redirige al enlace generado
-            window.location.href = url;
+            setInterval(function() {
+                if(filtrosActivos.length > 0) {
+                    cargarDatosConFiltros();
+                } else {
+                    cargarDatos();
+                }
+            }, 30000);
         });
     </script>
     <script>
         // Función que detecta la tecla Enter
-        function submitOnEnter(event, buttonId) {
-            // Verifica si la tecla presionada es Enter (código 13)
+        function submitOnEnter(event) {
             if (event.key === 'Enter') {
-                event.preventDefault(); // Evita el comportamiento predeterminado
-                document.getElementById(buttonId).click(); // Simula un clic en el botón
+                event.preventDefault();
+                agregarFiltro(); // Ejecutar directamente la función
             }
         }
     </script>
