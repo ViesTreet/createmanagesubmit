@@ -184,7 +184,7 @@
             </div>
             <div id="button-container">
                 <div id="normal-buttons">
-                    <button class="btn btn-primary" onclick="openForm()">Enviar restantes</button>
+                    <button class="btn btn-primary" onclick="selectAllVisible()">Seleccionar todos</button>
                     <a class="btn btn-success" href="/dataBaseAlumno/addAlumnoBase">+</a>
                     <button id="downloadBtn" href="/dataBaseAlumno/download" class="btn btn-secondary">Descargar base de datos</button>
                 </div>
@@ -396,6 +396,9 @@
             }
     </script>
     <script>
+        function selectAllVisible() {
+            $("#tablaAlumnos tbody input[type='checkbox']").prop('checked', true).trigger('change');
+        }
         $(document).ready(function () {
             const checkboxKey = "checkboxStates";
             const ubicacionAdmin = "${admin.ubicacion}"; 
@@ -525,6 +528,7 @@
     
             // Cargar datos inicialmente
             cargarDatos();
+
     
             // Actualizar la tabla cada 30 segundos (30000 milisegundos)
             setInterval(function() {
@@ -534,6 +538,8 @@
                     cargarDatos();
                 }
             }, 30000);
+
+
         });
     </script>
     <script>
@@ -711,7 +717,7 @@
             showAlert("${error}");
         </script>
     </c:if>
-    <footer class="text-center p-3 bg-light d-flex justify-content-center align-items-center" style="height: 15vh;">
+    <footer class="text-center p-3d-flex justify-content-center align-items-center" style="height: 15vh; background-color: #f8f9fa;">
         <div>
             <div><i class="fa-solid fa-phone"></i><a href="tel:+56 41 3830944">+56 41 3830944</a></div>
             <div><i class="fa-solid fa-location-dot"></i><a href="https://www.google.com/maps/place/Consultores+Empresariales+E-Volution+Limitada/@-36.8252678,-73.050754,19z/data=!3m1!4b1!4m6!3m5!1s0x9669b5d0308198b5:0xbd67409566499fa!8m2!3d-36.8252678!4d-73.0501103!16s%2Fg%2F11fzwngw1q?entry=ttu&g_ep=EgoyMDI1MDEwNi4xIKXMDSoASAFQAw%3D%3D">Freire 728, Oficina 206</a></div>
