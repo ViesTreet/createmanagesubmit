@@ -149,7 +149,7 @@ public class ServicioGenerarCertificado {
 
         // Generar código QR con la URL y el ID encriptado
         String encryptedId = encryptStudentId(alumno.getId().toString());
-        String qrCodeText = "http://localhost:8080/generarCertificadoQr/" + encryptedId;
+        String qrCodeText = "https://www.app.e-volution.cl/generarCertificadoQr/" + encryptedId;
 
         ByteArrayOutputStream qrCodeOutputStream = generateQRCodeImage(qrCodeText, 200, 200);
         byte[] qrCodeBytes = qrCodeOutputStream.toByteArray();
