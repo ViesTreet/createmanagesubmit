@@ -292,7 +292,7 @@
                     var correoText = "sin correo"; // Valor por defecto
                     
                     if (alumno.correo) { // Verifica si el correo existe
-                        if (alumno.correo === "javito12ulloa@gmail.com") {
+                        if (alumno.correo === "diplomas@e-volution.cl") {
                             correoText = "correo empresa";
                         } else {
                             correoText = "con correo";
@@ -485,7 +485,7 @@
                                 var correoText = "sin correo"; // Valor por defecto
                                 
                                 if (alumno.correo) { // Verifica si el correo existe
-                                    if (alumno.correo === "javito12ulloa@gmail.com") {
+                                    if (alumno.correo === "diplomas@e-volution.cl") {
                                         correoText = "correo empresa";
                                     } else {
                                         correoText = "con correo";

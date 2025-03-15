@@ -54,7 +54,7 @@ public class Servicio {
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
 
-    public static String CORREO_EMPRESA = "javito12ulloa@gmail.com";
+    public static String CORREO_EMPRESA = "diplomas@e-volution.cl";
 
     private static final String STATIC_DIRECTORY = "src/main/resources/static";
 

@@ -221,6 +221,7 @@ public class ServicioArchivos {
                 break;
             case "nº de horas":
             case "numero horas":
+            case "numero de horas":
             case "duracion del curso":
             case "duracion curso":
             case "duración del curso":
