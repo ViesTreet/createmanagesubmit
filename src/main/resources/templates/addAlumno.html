@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Añadir alumno</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/styleCustom.css">
+    <link rel="icon" href="/images/Logobgremove.png" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+</head>
+<body>
+    <header class="d-flex align-items-center justify-content-between p-3 bg-light" style="height: 10vh;">
+        <a href="/home" class="logo"><img src="/images/Logobgremove.png" alt="[LOGO]"></a>
+        <nav class="d-flex justify-content-center align-items-center flex-nowrap">
+            <a href="/dataBaseAlumno" class="btn btn-primary mx-2">Regresar</a>
+            <a href="/home" class="btn btn-primary mx-2">Inicio</a>
+            <a href="/documentacion" target="_blank" class="btn btn-primary mx-2">Documentación</a>
+            <div class="d-flex flex-column justify-content-center align-items-center">
+                <i class="fa-solid fa-user"></i>
+                <p class="p-0 m-0" style="font-size: normal;" th:text="${admin.nombre}"></p>
+            </div>
+        </nav>
+    </header>
+    <main class="d-flex flex-column align-items-center justify-content-center" style="height: 90vh;">
+        <div class="card" style="width: 70vw;">
+            <div class="card-body" style="width: 100%;">
+                <h4 class="card-title text-center">Agregar nuevo alumno</h4>
+                <form th:action="@{/dataBaseAlumno/agregarAlumno}" method="post" onsubmit="return guardarDatos()">
+                    <div class="d-flex justify-content-between">
+                        <div style="max-width: 33%;">
+                            <div th:each="campo : ${#lists.list('nombreAsistente', 'curso', 'diasCursos', 'numeroHoras', 'modalidad', 'lugarYfechaEmision')}">
+                                <label th:for="${campo}" th:text="${#strings.capitalize(campo)}"></label>
+                                <input type="text" th:name="${campo}" th:id="${campo}" class="form-control" th:placeholder="${campo}">
+                            </div>
+                        </div>
+                        <div style="max-width: 33%;">
+                            <div th:each="campo : ${#lists.list('cliente', 'identificador', 'codigo', 'notaAprobacion', 'relator', 'asistencia')}">
+                                <label th:for="${campo}" th:text="${#strings.capitalize(campo)}"></label>
+                                <input type="text" th:name="${campo}" th:id="${campo}" class="form-control" th:placeholder="${campo}">
+                            </div>
+                        </div>
+                        <div style="max-width: 33%;">
+                            <label for="estado">Estado</label>
+                            <select class="form-select" name="estado" id="estado">
+                                <option value="auto">Automático</option>
+                                <option value="aprobado">Aprobado</option>
+                                <option value="noAprobado">No Aprobado</option>
+                            </select>
+                            <label for="plantilla">Plantilla</label>
+                            <select name="plantilla" id="plantilla" class="form-select">
+                                <option th:each="plantilla : ${plantillas}" th:value="${plantilla.id}" th:text="${plantilla.nombreCertificado}"></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between pt-1">
+                        <div>
+                            <label style="font-size: 10px;">Guardar datos comunes</label>
+                            <input type="checkbox" name="guardar" id="guardar">
+                        </div>
+                        <input class="btn btn-success" type="submit" value="Añadir">
+                        <a href="/dataBaseAlumno/addAlumnoBase/excel" class="btn btn-primary">Agregar usando Excel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+    <footer class="text-center p-3 bg-light d-flex justify-content-center align-items-center" style="height: 15vh;">
+        <div>
+            <div><i class="fa-solid fa-phone"></i><a href="tel:+56 41 3830944">+56 41 3830944</a></div>
+            <div><i class="fa-solid fa-location-dot"></i><a href="https://www.google.com/maps/place/Consultores+Empresariales+E-Volution+Limitada/">Freire 728, Oficina 206</a></div>
+            <div><i class="fa-solid fa-envelope"></i><a href="mailto:contacto@e-volution.cl">contacto@e-volution.cl</a></div>
+        </div>
+    </footer>
+    <script>
+        function showAlert(message) {
+            if (message && message.trim() !== "") { 
+                alert(message);
+            }
+        }
+    </script>
+    <script th:if="${not #strings.isEmpty(error)}">
+        showAlert("[[${error}]]");
+    </script>
+</body>
+</html>

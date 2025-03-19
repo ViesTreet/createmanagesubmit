@@ -76,7 +76,7 @@ public class ControladorBase {
             nuevaPlantilla.setNombreCertificado("Error en encontrar plantilla");
             servicio.guardarPlantilla(nuevaPlantilla);
         }
-        return "index.jsp";
+        return "index";
     }
 
     @PostMapping("/login")
@@ -101,7 +101,7 @@ public class ControladorBase {
 	        return "redirect:/";  
 	    }
         model.addAttribute("admin",usuarioTemporal);
-        return "ubicacion.jsp";
+        return "ubicacion";
     }
     
     @PostMapping("/actualizarUbicacion")
@@ -123,7 +123,7 @@ public class ControladorBase {
 	        return "redirect:/";  
 	    }
         model.addAttribute("admin", usuarioTemporal);
-        return "home.jsp";
+        return "home";
     }
 
     @GetMapping("/logout")
@@ -143,7 +143,7 @@ public class ControladorBase {
 	        return "redirect:/";  
 	    }
         model.addAttribute("admin", usuarioTemporal);
-        return "databaseAlumno.jsp";
+        return "databaseAlumno";
     }
     
     @GetMapping("/dataBaseAlumno/buscarAlumno")
@@ -156,7 +156,7 @@ public class ControladorBase {
         model.addAttribute("filtro", filtro);
         model.addAttribute("busqueda", busqueda);
         model.addAttribute("admin", usuarioTemporal);
-        return "databaseAlumnoBusqueda.jsp";
+        return "databaseAlumnoBusqueda";
     }
 
     @GetMapping("/dataBaseAlumno/alumno/{id}")
@@ -169,7 +169,7 @@ public class ControladorBase {
         model.addAttribute("admin", usuarioTemporal);
         if(alumno != null){
             model.addAttribute("alumno",alumno);
-            return "alumnoDatos.jsp";
+            return "alumnoDatos";
         }else{
             return "redirect:/dataBaseAlumno";
         }
@@ -185,7 +185,7 @@ public class ControladorBase {
         model.addAttribute("admin", usuarioTemporal);
         List<Plantilla> plantillas=servicio.todasLasPlantillas();
         model.addAttribute("plantillas",plantillas);
-        return "addAlumno.jsp";
+        return "addAlumno";
     }
 
     @PostMapping("/dataBaseAlumno/agregarAlumno")
@@ -223,7 +223,7 @@ public class ControladorBase {
                     nuevoAlumno.setNombreAsistente(nombreAsistente);
                 }else{
                     model.addAttribute("error", "El nombre no pudo ser encontrado.");
-                    return "addAlumno.jsp";
+                    return "addAlumno";
                 }
             }
         }else{
@@ -231,7 +231,7 @@ public class ControladorBase {
                 nuevoAlumno.setNombreAsistente(nombreAsistente);
             }else{
                 model.addAttribute("error", "El nombre no fue ingresado.");
-                return "addAlumno.jsp";
+                return "addAlumno";
             }
         }
 
@@ -240,7 +240,7 @@ public class ControladorBase {
             nuevoAlumno.setPlantilla(plantillausuario);
         } catch (MissingTemplateException ex) {
             model.addAttribute("error", ex.getMessage());
-            return "addAlumno.jsp";
+            return "addAlumno";
         }
 
         try {
@@ -252,7 +252,7 @@ public class ControladorBase {
                     nuevoAlumno.setDiploma("enviado");
                 } catch (Exception ex) {
                     model.addAttribute("error", ex.getMessage());
-                    return "addAlumno.jsp";
+                    return "addAlumno";
                 }
             }else{
                 nuevoAlumno.setDiploma("noEnviado");
@@ -264,7 +264,7 @@ public class ControladorBase {
         return "redirect:/dataBaseAlumno/addAlumnoBase";
         } catch (MissingNameOrRutException ex) {
             model.addAttribute("error", ex.getMessage());
-            return "addAlumno.jsp";
+            return "addAlumno";
         }
     
     }
@@ -279,7 +279,7 @@ public class ControladorBase {
         model.addAttribute("admin", usuarioTemporal);
         List<Plantilla> plantillas = servicio.todasLasPlantillas();
         model.addAttribute("plantillas",plantillas);
-        return "addAlumnoExcel.jsp";
+        return "addAlumnoExcel";
     }
 
     @PostMapping(value = "/dataBaseAlumno/uploadAlumnoExcel", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -305,7 +305,7 @@ public class ControladorBase {
                 List<Plantilla> plantillas = servicio.todasLasPlantillas();
                 model.addAttribute("plantillas",plantillas);
                 model.addAttribute("error", ex.getMessage());
-                return "addAlumnoExcel.jsp";
+                return "addAlumnoExcel";
             }
         }
         return "redirect:/";
@@ -322,7 +322,7 @@ public class ControladorBase {
         Alumno alumno = servicio.alumnoPorId(id);
         model.addAttribute("alumno",alumno);
         model.addAttribute("plantillas",plantillas);
-        return "editarAlumno.jsp";
+        return "editarAlumno";
     }
     
     @PostMapping("/dataBaseAlumno/editarAlumno")
@@ -344,7 +344,7 @@ public class ControladorBase {
             model.addAttribute("alumno",alumno);
             model.addAttribute("plantillas",plantillas);
             model.addAttribute("error", ex.getMessage());
-            return "editarAlumno.jsp";
+            return "editarAlumno";
         }
     }
 
@@ -387,7 +387,7 @@ public class ControladorBase {
                 Alumno alumno = servicio.alumnoPorId(id);
                 model.addAttribute("alumno",alumno);
                 model.addAttribute("error", ex.getMessage());
-                return "alumnoDatos.jsp";
+                return "alumnoDatos";
             }
         }
         return "redirect:/";
@@ -404,7 +404,7 @@ public class ControladorBase {
             } catch (Exception e) {
                 e.printStackTrace();
                 model.addAttribute("error", "Ocurrió un error al mandar los restantes.");
-                return "databaseAlumno.jsp";
+                return "databaseAlumno";
             }
         }
         return "redirect:/";
@@ -423,7 +423,7 @@ public class ControladorBase {
         List<Plantilla> plantillas = servicio.todasLasPlantillas();
         model.addAttribute("plantillas",plantillas);
         model.addAttribute("busqueda",busqueda);
-        return "databasePlantillaBusqueda.jsp";
+        return "databasePlantillaBusqueda";
     }
     
     
@@ -436,7 +436,7 @@ public class ControladorBase {
         model.addAttribute("admin", usuarioTemporal);
         List<Plantilla> plantillas = servicio.todasLasPlantillas();
         model.addAttribute("plantillas",plantillas);
-        return "databasePlantilla.jsp";
+        return "databasePlantilla";
     }
 
     @PostMapping("/dataBasePlantilla/nuevaPlantilla")
@@ -450,7 +450,7 @@ public class ControladorBase {
                 model.addAttribute("error", "El nombre de la plantilla tiene que ser único, no se puede repetir.");
                 List<Plantilla> plantillas = servicio.todasLasPlantillas();
                 model.addAttribute("plantillas",plantillas);
-                return "databasePlantilla.jsp";
+                return "databasePlantilla";
             }
             try {
                 Plantilla nuevaPlantilla = new Plantilla();
@@ -491,7 +491,7 @@ public class ControladorBase {
                 model.addAttribute("error", "Ocurrió un error al guardar la nueva plantilla");
                 List<Plantilla> plantillas = servicio.todasLasPlantillas();
                 model.addAttribute("plantillas",plantillas);
-                return "databasePlantilla.jsp";
+                return "databasePlantilla";
             }
             
         }
@@ -510,7 +510,7 @@ public class ControladorBase {
         model.addAttribute("admin", usuarioTemporal);
         Plantilla plantilla = servicio.plantillaPorId(id);
         model.addAttribute("plantilla",plantilla);
-        return "borrarPlantilla.jsp";
+        return "borrarPlantilla";
     }
 
     @GetMapping("/dataBasePlantilla/borrar/{id}")
@@ -528,7 +528,7 @@ public class ControladorBase {
                 model.addAttribute("error", ex);
                 List<Plantilla> plantillas = servicio.todasLasPlantillas();
                 model.addAttribute("plantillas",plantillas);
-                return "databasePlantilla.jsp";
+                return "databasePlantilla";
             }
             
         }
@@ -544,7 +544,7 @@ public class ControladorBase {
         model.addAttribute("admin", usuarioTemporal);
         Plantilla plantilla = servicio.plantillaPorId(id);
         model.addAttribute("plantilla",plantilla);
-        return "editarPlantilla.jsp";
+        return "editarPlantilla";
     }
 
     @PostMapping("/dataBasePlantilla/editarPlantilla")
@@ -572,7 +572,7 @@ public class ControladorBase {
                 model.addAttribute("error", "El nombre tiene que ser unicó y no puede estar vacio");
                 Plantilla plantillaError = servicio.plantillaPorId(id);
                 model.addAttribute("plantilla",plantillaError);
-                return "editarPlantilla.jsp";
+                return "editarPlantilla";
 
             }
             plantilla.setNombreCertificado(nombre);
@@ -602,7 +602,7 @@ public class ControladorBase {
                 model.addAttribute("error", "Error al guardar la plantilla.");
                 Plantilla plantillaError = servicio.plantillaPorId(id);
                 model.addAttribute("plantilla",plantillaError);
-                return "editarPlantilla.jsp";
+                return "editarPlantilla";
             }
         }
         return "redirect:/";
@@ -617,7 +617,7 @@ public class ControladorBase {
         model.addAttribute("admin", usuarioTemporal);
         Plantilla plantilla = servicio.plantillaPorId(id);
         model.addAttribute("plantilla", plantilla);
-        return "probarPlantilla.jsp";
+        return "probarPlantilla";
     }
 
     @GetMapping("/dataBasePlantilla/download")
@@ -648,7 +648,7 @@ public class ControladorBase {
 	        return "redirect:/";  
 	    }
         model.addAttribute("admin", usuarioTemporal);
-        return "databaseAdmin.jsp";
+        return "databaseAdmin";
     }
 
     @GetMapping("/dataBaseAdmin/{id}/borrar")
@@ -663,7 +663,7 @@ public class ControladorBase {
                 return "redirect:/dataBaseAdmin";
             } catch (MissingAdminIdException ex) {
                 model.addAttribute("error", ex.getMessage());
-                return "databaseAdmin.jsp";
+                return "databaseAdmin";
             }
             
         }
@@ -680,7 +680,7 @@ public class ControladorBase {
                 return "redirect:/dataBaseAdmin";
             }else{
                 model.addAttribute("error", "El correo de los administradores no se pueden repetir");
-                return "databaseAdmin.jsp";
+                return "databaseAdmin";
             }
         }
         return "redirect:/";
@@ -690,7 +690,7 @@ public class ControladorBase {
     @GetMapping("/generarCertificadoQr/{id}")
     public String getMethodName(@PathVariable("id") String idEncriptada, HttpServletResponse response, Model model) {
         model.addAttribute("id", idEncriptada);
-        return "generarCertificadoQr.jsp";
+        return "generarCertificadoQr";
     }
     
 
