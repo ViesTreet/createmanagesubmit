@@ -4,18 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Datos Alumno</title>
-    <link rel="stylesheet" href="/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/css/styleCustom.css">
-    <link rel="icon" href="/images/Logobgremove.png" type="image/x-icon">
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/styleCustom.css}">
+    <link rel="icon" th:href="@{/images/Logobgremove.png}" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 </head>
 <body>
     <header class="d-flex align-items-center justify-content-between p-3 bg-light" style="height: 10vh;">
-        <a href="/home" class="logo"><img src="/images/Logobgremove.png" alt="[LOGO]"></a>
+        <a th:href="@{/home}" class="logo">
+            <img th:src="@{/images/Logobgremove.png}" alt="[LOGO]">
+        </a>
         <nav class="d-flex justify-content-center align-items-center flex-nowrap">
-            <a href="/dataBaseAlumno" class="btn btn-primary mx-2">Regresar</a>
-            <a href="/home" class="btn btn-primary mx-2">Inicio</a>
-            <a href="/documentacion" target="_blank" class="btn btn-primary mx-2">Documentación</a>
+            <a th:href="@{/dataBaseAlumno}" class="btn btn-primary mx-2">Regresar</a>
+            <a th:href="@{/home}" class="btn btn-primary mx-2">Inicio</a>
+            <a th:href="@{/documentacion}" target="_blank" class="btn btn-primary mx-2">Documentación</a>
             <div class="d-flex flex-column justify-content-center align-items-center">
                 <i class="fa-solid fa-user"></i>
                 <p class="p-0 m-0" style="font-size: normal;" th:text="${admin.nombre}"></p>
@@ -26,7 +28,7 @@
         <div class="card" style="width: 70vw;">
             <div class="card-body">
                 <div class="card-title text-center">
-                    <h3 th:text="'Datos del alumno ' + ${alumno.nombreAsistente}"></h3>
+                    <h3>Datos del alumno <span th:text="${alumno.nombreAsistente}"></span></h3>
                 </div>
             </div>
             <div class="d-flex justify-content-between">
@@ -49,8 +51,14 @@
                     <p><strong>Diploma:</strong> <span th:text="${alumno.diploma}"></span></p>
                     <p><strong>RUT:</strong> <span th:text="${alumno.rut}"></span></p>
                     <p><strong>Correo electrónico:</strong> <span th:text="${alumno.correo}"></span></p>
-                    <p><strong>Plantilla:</strong> <span th:text="${alumno.plantilla != null ? alumno.plantilla.nombreCertificado : 'N/A'}"></span></p>
-                    <p><strong>Lugar y fecha de emisión:</strong> <span th:text="${alumno.lugarYfechaEmision != null ? alumno.lugarYfechaEmision : 'N/A'}"></span></p>
+                    <p>
+                        <strong>Plantilla:</strong>
+                        <span th:text="${alumno.plantilla != null ? alumno.plantilla.nombreCertificado : 'N/A'}"></span>
+                    </p>
+                    <p>
+                        <strong>Lugar y fecha de emisión:</strong>
+                        <span th:text="${alumno.lugarYfechaEmision != null ? alumno.lugarYfechaEmision : 'N/A'}"></span>
+                    </p>
                     <p><strong>Fecha de creación:</strong> <span th:text="${alumno.createdAt}"></span></p>
                     <p><strong>Fecha de actualización:</strong> <span th:text="${alumno.updatedAt}"></span></p>
                 </div>
@@ -68,17 +76,28 @@
                 }
             }
         </script>
-        <script th:if="${not #strings.isEmpty(error)}">
+        <script th:inline="javascript" th:if="${error != null}">
             showAlert("[[${error}]]");
         </script>
     </main>
     <footer class="text-center p-3 bg-light d-flex justify-content-center align-items-center" style="height: 15vh;">
         <div>
-            <div><i class="fa-solid fa-phone"></i><a href="tel:+56 41 3830944">+56 41 3830944</a></div>
-            <div><i class="fa-solid fa-location-dot"></i><a href="https://www.google.com/maps/place/Consultores+Empresariales+E-Volution+Limitada/@-36.8252678,-73.050754,19z/data=!3m1!4b1!4m6!3m5!1s0x9669b5d0308198b5:0xbd67409566499fa!8m2!3d-36.8252678!4d-73.0501103!16s%2Fg%2F11fzwngw1q?entry=ttu&g_ep=EgoyMDI1MDEwNi4xIKXMDSoASAFQAw%3D%3D">Freire 728, Oficina 206</a></div>
-            <div><i class="fa-solid fa-envelope"></i><a href="mailto:contacto@e-volution.cl">contacto@e-volution.cl</a></div>
+            <div>
+                <i class="fa-solid fa-phone"></i>
+                <a href="tel:+56 41 3830944">+56 41 3830944</a>
+            </div>
+            <div>
+                <i class="fa-solid fa-location-dot"></i>
+                <a href="https://www.google.com/maps/place/Consultores+Empresariales+E-Volution+Limitada/@-36.8252678,-73.050754,19z/data=!3m1!4b1!4m6!3m5!1s0x9669b5d0308198b5:0xbd67409566499fa!8m2!3d-36.8252678!4d-73.0501103!16s%2Fg%2F11fzwngw1q?entry=ttu&amp;g_ep=EgoyMDI1MDEwNi4xIKXMDSoASAFQAw%3D%3D">
+                    Freire 728, Oficina 206
+                </a>
+            </div>
+            <div>
+                <i class="fa-solid fa-envelope"></i>
+                <a href="mailto:contacto@e-volution.cl">contacto@e-volution.cl</a>
+            </div>
         </div>
     </footer>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 </html>

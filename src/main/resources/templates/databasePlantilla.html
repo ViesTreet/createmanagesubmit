@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Lista de Administradores</title>
+    <title>Plantillas de diplomas</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Importar CSS de Bootstrap -->
@@ -16,11 +16,11 @@
 
     <style>
         th {
-            font-size: 16px;
+            font-size: 13px;
         }
         td {
             overflow-x: auto;
-            font-size: 14px;
+            font-size: 11px;
         }
         #alumnoBuscador {
             padding-right: 0px;
@@ -97,7 +97,7 @@
                 overflow-x: auto;
                 font-size: 12px;
             }
-            #tablaAlumnos {
+            #tablaPlantilla {
                 width: 250vw;
             }
         }
@@ -119,56 +119,69 @@
         </nav>
     </header>
     <div id="contenderBase" class="container pt-2 pb-2" style="height: 90vh;">
-        <h2 class="text-center">Base de datos Administradores</h2>
-        <div class="d-flex align-items-center justify-content-end pb-1" style="max-width: 95vw;">
-            <!-- Se muestra el botón para agregar solo si el correo del admin en sesión es "admin@admin.com" -->
-            <th:block th:if="${admin.correo == 'admin@admin.com'}">
-                <div>
-                    <button class="btn btn-success" onclick="openForm()">Agregar nuevo administradores</button>
-                </div>
-            </th:block>
+        <h2 class="text-center">Plantillas de diplomas</h2>
+        <div class="d-flex align-items-center justify-content-between pb-1" style="max-width: 95vw;">
+            <div>
+                <form id="plantillaBuscador" class="col-12">
+                    <input id="busquedaPlantilla" type="search" onkeydown="submitOnEnter(event, 'buscarLink')" class="col-7" placeholder="Buscar por nombre" name="busquedaPlantilla"/>
+                    <a id="buscarLink" href="#" class="btn btn-outline-primary">Buscar</a>
+                </form>
+            </div>
+            <div>
+                <button class="btn btn-success" onclick="openForm()">Agregar nueva plantilla</button>
+            </div>
         </div>
         <div id="contenedorTabla" style="overflow-y: auto; max-height: 70vh; max-width: 95vw;">
-            <table class="table table-hover table-bordered mb-5" style="table-layout: auto; height: 100%;" id="tablaAdmin">
+            <table class="table table-hover table-bordered mb-5" style="table-layout: fixed; height: 100%;" id="tablaPlantilla">
                 <thead class="thead-dark">
                     <tr>
-                        <th>Correo</th>
-                        <th>Nombre</th>
-                        <th style="width: 10vw;">Acciones</th>
+                        <th>Nombre Plantilla</th>
+                        <th>Descripción</th>
+                        <th>Asistencia mínima</th>
+                        <th>Nota mínima</th>
+                        <th style="width: 25vw;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Las filas se agregarán dinámicamente aquí -->
+                    <!-- Se cargarán dinámicamente las filas -->
                 </tbody>
             </table>
         </div>
     </div>
-    <script th:inline="javascript">
+    <script>
         $(document).ready(function () {
             function cargarDatos() {
                 $.ajax({
-                    url: "/api/datosAdmin",
+                    url: "/api/datosPlantilla",
                     method: "GET",
                     success: function (data) {
-                        var tbody = $("#tablaAdmin tbody");
-                        // Inyectar el correo del admin en sesión mediante Thymeleaf inline
-                        var correoUsuarioEnSesion = /*[[${admin.correo}]]*/ "default";
+                        var tbody = $("#tablaPlantilla tbody");
                         tbody.empty(); // Limpiar la tabla antes de agregar nuevos datos
-    
-                        $.each(data, function (i, admins) {
-                            // Crear una fila de tabla
-                            var fila = "<tr>" +
-                                "<td>" + (admins.correo != null ? admins.correo : "") + "</td>" +
-                                "<td>" + (admins.nombre != null ? admins.nombre : "") + "</td>";
-    
-                            // Agregar el botón borrar solo si el admin en sesión es "admin@admin.com" y el admin iterado no lo es
-                            if (correoUsuarioEnSesion === "admin@admin.com" && admins.correo !== "admin@admin.com") {
-                                fila += "<td style='width: 10vw;'>" + "<a class='btn btn-danger' href='/dataBaseAdmin/" + admins.id + "/borrar'>Borrar</a>" + "</td>";
-                            } else {
-                                fila += "<td></td>";
+
+                        $.each(data, function (i, plantilla) {
+                            // Omitir la fila si el nombre es "Error en encontrar plantilla"
+                            if (plantilla.nombreCertificado === "Error en encontrar plantilla") {
+                                return;
                             }
-    
-                            fila += "</tr>";
+                            // Inyectar el correo del admin en sesión desde el modelo
+                            var adminCorreo = /*[[${admin.correo}]]*/ "default";
+                            // Construir la fila
+                            var fila = "<tr>" +
+                                "<td>" + (plantilla.nombreCertificado != null ? plantilla.nombreCertificado : "") + "</td>" +
+                                "<td>" + (plantilla.descripcion != null ? plantilla.descripcion : "") + "</td>" +
+                                "<td>" + (plantilla.asistenciaMin != null ? plantilla.asistenciaMin : "") + "</td>" +
+                                "<td>" + (plantilla.notaMin != null ? plantilla.notaMin : "") + "</td>" +
+                                "<td class='d-flex justify-content-center flex-nowrap' style='width: 25vw;'>" +
+                                "<a class='btn btn-primary' href='/dataBasePlantilla/plantilla/" + plantilla.id + "/editar'>Editar</a>" +
+                                "<a href='/api/dataBasePlantilla/plantilla/" + plantilla.id + "/descargar' class='btn btn-success'>Descargar</a>" +
+                                "<a href='/dataBasePlantilla/plantilla/" + plantilla.id + "/probar' class='btn btn-secondary'>Probar</a>";
+                            
+                            // Agregar el botón "Borrar" solo si el correo es admin@admin.com
+                            if (adminCorreo === "admin@admin.com") {
+                                fila += "<a href='/dataBasePlantilla/plantilla/" + plantilla.id + "/borrar' class='btn btn-danger'>Borrar</a>";
+                            }
+                            fila += "</td></tr>";
+                            
                             tbody.append(fila);
                         });
                     },
@@ -186,7 +199,7 @@
         });
     </script>
     <script>
-        // Función que detecta la tecla Enter y simula clic en un botón
+        // Detecta la tecla Enter y simula clic en un botón
         function submitOnEnter(event, buttonId) {
             if (event.key === 'Enter') {
                 event.preventDefault();
@@ -195,27 +208,44 @@
         }
     </script>
     <div class="overlay" id="overlay">
-        <div class="popup col-4">
+        <div class="popup col-7">
             <div class="d-flex justify-content-end">
                 <button class="btn btn-danger" onclick="closeForm()">Cerrar</button>
             </div>
-            <h2 class="text-center pb-2">Crear Admin</h2>
-            <form th:action="@{/dataBaseAdmin/nuevoAdmin}" method="post">
-                <div class="d-flex justify-content-center">
-                    <div style="max-width: 100%;">
-                        <div class="pb-2">
-                            <label for="correo">Correo</label>
-                            <input type="email" name="correo" id="correo" class="form-control">
+            <h2 class="text-center pb-2">Crear plantilla</h2>
+            <form th:action="@{/dataBasePlantilla/nuevaPlantilla}" method="post" enctype="multipart/form-data">
+                <div class="d-flex justify-content-around pb-2">
+                    <div style="max-width: 40%;">
+                        <label for="nombreCertificado">Nombre Plantilla</label>
+                        <input id="nombreCertificado" name="nombreCertificado" type="text" class="form-control" placeholder="Nombre de la plantilla">
+                        <label for="descripcion">Descripción Plantilla</label>
+                        <input id="descripcion" type="text" name="descripcion" class="form-control" placeholder="Descripción de la plantilla">
+                    </div>
+                    <div style="max-width: 40%;">
+                        <label for="asistenciaMin">Asistencia Mínima</label>
+                        <input id="asistenciaMin" type="text" name="asistenciaMin" class="form-control" placeholder="ej: 60">
+                        <label for="notaMin">Nota Mínima</label>
+                        <input id="notaMin" type="text" name="notaMin" class="form-control" placeholder="ej: 5.5">
+                        <input type="checkbox" id="clonarPlantilla" name="clonarPlantilla" value="true" onclick="toggleInputs('plantilla')">
+                        <label for="clonarPlantilla">Clonar Plantilla</label>
+                        <!-- Input file para subir la nueva plantilla -->
+                        <div id="inputPlantilla">
+                            <label for="pathArchivo">Nueva Plantilla (.pptx)</label>
+                            <input type="file" name="pathArchivo" id="pathArchivo" class="form-control" accept=".pptx">
                         </div>
-                        <div class="pb-2">
-                            <label for="nombre">Nombre</label>
-                            <input type="text" name="nombre" id="nombre" class="form-control">
+                        <div id="selectPlantilla" style="display: none;">
+                            <label for="pathArchivoS">Elegir Plantilla</label>
+                            <select name="pathArchivoS" id="pathArchivoS" class="form-select">
+                                <th:block th:each="plantilla : ${plantillas}">
+                                    <option th:value="${plantilla.pathArchivo}" th:text="${plantilla.nombreCertificado}"></option>
+                                </th:block>
+                            </select>
                         </div>
-                        <label for="contrasena">Contraseña</label>
-                        <input type="password" name="contrasena" id="contrasena" class="form-control">
                     </div>
                 </div>
-                <div class="pt-2 d-flex justify-content-center">
+    
+                <div class="d-flex justify-content-center">
+                    <input type="hidden" name="orden" value="true">
                     <input class="btn btn-success" type="submit" value="Enviar">
                 </div>
             </form>
@@ -233,19 +263,7 @@
     </script>
     <script>
         function toggleInputs(type) {
-            if (type === 'logo') {
-                const checkbox = document.getElementById('clonarLogo');
-                const inputFile = document.getElementById('inputLogo');
-                const selectOptions = document.getElementById('selectLogo');
-            
-                if (checkbox.checked) {
-                    inputFile.style.display = 'none';
-                    selectOptions.style.display = 'block';
-                } else {
-                    inputFile.style.display = 'block';
-                    selectOptions.style.display = 'none';
-                }
-            } else if (type === 'plantilla') {
+            if (type === 'plantilla') {
                 const checkbox = document.getElementById('clonarPlantilla');
                 const inputFile = document.getElementById('inputPlantilla');
                 const selectOptions = document.getElementById('selectPlantilla');
