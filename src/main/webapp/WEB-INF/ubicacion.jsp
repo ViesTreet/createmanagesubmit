@@ -1,14 +1,13 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
-    <link rel="stylesheet" href="/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/css/styleCustom.css">
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/styleCustom.css}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-    <link rel="icon" href="/images/Logobgremove.png" type="image/x-icon">
+    <link rel="icon" th:href="@{/images/Logobgremove.png}" type="image/x-icon">
     <style>
         .btn-custom {
             width: 100%;
@@ -19,19 +18,19 @@
 </head>
 <body>
     <header class="d-flex align-items-center justify-content-between p-3 bg-light" style="height: 10vh;">
-        <a class="logo"><img src="/images/Logobgremove.png" alt="[LOGO]"></a>
+        <a class="logo"><img th:src="@{/images/Logobgremove.png}" alt="[LOGO]"></a>
         <nav class="d-flex justify-content-center align-items-center flex-nowrap">
-            <a href="/documentacion" target="_blank" class="btn btn-primary mx-2">Documentación</a>
+            <a th:href="@{/documentacion}" target="_blank" class="btn btn-primary mx-2">Documentación</a>
             <div class="d-flex flex-column justify-content-center align-items-center">
                 <i class="fa-solid fa-user"></i>
-                <p class="p-0 m-0" style="font-size: normal;">${admin.nombre}</p>
+                <p class="p-0 m-0" style="font-size: normal;" th:text="${admin.nombre}"></p>
             </div>
         </nav>
     </header>
     <main class="pb-5 d-flex flex-column align-items-center justify-content-center" style="height: 90vh;">
         <h1 class="text-center pb-1">Bienvenido a <b style="color: #0266ac;">E</b>-VOLUTION</h1>
         <h3 class="text-center pb-3">Por favor elija una ubicación</h3>
-        <form class="d-flex flex-wrap justify-content-center" action="/actualizarUbicacion" method="post">
+        <form class="d-flex flex-wrap justify-content-center" th:action="@{/actualizarUbicacion}" method="post">
             <select class="form-select" name="ubi" id="ubi">
                 <option value="arica">Arica y Parinacota</option>
                 <option value="tarapaca">Tarapacá</option>
@@ -60,5 +59,6 @@
             <div><i class="fa-solid fa-envelope"></i><a href="mailto:contacto@e-volution.cl">contacto@e-volution.cl</a></div>
         </div>
     </footer>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script></body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
 </html>
