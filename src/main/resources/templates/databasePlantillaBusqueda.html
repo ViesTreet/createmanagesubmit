@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Plantillas de diplomas</title>
+    <title>Plantillas de diplomas búsqueda</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Importar CSS de Bootstrap -->
@@ -97,7 +97,7 @@
                 overflow-x: auto;
                 font-size: 12px;
             }
-            #tablaPlantilla {
+            #tablaAlumnos {
                 width: 250vw;
             }
         }
@@ -109,7 +109,7 @@
             <img th:src="@{/images/Logobgremove.png}" alt="[LOGO]">
         </a>
         <nav class="d-flex justify-content-center align-items-center flex-nowrap">
-            <a th:href="@{/home}" class="btn btn-primary mx-2">Regresar</a>
+            <a th:href="@{/dataBasePlantilla}" class="btn btn-primary mx-2">Regresar</a>
             <a th:href="@{/home}" class="btn btn-primary mx-2">Inicio</a>
             <a th:href="@{/documentacion}" target="_blank" class="btn btn-primary mx-2">Documentación</a>
             <div class="d-flex flex-column justify-content-center align-items-center">
@@ -122,13 +122,17 @@
         <h2 class="text-center">Plantillas de diplomas</h2>
         <div class="d-flex align-items-center justify-content-between pb-1" style="max-width: 95vw;">
             <div>
+                <form id="plantillaBuscador" class="col-12">
+                    <input id="busquedaPlantilla" type="search" onkeydown="submitOnEnter(event, 'buscarLink')" class="col-7" placeholder="Buscar por nombre" name="busquedaPlantilla"/>
+                    <a id="buscarLink" href="#" class="btn btn-outline-primary">Buscar</a>
+                </form>
             </div>
             <div>
                 <button class="btn btn-success" onclick="openForm()">Agregar nueva plantilla</button>
             </div>
         </div>
         <div id="contenedorTabla" style="overflow-y: auto; max-height: 70vh; max-width: 95vw;">
-            <table class="table table-hover table-bordered mb-5" style="table-layout: fixed; height: 100%;" id="tablaPlantilla">
+            <table class="table table-hover table-bordered mb-5" style="table-layout: auto; height: 100%;" id="tablaPlantilla">
                 <thead class="thead-dark">
                     <tr>
                         <th>Nombre Plantilla</th>
@@ -139,29 +143,27 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Se cargarán dinámicamente las filas -->
+                    <!-- Las filas se agregarán dinámicamente aquí -->
                 </tbody>
             </table>
         </div>
     </div>
+
     <script>
         $(document).ready(function () {
+            // Se asume que la variable 'busqueda' se pasa en el modelo
+            var busqueda = /*[[${busqueda}]]*/ "";
             function cargarDatos() {
                 $.ajax({
-                    url: "/api/datosPlantilla",
+                    url: "/api/datosPlantilla/busquedaPlantilla",
                     method: "GET",
+                    data: { busqueda: busqueda },
                     success: function (data) {
                         var tbody = $("#tablaPlantilla tbody");
+                        var adminCorreo = "${admin.correo}";
                         tbody.empty(); // Limpiar la tabla antes de agregar nuevos datos
 
                         $.each(data, function (i, plantilla) {
-                            // Omitir la fila si el nombre es "Error en encontrar plantilla"
-                            if (plantilla.nombreCertificado === "Error en encontrar plantilla") {
-                                return;
-                            }
-                            // Inyectar el correo del admin en sesión desde el modelo
-                            var adminCorreo = /*[[${admin.correo}]]*/ "default";
-                            // Construir la fila
                             var fila = "<tr>" +
                                 "<td>" + (plantilla.nombreCertificado != null ? plantilla.nombreCertificado : "") + "</td>" +
                                 "<td>" + (plantilla.descripcion != null ? plantilla.descripcion : "") + "</td>" +
@@ -172,12 +174,11 @@
                                 "<a href='/api/dataBasePlantilla/plantilla/" + plantilla.id + "/descargar' class='btn btn-success'>Descargar</a>" +
                                 "<a href='/dataBasePlantilla/plantilla/" + plantilla.id + "/probar' class='btn btn-secondary'>Probar</a>";
                             
-                            // Agregar el botón "Borrar" solo si el correo es admin@admin.com
                             if (adminCorreo === "admin@admin.com") {
                                 fila += "<a href='/dataBasePlantilla/plantilla/" + plantilla.id + "/borrar' class='btn btn-danger'>Borrar</a>";
                             }
-                            fila += "</td></tr>";
                             
+                            fila += "</td></tr>";
                             tbody.append(fila);
                         });
                     },
@@ -194,8 +195,9 @@
             setInterval(cargarDatos, 30000);
         });
     </script>
+    
     <script>
-        // Detecta la tecla Enter y simula clic en un botón
+        // Detecta la tecla Enter y simula clic en el botón de búsqueda
         function submitOnEnter(event, buttonId) {
             if (event.key === 'Enter') {
                 event.preventDefault();
@@ -203,6 +205,7 @@
             }
         }
     </script>
+    
     <div class="overlay" id="overlay">
         <div class="popup col-7">
             <div class="d-flex justify-content-end">
@@ -219,9 +222,9 @@
                     </div>
                     <div style="max-width: 40%;">
                         <label for="asistenciaMin">Asistencia Mínima</label>
-                        <input id="asistenciaMin" type="text" name="asistenciaMin" class="form-control" placeholder="ej: 60">
+                        <input id="asistenciaMin" type="text" name="asistenciaMin" class="form-control" placeholder="ej:60">
                         <label for="notaMin">Nota Mínima</label>
-                        <input id="notaMin" type="text" name="notaMin" class="form-control" placeholder="ej: 5.5">
+                        <input id="notaMin" type="text" name="notaMin" class="form-control" placeholder="ej:5.5">
                         <input type="checkbox" id="clonarPlantilla" name="clonarPlantilla" value="true" onclick="toggleInputs('plantilla')">
                         <label for="clonarPlantilla">Clonar Plantilla</label>
                         <!-- Input file para subir la nueva plantilla -->
@@ -247,6 +250,7 @@
             </form>
         </div>
     </div>
+    
     <script>
         // Función para mostrar el formulario
         function openForm() {
@@ -257,6 +261,7 @@
             document.getElementById('overlay').style.display = 'none';
         }
     </script>
+    
     <script>
         function toggleInputs(type) {
             if (type === 'plantilla') {
@@ -274,6 +279,7 @@
             }
         }
     </script>
+    
     <script>
         function showAlert(message) {
             if (message && message.trim() !== "") { 
@@ -281,11 +287,13 @@
             }
         }
     </script>
+    
     <th:block th:if="${error != null}">
         <script th:inline="javascript">
             showAlert("[[${error}]]");
         </script>
     </th:block>
+    
     <footer class="text-center p-3 d-flex justify-content-center align-items-center" style="height: 15vh; background-color: #f8f9fa;">
         <div>
             <div>

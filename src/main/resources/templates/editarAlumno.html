@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Alumno</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/styleCustom.css}">
+    <link rel="icon" th:href="@{/images/Logobgremove.png}" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <style>
+        /* Puedes agregar estilos adicionales aquí si es necesario */
+    </style>
+</head>
+<body>
+    <header class="d-flex align-items-center justify-content-between p-3 bg-light" style="height: 10vh;">
+        <a th:href="@{/home}" class="logo">
+            <img th:src="@{/images/Logobgremove.png}" alt="[LOGO]">
+        </a>
+        <nav class="d-flex justify-content-center align-items-center flex-nowrap">
+            <a th:href="@{'/dataBaseAlumno/alumno/' + ${alumno.id}}" class="btn btn-primary mx-2">Regresar</a>
+            <a th:href="@{/home}" class="btn btn-primary mx-2">Inicio</a>
+            <a th:href="@{/documentacion}" target="_blank" class="btn btn-primary mx-2">Documentación</a>
+            <div class="d-flex flex-column justify-content-center align-items-center">
+                <i class="fa-solid fa-user"></i>
+                <p class="p-0 m-0" style="font-size: normal;" th:text="${admin.nombre}"></p>
+            </div>
+        </nav>
+    </header>
+    <main class="d-flex flex-column align-items-center justify-content-center" style="height: 90vh;">
+        <div class="card" style="width: 70vw;">
+            <div class="card-body" style="width: 100%;">
+                <h4 class="card-title text-center">
+                    Editar Alumno <span th:text="${alumno.nombreAsistente}"></span>
+                </h4>
+                <!-- Se elimina el modelAttribute para que se envíen parámetros individuales -->
+                <form th:action="@{/dataBaseAlumno/editarAlumno}" method="post">
+                    <div class="d-flex justify-content-between">
+                        <div style="max-width: 33%;">
+                            <div>
+                                <label for="nombreAsistente">Nombre Asistente</label>
+                                <input type="text" name="nombreAsistente" id="nombreAsistente" class="form-control" 
+                                       placeholder="Nombres Apellidos Asistente" th:value="${alumno.nombreAsistente}">
+                            </div>
+                            <div>
+                                <label for="nombreCurso">Cursos</label>
+                                <input type="text" name="nombreCurso" id="nombreCurso" class="form-control" 
+                                       placeholder="curso1,curso2,etc..." th:value="${alumno.nombreCurso}">
+                            </div>
+                            <div>
+                                <label for="diasCursos">Días del curso</label>
+                                <input type="text" name="diasCursos" id="diasCursos" class="form-control" 
+                                       placeholder="fecha" th:value="${alumno.diasCursos}">
+                            </div>
+                            <div>
+                                <label for="numeroHoras">Duración del curso</label>
+                                <input type="text" name="numeroHoras" id="numeroHoras" class="form-control" 
+                                       placeholder="Duración" th:value="${alumno.duracion}">
+                            </div>
+                            <div>
+                                <label for="modalidad">Modalidad</label>
+                                <input type="text" name="modalidad" id="modalidad" class="form-control" 
+                                       placeholder="virtual" th:value="${alumno.modalidad}">
+                            </div>
+                            <div>
+                                <label for="lugarYfechaEmision">Lugar y/o Fecha de emisión</label>
+                                <input type="text" name="lugarYfechaEmision" id="lugarYfechaEmision" class="form-control" 
+                                       placeholder="2023, Santiago" th:value="${alumno.lugarYfechaEmision}">
+                            </div>
+                        </div>
+                        <div style="max-width: 33%;">
+                            <div>
+                                <label for="cliente">Cliente</label>
+                                <input type="text" name="cliente" id="cliente" class="form-control" 
+                                       placeholder="Cliente" th:value="${alumno.cliente}">
+                            </div>
+                            <div>
+                                <label for="identificador">Identificador</label>
+                                <input type="text" name="identificador" id="identificador" class="form-control" 
+                                       placeholder="identificador" th:value="${alumno.identificador}">
+                            </div>
+                            <div>
+                                <label for="codigo">Codigo</label>
+                                <input type="text" name="codigo" id="codigo" class="form-control" 
+                                       placeholder="Codigo" th:value="${alumno.codigo}">
+                            </div>
+                            <div>
+                                <label for="notaAprobacion">Nota aprobación</label>
+                                <input type="text" name="notaAprobacion" id="notaAprobacion" class="form-control" 
+                                       placeholder="Ej: 7.0" th:value="${alumno.notaAprobacion}">
+                            </div>
+                            <div>
+                                <label for="relator">Relator</label>
+                                <input type="text" name="relator" id="relator" class="form-control" 
+                                       placeholder="Relator" th:value="${alumno.relator}">
+                            </div>
+                            <div>
+                                <label for="asistencia">Asistencia</label>
+                                <input type="text" name="asistencia" id="asistencia" class="form-control" 
+                                       placeholder="Ej: 100" th:value="${alumno.asistencia}">
+                            </div>
+                        </div>
+                        <div style="max-width: 33%;">
+                            <div>
+                                <label for="estado">Estado</label>
+                                <select class="form-select" name="estado" id="estado">
+                                    <option value="auto" th:selected="${alumno.estado == 'revisionManual' or alumno.estado == 'auto'}">Automatico</option>
+                                    <option value="aprobado" th:selected="${alumno.estado == 'aprobado'}">Aprobado</option>
+                                    <option value="noAprobado" th:selected="${alumno.estado == 'noAprobado'}">No Aprobado</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="diploma">Diploma</label>
+                                <select class="form-select" name="diploma" id="diploma">
+                                    <option value="enviado" th:selected="${alumno.diploma == 'enviado'}">Enviado</option>
+                                    <option value="noEnviado" th:selected="${alumno.diploma == 'noEnviado'}">No enviado</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="rut">Rut</label>
+                                <input type="text" name="rut" id="rut" class="form-control" 
+                                       placeholder="11.111.111-1" th:value="${alumno.rut}">
+                            </div>
+                            <div>
+                                <label for="correo">Correo</label>
+                                <input type="email" name="correo" id="correo" class="form-control" 
+                                       placeholder="example@example.com" th:value="${alumno.correo}">
+                            </div>
+                            <div>
+                                <label for="plantilla">Plantilla</label>
+                                <select name="plantilla" id="plantilla" class="form-select">
+                                    <th:block th:each="p : ${plantillas}">
+                                        <option th:value="${p.id}" th:text="${p.nombreCertificado}" 
+                                            th:selected="${p.id == alumno.plantilla.id}"></option>
+                                    </th:block>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-center pt-1">
+                        <input type="hidden" name="id" th:value="${alumno.id}">
+                        <input class="btn btn-success" type="submit" value="Editar">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+    <script>
+        function formatearRut() {
+            var input = document.getElementById('rut');
+            var rut = input.value.replace(/\./g, '').replace('-', '');
+            if (rut.length > 3) {
+                var cuerpo = rut.slice(0, -1);
+                var dv = rut.slice(-1);
+                input.value = cuerpo + '-' + dv;
+            } else {
+                input.value = rut;
+            }
+        }
+        document.getElementById('rut').addEventListener('input', formatearRut);
+    </script>
+    <script>
+        function showAlert(message) {
+            if (message && message.trim() !== "") {
+                alert(message);
+            }
+        }
+    </script>
+    <th:block th:if="${error != null}">
+        <script th:inline="javascript">
+            showAlert("[[${error}]]");
+        </script>
+    </th:block>
+    <footer class="text-center p-3 bg-light d-flex justify-content-center align-items-center" style="height: 15vh;">
+        <div>
+            <div>
+                <i class="fa-solid fa-phone"></i>
+                <a href="tel:+56 41 3830944">+56 41 3830944</a>
+            </div>
+            <div>
+                <i class="fa-solid fa-location-dot"></i>
+                <a href="https://www.google.com/maps/place/Consultores+Empresariales+E-Volution+Limitada/@-36.8252678,-73.050754,19z/data=!3m1!4b1!4m6!3m5!1s0x9669b5d0308198b5:0xbd67409566499fa!8m2!3d-36.8252678!4d-73.0501103!16s%2Fg%2F11fzwngw1q?entry=ttu&amp;g_ep=EgoyMDI1MDEwNi4xIKXMDSoASAFQAw%3D%3D">
+                    Freire 728, Oficina 206
+                </a>
+            </div>
+            <div>
+                <i class="fa-solid fa-envelope"></i>
+                <a href="mailto:contacto@e-volution.cl">contacto@e-volution.cl</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
