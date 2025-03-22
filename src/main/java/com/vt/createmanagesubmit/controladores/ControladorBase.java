@@ -69,7 +69,7 @@ public class ControladorBase {
     @GetMapping("/")
     public String index() {
         if(servicio.adminPorCorreo("admin@admin.com")==null){
-            servicio.registrarAdmin("admin@admin.com", "admin", "yz1zc9M8DY");
+            servicio.registrarAdmin("admin@admin.com", "admin", "RcOqkObsJN");
         }
         if(!servicio.plantillaPorNombre("Error en encontrar plantilla").isPresent()){
             Plantilla nuevaPlantilla = new Plantilla();

@@ -197,6 +197,7 @@ public class ServicioGenerarCertificado {
     private void sendEmailWithAttachments(String toEmail, String subject, Alumno alumno, byte[] pdfBytes, byte[] qrCodeBytes) throws MessagingException {
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
+        helper.setFrom("diplomas@e-volution.cl");
         helper.setTo(toEmail);
         helper.setSubject(subject);
         byte[] logoBytes=null;
