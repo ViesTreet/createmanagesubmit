@@ -56,7 +56,7 @@ public class Servicio {
 
     public static String CORREO_EMPRESA = "diplomas@e-volution.cl";
 
-    private static final String STATIC_DIRECTORY = "src/main/resources/static";
+    private static final String STATIC_DIRECTORY = "/var/evolution/static";
 
 
     public Alumno registrarNuevoAlumno(Alumno nuevoAlumno){

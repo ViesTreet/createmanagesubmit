@@ -1,11 +1,6 @@
 package com.vt.createmanagesubmit.servicios;
 
 import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics2D;
-import java.awt.font.FontRenderContext;
-import java.awt.geom.Dimension2D;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -13,6 +8,7 @@ import java.io.FileInputStream;
 // Otras importaciones necesarias
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
@@ -28,13 +24,10 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import javax.imageio.ImageIO;
 
-import org.apache.poi.sl.usermodel.Insets2D;
 import org.apache.poi.sl.usermodel.TextShape.TextAutofit;
-import org.apache.poi.util.Dimension2DDouble;
 import org.apache.poi.xslf.usermodel.XMLSlideShow;
 import org.apache.poi.xslf.usermodel.XSLFShape;
 import org.apache.poi.xslf.usermodel.XSLFSlide;
-import org.apache.poi.xslf.usermodel.XSLFTextBox;
 import org.apache.poi.xslf.usermodel.XSLFTextParagraph;
 import org.apache.poi.xslf.usermodel.XSLFTextRun;
 import org.apache.poi.xslf.usermodel.XSLFTextShape;
@@ -42,6 +35,7 @@ import org.jodconverter.local.JodConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -118,7 +112,7 @@ public class ServicioGenerarCertificado {
     
 
         // Guarda el PPTX modificado en un archivo temporal
-        String tempPptxPath = "temp/" + alumno.getId() + ".pptx";
+        String tempPptxPath = "/var/evolution/static/temp/" + alumno.getId() + ".pptx";
         File tempDir = new File("temp");
         if (!tempDir.exists()) {
             tempDir.mkdirs();
@@ -131,7 +125,7 @@ public class ServicioGenerarCertificado {
         ppt.close();
 
         // Convierte el PPTX a PDF usando JODConverter
-        String tempPdfPath = "temp/" + alumno.getId() + ".pdf";
+        String tempPdfPath = "/var/evolution/static/temp/" + alumno.getId() + ".pdf";
         JodConverter
                 .convert(new File(tempPptxPath))
                 .to(new File(tempPdfPath))
@@ -155,8 +149,9 @@ public class ServicioGenerarCertificado {
         byte[] qrCodeBytes = qrCodeOutputStream.toByteArray();
 
         // Enviar correo electrónico al alumno con el PDF y el código QR como adjuntos
+        System.out.println("iniciando correo");
         sendEmailWithAttachments(alumno.getCorreo(), "Certificado de Curso",alumno, pdfBytes, qrCodeBytes);
-
+        System.out.println("termino");
         return CompletableFuture.completedFuture(null);
     }
 
@@ -201,11 +196,12 @@ public class ServicioGenerarCertificado {
         helper.setTo(toEmail);
         helper.setSubject(subject);
         byte[] logoBytes=null;
-        try {
-            logoBytes = Files.readAllBytes(Paths.get("src/main/resources/static/images/Logobgremove.png"));
+        System.out.println("entro en el servicio email");
+        ClassPathResource logoResourceDir = new ClassPathResource("static/images/Logobgremove.png");
+        try (InputStream is = logoResourceDir.getInputStream()) {
+            logoBytes = is.readAllBytes();
         } catch (IOException e) {
-
-            e.printStackTrace();
+            throw new MessagingException("Error cargando logo", e);
         }
         ByteArrayResource logoResource = new ByteArrayResource(logoBytes);
         String htmlContent = "<!DOCTYPE html>" +
