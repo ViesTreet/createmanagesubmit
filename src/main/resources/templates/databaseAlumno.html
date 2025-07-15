@@ -245,6 +245,10 @@
             <button id="deseleccionarBtn" class="btn btn-warning">
               Deseleccionar
             </button>
+            <button id="eliminarSeleccionadosBtn" class="btn btn-danger">
+              Eliminar seleccionados
+            </button>
+
           </div>
         </div>
       </div>
@@ -835,7 +839,46 @@
         </div>
       </div>
     </div>
+    <script>
+      $("#eliminarSeleccionadosBtn").on("click", function () {
+        var selectedIds = $('input[type="checkbox"]:checked')
+          .map(function () {
+            return $(this).val();
+          })
+          .get();
+        
+        if (selectedIds.length === 0) {
+          alert("No hay registros seleccionados para eliminar.");
+          return;
+        }
+      
+        if (!confirm("¿Estás seguro de que quieres eliminar estos registros? Esta acción no se puede deshacer.")) {
+          return;
+        }
+      
+        $.ajax({
+          url: "/api/dataBaseAlumno/eliminarSeleccionados", // AJUSTA a tu endpoint
+          method: "POST",
+          contentType: "application/json",
+          data: JSON.stringify(selectedIds),
+          success: function (response) {
+            alert("Registros eliminados correctamente.");
+            if (filtrosActivos.length > 0) {
+              cargarDatosConFiltros();
+            } else {
+              cargarDatos();
+            }
+          
+            localStorage.removeItem(checkboxKey); // Limpia estados guardados
+            updateUIAfterRestore(); // Asegúrate de refrescar la UI de botones
+          },
+          error: function (error) {
+            alert("Error al eliminar: " + error.statusText);
+          },
+        });
+      });
 
+    </script>
     <script>
       $("#listoBtn").on("click", function () {
         $("#selection-overlay").show();

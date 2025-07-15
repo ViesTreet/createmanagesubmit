@@ -4,11 +4,15 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -32,10 +36,12 @@ import com.vt.createmanagesubmit.servicios.Servicio;
 import com.vt.createmanagesubmit.servicios.ServicioApi;
 import com.vt.createmanagesubmit.servicios.ServicioArchivos;
 import com.vt.createmanagesubmit.servicios.ServicioGenerarCertificado;
+import com.vt.createmanagesubmit.servicios.ServicioTareasProgramadas;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.RequestBody;
+
 
 
 
@@ -62,6 +68,9 @@ public class ControladorBase {
     @Autowired
     @Lazy
     private ServicioGenerarCertificado servicioGenerarCertificado;
+
+    @Autowired
+    private ServicioTareasProgramadas servicioTareaP;
 
     String correoEmpresa = Servicio.CORREO_EMPRESA;
 
@@ -409,6 +418,89 @@ public class ControladorBase {
         }
         return "redirect:/";
     }
+
+    @GetMapping("/programarCertificadoMoodle")
+    public String moodleTarea(HttpSession session, Model model) {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+	    if (usuarioTemporal == null) {
+	        return "redirect:/";  
+	    }
+        model.addAttribute("admin", usuarioTemporal);
+        List<Plantilla> plantillas = servicio.todasLasPlantillas();
+        model.addAttribute("plantillas",plantillas);
+        List<Map<String, Object>> cursos=servicioApi.obtenerCursosMoodle();
+        model.addAttribute("cursosMoodle",cursos);
+        return"moodleProgramado";
+    }
+
+    @PostMapping("/programarCertificadoMoodle/crear")
+    public String crearMoodleTarea(
+            HttpSession session,
+            @RequestParam(name = "cursoMoodle", required = false) String cursoMoodleParam,
+            @RequestParam(name = "plantilla",   required = false) String plantillaParam,
+            @RequestParam(name = "curso",       required = false) String nombreCurso,
+            @RequestParam(name = "diasCursos",  required = false) String diasCursos,
+            @RequestParam(name = "numeroHoras", required = false) String duracion,
+            @RequestParam(name = "modalidad",   required = false) String modalidad,
+            @RequestParam(name = "cliente",     required = false) String cliente,
+            @RequestParam(name = "relator",     required = false) String relator,
+            @RequestParam(name = "lugarYfechaEmision", required = false) String lugarYfechaEmision,
+            @RequestParam(name = "fechaDeEjecucion",   required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaDeEjecucion
+    ) {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+	    if (usuarioTemporal == null) {
+	        return "redirect:/";  
+	    }
+
+        // 2) Parseo de IDs (vacío → null)
+        Long idCurso   = (cursoMoodleParam == null || cursoMoodleParam.isBlank())
+                         ? null
+                         : Long.valueOf(cursoMoodleParam);
+        Long idPlantilla = (plantillaParam == null || plantillaParam.isBlank())
+                         ? null
+                         : Long.valueOf(plantillaParam);
+
+        if (idCurso == null || idPlantilla == null){
+            return "redirect:/programarCertificadoMoodle";
+        }
+        // 3) Strings: cadenas vacías o en blanco → null
+        nombreCurso         = (nombreCurso == null || nombreCurso.isBlank()) 
+                              ? null : nombreCurso;
+        diasCursos          = (diasCursos == null || diasCursos.isBlank())
+                              ? null : diasCursos;
+        duracion            = (duracion == null || duracion.isBlank())
+                              ? null : duracion;
+        modalidad           = (modalidad == null || modalidad.isBlank())
+                              ? null : modalidad;
+        cliente             = (cliente == null || cliente.isBlank())
+                              ? null : cliente;
+        relator             = (relator == null || relator.isBlank())
+                              ? null : relator;
+        lugarYfechaEmision  = (lugarYfechaEmision == null || lugarYfechaEmision.isBlank())
+                              ? null : lugarYfechaEmision;
+
+        Long idQuiz = servicioApi.obtenerQuizId(idCurso);
+        String lugarSubida = usuarioTemporal.getUbicacion();
+        servicioTareaP.CrearTarea(
+            idCurso,
+            idQuiz,
+            idPlantilla,
+            nombreCurso,
+            diasCursos,
+            duracion,
+            modalidad,
+            cliente,
+            relator,
+            lugarYfechaEmision,
+            fechaDeEjecucion,
+            lugarSubida
+        );
+
+        return "redirect:/programarCertificadoMoodle";
+    }
+
+    
+    
 
     //----------------------------------------------------------------------------------
 

@@ -337,6 +337,19 @@ public class ControladorApi {
             return null;
         }
     }
+
+    @PostMapping("/dataBaseAlumno/eliminarSeleccionados")
+    public ResponseEntity<?> eliminarSeleccionados(@RequestBody List<Long> ids) {
+        try {
+            for(Long id:ids){
+                ser.borrarAlumnoPorId(id);
+            }
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al eliminar");
+        }
+    }
+
         
 }
 
