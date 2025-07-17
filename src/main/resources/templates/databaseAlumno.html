@@ -361,6 +361,9 @@
         contenedorNoEnviados.empty();
 
         $.each(data, function (i, alumno) {
+          if (alumno.estado && alumno.estado.toLowerCase() === "borrado") {
+                  return; // Salta al siguiente alumno
+                }
           if (alumno.ubicacionSubida === ubicacionAdmin) {
             var correoText = "sin correo"; // Valor por defecto
 
@@ -614,6 +617,9 @@
               contenedorNoEnviados.empty(); // Limpiar el contenedor antes de agregar nuevos datos
 
               $.each(data, function (i, alumno) {
+                if (alumno.estado && alumno.estado.toLowerCase() === "borrado") {
+                  return; // Salta al siguiente alumno
+                }
                 if (alumno.ubicacionSubida === ubicacionAdmin) {
                   var correoText = "sin correo"; // Valor por defecto
 

@@ -1,9 +1,11 @@
 package com.vt.createmanagesubmit.servicios;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.vt.createmanagesubmit.modelos.Plantilla;
 import com.vt.createmanagesubmit.modelos.TareaProgramada;
@@ -55,5 +57,16 @@ public class ServicioTareasProgramadas {
         tarea.setEstado("En proceso");
 
         repoTarea.save(tarea);
+    }
+
+    @Transactional
+    public void ejecutarTareasPendientes() {
+        LocalDateTime ahora = LocalDateTime.now();
+        List<TareaProgramada> lista = repoTarea.findByEstadoAndFechaEjecucionLessThanEqual("En proceso", ahora);
+        lista.forEach(t -> {
+          // tu código de ejecución (e.g. generar certificados)
+          t.setEstado("Completado");
+          repoTarea.save(t);
+        });
     }
 }

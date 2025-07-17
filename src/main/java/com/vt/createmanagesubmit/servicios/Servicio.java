@@ -29,9 +29,11 @@ import com.vt.createmanagesubmit.exceptions.MissingTemplateException;
 import com.vt.createmanagesubmit.modelos.Admin;
 import com.vt.createmanagesubmit.modelos.Alumno;
 import com.vt.createmanagesubmit.modelos.Plantilla;
+import com.vt.createmanagesubmit.modelos.TareaProgramada;
 import com.vt.createmanagesubmit.repositorios.RepositorioAdmin;
 import com.vt.createmanagesubmit.repositorios.RepositorioAlumnos;
 import com.vt.createmanagesubmit.repositorios.RepositorioPlantillas;
+import com.vt.createmanagesubmit.repositorios.RepositorioTareasProgramadas;
 
 
 
@@ -50,6 +52,9 @@ public class Servicio {
     @Autowired
     @Lazy
     private ServicioArchivos servicioAr;
+
+    @Autowired
+    private RepositorioTareasProgramadas repoTarea;
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -71,7 +76,8 @@ public class Servicio {
         Optional<Alumno> optAlumno = repoAlum.findById(id);
         if(optAlumno.isPresent()){
             Alumno alumno = optAlumno.get();
-            repoAlum.delete(alumno);
+            alumno.setEstado("borrado");
+            repoAlum.save(alumno);
         }else{
             throw new MissingAlumnoIdException("No se encontró el alumno a borrar.");
         }
@@ -541,6 +547,10 @@ public class Servicio {
             }
         }
         return null;
+    }
+
+    public Page<TareaProgramada> todasLasTareas(){
+        return repoTarea.findAll(PageRequest.of(0, 20, Sort.by("updatedAt").descending()));
     }
 
 }

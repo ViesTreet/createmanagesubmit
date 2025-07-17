@@ -38,10 +38,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vt.createmanagesubmit.dto.AlumnoDTO;
+import com.vt.createmanagesubmit.dto.TareaDTO;
 import com.vt.createmanagesubmit.dto.filtroDTO;
 import com.vt.createmanagesubmit.modelos.Admin;
 import com.vt.createmanagesubmit.modelos.Alumno;
 import com.vt.createmanagesubmit.modelos.Plantilla;
+import com.vt.createmanagesubmit.modelos.TareaProgramada;
 import com.vt.createmanagesubmit.servicios.Servicio;
 import com.vt.createmanagesubmit.servicios.ServicioArchivos;
 import com.vt.createmanagesubmit.servicios.ServicioGenerarCertificado;
@@ -83,6 +85,20 @@ public class ControladorApi {
         }
         return null;
     }
+
+    @GetMapping("/tareasProgramadas")
+    public List<TareaDTO> getMethodName(HttpSession session) {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+        if (usuarioTemporal != null) {
+            return ser.todasLasTareas()
+              .getContent()
+              .stream()
+              .map(TareaDTO::new)
+              .collect(Collectors.toList());
+        }
+        return null;
+    }
+    
 
     @PostMapping("/datosAlumno/busquedaMultiFiltro")
     public List<AlumnoDTO> busquedaMultiFiltro(@RequestBody List<filtroDTO> filtros, HttpSession session) {
