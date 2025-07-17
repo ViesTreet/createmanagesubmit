@@ -1,6 +1,6 @@
 package com.vt.createmanagesubmit.servicios;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,10 +18,13 @@ public class ServicioTareasProgramadas {
     @Autowired
     private RepositorioTareasProgramadas repoTarea;
 
+    @Autowired
+    private Servicio ser;
+
 
     public void CrearTarea(
             Long IDCurso,
-            Long IDQuiz,               
+            String accion,               
             Long plantillaId,
             String nombreCurso,
             String diasCursos,
@@ -30,17 +33,14 @@ public class ServicioTareasProgramadas {
             String cliente,
             String relator,
             String lugarYfechaEmision,
-            LocalDate fechaDeEjecucion,
+            LocalDateTime fechaDeEjecucion,
             String lugarSubida
     ) {
         TareaProgramada tarea = new TareaProgramada();
 
         // Campos del modelo
         tarea.setIDCurso(IDCurso);
-
-        // TODO: buscar/setear el IDQuiz correcto
-        // tarea.setIDQuiz(IDQuiz);
-
+        tarea.setAccion(accion);
         tarea.setNombreCurso(nombreCurso);
         tarea.setDiasCursos(diasCursos);
         tarea.setDuracion(duracion);
@@ -49,18 +49,11 @@ public class ServicioTareasProgramadas {
         tarea.setRelator(relator);
         tarea.setLugarYfechaEmision(lugarYfechaEmision);
         tarea.setUbicacionSubida(lugarSubida);
+        Plantilla plantilla = ser.plantillaPorId(plantillaId);
+        tarea.setPlantilla(plantilla);
+        tarea.setFechaEjecucion(fechaDeEjecucion);
+        tarea.setEstado("En proceso");
 
-        // Asignar la plantilla (solo con el ID)
-        if (plantillaId != null) {
-            Plantilla plantilla = new Plantilla();
-            plantilla.setId(plantillaId);
-            tarea.setPlantilla(plantilla);
-            // Si necesitas más datos de la plantilla, usa plantillaRepository.findById(...)
-        }
-
-        // Fecha de ejecución → de LocalDate a LocalDateTime a medianoche
-        if (fechaDeEjecucion != null) {
-            tarea.setFechaEjecucion(fechaDeEjecucion.atStartOfDay());
-        }
+        repoTarea.save(tarea);
     }
 }

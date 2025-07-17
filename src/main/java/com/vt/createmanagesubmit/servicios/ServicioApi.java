@@ -147,8 +147,6 @@ public class ServicioApi {
         .encode() // Codifica caracteres especiales
         .toUriString();
 
-    System.out.println("URL de Moodle: " + fullUrl); 
-
     try {
         // Usa getForEntity para capturar posibles errores HTTP
         ResponseEntity<String> response = restTemplate.getForEntity(fullUrl, String.class);
@@ -158,7 +156,6 @@ public class ServicioApi {
         }
 
         String responseBody = response.getBody();
-        System.out.println("Respuesta cruda de Moodle: " + responseBody); 
 
         JsonNode root = objectMapper.readTree(responseBody);
 

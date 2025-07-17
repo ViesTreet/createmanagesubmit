@@ -13,6 +13,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
 @Entity
@@ -25,7 +27,7 @@ public class TareaProgramada {
 
     private Long IDCurso; 
 
-    private Long IDQuiz;       
+    private String accion;       
 
     private String nombreCurso;
 
@@ -61,12 +63,12 @@ public class TareaProgramada {
     public TareaProgramada() {
     }
 
-    public TareaProgramada(Long id, Long iDCurso, Long iDQuiz, String nombreCurso, String diasCursos, String duracion,
+    public TareaProgramada(Long id, Long iDCurso, String accion, String nombreCurso, String diasCursos, String duracion,
             String modalidad, String cliente, String relator, String lugarYfechaEmision, Plantilla plantilla,
             LocalDateTime fechaEjecucion, String estado, String ubicacionSubida , Date createdAt, Date updatedAt) {
         this.id = id;
-        IDCurso = iDCurso;
-        IDQuiz = iDQuiz;
+        this.IDCurso = iDCurso;
+        this.accion = accion;
         this.nombreCurso = nombreCurso;
         this.diasCursos = diasCursos;
         this.duracion = duracion;
@@ -98,12 +100,12 @@ public class TareaProgramada {
         IDCurso = iDCurso;
     }
 
-    public Long getIDQuiz() {
-        return IDQuiz;
+    public String getAccion() {
+        return accion;
     }
 
-    public void setIDQuiz(Long iDQuiz) {
-        IDQuiz = iDQuiz;
+    public void setAccion(String Accion) {
+        accion = Accion;
     }
 
     public String getNombreCurso() {
@@ -212,13 +214,22 @@ public class TareaProgramada {
 
     @Override
     public String toString() {
-        return "TareaProgramada [id=" + id + ", IDCurso=" + IDCurso + ", IDQuiz=" + IDQuiz + ", nombreCurso="
+        return "TareaProgramada [id=" + id + ", IDCurso=" + IDCurso + ", Accion=" + accion + ", nombreCurso="
                 + nombreCurso + ", diasCursos=" + diasCursos + ", duracion=" + duracion + ", modalidad=" + modalidad
                 + ", cliente=" + cliente + ", relator=" + relator + ", lugarYfechaEmision=" + lugarYfechaEmision
                 + ", plantilla=" + plantilla + ", fechaEjecucion=" + fechaEjecucion + ", estado=" + estado
                 + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + "]";
     }
 
-    
+    @PrePersist
+	protected void onCreated() {
+		this.createdAt = new Date();
+        this.updatedAt = new Date();
+	}
+	
+	@PreUpdate
+	protected void onUpdate() {
+		this.updatedAt = new Date();
+	}
     
 }

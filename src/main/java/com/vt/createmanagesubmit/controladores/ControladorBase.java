@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -436,8 +437,9 @@ public class ControladorBase {
     @PostMapping("/programarCertificadoMoodle/crear")
     public String crearMoodleTarea(
             HttpSession session,
-            @RequestParam(name = "cursoMoodle", required = false) String cursoMoodleParam,
-            @RequestParam(name = "plantilla",   required = false) String plantillaParam,
+            @RequestParam(name = "cursoMoodle", required = true) String cursoMoodleParam,
+            @RequestParam(name = "accion", required = true) String accion,
+            @RequestParam(name = "plantilla",   required = true) String plantillaParam,
             @RequestParam(name = "curso",       required = false) String nombreCurso,
             @RequestParam(name = "diasCursos",  required = false) String diasCursos,
             @RequestParam(name = "numeroHoras", required = false) String duracion,
@@ -445,7 +447,7 @@ public class ControladorBase {
             @RequestParam(name = "cliente",     required = false) String cliente,
             @RequestParam(name = "relator",     required = false) String relator,
             @RequestParam(name = "lugarYfechaEmision", required = false) String lugarYfechaEmision,
-            @RequestParam(name = "fechaDeEjecucion",   required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaDeEjecucion
+            @RequestParam(name = "fechaDeEjecucion",   required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaDeEjecucion
     ) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
 	    if (usuarioTemporal == null) {
@@ -460,7 +462,7 @@ public class ControladorBase {
                          ? null
                          : Long.valueOf(plantillaParam);
 
-        if (idCurso == null || idPlantilla == null){
+        if (idCurso == null || idPlantilla == null || accion.isBlank()){
             return "redirect:/programarCertificadoMoodle";
         }
         // 3) Strings: cadenas vacías o en blanco → null
@@ -479,11 +481,10 @@ public class ControladorBase {
         lugarYfechaEmision  = (lugarYfechaEmision == null || lugarYfechaEmision.isBlank())
                               ? null : lugarYfechaEmision;
 
-        Long idQuiz = servicioApi.obtenerQuizId(idCurso);
         String lugarSubida = usuarioTemporal.getUbicacion();
         servicioTareaP.CrearTarea(
             idCurso,
-            idQuiz,
+            accion,
             idPlantilla,
             nombreCurso,
             diasCursos,

@@ -27,7 +27,7 @@ public class ControladorError implements ErrorController{
             }
         }
         model.addAttribute("message", "Ocurrió un error inesperado.");
-        return "error.jsp"; // Página genérica de error
+        return "error"; // Página genérica de error
     }
 
 }

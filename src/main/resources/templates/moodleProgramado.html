@@ -36,85 +36,90 @@
     <main class="container">
         <!-- Formulario en Card -->
         <div class="card form-card shadow">
-            <div class="card-body">
+              <div class="card-body">
                 <h4 class="text-center mb-4">Programar Certificados para Moodle</h4>
                 <form th:action="@{/programarCertificadoMoodle/crear}" method="post">
-                    <div class="row g-3 mb-4">
-                        <!-- Selector de Curso -->
-                        <div class="col-md-6">
-                            <label for="cursoMoodle" class="form-label">Curso de Moodle</label>
-                            <select class="form-select" id="cursoMoodle">
-                                <option value="">Seleccionar Curso</option>
-                                <option th:each="curso : ${cursosMoodle}" 
-                                        th:value="${curso.id}" 
-                                        th:text="${curso.nombre}"></option>
-                            </select>
-                        </div>
-
-                        <!-- Selector de Plantilla -->
-                        <div class="col-md-6">
-                            <label for="plantilla" class="form-label">Plantilla</label>
-                            <select class="form-select" id="plantilla">
-                                <option th:each="plantilla : ${plantillas}" 
-                                        th:value="${plantilla.id}" 
-                                        th:text="${plantilla.nombreCertificado}"></option>
-                            </select>
-                        </div>
+                  <div class="row g-3 mb-4">
+                    <!-- Selector de Curso -->
+                    <div class="col-md-4">
+                      <label for="cursoMoodle" class="form-label">Curso de Moodle</label>
+                      <select name="cursoMoodle" id="cursoMoodle" class="form-select">
+                        <option value="">Seleccionar Curso</option>
+                        <option th:each="curso : ${cursosMoodle}" 
+                                th:value="${curso.id}" 
+                                th:text="${curso.nombre}"></option>
+                      </select>
                     </div>
-                    <div><p><i>*Datos que se usarán en el certificado(No es obligatorio rellenar todos los datos).</i></p></div>
-                    <!-- Campos del Formulario -->
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-4">
-                            <label for="curso" class="form-label">Nombre del Curso</label>
-                            <input type="text" class="form-control" id="curso"  placeholder="Capacitancion en ...">
-                        </div>
-                        
-                        <div class="col-md-4">
-                            <label for="diasCursos" class="form-label">Días del Curso</label>
-                            <input type="text" class="form-control" id="diasCursos" placeholder="Del 7 de enero al ...">
-                        </div>
-                        
-                        <div class="col-md-4">
-                            <label for="numeroHoras" class="form-label">Duración</label>
-                            <input type="text" class="form-control" id="numeroHoras" placeholder="3 horas">
-                        </div>
+                    <!-- Acción -->
+                    <div class="col-md-4">
+                      <label for="accion" class="form-label">Acción a ejecutar</label>
+                      <select name="accion" id="accion" class="form-select">
+                        <option value="generar">Generar certificados y guardar</option>
+                        <option value="guardar">Solo guardar en base de datos</option>
+                      </select>
                     </div>
-
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-4">
-                            <label for="modalidad" class="form-label">Modalidad</label>
-                            <input type="text" class="form-control" id="modalidad" placeholder="Online">
-                        </div>
-                        
-                        <div class="col-md-4">
-                            <label for="cliente" class="form-label">Cliente</label>
-                            <input type="text" class="form-control" id="cliente" placeholder="Municipalidad de ...">
-                        </div>
-                        
-                        <div class="col-md-4">
-                            <label for="relator" class="form-label">Relator</label>
-                            <input type="text" class="form-control" id="relator" placeholder="Juan ...">
-                        </div>
+                    <!-- Plantilla -->
+                    <div class="col-md-4">
+                      <label for="plantilla" class="form-label">Plantilla</label>
+                      <select name="plantilla" id="plantilla" class="form-select">
+                        <option value="">Seleccionar Plantilla</option>
+                        <option th:each="plantilla : ${plantillas}" 
+                                th:value="${plantilla.id}" 
+                                th:text="${plantilla.nombreCertificado}"></option>
+                      </select>
                     </div>
-
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-6">
-                            <label for="lugarYfechaEmision" class="form-label">Lugar y Fecha de Emisión</label>
-                            <input type="text" class="form-control" id="lugarYfechaEmision" placeholder="Concepcion, 3 de ...">
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <label for="fechaDeEjecucion" class="form-label">Fecha de Ejecución</label>
-                            <input type="date" class="form-control" id="fechaDeEjecucion">
-                        </div>
+                  </div>
+              
+                  <p><i>*Datos que se usarán en el certificado (no es obligatorio rellenar todos los datos).</i></p>
+              
+                  <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                      <label for="curso" class="form-label">Nombre del Curso</label>
+                      <input type="text" name="curso" id="curso" class="form-control" placeholder="Capacitación en ...">
                     </div>
-
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-success btn-lg">Programar Certificado</button>
+                    <div class="col-md-4">
+                      <label for="diasCursos" class="form-label">Días del Curso</label>
+                      <input type="text" name="diasCursos" id="diasCursos" class="form-control" placeholder="Del 7 de enero al ...">
                     </div>
+                    <div class="col-md-4">
+                      <label for="numeroHoras" class="form-label">Duración</label>
+                      <input type="text" name="numeroHoras" id="numeroHoras" class="form-control" placeholder="3 horas">
+                    </div>
+                  </div>
+              
+                  <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                      <label for="modalidad" class="form-label">Modalidad</label>
+                      <input type="text" name="modalidad" id="modalidad" class="form-control" placeholder="Online">
+                    </div>
+                    <div class="col-md-4">
+                      <label for="cliente" class="form-label">Cliente</label>
+                      <input type="text" name="cliente" id="cliente" class="form-control" placeholder="Municipalidad de ...">
+                    </div>
+                    <div class="col-md-4">
+                      <label for="relator" class="form-label">Relator</label>
+                      <input type="text" name="relator" id="relator" class="form-control" placeholder="Juan ...">
+                    </div>
+                  </div>
+              
+                  <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                      <label for="lugarYfechaEmision" class="form-label">Lugar y Fecha de Emisión</label>
+                      <input type="text" name="lugarYfechaEmision" id="lugarYfechaEmision" class="form-control" placeholder="Concepción, 3 de ...">
+                    </div>
+                    <div class="col-md-6">
+                      <label for="fechaDeEjecucion" class="form-label">Fecha de Ejecución</label>
+                      <input type="datetime-local" name="fechaDeEjecucion" id="fechaDeEjecucion" class="form-control">
+                    </div>
+                  </div>
+              
+                  <div class="d-grid">
+                    <button type="submit" class="btn btn-success btn-lg">Programar Certificado</button>
+                  </div>
                 </form>
+              </div>
             </div>
-        </div>
+
 
         <!-- Tabla de Tareas Programadas -->
          <!--
