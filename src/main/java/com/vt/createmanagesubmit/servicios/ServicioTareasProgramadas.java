@@ -23,6 +23,9 @@ public class ServicioTareasProgramadas {
     @Autowired
     private Servicio ser;
 
+    @Autowired
+    private TareaMoodleService serTareaMoodle;
+
 
     public void CrearTarea(
             Long IDCurso,
@@ -64,7 +67,12 @@ public class ServicioTareasProgramadas {
         LocalDateTime ahora = LocalDateTime.now();
         List<TareaProgramada> lista = repoTarea.findByEstadoAndFechaEjecucionLessThanEqual("En proceso", ahora);
         lista.forEach(t -> {
-          // tu código de ejecución (e.g. generar certificados)
+          try {
+            serTareaMoodle.procesarTarea(t);
+          } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
           t.setEstado("Completado");
           repoTarea.save(t);
         });

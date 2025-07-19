@@ -65,7 +65,8 @@ public class Servicio {
 
 
     public Alumno registrarNuevoAlumno(Alumno nuevoAlumno){
-        return repoAlum.save(nuevoAlumno);
+        numeroCorrelativoAuto(nuevoAlumno);
+        return nuevoAlumno;
     }
 
     public Alumno alumnoPorId(Long id){
