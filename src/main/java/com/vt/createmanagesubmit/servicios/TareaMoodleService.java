@@ -52,29 +52,19 @@ public class TareaMoodleService {
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void procesarTarea(TareaProgramada tarea) throws Exception {
         Long courseId = tarea.getIDCurso();
-
-        // 1) obtener CMIDs de actividades “final”
-        List<Integer> cmidsFinal = obtenerCmidsFinales(courseId);
-        if (cmidsFinal.isEmpty()) return;
-
-        // 2) obtener usuarios matriculados
         List<Long> userIds = obtenerUsuariosMatriculados(courseId);
 
-        // 3) obtener estado de completación en batch (o por chunks si son muchos)
         Map<Long, Boolean> completadosMap =
-            obtenerEstadosFinalizacionBatch(courseId, userIds, cmidsFinal);
+            obtenerEstadosFinalizacionBatch(courseId, userIds);
 
-        // 4) quedarnos sólo con los aprobados
         List<Long> aprobados = completadosMap.entrySet().stream()
             .filter(Map.Entry::getValue)
             .map(Map.Entry::getKey)
             .collect(Collectors.toList());
         if (aprobados.isEmpty()) return;
 
-        // 5) obtener nombre+correo en batch
         Map<Long, JsonNode> infoUsuarios = obtenerUsuariosInfoBatch(aprobados);
 
-        // 6) mapear a lista de Alumno
         List<Alumno> resultado = new ArrayList<>();
         for (Long uid : aprobados) {
             JsonNode info = infoUsuarios.get(uid);
@@ -104,31 +94,7 @@ public class TareaMoodleService {
             }
         }
     }
-
-    private List<Integer> obtenerCmidsFinales(Long courseId) throws Exception {
-        String json = restTemplate.getForObject(
-            UriComponentsBuilder
-                .fromUriString(moodleBaseUrl + "/webservice/rest/server.php")
-                .queryParam("wstoken", moodleToken)
-                .queryParam("wsfunction", "core_course_get_contents")
-                .queryParam("moodlewsrestformat", "json")
-                .queryParam("courseid", courseId)
-                .toUriString(),
-            String.class
-        );
-        JsonNode sections = objectMapper.readTree(json);
-        List<Integer> cmids = new ArrayList<>();
-        for (JsonNode sec : sections) {
-            for (JsonNode mod : sec.get("modules")) {
-                String name = mod.get("name").asText();
-                if (NOMBRE_FINAL.matcher(name).find()) {
-                    cmids.add(mod.get("id").asInt());
-                }
-            }
-        }
-        return cmids;
-    }
-
+    
     private List<Long> obtenerUsuariosMatriculados(Long courseId) throws Exception {
         String json = restTemplate.getForObject(
             UriComponentsBuilder
@@ -150,8 +116,7 @@ public class TareaMoodleService {
 
     private Map<Long, Boolean> obtenerEstadosFinalizacionBatch(
         Long courseId,
-        List<Long> userIds,
-        List<Integer> cmidsFinal
+        List<Long> userIds
     ) throws Exception {
         Map<Long, Boolean> result = new HashMap<>();
         if (userIds.isEmpty()) return result;
@@ -178,7 +143,6 @@ public class TareaMoodleService {
         }
         return result;
     }
-
     private Map<Long, JsonNode> obtenerUsuariosInfoBatch(List<Long> userIds) throws Exception {
         Map<Long, JsonNode> map = new HashMap<>();
         if (userIds.isEmpty()) return map;
