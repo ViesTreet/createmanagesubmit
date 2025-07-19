@@ -69,7 +69,15 @@ public class TareaMoodleService {
         for (Long uid : aprobados) {
             JsonNode info = infoUsuarios.get(uid);
             Alumno a = new Alumno();
-            a.setNombreAsistente(info.get("fullname").asText());
+            String nombreAsistente;
+            if (info.hasNonNull("fullname")) {
+                nombreAsistente = info.get("fullname").asText();
+            } else {
+                String first = info.hasNonNull("firstname") ? info.get("firstname").asText() : "";
+                String last  = info.hasNonNull("lastname")  ? info.get("lastname").asText()  : "";
+                nombreAsistente = (first + " " + last).trim();
+            }
+            a.setNombreAsistente(nombreAsistente.toUpperCase());
             a.setCorreo(info.get("email").asText());
             // datos heredados de la tarea
             a.setNombreCurso(tarea.getNombreCurso());
