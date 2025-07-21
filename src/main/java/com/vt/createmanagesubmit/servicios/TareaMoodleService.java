@@ -77,6 +77,9 @@ public class TareaMoodleService {
                 String last  = info.hasNonNull("lastname")  ? info.get("lastname").asText()  : "";
                 nombreAsistente = (first + " " + last).trim();
             }
+            double promedioMoodle = obtenerPromedioNotas(courseId, uid);
+            double notaF = Math.round(promedioMoodle * 10.0) / 10.0;
+            a.setNotaAprobacion(String.valueOf(notaF));
             a.setNombreAsistente(nombreAsistente.toUpperCase());
             a.setCorreo(info.get("email").asText());
             // datos heredados de la tarea
@@ -92,6 +95,7 @@ public class TareaMoodleService {
             a.setEstado("Aprobado");
             a.setRut(null);
             a.setUbicacionSubida(tarea.getUbicacionSubida());
+            a.setAsistencia("100");
             resultado.add(a);
         }
 
@@ -172,5 +176,38 @@ public class TareaMoodleService {
         }
         return map;
     }
+
+    private double obtenerPromedioNotas(Long courseId, Long userId) throws Exception {
+        UriComponentsBuilder b = UriComponentsBuilder
+            .fromUriString(moodleBaseUrl + "/webservice/rest/server.php")
+            .queryParam("wstoken", moodleToken)
+            .queryParam("wsfunction", "gradereport_user_get_grade_items")
+            .queryParam("moodlewsrestformat", "json")
+            .queryParam("courseid", courseId)
+            .queryParam("userid", userId);
+        
+        String json = restTemplate.getForObject(b.toUriString(), String.class);
+        JsonNode root = objectMapper.readTree(json);
+        JsonNode gradeItems = root.path("usergrades").get(0).path("gradeitems");
+        
+        double total = 0.0;
+        double totalPeso = 0.0;
+        
+        for (JsonNode item : gradeItems) {
+            if (item.hasNonNull("graderaw") && item.hasNonNull("weightraw")&& item.get("weightraw").asDouble() > 0) {
+                double nota = item.get("graderaw").asDouble();
+                double peso = item.get("weightraw").asDouble();
+                total += nota * peso;
+                totalPeso += peso;
+            }
+        }
+    
+        // Si no hay peso, devolvemos 0
+        if (totalPeso == 0.0) return 0.0;
+    
+        return total / totalPeso;
+    }
+
+
 }
 

@@ -38,6 +38,7 @@ import com.vt.createmanagesubmit.servicios.ServicioApi;
 import com.vt.createmanagesubmit.servicios.ServicioArchivos;
 import com.vt.createmanagesubmit.servicios.ServicioGenerarCertificado;
 import com.vt.createmanagesubmit.servicios.ServicioTareasProgramadas;
+import com.vt.createmanagesubmit.servicios.TareaMoodleService;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -134,6 +135,7 @@ public class ControladorBase {
 	    }
         model.addAttribute("admin", usuarioTemporal);
         return "home";
+        
     }
 
     @GetMapping("/logout")
