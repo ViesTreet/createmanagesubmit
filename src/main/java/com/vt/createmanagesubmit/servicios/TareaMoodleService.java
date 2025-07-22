@@ -39,8 +39,6 @@ public class TareaMoodleService {
     @Value("255a3f0b97656fcec9552a98df8c13c3")
     private String moodleToken;
 
-    private static final Pattern NOMBRE_FINAL = Pattern.compile(".*final.*", Pattern.CASE_INSENSITIVE);
-
     public TareaMoodleService(RestTemplate restTemplate,
                               ObjectMapper objectMapper,
                               RepositorioAlumnos alumnoRepo) {
@@ -210,4 +208,3 @@ public class TareaMoodleService {
 
 
 }
-

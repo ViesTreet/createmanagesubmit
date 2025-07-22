@@ -502,8 +502,19 @@ public class ControladorBase {
         return "redirect:/programarCertificadoMoodle";
     }
 
-    
-    
+    @GetMapping("/programarCertificadoMoodleManual")
+    public String moodleManual(HttpSession session, Model model) {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+	    if (usuarioTemporal == null) {
+	        return "redirect:/";  
+	    }
+        model.addAttribute("admin", usuarioTemporal);
+        List<Plantilla> plantillas = servicio.todasLasPlantillas();
+        model.addAttribute("plantillas",plantillas);
+        List<Map<String, Object>> cursos=servicioApi.obtenerCursosMoodle();
+        model.addAttribute("cursosMoodle",cursos);
+        return "moodleManual";
+    }
 
     //----------------------------------------------------------------------------------
 

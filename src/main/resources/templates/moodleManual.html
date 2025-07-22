@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Programación de Certificados</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/styleCustom.css}">
+    <link rel="icon" th:href="@{/images/Logobgremove.png}" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <!-- Importar jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>  
+    <!-- Importar JS de Bootstrap -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <style>
+        .scrollable-table {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        .form-card {
+            max-width: 800px;
+            margin: 20px auto;
+        }
+    </style>
+</head>
+<body>
+    <header class="d-flex align-items-center justify-content-between p-3 bg-light" style="height: 10vh;">
+        <a href="/home" class="logo"><img src="/images/Logobgremove.png" alt="[LOGO]"></a>
+        <nav class="d-flex justify-content-center align-items-center flex-nowrap">
+            <a href="/home" class="btn btn-primary mx-2">Inicio</a>
+            <a href="/documentacion" target="_blank" class="btn btn-primary mx-2">Documentación</a>
+            <div class="d-flex flex-column justify-content-center align-items-center">
+                <i class="fa-solid fa-user"></i>
+                <p class="p-0 m-0" style="font-size: normal;" th:text="${admin.nombre}"></p>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        <!-- Formulario en Card -->
+        <div class="card form-card shadow">
+              <div class="card-body">
+                <h4 class="text-center mb-4">Emitir certificados para Moodle</h4>
+                <form th:action="@{/programarCertificadoMoodle/crear}" method="post">
+                  <div class="row g-3 mb-4">
+                    <!-- Selector de Curso -->
+                    <div class="col-md-4">
+                      <label for="cursoMoodle" class="form-label">Curso de Moodle</label>
+                      <select name="cursoMoodle" id="cursoMoodle" class="form-select">
+                        <option value="">Seleccionar Curso</option>
+                        <option th:each="curso : ${cursosMoodle}" 
+                                th:value="${curso.id}" 
+                                th:text="${curso.nombre}"></option>
+                      </select>
+                    </div>
+                    <!-- Plantilla -->
+                    <div class="col-md-4">
+                      <label for="plantilla" class="form-label">Plantilla</label>
+                      <select name="plantilla" id="plantilla" class="form-select">
+                        <option value="">Seleccionar Plantilla</option>
+                        <option th:each="plantilla : ${plantillas}" 
+                                th:value="${plantilla.id}" 
+                                th:text="${plantilla.nombreCertificado}"></option>
+                      </select>
+                    </div>
+                  </div>
+              
+                  <p><i>*Datos que se usarán en el certificado (no es obligatorio rellenar todos los datos).</i></p>
+              
+                  <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                      <label for="curso" class="form-label">Nombre del Curso</label>
+                      <input type="text" name="curso" id="curso" class="form-control" placeholder="Capacitación en ...">
+                    </div>
+                    <div class="col-md-4">
+                      <label for="diasCursos" class="form-label">Días del Curso</label>
+                      <input type="text" name="diasCursos" id="diasCursos" class="form-control" placeholder="Del 7 de enero al ...">
+                    </div>
+                    <div class="col-md-4">
+                      <label for="numeroHoras" class="form-label">Duración</label>
+                      <input type="text" name="numeroHoras" id="numeroHoras" class="form-control" placeholder="3 horas">
+                    </div>
+                  </div>
+              
+                  <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                      <label for="modalidad" class="form-label">Modalidad</label>
+                      <input type="text" name="modalidad" id="modalidad" class="form-control" placeholder="Online">
+                    </div>
+                    <div class="col-md-4">
+                      <label for="cliente" class="form-label">Cliente</label>
+                      <input type="text" name="cliente" id="cliente" class="form-control" placeholder="Municipalidad de ...">
+                    </div>
+                    <div class="col-md-4">
+                      <label for="relator" class="form-label">Relator</label>
+                      <input type="text" name="relator" id="relator" class="form-control" placeholder="Juan ...">
+                    </div>
+                  </div>
+              
+                  <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                      <label for="lugarYfechaEmision" class="form-label">Lugar y Fecha de Emisión</label>
+                      <input type="text" name="lugarYfechaEmision" id="lugarYfechaEmision" class="form-control" placeholder="Concepción, 3 de ...">
+                    </div>
+              
+                  <div class="d-grid">
+                    <button id="busqueda" class="btn btn-primary btn-lg">Siguiente</button>
+                  </div>
+                </form>
+                <!-- justo después de </form> -->
+                <div id="alumnosSection" style="display:none" class="mt-5">
+                  <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" value="" id="mostrarTodos" checked>
+                    <label class="form-check-label" for="mostrarTodos">
+                      Mostrar todos inscritos
+                    </label>
+                  </div>
+              
+                  <table class="table table-striped" id="tablaAlumnos">
+                    <thead>
+                      <tr>
+                        <th>Nombre</th>
+                        <th>Correo</th>
+                        <th>Nota</th>
+                        <th>Asistencia</th>
+                        <th>Habilitado</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+              
+                  <div class="d-flex gap-2">
+                    <button id="guardarAlumnos" class="btn btn-secondary">Guardar</button>
+                    <button id="emitirYGuardar" class="btn btn-success">Emitir y Guardar</button>
+                  </div>
+                </div>
+
+                <script>
+                // esperar a que cargue la página
+                document.addEventListener("DOMContentLoaded", function() {
+                  const btnBusqueda    = document.getElementById("busqueda");
+                  const sectionAl     = document.getElementById("alumnosSection");
+                  const tablaBody     = document.querySelector("#tablaAlumnos tbody");
+                  const chkMostrar    = document.getElementById("mostrarTodos");
+                  const btnGuardar    = document.getElementById("guardarAlumnos");
+                  const btnEmitir     = document.getElementById("emitirYGuardar");
+                
+                  btnBusqueda.addEventListener("click", function(evt) {
+                    evt.preventDefault();
+                    sectionAl.style.display = "block";
+                    cargarAlumnos();
+                  });
+              
+                  chkMostrar.addEventListener("change", cargarAlumnos);
+              
+                  async function cargarAlumnos() {
+                    tablaBody.innerHTML = "";
+                    const cursoId = document.getElementById("cursoMoodle").value;
+                    const showAll    = chkMostrar.checked;
+                    if (!cursoId) return;
+                
+                    let data;
+                    try {
+                      // llama a tu API que devuelve [{id,nombreAsistente,correo,estado,notaAprobacion}]
+                      const resp = await fetch(`/api/alumnos?cursoId=${cursoId}&showAll=${showAll}`);
+                      data = await resp.json();
+                    } catch(err) {
+                      console.error("No se pudo cargar alumnos:", err);
+                      return;
+                    }
+                
+                    const mostrarTodos = chkMostrar.checked;
+                
+                    data.forEach(al => {
+                        const tr = document.createElement("tr");
+                        tr.innerHTML = `
+                          <td><input type="text" class="form-control" value="${al.nombreAsistente}"></td>
+                          <td><input type="email" class="form-control" value="${al.correo}"></td>
+                          <td><input type="number" min="1" max="7" step="0.1" class="form-control" value="${al.notaAprobacion}"></td>
+                          <td><input type="text" class="form-control" value="100"></td>
+                          <td>
+                            <select class="form-select">
+                              <option value="Si" selected>Si</option>
+                              <option value="No">No</option>
+                            </select>
+                          </td>`;
+                        tablaBody.append(tr);
+                    });
+                  }
+              
+                  function recogerAlumnos() {
+                    const rows = Array.from(tablaBody.querySelectorAll("tr"));
+                    return rows.map(row => {
+                      const inputs = row.querySelectorAll("input, select");
+                      return {
+                        nombreAsistente: inputs[0].value,
+                        correo:          inputs[1].value,
+                        notaAprobacion:  parseFloat(inputs[2].value),
+                        asistencia:      inputs[3].value,
+                        habilitado:      inputs[4].value === "Si"
+                      };
+                    }).filter(a => a.habilitado);
+                  }
+              
+                  btnGuardar.addEventListener("click", async () => {
+                    const alumnos = recogerAlumnos();
+                    // TODO: llamar a tu endpoint para guardar: 
+                    // await fetch('/api/alumnos/guardar', {method:'POST', body: JSON.stringify(alumnos), headers:{'Content-Type':'application/json'}});
+                    console.log("Guardando:", alumnos);
+                  });
+              
+                  btnEmitir.addEventListener("click", async () => {
+                    const alumnos = recogerAlumnos();
+                    // TODO: primero guardar, luego emitir (certificados)
+                    console.log("Emitir y Guardar:", alumnos);
+                  });
+              
+                });
+                </script>
+
+              </div>
+            </div>
+        </div>    
+    </main>
+    <footer class="text-center p-3 bg-light d-flex justify-content-center align-items-center" style="height: 15vh;">
+        <div>
+            <div><i class="fa-solid fa-phone"></i><a href="tel:+56 41 3830944">+56 41 3830944</a></div>
+            <div><i class="fa-solid fa-location-dot"></i><a href="https://www.google.com/maps/place/Consultores+Empresariales+E-Volution+Limitada/@-36.8252678,-73.050754,19z/data=!3m1!4b1!4m6!3m5!1s0x9669b5d0308198b5:0xbd67409566499fa!8m2!3d-36.8252678!4d-73.0501103!16s%2Fg%2F11fzwngw1q?entry=ttu&g_ep=EgoyMDI1MDEwNi4xIKXMDSoASAFQAw%3D%3D">Freire 728, Oficina 206</a></div>
+            <div><i class="fa-solid fa-envelope"></i><a href="mailto:contacto@e-volution.cl">contacto@e-volution.cl</a></div>
+        </div>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>

@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -37,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.vt.createmanagesubmit.dto.AlumnoDTO;
 import com.vt.createmanagesubmit.dto.TareaDTO;
 import com.vt.createmanagesubmit.dto.filtroDTO;
@@ -47,6 +49,7 @@ import com.vt.createmanagesubmit.modelos.TareaProgramada;
 import com.vt.createmanagesubmit.servicios.Servicio;
 import com.vt.createmanagesubmit.servicios.ServicioArchivos;
 import com.vt.createmanagesubmit.servicios.ServicioGenerarCertificado;
+import com.vt.createmanagesubmit.servicios.TareaMoodleService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -69,6 +72,9 @@ public class ControladorApi {
     @Autowired
     @Lazy
     private ServicioGenerarCertificado servicioGenerarCertificado;
+
+    @Autowired
+    private TareaMoodleService servicioTarea;
 
     private static final int MAX_DOWNLOADS = 5;
     private static final long TIME_FRAME = 60 * 60 * 1000; // 1 hora
@@ -365,7 +371,6 @@ public class ControladorApi {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al eliminar");
         }
     }
-
         
 }
 

@@ -69,11 +69,10 @@ public class ServicioTareasProgramadas {
         lista.forEach(t -> {
           try {
             serTareaMoodle.procesarTarea(t);
+            t.setEstado("Completado");
           } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            t.setEstado("Error");
           }
-          t.setEstado("Completado");
           repoTarea.save(t);
         });
     }
