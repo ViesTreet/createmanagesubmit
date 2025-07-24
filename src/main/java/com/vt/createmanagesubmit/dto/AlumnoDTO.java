@@ -48,6 +48,10 @@ public class AlumnoDTO {
 	
 	private Date updatedAt;
 
+    
+    public AlumnoDTO() {
+    }
+
     public AlumnoDTO(Alumno alumno) {
         this.id = alumno.getId();
         this.nombreAsistente = alumno.getNombreAsistente();

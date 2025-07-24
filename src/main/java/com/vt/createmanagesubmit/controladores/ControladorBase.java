@@ -6,9 +6,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -20,12 +22,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.vt.createmanagesubmit.dto.AlumnoDTO;
+import com.vt.createmanagesubmit.dto.AlumnosWrapper;
 import com.vt.createmanagesubmit.exceptions.MissingAdminIdException;
 import com.vt.createmanagesubmit.exceptions.MissingAlumnoIdException;
 import com.vt.createmanagesubmit.exceptions.MissingNameOrRutException;
@@ -33,6 +38,7 @@ import com.vt.createmanagesubmit.exceptions.MissingTemplateException;
 import com.vt.createmanagesubmit.modelos.Admin;
 import com.vt.createmanagesubmit.modelos.Alumno;
 import com.vt.createmanagesubmit.modelos.Plantilla;
+import com.vt.createmanagesubmit.repositorios.RepositorioAlumnos;
 import com.vt.createmanagesubmit.servicios.Servicio;
 import com.vt.createmanagesubmit.servicios.ServicioApi;
 import com.vt.createmanagesubmit.servicios.ServicioArchivos;
@@ -45,17 +51,10 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.RequestBody;
 
 
-
-
-
-
-
-
-
-
-
 @Controller
 public class ControladorBase {
+
+    private final RepositorioAlumnos repositorioAlumnos;
 
     @Autowired
     @Lazy
@@ -75,6 +74,10 @@ public class ControladorBase {
     private ServicioTareasProgramadas servicioTareaP;
 
     String correoEmpresa = Servicio.CORREO_EMPRESA;
+
+    ControladorBase(RepositorioAlumnos repositorioAlumnos) {
+        this.repositorioAlumnos = repositorioAlumnos;
+    }
 
     //-----------------------Acciones comunes-----------------------------
     @GetMapping("/")
@@ -514,6 +517,67 @@ public class ControladorBase {
         List<Map<String, Object>> cursos=servicioApi.obtenerCursosMoodle();
         model.addAttribute("cursosMoodle",cursos);
         return "moodleManual";
+    }
+
+    @PostMapping("/programarCertificadoMoodleManual/crear")
+    public String procesarAlumnos(
+            @RequestParam Long cursoMoodle,
+            @RequestParam Long plantilla,
+            @RequestParam(required=false) String curso,
+            @RequestParam(required=false) String diasCursos,
+            @RequestParam(required=false, name="numeroHoras") String duracion,
+            @RequestParam(required=false) String modalidad,
+            @RequestParam(required=false) String cliente,
+            @RequestParam(required=false) String relator,
+            @RequestParam(required=false) String lugarYfechaEmision,
+            @RequestParam(required=false, name="ubicacionSubida") String ubicacionSubida,
+            @RequestParam String accion,
+            @ModelAttribute("alumnos") AlumnosWrapper wrapper
+    ) {
+        List<AlumnoDTO> alumnosForm = wrapper.getAlumnos();
+        List<AlumnoDTO> habilitados = new ArrayList<AlumnoDTO>();
+        for(AlumnoDTO alumno: alumnosForm){
+            if(alumno.getEstado().equals("Aprobado")){
+                habilitados.add(alumno);
+            }
+        }
+        List<Alumno> alumnos = habilitados.stream().map(f -> {
+            Alumno a = new Alumno();
+            a.setNombreAsistente(f.getNombreAsistente());
+            a.setCorreo(f.getCorreo());
+            a.setNotaAprobacion(f.getNotaAprovacion());
+            a.setAsistencia(f.getAsistencia());
+            a.setEstado("Aprobado");          // o el estado que toque
+            a.setDiploma("noEnviado");       // inicial
+            a.setNombreCurso(curso);
+            a.setDiasCursos(diasCursos);
+            a.setDuracion(duracion);
+            a.setModalidad(modalidad);
+            a.setCliente(cliente);
+            a.setRelator(relator);
+            a.setLugarYfechaEmision(lugarYfechaEmision);
+            Plantilla p = servicio.plantillaPorId(plantilla);
+            a.setPlantilla(p);
+            a.setUbicacionSubida(ubicacionSubida);
+            return a;
+        }).collect(Collectors.toList());
+
+        for(Alumno alumno:alumnos){
+            repositorioAlumnos.save(alumno);
+            servicio.numeroCorrelativoAuto(alumno);
+            if ("emitirYGuardar".equalsIgnoreCase(accion)) {
+                try {
+                    servicioAr.generateCertificatesById(alumno.getId());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        
+
+        return "redirect:/programarCertificadoMoodleManual";
+
     }
 
     //----------------------------------------------------------------------------------

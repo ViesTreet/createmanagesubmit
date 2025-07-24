@@ -9,12 +9,12 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -40,12 +40,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.vt.createmanagesubmit.dto.AlumnoDTO;
+import com.vt.createmanagesubmit.dto.AlumnosWrapper;
 import com.vt.createmanagesubmit.dto.TareaDTO;
 import com.vt.createmanagesubmit.dto.filtroDTO;
 import com.vt.createmanagesubmit.modelos.Admin;
 import com.vt.createmanagesubmit.modelos.Alumno;
 import com.vt.createmanagesubmit.modelos.Plantilla;
-import com.vt.createmanagesubmit.modelos.TareaProgramada;
+import com.vt.createmanagesubmit.repositorios.RepositorioAlumnos;
 import com.vt.createmanagesubmit.servicios.Servicio;
 import com.vt.createmanagesubmit.servicios.ServicioArchivos;
 import com.vt.createmanagesubmit.servicios.ServicioGenerarCertificado;
@@ -75,6 +76,9 @@ public class ControladorApi {
 
     @Autowired
     private TareaMoodleService servicioTarea;
+
+    @Autowired
+    private RepositorioAlumnos repoAlum;
 
     private static final int MAX_DOWNLOADS = 5;
     private static final long TIME_FRAME = 60 * 60 * 1000; // 1 hora
@@ -370,6 +374,143 @@ public class ControladorApi {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al eliminar");
         }
+    }
+
+    @GetMapping("/programarCertificadoMoodleManual/alumnos/{courseId}")
+    public ResponseEntity<?> getAlumnosCurso(@PathVariable Long courseId) {
+        try {
+            System.out.println("Obteniendo alumnos para curso: {}" + courseId);
+
+            // 1. Obtener IDs de usuarios matriculados
+            List<Long> userIds = servicioTarea.obtenerUsuariosMatriculados(courseId);
+            System.out.println("IDs de usuarios encontrados: {}" + userIds);
+
+            if (userIds.isEmpty()) {
+                return ResponseEntity.ok(Collections.emptyList());
+            }
+
+            // 2. Obtener información detallada de usuarios
+            Map<Long, JsonNode> userInfoMap = servicioTarea.obtenerUsuariosInfoBatch(userIds);
+            System.out.println("Información de usuarios obtenida: {}" + userInfoMap.keySet());
+
+            List<AlumnoDTO> alumnos = new ArrayList<>();
+
+            for (Long userId : userIds) {
+                try {
+                    JsonNode userNode = userInfoMap.get(userId);
+                    if (userNode == null) {
+                        System.out.println("Usuario {} no encontrado en la respuesta" + userId);
+                        continue;
+                    }
+                    System.out.println(userNode);
+                    AlumnoDTO dto = new AlumnoDTO();
+                    dto.setId(userId);
+
+                    // 3. Procesar nombre (fullname o firstname + lastname)
+                    if (userNode.has("fullname") && !userNode.get("fullname").isNull()) {
+                        dto.setNombreAsistente(userNode.get("fullname").asText().trim());
+                    } else {
+                        String firstName = userNode.has("firstname") ? userNode.get("firstname").asText("") : "";
+                        String lastName = userNode.has("lastname") ? userNode.get("lastname").asText("") : "";
+                        dto.setNombreAsistente((firstName + " " + lastName).trim());
+                    }
+                    dto.setNombreAsistente(dto.getNombreAsistente().toUpperCase());
+                    // 4. Procesar email
+                    if (userNode.has("email")) {
+                        dto.setCorreo(userNode.get("email").asText());
+                    } else {
+                        System.out.println("Usuario {} no tiene email"+ userId);
+                        dto.setCorreo("sin-email@ejemplo.com");
+                    }
+
+                    // 5. Obtener nota con manejo de errores
+                    try {
+                        double nota = servicioTarea.obtenerPromedioNotasSafe(courseId, userId);
+                        dto.setNotaAprovacion(String.valueOf(nota));
+                    } catch (Exception e) {
+                        System.out.println("Error al obtener nota para usuario {}: {}"+ userId+ e.getMessage());
+                        dto.setNotaAprovacion(String.valueOf(7.0)); // Valor por defecto
+                    }
+
+                    alumnos.add(dto);
+
+                } catch (Exception e) {
+                    System.out.println("Error procesando usuario {}: {}"+ userId+ e.getMessage());
+                }
+            }
+
+            return ResponseEntity.ok(alumnos);
+
+        } catch (Exception e) {
+            System.out.println("Error crítico al obtener alumnos: {}"+ e.getMessage()+ e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                        "error", "Error al obtener alumnos",
+                        "detalle", e.getMessage(),
+                        "cursoId", courseId
+                    ));
+        }
+    }
+
+    @PostMapping("/programarCertificadoMoodleManual/crear")
+    public ResponseEntity<?> procesarAlumnos(
+            @RequestParam Long cursoMoodle,
+            @RequestParam Long plantilla,
+            @RequestParam(required=false) String curso,
+            @RequestParam(required=false) String diasCursos,
+            @RequestParam(required=false, name="numeroHoras") String duracion,
+            @RequestParam(required=false) String modalidad,
+            @RequestParam(required=false) String cliente,
+            @RequestParam(required=false) String relator,
+            @RequestParam(required=false) String lugarYfechaEmision,
+            @RequestParam(required=false, name="ubicacionSubida") String ubicacionSubida,
+            @RequestParam String accion,
+            @ModelAttribute("alumnos") AlumnosWrapper wrapper
+    ) {
+        List<AlumnoDTO> alumnosForm = wrapper.getAlumnos();
+        List<AlumnoDTO> habilitados = new ArrayList<AlumnoDTO>();
+        for(AlumnoDTO alumno: alumnosForm){
+            if(alumno.getEstado().equals("Aprobado")){
+                habilitados.add(alumno);
+            }
+        }
+        List<Alumno> alumnos = habilitados.stream().map(f -> {
+            Alumno a = new Alumno();
+            a.setNombreAsistente(f.getNombreAsistente());
+            a.setCorreo(f.getCorreo());
+            a.setNotaAprobacion(f.getNotaAprovacion());
+            a.setAsistencia(f.getAsistencia());
+            a.setEstado("Aprobado");          // o el estado que toque
+            a.setDiploma("noEnviado");       // inicial
+            a.setNombreCurso(curso);
+            a.setDiasCursos(diasCursos);
+            a.setDuracion(duracion);
+            a.setModalidad(modalidad);
+            a.setCliente(cliente);
+            a.setRelator(relator);
+            a.setLugarYfechaEmision(lugarYfechaEmision);
+            Plantilla p = ser.plantillaPorId(plantilla);
+            a.setPlantilla(p);
+            a.setUbicacionSubida(ubicacionSubida);
+            return a;
+        }).collect(Collectors.toList());
+
+        for(Alumno alumno:alumnos){
+            System.out.println(alumno.getNombreAsistente());
+            repoAlum.save(alumno);
+            if ("emitirYGuardar".equalsIgnoreCase(accion)) {
+                try {
+                    servicioAr.generateCertificatesById(alumno.getId());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        
+
+        return ResponseEntity.ok(Map.of("redirectUrl", "/programarCertificadoMoodleManual"));
+
     }
         
 }

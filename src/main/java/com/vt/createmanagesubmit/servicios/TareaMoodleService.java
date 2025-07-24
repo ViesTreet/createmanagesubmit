@@ -105,7 +105,7 @@ public class TareaMoodleService {
         }
     }
     
-    private List<Long> obtenerUsuariosMatriculados(Long courseId) throws Exception {
+    public List<Long> obtenerUsuariosMatriculados(Long courseId) throws Exception {
         String json = restTemplate.getForObject(
             UriComponentsBuilder
                 .fromUriString(moodleBaseUrl + "/webservice/rest/server.php")
@@ -124,7 +124,7 @@ public class TareaMoodleService {
         return ids;
     }
 
-    private Map<Long, Boolean> obtenerEstadosFinalizacionBatch(
+    public Map<Long, Boolean> obtenerEstadosFinalizacionBatch(
         Long courseId,
         List<Long> userIds
     ) throws Exception {
@@ -153,7 +153,7 @@ public class TareaMoodleService {
         }
         return result;
     }
-    private Map<Long, JsonNode> obtenerUsuariosInfoBatch(List<Long> userIds) throws Exception {
+    public Map<Long, JsonNode> obtenerUsuariosInfoBatch(List<Long> userIds) throws Exception {
         Map<Long, JsonNode> map = new HashMap<>();
         if (userIds.isEmpty()) return map;
 
@@ -167,16 +167,59 @@ public class TareaMoodleService {
         for (int i = 0; i < userIds.size(); i++) {
             b.queryParam("values[" + i + "]", userIds.get(i));
         }
-        String json = restTemplate.getForObject(b.toUriString(), String.class);
-        JsonNode arr = objectMapper.readTree(json);
-        for (JsonNode u : arr) {
-            map.put(u.get("id").asLong(), u);
+        String url = b.build(false).toUriString();
+        String json = restTemplate.getForObject(url, String.class);
+        JsonNode root = objectMapper.readTree(json);
+        JsonNode arr  = root.has("users") ? root.get("users") : root;
+            if (arr.isArray()) {
+            for (JsonNode u : arr) {
+                JsonNode idNode = u.get("id");
+                if (idNode != null && idNode.canConvertToLong()) {
+                    map.put(idNode.asLong(), u);
+                }
+            }
         }
         return map;
     }
 
-    private double obtenerPromedioNotas(Long courseId, Long userId) throws Exception {
+    public double obtenerPromedioNotas(Long courseId, Long userId) throws Exception {
         UriComponentsBuilder b = UriComponentsBuilder
+            .fromUriString(moodleBaseUrl + "/webservice/rest/server.php")
+            .queryParam("wstoken", moodleToken)
+            .queryParam("wsfunction", "gradereport_user_get_grade_items")
+            .queryParam("moodlewsrestformat", "json")
+            .queryParam("courseid", courseId)
+            .queryParam("userid", userId);
+        
+        String json = restTemplate.getForObject(b.toUriString(), String.class);
+        System.out.println(json);
+        JsonNode root = objectMapper.readTree(json);
+        JsonNode gradeItems = root.path("usergrades").get(0).path("gradeitems");
+        System.out.println(gradeItems);
+        
+        double total = 0.0;
+        double totalPeso = 0.0;
+        
+        for (JsonNode item : gradeItems) {
+            if (item.hasNonNull("graderaw") && item.hasNonNull("weightraw")&& item.get("weightraw").asDouble() > 0) {
+                double nota = item.get("graderaw").asDouble();
+                double peso = item.get("weightraw").asDouble();
+                total += nota * peso;
+                totalPeso += peso;
+            }
+            System.out.println(total);
+        }
+    
+        // Si no hay peso, devolvemos 0
+        if (totalPeso == 0.0) return 0.0;
+    
+        double rawAverage= total / totalPeso;
+        return Math.round(rawAverage * 10.0) / 10.0;
+    }
+
+    public double obtenerPromedioNotasSafe(Long courseId, Long userId){
+        try {
+            UriComponentsBuilder b = UriComponentsBuilder
             .fromUriString(moodleBaseUrl + "/webservice/rest/server.php")
             .queryParam("wstoken", moodleToken)
             .queryParam("wsfunction", "gradereport_user_get_grade_items")
@@ -201,10 +244,14 @@ public class TareaMoodleService {
         }
     
         // Si no hay peso, devolvemos 0
-        if (totalPeso == 0.0) return 0.0;
+        if (totalPeso == 0.0) return 7.0;
     
-        return total / totalPeso;
+        double rawAverage= total / totalPeso;
+        return Math.round(rawAverage * 10.0) / 10.0;
+        } catch (Exception e) {
+            return 7.0;
+        }
+        
     }
-
 
 }
