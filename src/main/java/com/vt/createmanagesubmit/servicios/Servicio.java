@@ -554,6 +554,10 @@ public class Servicio {
         return repoTarea.findAll(PageRequest.of(0, 20, Sort.by("updatedAt").descending()));
     }
 
+    public void borrarTareaPorId(Long id){
+        repoTarea.deleteById(id);
+    }
+
 }
 
 

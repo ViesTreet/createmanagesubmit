@@ -140,8 +140,10 @@
             </table>
         </div>      
     </main>
+    
     <script th:inline="javascript">
         $(document).ready(function () {
+        
             function cargarDatos() {
                 $.ajax({
                     url: "/api/tareasProgramadas",
@@ -149,16 +151,15 @@
                     success: function (data) {
                         var tbody = $("#tablaTarea tbody");
                         tbody.empty(); // Limpiar la tabla antes de agregar nuevos datos
-    
+                    
                         $.each(data, function (i, tarea) {
-                            // Crear una fila de tabla
                             var fila = "<tr>" +
                                 "<td>" + (tarea.nombreCurso != null ? tarea.nombreCurso : "") + "</td>" +
-                                "<td>" + (tarea.fechaEjecucion != null ? tarea.fechaEjecucion : "") + "</td>"+
-                                "<td>s</td>" +
-                                "<td>s</td>" ;
-    
-                            fila += "</tr>";
+                                "<td>" + (tarea.fechaEjecucion != null ? tarea.fechaEjecucion : "") + "</td>" +
+                                "<td>" + (tarea.estado != null ? tarea.estado : "") + "</td>" +
+                                "<td><button class='btn btn-danger btn-sm borrar-btn' data-id='" + tarea.id + "'>Borrar</button></td>" +
+                                "</tr>";
+                            
                             tbody.append(fila);
                         });
                     },
@@ -167,10 +168,28 @@
                     }
                 });
             }
-    
+          
+            // Función para borrar tarea
+            $(document).on("click", ".borrar-btn", function () {
+                var id = $(this).data("id");
+            
+                if (confirm("¿Estás seguro de que deseas borrar esta tarea?")) {
+                    $.ajax({
+                        url: "/api/tareasProgramadas/borrar/" + id,
+                        method: "DELETE",
+                        success: function () {
+                            cargarDatos(); // Recargar tabla después de borrar
+                        },
+                        error: function (error) {
+                            console.log("Error al borrar la tarea", error);
+                        }
+                    });
+                }
+            });
+          
             // Cargar datos inicialmente
             cargarDatos();
-    
+          
             // Actualizar la tabla cada 30 segundos
             setInterval(cargarDatos, 30000);
         });
