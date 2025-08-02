@@ -497,7 +497,6 @@ public class ControladorApi {
         }).collect(Collectors.toList());
 
         for(Alumno alumno:alumnos){
-            System.out.println(alumno.getNombreAsistente());
             repoAlum.save(alumno);
             if ("emitirYGuardar".equalsIgnoreCase(accion)) {
                 try {
