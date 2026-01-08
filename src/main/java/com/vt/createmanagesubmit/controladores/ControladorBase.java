@@ -875,4 +875,18 @@ public class ControladorBase {
                 .body(pdfBytes);
     }
 
+    //-----------------------------------------------------------------------
+
+    //-------------------------OneDrive---------------------------------------
+
+    @GetMapping("/subirOneDrive")
+    public String subirArchivosOneDrive(HttpSession session, Model model) {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+	    if (usuarioTemporal == null) {
+	        return "redirect:/";  
+	    }
+        model.addAttribute("admin",usuarioTemporal);
+        return "subirArchivosDrive";
+    }
+    
 }
