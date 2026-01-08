@@ -1,78 +1,158 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-  <head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Subir archivos a OneDrive</title>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Importar CSS de Bootstrap -->
-    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
-    <link rel="stylesheet" th:href="@{/css/styleCustom.css}" />
-    <link
-      rel="icon"
-      th:href="@{/images/Logobgremove.png}"
-      type="image/x-icon"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
-    />
-    <!-- Importar jQuery -->
+
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/styleCustom.css}">
+    <link rel="icon" th:href="@{/images/Logobgremove.png}" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <!-- Importar JS de Bootstrap -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </head>
-<body style="overflow-x: hidden;">
-    <header
-      class="d-flex align-items-center justify-content-between p-3 bg-light"
-      style="height: 10vh; z-index: 1"
-    >
-      <a th:href="@{/home}" class="logo">
-        <img th:src="@{/images/Logobgremove.png}" alt="[LOGO]" />
-      </a>
-      <nav class="d-flex justify-content-center align-items-center flex-nowrap">
+
+<body>
+
+<header class="d-flex align-items-center justify-content-between p-3 bg-light" style="height: 10vh;">
+    <a th:href="@{/home}" class="logo">
+        <img th:src="@{/images/Logobgremove.png}" alt="[LOGO]">
+    </a>
+    <nav class="d-flex justify-content-center align-items-center flex-nowrap">
         <a th:href="@{/home}" class="btn btn-primary mx-2">Regresar</a>
         <a th:href="@{/home}" class="btn btn-primary mx-2">Inicio</a>
-        <a
-          th:href="@{/documentacion}"
-          target="_blank"
-          class="btn btn-primary mx-2"
-          >Documentación</a
-        >
-        <div
-          class="d-flex flex-column justify-content-center align-items-center"
-        >
-          <i class="fa-solid fa-user"></i>
-          <p
-            class="p-0 m-0"
-            style="font-size: normal"
-            th:text="${admin.nombre}"
-          ></p>
+        <a th:href="@{/documentacion}" target="_blank" class="btn btn-primary mx-2">Documentación</a>
+        <div class="d-flex flex-column justify-content-center align-items-center">
+            <i class="fa-solid fa-user"></i>
+            <p class="p-0 m-0" th:text="${admin.nombre}"></p>
         </div>
-      </nav>
-    </header>
-    <div style="width: 100vw; height: 90vh; background-color: red;">
+    </nav>
+</header>
 
+<main class="d-flex flex-column align-items-center justify-content-center" style="height: 90vh;">
+    <div class="card" style="width: 70vw; max-height: 95%;">
+        <div class="card-body" style="overflow-y: auto;">
+
+            <h4 class="card-title text-center mb-4">Carga de documentos</h4>
+
+            <form method="post" enctype="multipart/form-data">
+
+                <!-- RADIO -->
+                <div class="mb-3">
+                    <label class="fw-bold">¿Existe la carpeta en OneDrive?</label><br>
+                    <input type="radio" name="existeCarpeta" value="si" onclick="toggleForm()"> Sí
+                    <input type="radio" name="existeCarpeta" value="no" onclick="toggleForm()"> No
+                </div>
+
+                <!-- CONTENIDO DINÁMICO -->
+                <div id="formularioCompleto" style="display: none;">
+
+                    <!-- SI EXISTE -->
+                    <div id="carpetaSelect" class="mb-3" style="display: none;">
+                        <label>Seleccione la carpeta de OneDrive</label>
+                        <select class="form-select" name="carpetaExistente">
+                            <option value="">Seleccione</option>
+                            <option value="carpeta1">Carpeta 1</option>
+                            <option value="carpeta2">Carpeta 2</option>
+                        </select>
+                    </div>
+
+                    <!-- NO EXISTE -->
+                    <div id="carpetaInput" class="mb-3" style="display: none;">
+                        <label>Ingrese nombre de la carpeta</label>
+                        <input type="text" class="form-control" name="nombreCarpeta">
+                    </div>
+
+                    <!-- BLOQUES DE ARCHIVOS -->
+                    <div class="mb-4">
+                        <h5 class="fw-bold">Asistencia</h5>
+                        <input type="file" class="form-control" name="asistencia">
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="fw-bold">CV</h5>
+                        <input type="file" class="form-control" name="cv">
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="fw-bold">Diplomas</h5>
+                        <input type="file" class="form-control" name="diplomas">
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="fw-bold">Encuesta de satisfacción</h5>
+                        <input type="file" class="form-control" name="encuesta">
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="fw-bold">Flyer</h5>
+                        <input type="file" class="form-control" name="flyer">
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="fw-bold">Fotos</h5>
+                        <input type="file" class="form-control" name="fotos" multiple>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="fw-bold">Grabación</h5>
+                        <input type="file" class="form-control" name="grabacion">
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="fw-bold">Informe</h5>
+                        <input type="file" class="form-control" name="informe">
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="fw-bold">Presentación PPT</h5>
+                        <input type="file" class="form-control" name="ppt">
+                    </div>
+
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-success">Subir archivos</button>
+                    </div>
+
+                </div>
+            </form>
+        </div>
     </div>
-    <footer
-      class="text-center p-3 d-flex justify-content-center align-items-center"
-      style="height: 15vh; background-color: #f8f9fa"
-    >
-      <div>
+</main>
+
+<footer class="text-center p-3 bg-light d-flex justify-content-center align-items-center" style="height: 15vh;">
+    <div>
         <div>
-          <i class="fa-solid fa-phone"></i>
-          <a href="tel:+56 41 3830944">+56 41 3830944</a>
+            <i class="fa-solid fa-phone"></i>
+            <a href="tel:+56 41 3830944">+56 41 3830944</a>
         </div>
         <div>
-          <i class="fa-solid fa-location-dot"></i>
-          <a href="https://www.google.com/maps/place/Consultores+Empresariales+E-Volution+Limitada/@-36.8252678,-73.050754,19z/data=!3m1!4b1!4m6!3m5!1s0x9669b5d0308198b5:0xbd67409566499fa!8m2!3d-36.8252678!4d-73.0501103!16s%2Fg%2F11fzwngw1q?entry=ttu&g_ep=EgoyMDI1MDEwNi4xIKXMDSoASAFQAw%3D%3D">
-            Freire 728, Oficina 206
-          </a>
+            <i class="fa-solid fa-location-dot"></i>
+            <a href="https://www.google.com/maps/place/Consultores+Empresariales+E-Volution+Limitada/">
+                Freire 728, Oficina 206
+            </a>
         </div>
         <div>
-          <i class="fa-solid fa-envelope"></i>
-          <a href="mailto:contacto@e-volution.cl">contacto@e-volution.cl</a>
+            <i class="fa-solid fa-envelope"></i>
+            <a href="mailto:contacto@e-volution.cl">contacto@e-volution.cl</a>
         </div>
-      </div>
-    </footer>
+    </div>
+</footer>
+
+<script>
+function toggleForm() {
+    const radios = document.getElementsByName('existeCarpeta');
+    let value = '';
+
+    radios.forEach(r => {
+        if (r.checked) value = r.value;
+    });
+
+    document.getElementById('formularioCompleto').style.display = 'block';
+    document.getElementById('carpetaSelect').style.display = value === 'si' ? 'block' : 'none';
+    document.getElementById('carpetaInput').style.display = value === 'no' ? 'block' : 'none';
+}
+</script>
+
 </body>
 </html>
