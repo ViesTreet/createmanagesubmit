@@ -1,23 +1,26 @@
 package com.vt.createmanagesubmit.modelos;
 
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name="cursoTemporal")
-@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler", "plantilla" })
 public class CursoTemporal {
 
     @Id
@@ -45,6 +48,11 @@ public class CursoTemporal {
 
     private String estado;
 
+    private Long plantilla;
+
+    @OneToMany(mappedBy = "cursoTemporal", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<AlumnoTemporal> alumnosTemporales;
+
     @Column(updatable=false)
 	@DateTimeFormat(pattern="yyyy-MM-dd")
 	private Date createdAt;
@@ -57,7 +65,7 @@ public class CursoTemporal {
 
     public CursoTemporal(Long id, String nombreCurso, String diasCursos, String duracion, String modalidad,
             String relator, String identificador, String cliente, String ubicacionSubida, String lugarYfechaEmision,
-            String estado, Date createdAt, Date updatedAt) {
+            String estado, Long plantilla, List<AlumnoTemporal> alumnosTemporales, Date createdAt, Date updatedAt) {
         this.id = id;
         this.nombreCurso = nombreCurso;
         this.diasCursos = diasCursos;
@@ -69,10 +77,12 @@ public class CursoTemporal {
         this.ubicacionSubida = ubicacionSubida;
         this.lugarYfechaEmision = lugarYfechaEmision;
         this.estado = estado;
+        this.plantilla = plantilla;
+        this.alumnosTemporales = alumnosTemporales;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
-
+    
     public Long getId() {
         return id;
     }
@@ -161,6 +171,22 @@ public class CursoTemporal {
         this.estado = estado;
     }
 
+    public Long getPlantilla() {
+        return plantilla;
+    }
+
+    public void setPlantilla(Long plantilla) {
+        this.plantilla = plantilla;
+    }
+
+    public List<AlumnoTemporal> getAlumnosTemporales() {
+        return alumnosTemporales;
+    }
+
+    public void setAlumnosTemporales(List<AlumnoTemporal> alumnosTemporales) {
+        this.alumnosTemporales = alumnosTemporales;
+    }
+
     public Date getCreatedAt() {
         return createdAt;
     }
@@ -187,17 +213,5 @@ public class CursoTemporal {
 	protected void onUpdate() {
 		this.updatedAt = new Date();
 	}
-
-    @Override
-    public String toString() {
-        return "CursoTemporal [id=" + id + ", nombreCurso=" + nombreCurso + ", diasCursos=" + diasCursos + ", duracion="
-                + duracion + ", modalidad=" + modalidad + ", relator=" + relator + ", identificador=" + identificador
-                + ", cliente=" + cliente + ", ubicacionSubida=" + ubicacionSubida + ", lugarYfechaEmision="
-                + lugarYfechaEmision + ", estado=" + estado + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt
-                + "]";
-    }
-
-    
-
 
 }
