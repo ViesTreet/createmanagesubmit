@@ -29,6 +29,8 @@ public class Admin {
 
 	private String ubicacion;
 
+	private String rol;
+
     @Column(updatable=false)
 	@DateTimeFormat(pattern="yyyy-MM-dd")
 	private Date createdAt;
@@ -39,18 +41,17 @@ public class Admin {
     public Admin() {
 	}
 
-	public Admin(Long id, String nombre, String correo, String contrasena, String ubicacion, Date createdAt,
+	public Admin(Long id, String nombre, String correo, String contrasena, String ubicacion, String rol, Date createdAt,
 			Date updatedAt) {
 		this.id = id;
 		this.nombre = nombre;
 		this.correo = correo;
 		this.contrasena = contrasena;
 		this.ubicacion = ubicacion;
+		this.rol = rol;
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
 	}
-
-
 
 	public Long getId() {
 		return id;
@@ -90,6 +91,14 @@ public class Admin {
 
 	public void setUbicacion(String ubicacion) {
 		this.ubicacion = ubicacion;
+	}
+
+	public String getRol() {
+		return rol;
+	}
+
+	public void setRol(String rol) {
+		this.rol = rol;
 	}
 
 	public Date getCreatedAt() {

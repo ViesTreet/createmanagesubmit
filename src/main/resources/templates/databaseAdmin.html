@@ -134,6 +134,7 @@
                     <tr>
                         <th>Correo</th>
                         <th>Nombre</th>
+                        <th>Rol</th>
                         <th style="width: 10vw;">Acciones</th>
                     </tr>
                 </thead>
@@ -159,7 +160,8 @@
                             // Crear una fila de tabla
                             var fila = "<tr>" +
                                 "<td>" + (admins.correo != null ? admins.correo : "") + "</td>" +
-                                "<td>" + (admins.nombre != null ? admins.nombre : "") + "</td>";
+                                "<td>" + (admins.nombre != null ? admins.nombre : "") + "</td>" +
+                                "<td>" + (admins.rol != null ? admins.rol : "") + "</td>" ;
     
                             // Agregar el botón borrar solo si el admin en sesión es "admin@admin.com" y el admin iterado no lo es
                             if (correoUsuarioEnSesion === "admin@admin.com" && admins.correo !== "admin@admin.com") {
@@ -211,8 +213,17 @@
                             <label for="nombre">Nombre</label>
                             <input type="text" name="nombre" id="nombre" class="form-control">
                         </div>
-                        <label for="contrasena">Contraseña</label>
-                        <input type="password" name="contrasena" id="contrasena" class="form-control">
+                        <div>
+                            <label for="contrasena">Contraseña</label>
+                            <input type="password" name="contrasena" id="contrasena" class="form-control">
+                        </div>
+                        <div>
+                            <label for="rol">Rol del administrador</label>
+                            <select name="rol" id="rol" class="form-select">
+                                <option value="administrador">Administrador</option>
+                                <option value="coordinador">Coordinador</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
                 <div class="pt-2 d-flex justify-content-center">

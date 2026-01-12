@@ -83,7 +83,7 @@ public class ControladorBase {
     @GetMapping("/")
     public String index() {
         if(servicio.adminPorCorreo("admin@admin.com")==null){
-            servicio.registrarAdmin("admin@admin.com", "admin", "RcOqkObsJN");
+            servicio.registrarAdmin("admin@admin.com", "admin", "RcOqkObsJN", "administrador");
         }
         if(!servicio.plantillaPorNombre("Error en encontrar plantilla").isPresent()){
             Plantilla nuevaPlantilla = new Plantilla();
@@ -841,12 +841,12 @@ public class ControladorBase {
     }
 
     @PostMapping("/dataBaseAdmin/nuevoAdmin")
-    public String crearNuevoAdmin(@RequestParam(value = "correo")String correo,@RequestParam(value = "nombre")String nombre,@RequestParam(value = "contrasena")String password,HttpSession session,Model model) {
+    public String crearNuevoAdmin(@RequestParam(value = "correo")String correo,@RequestParam(value = "nombre")String nombre,@RequestParam(value = "contrasena")String password,@RequestParam(value = "rol")String rol,HttpSession session,Model model) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
 	    if (usuarioTemporal != null) {
             model.addAttribute("admin", usuarioTemporal);
             if(servicio.adminPorCorreo(correo)==null){
-                servicio.registrarAdmin(correo,nombre,password);
+                servicio.registrarAdmin(correo,nombre,password,rol);
                 return "redirect:/dataBaseAdmin";
             }else{
                 model.addAttribute("error", "El correo de los administradores no se pueden repetir");
@@ -862,6 +862,16 @@ public class ControladorBase {
         model.addAttribute("id", idEncriptada);
         return "generarCertificadoQr";
     }
+
+    @GetMapping("/seccionAsistencia")
+    public String generarQrDeAsistencia(HttpSession session) {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+	    if (usuarioTemporal != null) {
+            return "seccionAsistencia";
+        }
+        return "redirect:/";
+    }
+    
     
 
     @GetMapping("/documentacion")

@@ -525,7 +525,7 @@ public class Servicio {
     }
     
 
-    public void registrarAdmin(String correo,String nombre, String password) {
+    public void registrarAdmin(String correo,String nombre, String password, String role) {
         // Encriptar la contraseña
         String passwordEncriptada = passwordEncoder.encode(password);
 
@@ -534,7 +534,7 @@ public class Servicio {
         admin.setCorreo(correo);
         admin.setNombre(nombre);
         admin.setContrasena(passwordEncriptada);
-
+        admin.setRol(role);
         repoAdmin.save(admin);
     }
 
