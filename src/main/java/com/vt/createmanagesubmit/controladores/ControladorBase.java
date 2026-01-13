@@ -864,10 +864,13 @@ public class ControladorBase {
     }
 
     @GetMapping("/seccionAsistencia")
-    public String generarQrDeAsistencia(HttpSession session) {
+    public String generarQrDeAsistencia(HttpSession session, Model model) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
-	    if (usuarioTemporal != null) {
-            return "seccionAsistencia";
+        if (usuarioTemporal != null) {
+            // Cargar plantillas para el select inicial opcional (aunque el frontend también pide /api/plantillas)
+            model.addAttribute("plantillas", servicio.todasLasPlantillas());
+            model.addAttribute("admin", usuarioTemporal);
+            return "seccionAsistencia"; // Thymeleaf template
         }
         return "redirect:/";
     }

@@ -17,7 +17,7 @@ import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name="cursoTemporal")
+@Table(name="alumnoTemporal")
 public class AlumnoTemporal {
     @Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)

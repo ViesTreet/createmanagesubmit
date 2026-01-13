@@ -7,14 +7,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -24,6 +25,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -42,10 +44,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.vt.createmanagesubmit.dto.AlumnoDTO;
 import com.vt.createmanagesubmit.dto.AlumnosWrapper;
+import com.vt.createmanagesubmit.dto.CursoTemporalDTO;
 import com.vt.createmanagesubmit.dto.TareaDTO;
 import com.vt.createmanagesubmit.dto.filtroDTO;
 import com.vt.createmanagesubmit.modelos.Admin;
 import com.vt.createmanagesubmit.modelos.Alumno;
+import com.vt.createmanagesubmit.modelos.CursoTemporal;
 import com.vt.createmanagesubmit.modelos.Plantilla;
 import com.vt.createmanagesubmit.repositorios.RepositorioAlumnos;
 import com.vt.createmanagesubmit.servicios.Servicio;
@@ -518,8 +522,82 @@ public class ControladorApi {
         ser.borrarTareaPorId(id);
         return ResponseEntity.noContent().build();
     }
-        
+
+    @GetMapping("/cursoTemporal")
+    public ResponseEntity<List<CursoTemporalDTO>> listAll(){
+        List<CursoTemporal> list = ser.listAll();
+        // mapear a DTO simple (o enviar entidad si quieres)
+        List<CursoTemporalDTO> dtos = new ArrayList<>();
+        for(CursoTemporal c : list){
+            CursoTemporalDTO d = CursoTemporalDTO.fromEntity(c);
+            dtos.add(d);
+        }
+        return ResponseEntity.ok(dtos);
+    }
+
+    @PostMapping("/cursoTemporal/busquedaMultiFiltro")
+    public ResponseEntity<List<CursoTemporalDTO>> buscarMultiFiltro(@RequestBody List<Map<String,String>> filtros){
+        List<CursoTemporal> encontrados = ser.buscarConFiltros(filtros);
+        List<CursoTemporalDTO> dtos = new ArrayList<>();
+        for(CursoTemporal c : encontrados) dtos.add(CursoTemporalDTO.fromEntity(c));
+        return ResponseEntity.ok(dtos);
+    }
+
+    @GetMapping("/cursoTemporal/generarQr/{id}")
+    public ResponseEntity<?> generarQr(@PathVariable Long id){
+        try {
+            Map<String,String> res = ser.generarQrParaCurso(id);
+            return ResponseEntity.ok(res);
+        } catch(Exception ex){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+        }
+    }
+
+    // Endpoint que descarga el QR en PNG (por id)
+    @GetMapping("/cursoTemporal/downloadQr/{id}")
+    public ResponseEntity<byte[]> downloadQr(@PathVariable Long id, @RequestParam(value="filename", required=false) String filename){
+        try {
+            Map<String,String> res = ser.generarQrParaCurso(id);
+            String base64 = res.get("imageBase64");
+            byte[] data = Base64.getDecoder().decode(base64);
+            if(filename == null || filename.isEmpty()){
+                filename = res.get("nombreCurso") + "_QR.png";
+            }
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.IMAGE_PNG);
+            headers.setContentDisposition(ContentDisposition.attachment().filename(filename).build());
+            return new ResponseEntity<>(data, headers, HttpStatus.OK);
+        } catch(Exception ex){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    // Crear curso (recibe JSON con request params) y devuelve qr
+    @PostMapping("/cursoTemporal/create")
+    public ResponseEntity<?> createCursoAndGenerateQr(@RequestBody Map<String,String> params){
+        try {
+            Map<String,String> res = ser.createCursoAndGenerateQr(params);
+            return ResponseEntity.ok(res);
+        } catch(Exception ex){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+        }
+    }
+    @GetMapping("/plantillas")
+    public ResponseEntity<List<Map<String,Object>>> listPlantillas(){
+        List<Plantilla> list = ser.todasLasPlantillas();
+        List<Map<String,Object>> out = new ArrayList<>();
+        for(Plantilla p : list){
+            Map<String,Object> m = new HashMap<>();
+            m.put("id", p.getId());
+            m.put("nombre", p.getNombreCertificado());
+            out.add(m);
+        }
+        return ResponseEntity.ok(out);
+    }
+
 }
+        
+
 
 
 

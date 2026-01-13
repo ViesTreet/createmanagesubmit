@@ -5,9 +5,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
+import javax.crypto.spec.SecretKeySpec;
+import javax.imageio.ImageIO;
+
+//import org.apache.poi.ss.usermodel.Color;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -21,6 +27,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
 import com.vt.createmanagesubmit.dto.filtroDTO;
 import com.vt.createmanagesubmit.exceptions.MissingAdminIdException;
 import com.vt.createmanagesubmit.exceptions.MissingAlumnoIdException;
@@ -28,12 +38,29 @@ import com.vt.createmanagesubmit.exceptions.MissingNameOrRutException;
 import com.vt.createmanagesubmit.exceptions.MissingTemplateException;
 import com.vt.createmanagesubmit.modelos.Admin;
 import com.vt.createmanagesubmit.modelos.Alumno;
+import com.vt.createmanagesubmit.modelos.CursoTemporal;
 import com.vt.createmanagesubmit.modelos.Plantilla;
 import com.vt.createmanagesubmit.modelos.TareaProgramada;
 import com.vt.createmanagesubmit.repositorios.RepositorioAdmin;
+import com.vt.createmanagesubmit.repositorios.RepositorioAlumnoTemporal;
 import com.vt.createmanagesubmit.repositorios.RepositorioAlumnos;
+import com.vt.createmanagesubmit.repositorios.RepositorioCursoTemporal;
 import com.vt.createmanagesubmit.repositorios.RepositorioPlantillas;
 import com.vt.createmanagesubmit.repositorios.RepositorioTareasProgramadas;
+
+import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.security.MessageDigest;
+
+import java.util.Arrays;
+import java.util.Base64;
+
+import java.util.Map;
+import javax.crypto.Cipher;
+
+
+import org.springframework.transaction.annotation.Transactional;
 
 
 
@@ -48,6 +75,12 @@ public class Servicio {
 
     @Autowired
     private RepositorioAdmin repoAdmin;
+
+    @Autowired
+    private RepositorioAlumnoTemporal repoAlumTemp;
+
+    @Autowired
+    private RepositorioCursoTemporal repoCursoTemp;
 
     @Autowired
     @Lazy
@@ -557,6 +590,131 @@ public class Servicio {
     public void borrarTareaPorId(Long id){
         repoTarea.deleteById(id);
     }
+
+    public List<CursoTemporal> listAll(){
+        return repoCursoTemp.findAll();
+    }
+
+    public Optional<CursoTemporal> findById(Long id){
+        return repoCursoTemp.findById(id);
+    }
+
+    @Transactional
+    public CursoTemporal saveCursoTemporal(CursoTemporal c){
+        return repoCursoTemp.save(c);
+    }
+
+    // Busqueda sencilla con filtros; filtros es lista de objetos {campo, valor}
+    public List<CursoTemporal> buscarConFiltros(List<Map<String,String>> filtros){
+        List<CursoTemporal> all = repoCursoTemp.findAll();
+        if(filtros == null || filtros.isEmpty()) return all;
+        List<CursoTemporal> out = new ArrayList<>();
+        for(CursoTemporal c : all){
+            boolean ok = true;
+            for(Map<String,String> f : filtros){
+                String campo = f.get("campo");
+                String valor = f.get("valor").toLowerCase();
+                String campoVal = "";
+                switch(campo){
+                    case "nombreCurso": campoVal = Optional.ofNullable(c.getNombreCurso()).orElse(""); break;
+                    case "relator": campoVal = Optional.ofNullable(c.getRelator()).orElse(""); break;
+                    case "identificador": campoVal = Optional.ofNullable(c.getIdentificador()).orElse(""); break;
+                    case "cliente": campoVal = Optional.ofNullable(c.getCliente()).orElse(""); break;
+                    case "estado": campoVal = Optional.ofNullable(c.getEstado()).orElse(""); break;
+                    default: campoVal = "";
+                }
+                if(!campoVal.toLowerCase().contains(valor)){ ok = false; break; }
+            }
+            if(ok) out.add(c);
+        }
+        return out;
+    }
+
+    // ENCRIPTACIÓN (reutiliza tu método, pero lo hago sin @Async)
+    public String encryptId(String id) throws Exception {
+        String secretKey = "eFSan7jbftsl2P6";
+        MessageDigest sha = null;
+        try {
+            byte[] key = secretKey.getBytes("UTF-8");
+            sha = MessageDigest.getInstance("SHA-1");
+            key = sha.digest(key);
+            key = Arrays.copyOf(key, 16); // 128 bits
+            SecretKeySpec secretKeySpec = new SecretKeySpec(key, "AES");
+            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+            cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec);
+            byte[] encrypted = cipher.doFinal(id.getBytes("UTF-8"));
+            String base64Encrypted = Base64.getEncoder().encodeToString(encrypted);
+            base64Encrypted = base64Encrypted.replace("/", "_").replace("+", "-");
+            return base64Encrypted;
+        } catch (Exception e) {
+            throw new Exception("Error al encriptar el ID.", e);
+        }
+    }
+
+    // Genera el QR como byte[] imagen PNG
+    public byte[] generateQrImageBytes(String text, int width, int height) throws WriterException, IOException {
+        QRCodeWriter qrCodeWriter = new QRCodeWriter();
+        BitMatrix bitMatrix = qrCodeWriter.encode(text, BarcodeFormat.QR_CODE, width, height);
+        BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                int rgb = bitMatrix.get(x, y) ? Color.BLACK.getRGB() : Color.WHITE.getRGB();
+                bufferedImage.setRGB(x, y, rgb);
+            }
+        }
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(bufferedImage, "png", baos);
+        return baos.toByteArray();
+    }
+
+    // Genera QR por id de curso: devuelve base64+link
+    public Map<String,String> generarQrParaCurso(Long cursoId) throws Exception {
+        Optional<CursoTemporal> cursoOpt = repoCursoTemp.findById(cursoId);
+        if(!cursoOpt.isPresent()) throw new IllegalArgumentException("Curso no encontrado");
+        CursoTemporal c = cursoOpt.get();
+        String encrypted = encryptId(String.valueOf(c.getId()));
+        String link = "https://app.e-volution.cl/marcarAsistenciaCurso/" + encrypted;
+        byte[] png = generateQrImageBytes(link, 300, 300);
+        String base64 = Base64.getEncoder().encodeToString(png);
+        Map<String,String> res = new HashMap<>();
+        res.put("imageBase64", base64);
+        res.put("link", link);
+        res.put("nombreCurso", c.getNombreCurso());
+        return res;
+    }
+
+    // Para crear curso desde params y devolver QR (uso simple)
+    @Transactional
+    public Map<String,String> createCursoAndGenerateQr(Map<String,String> params) throws Exception {
+        CursoTemporal c = new CursoTemporal();
+        c.setNombreCurso(params.getOrDefault("nombreCurso", ""));
+        c.setDiasCursos(params.get("diasCursos"));
+        c.setDuracion(params.get("duracion"));
+        c.setModalidad(params.get("modalidad"));
+        c.setRelator(params.get("relator"));
+        c.setIdentificador(params.get("identificador"));
+        c.setCliente(params.get("cliente"));
+        c.setUbicacionSubida(params.get("ubicacionSubida"));
+        c.setLugarYfechaEmision(params.get("lugarYfechaEmision"));
+        c.setEstado("creado");
+        String plantillaStr = params.get("plantilla");
+        if(plantillaStr != null && !plantillaStr.isEmpty()){
+            try { c.setPlantilla(Long.parseLong(plantillaStr)); } catch(Exception ex){ c.setPlantilla(null); }
+        }
+        CursoTemporal saved = repoCursoTemp.save(c);
+        // generar qr
+        String encrypted = encryptId(String.valueOf(saved.getId()));
+        String link = "https://app.e-volution.cl/marcarAsistenciaCurso/" + encrypted;
+        byte[] png = generateQrImageBytes(link, 300, 300);
+        String base64 = Base64.getEncoder().encodeToString(png);
+        Map<String,String> res = new HashMap<>();
+        res.put("imageBase64", base64);
+        res.put("link", link);
+        res.put("nombreCurso", saved.getNombreCurso());
+        res.put("id", String.valueOf(saved.getId()));
+        return res;
+    }
+
 
 }
 
