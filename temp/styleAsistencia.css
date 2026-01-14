@@ -1,0 +1,16 @@
+body{
+    overflow-y: hidden;
+}
+.contenedor {
+    width: 100vw;
+    height: 100vh;
+    background-image: url("imagenFondoAsistencia.png");
+    background-size: cover;        
+    background-position: center;  
+    background-repeat: no-repeat;  
+}
+.contenedor nav{
+    width: 100%;
+    height: 10%;
+    background-color: #0061a4;
+}
