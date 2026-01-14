@@ -11,7 +11,6 @@
     <style>
         .btn-custom {
             width: 100%;
-            max-width: 300px;
             margin: 5px 0;
         }
     </style>
@@ -50,15 +49,15 @@
                 <span th:case="magallanes">Magallanes y de la Antártica Chilena</span>
             </span>
         </h5>
-        <div class="col-5" style="display: flex;justify-content: center;align-items: center;">
-            <div style="margin-right: 5px;">
+        <div style="display: flex;justify-content: center;align-items: center; box-sizing: content-box !important; width: 50%;">
+            <div style="margin-right: 5px; box-sizing: content-box !important;">
                 <a href="/dataBaseAlumno" class="btn btn-primary btn-custom">Base de datos alumno</a>
                 <a href="/dataBaseAlumno/addAlumnoBase" class="btn btn-primary btn-custom">Agregar alumno base de datos</a>
                 <a href="/seccionAsistencia" class="btn btn-primary btn-custom">Sección asistencia</a>
                 <a href="/dataBasePlantilla" class="btn btn-secondary btn-custom">Plantillas de diplomas</a>
                 <a href="/ubicacion" class="btn btn-light btn-custom">Cambiar ubicación</a>
             </div>
-            <div style="margin-left: 5px;">
+            <div style="margin-left: 5px; box-sizing: content-box !important;">
                 <a href="/programarCertificadoMoodleManual" class="btn btn-custom" style="background-color: #f98418; color: white;">Emitir certificado con Moodle</a>
                 <a href="/programarCertificadoMoodle" class="btn btn-custom" style="background-color: #f98418; color: white;">Programar certificado Moodle</a>
                 <a href="/dataBaseAdmin" class="btn btn-secondary btn-custom">Administradores</a>
