@@ -870,7 +870,7 @@ public class ControladorBase {
             // Cargar plantillas para el select inicial opcional (aunque el frontend también pide /api/plantillas)
             model.addAttribute("plantillas", servicio.todasLasPlantillas());
             model.addAttribute("admin", usuarioTemporal);
-            return "seccionAsistencia"; // Thymeleaf template
+            return "asistenciaParaCertificados"; // Thymeleaf template
         }
         return "redirect:/";
     }
