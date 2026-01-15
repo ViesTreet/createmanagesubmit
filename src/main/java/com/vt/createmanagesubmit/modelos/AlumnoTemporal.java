@@ -29,8 +29,6 @@ public class AlumnoTemporal {
 
     private String correo;
 
-    private Date subida;
-
     @ManyToOne(fetch = FetchType.LAZY) 
     @JoinColumn(name = "cursoTemporal_id") 
     private CursoTemporal cursoTemporal;
@@ -45,13 +43,11 @@ public class AlumnoTemporal {
     public AlumnoTemporal() {
     }
     
-    public AlumnoTemporal(Long id, String nombreAsistente, String rut, String correo, Date subida,
-            CursoTemporal cursoTemporal, Date createdAt, Date updatedAt) {
+    public AlumnoTemporal(Long id, String nombreAsistente, String rut, String correo, CursoTemporal cursoTemporal, Date createdAt, Date updatedAt) {
         this.id = id;
         this.nombreAsistente = nombreAsistente;
         this.rut = rut;
         this.correo = correo;
-        this.subida = subida;
         this.cursoTemporal = cursoTemporal;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -93,14 +89,6 @@ public class AlumnoTemporal {
 
     public void setCorreo(String correo) {
         this.correo = correo;
-    }
-
-    public Date getSubida() {
-        return subida;
-    }
-
-    public void setSubida(Date subida) {
-        this.subida = subida;
     }
 
     public CursoTemporal getCursoTemporal() {

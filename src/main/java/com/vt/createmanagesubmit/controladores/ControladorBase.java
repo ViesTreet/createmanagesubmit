@@ -870,12 +870,16 @@ public class ControladorBase {
             // Cargar plantillas para el select inicial opcional (aunque el frontend también pide /api/plantillas)
             model.addAttribute("plantillas", servicio.todasLasPlantillas());
             model.addAttribute("admin", usuarioTemporal);
-            return "seccionAsistencia"; // Thymeleaf template
+            return "seccionAsistencia"; 
         }
         return "redirect:/";
     }
-    
-    
+
+    @GetMapping("/marcarAsistenciaCurso/{id}")
+    public String marcarAsistenciaCurso(HttpSession session, Model model,@PathVariable("id") String idEncriptada) {
+        model.addAttribute("id",idEncriptada);
+        return "asistenciaParaCertificados"; 
+    }
 
     @GetMapping("/documentacion")
     public ResponseEntity<byte[]> getPdf() throws IOException {

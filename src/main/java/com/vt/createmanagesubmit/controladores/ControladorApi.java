@@ -595,6 +595,22 @@ public class ControladorApi {
         return ResponseEntity.ok(out);
     }
 
+    @PostMapping("/alumnoTemporalSubir")
+    public ResponseEntity<?> recibirAsistencia(
+            @RequestParam String nombre,
+            @RequestParam String correo,
+            @RequestParam String rut,
+            @RequestParam String id
+    ) {
+        try {
+            ser.procesarAsistencia(nombre, correo, rut, id);
+            return ResponseEntity.ok().build();
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error");
+        }
+    }
+
 }
         
 

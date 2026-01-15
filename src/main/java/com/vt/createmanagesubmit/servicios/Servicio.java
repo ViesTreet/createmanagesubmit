@@ -38,6 +38,7 @@ import com.vt.createmanagesubmit.exceptions.MissingNameOrRutException;
 import com.vt.createmanagesubmit.exceptions.MissingTemplateException;
 import com.vt.createmanagesubmit.modelos.Admin;
 import com.vt.createmanagesubmit.modelos.Alumno;
+import com.vt.createmanagesubmit.modelos.AlumnoTemporal;
 import com.vt.createmanagesubmit.modelos.CursoTemporal;
 import com.vt.createmanagesubmit.modelos.Plantilla;
 import com.vt.createmanagesubmit.modelos.TareaProgramada;
@@ -630,9 +631,35 @@ public class Servicio {
         return out;
     }
 
-    // ENCRIPTACIÓN (reutiliza tu método, pero lo hago sin @Async)
+    public String decryptId(String encryptedId) throws Exception {
+        String secretKey = "t8iLdaYUBMsMDMt5";
+        try {
+            // Revertir cambios del Base64 URL-safe
+            encryptedId = encryptedId.replace("_", "/").replace("-", "+");
+
+            byte[] encryptedBytes = Base64.getDecoder().decode(encryptedId);
+
+            byte[] key = secretKey.getBytes("UTF-8");
+            MessageDigest sha = MessageDigest.getInstance("SHA-1");
+            key = sha.digest(key);
+            key = Arrays.copyOf(key, 16); // 128 bits
+
+            SecretKeySpec secretKeySpec = new SecretKeySpec(key, "AES");
+            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+            cipher.init(Cipher.DECRYPT_MODE, secretKeySpec);
+
+            byte[] decrypted = cipher.doFinal(encryptedBytes);
+
+            return new String(decrypted, "UTF-8");
+
+        } catch (Exception e) {
+            throw new Exception("Error al desencriptar el ID.", e);
+        }
+    }
+
+
     public String encryptId(String id) throws Exception {
-        String secretKey = "eFSan7jbftsl2P6";
+        String secretKey = "t8iLdaYUBMsMDMt5";
         MessageDigest sha = null;
         try {
             byte[] key = secretKey.getBytes("UTF-8");
@@ -715,6 +742,30 @@ public class Servicio {
         return res;
     }
 
+    public void procesarAsistencia(String nombre, String mail, String rut, String idEncriptada){
+
+        Long id;
+        try {
+            id = Long.valueOf(decryptId(idEncriptada));
+            CursoTemporal curso = repoCursoTemp.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Curso temporal no encontrado"));
+            
+            AlumnoTemporal alumnoTemporal = new AlumnoTemporal();
+            alumnoTemporal.setNombreAsistente(nombre.toUpperCase());
+            alumnoTemporal.setCorreo(mail);
+            alumnoTemporal.setRut(rut);
+            alumnoTemporal.setCursoTemporal(curso);
+            repoAlumTemp.save(alumnoTemporal);
+        } catch (NumberFormatException e) {
+            new RuntimeException("Error de ID");
+            e.printStackTrace();
+        } catch (Exception e) {
+            new RuntimeException("Error");
+            e.printStackTrace();
+        } 
+
+    }
 
 }
 
