@@ -740,7 +740,7 @@ public class Servicio {
     }
 
     public void procesarAsistencia(String nombre, String mail, String rut, String idEncriptada){
-
+        validarRut(rut);
         Long id;
         try {
             id = Long.valueOf(decryptId(idEncriptada));
@@ -798,6 +798,58 @@ public class Servicio {
             repoAlumTemp.delete(alumnoTemporal);
         }
     }
+
+    private void validarRut(String rut) {
+
+        if (rut == null || rut.isBlank()) {
+            throw new IllegalArgumentException("RUT vacío");
+        }
+
+        rut = rut.replace(".", "")
+                .replace(" ", "")
+                .toUpperCase();
+
+        if (!rut.contains("-")) {
+            throw new IllegalArgumentException("Formato de RUT inválido");
+        }
+
+        String[] partes = rut.split("-");
+        if (partes.length != 2) {
+            throw new IllegalArgumentException("Formato de RUT inválido");
+        }
+
+        String cuerpo = partes[0];
+        String dvIngresado = partes[1];
+
+        // Máx 8 dígitos (sin considerar puntos)
+        if (!cuerpo.matches("\\d{1,8}")) {
+            throw new IllegalArgumentException("RUT con cantidad de dígitos inválida");
+        }
+
+        if (!dvIngresado.matches("[0-9K]")) {
+            throw new IllegalArgumentException("Dígito verificador inválido");
+        }
+
+        int suma = 0;
+        int multiplicador = 2;
+
+        for (int i = cuerpo.length() - 1; i >= 0; i--) {
+            suma += Character.getNumericValue(cuerpo.charAt(i)) * multiplicador;
+            multiplicador = (multiplicador == 7) ? 2 : multiplicador + 1;
+        }
+
+        int resto = 11 - (suma % 11);
+
+        String dvCalculado;
+        if (resto == 11) dvCalculado = "0";
+        else if (resto == 10) dvCalculado = "K";
+        else dvCalculado = String.valueOf(resto);
+
+        if (!dvCalculado.equals(dvIngresado)) {
+            throw new IllegalArgumentException("Dígito verificador incorrecto");
+        }
+    }
+
 
 }
 
