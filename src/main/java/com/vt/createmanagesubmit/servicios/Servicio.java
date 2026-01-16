@@ -360,22 +360,19 @@ public class Servicio {
     }
 
     public Alumno comprobarYGuardar(Alumno nuevoAlumno,String orden) {
-        if(nuevoAlumno.getAsistencia().trim().isEmpty()){
+        if(nuevoAlumno.getAsistencia().isEmpty()){
             nuevoAlumno.setAsistencia(null);
         }
-        if(nuevoAlumno.getCliente().trim().isEmpty()){
+        if(nuevoAlumno.getCliente().isEmpty()){
             nuevoAlumno.setCliente(null);
         }
-        if(nuevoAlumno.getCodigo().trim().isEmpty()){
-            nuevoAlumno.setCodigo(null);
-        }
-        if(nuevoAlumno.getCorreo().trim().isEmpty()){
+        if(nuevoAlumno.getCorreo().isEmpty()){
             nuevoAlumno.setCorreo(CORREO_EMPRESA);
         }
-        if(nuevoAlumno.getDiasCursos().trim().isEmpty()){
+        if(nuevoAlumno.getDiasCursos().isEmpty()){
             nuevoAlumno.setDiasCursos(null);
         }
-        if(nuevoAlumno.getEstado().trim().isEmpty()){
+        if(nuevoAlumno.getEstado().isEmpty()){
             nuevoAlumno.setEstado(null);
         }
         if(nuevoAlumno.getNombreAsistente().trim().isEmpty()){
@@ -384,22 +381,22 @@ public class Servicio {
         if(nuevoAlumno.getNombreCurso().trim().isEmpty()){
             nuevoAlumno.setNombreCurso(null);
         }
-        if(nuevoAlumno.getNotaAprobacion().trim().isEmpty()){
+        if(nuevoAlumno.getNotaAprobacion().isEmpty()){
             nuevoAlumno.setNotaAprobacion(null);
         }
-        if(nuevoAlumno.getDuracion().trim().isEmpty()){
+        if(nuevoAlumno.getDuracion().isEmpty()){
             nuevoAlumno.setDuracion(null);
         }
-        if(nuevoAlumno.getIdentificador().trim().isEmpty()){
+        if(nuevoAlumno.getIdentificador().isEmpty()){
             nuevoAlumno.setIdentificador(null);
         }
-        if(nuevoAlumno.getRelator().trim().isEmpty()){
+        if(nuevoAlumno.getRelator().isEmpty()){
             nuevoAlumno.setRelator(null);
         }
         if(nuevoAlumno.getRut().trim().isEmpty()){
             nuevoAlumno.setRut(null);
         }
-        if(nuevoAlumno.getModalidad().trim().isEmpty()){
+        if(nuevoAlumno.getModalidad().isEmpty()){
             nuevoAlumno.setModalidad(null);
         }
 
@@ -592,11 +589,11 @@ public class Servicio {
         repoTarea.deleteById(id);
     }
 
-    public List<CursoTemporal> listAll(){
+    public List<CursoTemporal> todosLosCursosTemporales(){
         return repoCursoTemp.findAll();
     }
 
-    public Optional<CursoTemporal> findById(Long id){
+    public Optional<CursoTemporal> cursoTemporalPorId(Long id){
         return repoCursoTemp.findById(id);
     }
 
@@ -765,6 +762,41 @@ public class Servicio {
             e.printStackTrace();
         } 
 
+    }
+
+    public void borrarAlumnoTemporalPorId(Long id){
+        repoAlumTemp.deleteById(id);
+    }
+
+    public void alumnoVerificado(Long alumnoId, Long cursoId, String asistencia, String nota){
+        Optional<AlumnoTemporal> alumnoTempOpt = repoAlumTemp.findById(alumnoId);
+        Optional<CursoTemporal> cursoTempOpt = cursoTemporalPorId(cursoId);
+        if(alumnoTempOpt.isPresent() && cursoTempOpt.isPresent()){
+            AlumnoTemporal alumnoTemporal = alumnoTempOpt.get();
+            CursoTemporal cursoTemporal = cursoTempOpt.get();
+            
+            Alumno alumno = new Alumno();
+            alumno.setAsistencia(asistencia);
+            alumno.setNotaAprobacion(nota);
+            alumno.setNombreAsistente(alumnoTemporal.getNombreAsistente());
+            alumno.setCorreo(alumnoTemporal.getCorreo());
+            alumno.setRut(alumnoTemporal.getRut());
+            alumno.setCliente(cursoTemporal.getCliente());
+            alumno.setDiasCursos(cursoTemporal.getDiasCursos());
+            alumno.setDiploma("noEnviado");
+            alumno.setDuracion(cursoTemporal.getDuracion());
+            alumno.setEstado("aprobado");
+            alumno.setLugarYfechaEmision(cursoTemporal.getLugarYfechaEmision());
+            alumno.setModalidad(cursoTemporal.getModalidad());
+            alumno.setNombreCurso(cursoTemporal.getNombreCurso());
+            Plantilla plantilla = plantillaPorId(cursoTemporal.getPlantilla());
+            alumno.setPlantilla(plantilla);
+            alumno.setRelator(cursoTemporal.getRelator());
+            alumno.setUbicacionSubida(cursoTemporal.getUbicacionSubida());
+            alumno.setIdentificador(cursoTemporal.getIdentificador());
+            comprobarYGuardar(alumno, "No");
+            repoAlumTemp.delete(alumnoTemporal);
+        }
     }
 
 }

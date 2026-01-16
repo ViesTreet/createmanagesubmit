@@ -37,6 +37,7 @@ import com.vt.createmanagesubmit.exceptions.MissingNameOrRutException;
 import com.vt.createmanagesubmit.exceptions.MissingTemplateException;
 import com.vt.createmanagesubmit.modelos.Admin;
 import com.vt.createmanagesubmit.modelos.Alumno;
+import com.vt.createmanagesubmit.modelos.CursoTemporal;
 import com.vt.createmanagesubmit.modelos.Plantilla;
 import com.vt.createmanagesubmit.repositorios.RepositorioAlumnos;
 import com.vt.createmanagesubmit.servicios.Servicio;
@@ -870,10 +871,31 @@ public class ControladorBase {
             // Cargar plantillas para el select inicial opcional (aunque el frontend también pide /api/plantillas)
             model.addAttribute("plantillas", servicio.todasLasPlantillas());
             model.addAttribute("admin", usuarioTemporal);
-            return "seccionAsistencia"; 
+            return "databaseCursoTemporales"; 
         }
         return "redirect:/";
     }
+
+    @GetMapping("/seccionAsistencia/revision/{id}")
+    public String alumnoTemporalPorCurso(@PathVariable("id")String id,HttpSession session, Model model) {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+        if (usuarioTemporal != null) {
+            Long idR=Long.valueOf(id);
+            Optional<CursoTemporal> cursoTemporalOpt = servicio.cursoTemporalPorId(idR);
+            if(cursoTemporalOpt.isPresent()){
+                CursoTemporal cursoTemporal = cursoTemporalOpt.get();
+                model.addAttribute("idCurso",id);
+                model.addAttribute("cursoTemporal",cursoTemporal);
+                model.addAttribute("admin", usuarioTemporal);
+                return "databaseAlumnoTemporal";
+            }else{
+                return "error404";
+            }
+        }
+        return "redirect:/";
+        
+    }
+    
 
     @GetMapping("/marcarAsistenciaCurso/{id}")
     public String marcarAsistenciaCurso(HttpSession session, Model model,@PathVariable("id") String idEncriptada) {

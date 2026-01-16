@@ -13,6 +13,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -49,6 +50,7 @@ import com.vt.createmanagesubmit.dto.TareaDTO;
 import com.vt.createmanagesubmit.dto.filtroDTO;
 import com.vt.createmanagesubmit.modelos.Admin;
 import com.vt.createmanagesubmit.modelos.Alumno;
+import com.vt.createmanagesubmit.modelos.AlumnoTemporal;
 import com.vt.createmanagesubmit.modelos.CursoTemporal;
 import com.vt.createmanagesubmit.modelos.Plantilla;
 import com.vt.createmanagesubmit.repositorios.RepositorioAlumnos;
@@ -525,7 +527,7 @@ public class ControladorApi {
 
     @GetMapping("/cursoTemporal")
     public ResponseEntity<List<CursoTemporalDTO>> listAll(){
-        List<CursoTemporal> list = ser.listAll();
+        List<CursoTemporal> list = ser.todosLosCursosTemporales();
         // mapear a DTO simple (o enviar entidad si quieres)
         List<CursoTemporalDTO> dtos = new ArrayList<>();
         for(CursoTemporal c : list){
@@ -610,6 +612,47 @@ public class ControladorApi {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error");
         }
     }
+
+    @GetMapping("/datosAlumnoTemporal/{idCurso}")
+    public List<AlumnoTemporal> obtenerAlumnosPorCurso(
+            @PathVariable Long idCurso) {
+        
+        Optional<CursoTemporal> cursoTempOpt = ser.cursoTemporalPorId(idCurso);
+        if(cursoTempOpt.isPresent()){
+            CursoTemporal cursoTemp = cursoTempOpt.get();
+            List<AlumnoTemporal> alumnoTemporals = cursoTemp.getAlumnosTemporales();
+            return alumnoTemporals;
+        }else{
+            return null;
+        }
+        
+    }
+
+    @PostMapping("/alumnoTemporal/enviar")
+    public ResponseEntity<Map<String, Object>> enviarDatos(
+            @RequestParam Long alumnoId,
+            @RequestParam Long cursoId,
+            @RequestParam String asistencia,
+            @RequestParam String nota
+    ) {
+
+        ser.alumnoVerificado(alumnoId,cursoId,asistencia,nota);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("alumnoId", alumnoId);
+        response.put("cursoId", cursoId);
+        response.put("asistencia", asistencia);
+        response.put("nota", nota);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/alumnoTemporal/{idAlumno}")
+    public ResponseEntity<Void> borrarAlumno(@PathVariable Long idAlumno) {
+        ser.borrarAlumnoTemporalPorId(idAlumno);
+        return ResponseEntity.noContent().build();
+    }
+
 
 }
         
