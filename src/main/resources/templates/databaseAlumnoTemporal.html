@@ -258,19 +258,27 @@
     </script>
     <script th:inline="javascript">
         function formatearFecha(fechaBD) {
-        if (!fechaBD) return "";
-        const iso = fechaBD.replace(" ", "T").substring(0, 23);
+          if (!fechaBD) return "";
 
-        const d = new Date(iso);
+          // Si viene como Date o timestamp
+          let d = new Date(fechaBD);
 
-        const hh = String(d.getHours()).padStart(2, "0");
-        const mm = String(d.getMinutes()).padStart(2, "0");
-        const dd = String(d.getDate()).padStart(2, "0");
-        const MM = String(d.getMonth() + 1).padStart(2, "0");
-        const yyyy = d.getFullYear();
+          // Si falla, intentar formato "yyyy-MM-dd HH:mm:ss.SSS"
+          if (isNaN(d)) {
+              const normalizada = fechaBD.replace(" ", "T").substring(0, 19);
+              d = new Date(normalizada);
+          }
 
-        return `${hh}:${mm} ${dd}-${MM}-${yyyy}`;
-    }
+          if (isNaN(d)) return "Fecha inválida";
+
+          const hh = String(d.getHours()).padStart(2, "0");
+          const mm = String(d.getMinutes()).padStart(2, "0");
+          const dd = String(d.getDate()).padStart(2, "0");
+          const MM = String(d.getMonth() + 1).padStart(2, "0");
+          const yyyy = d.getFullYear();
+
+          return `${hh}:${mm} ${dd}-${MM}-${yyyy}`;
+      }
 
 
     </script>

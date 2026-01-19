@@ -15,9 +15,6 @@ import com.vt.createmanagesubmit.repositorios.RepositorioTareasProgramadas;
 public class ServicioTareasProgramadas {
 
     @Autowired
-    private ServicioApi SerApi;
-
-    @Autowired
     private RepositorioTareasProgramadas repoTarea;
 
     @Autowired

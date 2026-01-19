@@ -1,7 +1,6 @@
 package com.vt.createmanagesubmit.dto;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 import com.vt.createmanagesubmit.modelos.TareaProgramada;
 

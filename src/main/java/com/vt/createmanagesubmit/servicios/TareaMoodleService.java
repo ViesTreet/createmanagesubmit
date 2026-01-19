@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,9 +33,9 @@ public class TareaMoodleService {
     private final ObjectMapper objectMapper;
     private final RepositorioAlumnos alumnoRepo;
 
-    @Value("https://aulavirtual.e-volution.cl")
+    @Value("${MOODLE_TOKEN}")
     private String moodleBaseUrl;
-    @Value("255a3f0b97656fcec9552a98df8c13c3")
+    @Value("${MOODLE_PATH}")
     private String moodleToken;
 
     public TareaMoodleService(RestTemplate restTemplate,

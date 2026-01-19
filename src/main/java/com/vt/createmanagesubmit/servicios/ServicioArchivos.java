@@ -21,6 +21,7 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -56,7 +57,8 @@ public class ServicioArchivos {
     @Lazy
     private ServicioGenerarCertificado servicioGenerarCertificado;
 
-    String correoEmpresa = Servicio.CORREO_EMPRESA;
+    @Value("DIP_MAIL")
+    String correoEmpresa;
 
     @Async
     public CompletableFuture<Void> leerExcelYGuardarEnBD(byte[] fileBytes, String estadoDiplomaExcel, String plantilla, String estadoExcel, String rutificador, String ubicacion) throws IOException {
@@ -234,9 +236,6 @@ public class ServicioArchivos {
             case "identificador":
             case "id":
                 alumno.setIdentificador(valorCelda);
-                break;
-            case "codigo":
-                alumno.setCodigo(valorCelda);
                 break;
             case "nota aprobación":
             case "nota aprobacion":
@@ -439,7 +438,6 @@ public class ServicioArchivos {
             row.createCell(4).setCellValue(safeGet(alumnoDTO.getNumeroCorrelativoInterno()));
             row.createCell(5).setCellValue(safeGet(alumnoDTO.getCliente()));
             row.createCell(6).setCellValue(safeGet(alumnoDTO.getIdentificador()));
-            row.createCell(7).setCellValue(safeGet(alumnoDTO.getCodigo()));
             row.createCell(8).setCellValue(safeGet(alumnoDTO.getNotaAprovacion()));
             row.createCell(9).setCellValue(safeGet(alumnoDTO.getRelator()));
             row.createCell(10).setCellValue(safeGet(alumnoDTO.getAsistencia()));

@@ -44,7 +44,6 @@ public class Alumno {
 
     private String identificador;
 
-    private String codigo;
 
     private String notaAprobacion;
 
@@ -80,7 +79,7 @@ public class Alumno {
     }
 
     public Alumno(Long id, String nombreAsistente, String nombreCurso, String diasCursos, String duracion,
-            String numeroCorrelativoInterno, String modalidad, String cliente, String identificador, String codigo,
+            String numeroCorrelativoInterno, String modalidad, String cliente, String identificador,
             String notaAprobacion, String relator, String asistencia, String estado, String diploma, String rut,
             String correo, String ubicacionSubida, String lugarYfechaEmision, Plantilla plantilla, Date createdAt,
             Date updatedAt) {
@@ -93,7 +92,6 @@ public class Alumno {
         this.modalidad = modalidad;
         this.cliente = cliente;
         this.identificador = identificador;
-        this.codigo = codigo;
         this.notaAprobacion = notaAprobacion;
         this.relator = relator;
         this.asistencia = asistencia;
@@ -178,14 +176,6 @@ public class Alumno {
 
     public void setIdentificador(String identificador) {
         this.identificador = identificador;
-    }
-
-    public String getCodigo() {
-        return codigo;
-    }
-
-    public void setCodigo(String codigo) {
-        this.codigo = codigo;
     }
 
     public String getNotaAprobacion() {
@@ -299,7 +289,7 @@ public class Alumno {
         return "Alumno [id=" + id + ", nombreAsistente=" + nombreAsistente + ", nombreCurso=" + nombreCurso
                 + ", diasCursos=" + diasCursos + ", duracion=" + duracion + ", numeroCorrelativoInterno="
                 + numeroCorrelativoInterno + ", modalidad=" + modalidad + ", cliente=" + cliente + ", identificador="
-                + identificador + ", codigo=" + codigo + ", notaAprobacion=" + notaAprobacion + ", relator=" + relator
+                + identificador +", notaAprobacion=" + notaAprobacion + ", relator=" + relator
                 + ", asistencia=" + asistencia + ", estado=" + estado + ", diploma=" + diploma + ", rut=" + rut
                 + ", correo=" + correo + ", ubicacionSubida=" + ubicacionSubida + ", lugarYfechaEmision="
                 + lugarYfechaEmision + ", plantilla=" + plantilla + ", createdAt=" + createdAt + ", updatedAt="

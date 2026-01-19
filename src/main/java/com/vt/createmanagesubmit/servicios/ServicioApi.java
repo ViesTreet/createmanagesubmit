@@ -20,10 +20,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class ServicioApi {
 
-    @Value("255a3f0b97656fcec9552a98df8c13c3") // Token desde application.properties
+    @Value("${MOODLE_TOKEN}") // Token desde application.properties
     private String moodleToken;
 
-    @Value("https://aulavirtual.e-volution.cl") // URL base de Moodle
+    @Value("${MOODLE_PATH}") // URL base de Moodle
     private String moodleBaseUrl;
 
     public String obtenerNombrePorRut(String rut) {

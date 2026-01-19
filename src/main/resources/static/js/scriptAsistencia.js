@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
             form.reset();
 
         } catch (error) {
-            alert("¡Error al subir datos!");
+            alert("Error al subir los datos, revisar RUT");
             console.error(error);
         }
     });

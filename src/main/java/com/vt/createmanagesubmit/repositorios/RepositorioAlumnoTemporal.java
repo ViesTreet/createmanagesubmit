@@ -18,4 +18,6 @@ public interface RepositorioAlumnoTemporal extends JpaRepository<AlumnoTemporal,
     List<AlumnoTemporal> findAllById(Long id);
 
     List<AlumnoTemporal> findByCursoTemporalId(Long cursoTemporalId); 
+
+    long countByCursoTemporalId(Long cursoId);
 }

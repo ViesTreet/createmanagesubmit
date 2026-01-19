@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +12,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -45,11 +45,9 @@ import com.vt.createmanagesubmit.servicios.ServicioApi;
 import com.vt.createmanagesubmit.servicios.ServicioArchivos;
 import com.vt.createmanagesubmit.servicios.ServicioGenerarCertificado;
 import com.vt.createmanagesubmit.servicios.ServicioTareasProgramadas;
-import com.vt.createmanagesubmit.servicios.TareaMoodleService;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import org.springframework.web.bind.annotation.RequestBody;
 
 
 @Controller
@@ -74,7 +72,8 @@ public class ControladorBase {
     @Autowired
     private ServicioTareasProgramadas servicioTareaP;
 
-    String correoEmpresa = Servicio.CORREO_EMPRESA;
+    @Value("${DIP_MAIL}")
+    String correoEmpresa;
 
     ControladorBase(RepositorioAlumnos repositorioAlumnos) {
         this.repositorioAlumnos = repositorioAlumnos;
@@ -83,14 +82,6 @@ public class ControladorBase {
     //-----------------------Acciones comunes-----------------------------
     @GetMapping("/")
     public String index() {
-        if(servicio.adminPorCorreo("admin@admin.com")==null){
-            servicio.registrarAdmin("admin@admin.com", "admin", "RcOqkObsJN", "administrador");
-        }
-        if(!servicio.plantillaPorNombre("Error en encontrar plantilla").isPresent()){
-            Plantilla nuevaPlantilla = new Plantilla();
-            nuevaPlantilla.setNombreCertificado("Error en encontrar plantilla");
-            servicio.guardarPlantilla(nuevaPlantilla);
-        }
         return "index";
     }
 
@@ -205,7 +196,7 @@ public class ControladorBase {
     }
 
     @PostMapping("/dataBaseAlumno/agregarAlumno")
-    public String agregarAlumno(@RequestParam(name = "nombreAsistente") String nombreAsistente,@RequestParam("curso")String curso,@RequestParam(name = "diasCursos") String diasCursos,@RequestParam(name = "numeroHoras") String numeroHoras,@RequestParam(name = "cliente") String cliente,@RequestParam(name = "identificador") String identificador,@RequestParam(name = "codigo") String codigo,@RequestParam(name = "notaAprobacion") String notaAprobacion,@RequestParam(name = "relator") String relator,@RequestParam(name = "asistencia") String asistencia,@RequestParam(name = "estado") String estado,@RequestParam(name = "diploma") String diploma,@RequestParam(value="modalidad") String modalidad,@RequestParam(name = "rut") String rut,@RequestParam(name = "correo") String correo,@RequestParam(name = "plantilla",required = false) Long plantilla,@RequestParam(value = "rutificador", defaultValue = "false") boolean rutificador,@RequestParam("lugarYfechaEmision")String lugarYfechaEmision,Model model,HttpSession session) {
+    public String agregarAlumno(@RequestParam(name = "nombreAsistente") String nombreAsistente,@RequestParam("curso")String curso,@RequestParam(name = "diasCursos") String diasCursos,@RequestParam(name = "numeroHoras") String numeroHoras,@RequestParam(name = "cliente") String cliente,@RequestParam(name = "identificador") String identificador,@RequestParam(name = "notaAprobacion") String notaAprobacion,@RequestParam(name = "relator") String relator,@RequestParam(name = "asistencia") String asistencia,@RequestParam(name = "estado") String estado,@RequestParam(name = "diploma") String diploma,@RequestParam(value="modalidad") String modalidad,@RequestParam(name = "rut") String rut,@RequestParam(name = "correo") String correo,@RequestParam(name = "plantilla",required = false) Long plantilla,@RequestParam(value = "rutificador", defaultValue = "false") boolean rutificador,@RequestParam("lugarYfechaEmision")String lugarYfechaEmision,Model model,HttpSession session) {
     Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
 	    if (usuarioTemporal == null) {
 	        return "redirect:/";  
@@ -214,7 +205,6 @@ public class ControladorBase {
         Alumno nuevoAlumno = new Alumno();
         nuevoAlumno.setAsistencia(asistencia);
         nuevoAlumno.setCliente(cliente);
-        nuevoAlumno.setCodigo(codigo);
         nuevoAlumno.setCorreo(correo);
         nuevoAlumno.setDiasCursos(diasCursos);
         nuevoAlumno.setEstado(estado);
@@ -342,7 +332,7 @@ public class ControladorBase {
     }
     
     @PostMapping("/dataBaseAlumno/editarAlumno")
-    public String editarAlumno(@RequestParam("id") Long id,@RequestParam("nombreAsistente") String nombreAsistente,@RequestParam("nombreCurso") String nombreCurso,@RequestParam("diasCursos") String diasCursos,@RequestParam("numeroHoras") String numeroHoras,@RequestParam("cliente") String cliente,@RequestParam("identificador") String identificador,@RequestParam("codigo") String codigo,@RequestParam("notaAprobacion") String notaAprobacion,@RequestParam("relator") String relator,@RequestParam("modalidad") String modalidad,@RequestParam("asistencia") String asistencia,@RequestParam("estado") String estado,@RequestParam("diploma") String diploma,@RequestParam("rut") String rut,@RequestParam("correo") String correo,@RequestParam("plantilla") Long plantillaId,@RequestParam("lugarYfechaEmision")String lugarYfechaEmision,Model model,HttpSession session) {
+    public String editarAlumno(@RequestParam("id") Long id,@RequestParam("nombreAsistente") String nombreAsistente,@RequestParam("nombreCurso") String nombreCurso,@RequestParam("diasCursos") String diasCursos,@RequestParam("numeroHoras") String numeroHoras,@RequestParam("cliente") String cliente,@RequestParam("identificador") String identificador,@RequestParam("notaAprobacion") String notaAprobacion,@RequestParam("relator") String relator,@RequestParam("modalidad") String modalidad,@RequestParam("asistencia") String asistencia,@RequestParam("estado") String estado,@RequestParam("diploma") String diploma,@RequestParam("rut") String rut,@RequestParam("correo") String correo,@RequestParam("plantilla") Long plantillaId,@RequestParam("lugarYfechaEmision")String lugarYfechaEmision,Model model,HttpSession session) {
         
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuarioTemporal == null) {
@@ -351,7 +341,7 @@ public class ControladorBase {
         model.addAttribute("admin", usuarioTemporal);
         try {
             nombreAsistente = servicioApi.formatearNombre(nombreAsistente);
-            servicio.editarAlumno(id, nombreAsistente, nombreCurso, diasCursos, numeroHoras, cliente, identificador, codigo, notaAprobacion,relator, asistencia, estado, diploma, rut, modalidad, correo, plantillaId, lugarYfechaEmision);
+            servicio.editarAlumno(id, nombreAsistente, nombreCurso, diasCursos, numeroHoras, cliente, identificador, notaAprobacion,relator, asistencia, estado, diploma, rut, modalidad, correo, plantillaId, lugarYfechaEmision);
             return "redirect:/dataBaseAlumno/alumno/"+id;  
 
         } catch (MissingTemplateException | MissingAlumnoIdException | MissingNameOrRutException ex) {

@@ -1,0 +1,27 @@
+export DB_HOST=localhost
+export DB_PORT=3306
+export DB_USER=app
+export DB_PASSWORD=Lmh8ybA5yibFiW1K
+export DB_NAME=appevolution
+
+export SP_MAIL_HOST=mail.e-volution.cl
+export SP_MAIL_PORT=465
+export SP_MAIL_USERNAME=diplomas@e-volution.cl
+export SP_MAIL_PASSWORD=bUS39WvrTye
+
+export AD_MAIL=admin@admin.com
+export AD_NAME=admin
+export AD_PASSWORD=RcOqkObsJN
+
+export ST_FOLDER=/var/evolution/static
+
+export ENCRYPT_KEY_ASIS=t8iLdaYUBMsMDMt5
+
+export URL_PATH=https://app.e-volution.cl
+
+export MOODLE_TOKEN=255a3f0b97656fcec9552a98df8c13c3
+export MOODLE_PATH=https://aulavirtual.e-volution.cl
+
+export ENCRYPT_KEY_GEN=eFSan7jbftsl2P6
+
+export DIP_MAIL=diplomas@e-volution.cl

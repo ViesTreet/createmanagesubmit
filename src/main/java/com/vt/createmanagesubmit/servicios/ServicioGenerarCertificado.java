@@ -33,6 +33,7 @@ import org.apache.poi.xslf.usermodel.XSLFTextRun;
 import org.apache.poi.xslf.usermodel.XSLFTextShape;
 import org.jodconverter.local.JodConverter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
@@ -73,7 +74,16 @@ public class ServicioGenerarCertificado {
     @Autowired
     private JavaMailSender javaMailSender;
 
-    String correoEmpresa = Servicio.CORREO_EMPRESA;
+    @Value("DIP_MAIL")
+    private String correoEmpresa;
+
+    private String DecryptKeyGene=System.getenv("ENCRYPT_KEY_GEN");
+
+    @Value("URL_PATH")
+    public String urlPath;
+
+    @Value("${DIP_MAIL}")
+    public String diplomasMail;
 
     @Async
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -143,7 +153,7 @@ public class ServicioGenerarCertificado {
 
         // Generar código QR con la URL y el ID encriptado
         String encryptedId = encryptStudentId(alumno.getId().toString());
-        String qrCodeText = "https://www.app.e-volution.cl/generarCertificadoQr/" + encryptedId;
+        String qrCodeText = urlPath+"/generarCertificadoQr/" + encryptedId;
 
         ByteArrayOutputStream qrCodeOutputStream = generateQRCodeImage(qrCodeText, 200, 200);
         byte[] qrCodeBytes = qrCodeOutputStream.toByteArray();
@@ -192,7 +202,7 @@ public class ServicioGenerarCertificado {
     private void sendEmailWithAttachments(String toEmail, String subject, Alumno alumno, byte[] pdfBytes, byte[] qrCodeBytes) throws MessagingException {
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
-        helper.setFrom("diplomas@e-volution.cl");
+        helper.setFrom(diplomasMail);
         helper.setTo(toEmail);
         helper.setSubject(subject);
         byte[] logoBytes=null;
@@ -267,7 +277,7 @@ public class ServicioGenerarCertificado {
 
     @Async
     private String encryptStudentId(String studentId) throws Exception {
-        String secretKey = "eFSan7jbftsl2P6";
+        String secretKey = DecryptKeyGene;
         MessageDigest sha = null;
         try {
             byte[] key = secretKey.getBytes("UTF-8");
@@ -293,7 +303,7 @@ public class ServicioGenerarCertificado {
 
     @Async
     private Long decryptStudentId(String encryptedId) throws Exception {
-        String secretKey = "eFSan7jbftsl2P6"; // Usa una clave más segura y almacénala adecuadamente
+        String secretKey = DecryptKeyGene; // Usa una clave más segura y almacénala adecuadamente
 
         try {
             // Reemplaza los caracteres seguros para URL por los originales

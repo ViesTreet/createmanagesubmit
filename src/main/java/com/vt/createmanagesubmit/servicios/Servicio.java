@@ -16,6 +16,7 @@ import javax.imageio.ImageIO;
 //import org.apache.poi.ss.usermodel.Color;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -92,10 +93,15 @@ public class Servicio {
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
+    public String CORREO_EMPRESA = System.getenv("SP_MAIL_USERNAME");
 
-    public static String CORREO_EMPRESA = "diplomas@e-volution.cl";
+    private final String STATIC_DIRECTORY = System.getenv("ST_FOLDER");
 
-    private static final String STATIC_DIRECTORY = "/var/evolution/static";
+    private String CORREO_ADMIN = System.getenv("AD_MAIL");
+
+    private String SecretKeyVar=System.getenv("ENCRYPT_KEY_ASIS");
+
+    public String urlAsisencia = System.getenv("URL_PATH");
 
 
     public Alumno registrarNuevoAlumno(Alumno nuevoAlumno){
@@ -123,7 +129,7 @@ public class Servicio {
     }
 
     public Page<Alumno> buscarConMultiplesFiltros(List<filtroDTO> filtros) {
-        Specification<Alumno> spec = Specification.where(null);
+        Specification<Alumno> spec = Specification.unrestricted();
         
         for (filtroDTO filtro : filtros) {
             spec = spec.and(crearEspecificacion(filtro));
@@ -298,7 +304,7 @@ public class Servicio {
         Optional<Admin> optAdmin = repoAdmin.findById(id);
         if(optAdmin.isPresent()){
             Admin admin = optAdmin.get();
-            if(!admin.getCorreo().trim().equals("admin@admin.com")){
+            if(!admin.getCorreo().trim().equals(CORREO_ADMIN)){
                 repoAdmin.delete(admin);
             }
         }else{
@@ -424,7 +430,7 @@ public class Servicio {
         }
     }
 
-    public void editarAlumno(Long id,String nombreAsistente,String nombreCurso,String diasCursos,String numeroHoras,String cliente,String identificador,String codigo,String notaAprovacion,String relator,String asistencia,String estado,String diploma,String rut,String modalidad,String correo,Long plantillaId, String lugarYfechaEmision) {
+    public void editarAlumno(Long id,String nombreAsistente,String nombreCurso,String diasCursos,String numeroHoras,String cliente,String identificador,String notaAprovacion,String relator,String asistencia,String estado,String diploma,String rut,String modalidad,String correo,Long plantillaId, String lugarYfechaEmision) {
 
         Optional<Alumno> optalumno = repoAlum.findById(id);
         if(optalumno.isPresent()){
@@ -440,7 +446,6 @@ public class Servicio {
             alumno.setCliente(normalizarValor(cliente));
             alumno.setIdentificador(normalizarValor(identificador));
             alumno.setModalidad(normalizarValor(modalidad));
-            alumno.setCodigo(normalizarValor(codigo));
             alumno.setNotaAprobacion(normalizarValor(notaAprovacion));
             alumno.setRelator(normalizarValor(relator));
             alumno.setAsistencia(normalizarValor(asistencia));
@@ -590,7 +595,7 @@ public class Servicio {
     }
 
     public List<CursoTemporal> todosLosCursosTemporales(){
-        return repoCursoTemp.findAll();
+        return repoCursoTemp.findAllByOrderByIdDesc();
     }
 
     public Optional<CursoTemporal> cursoTemporalPorId(Long id){
@@ -629,7 +634,7 @@ public class Servicio {
     }
 
     public String decryptId(String encryptedId) throws Exception {
-        String secretKey = "t8iLdaYUBMsMDMt5";
+        String secretKey = SecretKeyVar;
         try {
             // Revertir cambios del Base64 URL-safe
             encryptedId = encryptedId.replace("_", "/").replace("-", "+");
@@ -656,7 +661,7 @@ public class Servicio {
 
 
     public String encryptId(String id) throws Exception {
-        String secretKey = "t8iLdaYUBMsMDMt5";
+        String secretKey = SecretKeyVar;
         MessageDigest sha = null;
         try {
             byte[] key = secretKey.getBytes("UTF-8");
@@ -697,7 +702,7 @@ public class Servicio {
         if(!cursoOpt.isPresent()) throw new IllegalArgumentException("Curso no encontrado");
         CursoTemporal c = cursoOpt.get();
         String encrypted = encryptId(String.valueOf(c.getId()));
-        String link = "https://app.e-volution.cl/marcarAsistenciaCurso/" + encrypted;
+        String link = urlAsisencia+"/marcarAsistenciaCurso/" + encrypted;
         byte[] png = generateQrImageBytes(link, 300, 300);
         String base64 = Base64.getEncoder().encodeToString(png);
         Map<String,String> res = new HashMap<>();
@@ -728,7 +733,7 @@ public class Servicio {
         CursoTemporal saved = repoCursoTemp.save(c);
         // generar qr
         String encrypted = encryptId(String.valueOf(saved.getId()));
-        String link = "https://app.e-volution.cl/marcarAsistenciaCurso/" + encrypted;
+        String link = urlAsisencia+"/marcarAsistenciaCurso/"+ encrypted;
         byte[] png = generateQrImageBytes(link, 300, 300);
         String base64 = Base64.getEncoder().encodeToString(png);
         Map<String,String> res = new HashMap<>();
@@ -765,7 +770,20 @@ public class Servicio {
     }
 
     public void borrarAlumnoTemporalPorId(Long id){
-        repoAlumTemp.deleteById(id);
+        Optional<AlumnoTemporal> alumnoTempOpt = repoAlumTemp.findById(id);
+        if(alumnoTempOpt.isPresent()){
+            AlumnoTemporal alumnoTemporal = alumnoTempOpt.get();
+            CursoTemporal cursoTemporal = alumnoTemporal.getCursoTemporal();
+            repoAlumTemp.deleteById(id);
+            Long cursoTemporalId=cursoTemporal.getId();
+            if(repoAlumTemp.countByCursoTemporalId(cursoTemporalId)>0){
+                cursoTemporal.setEstado("Revisando...");
+            }else{
+                cursoTemporal.setEstado("Listo");
+            }
+            repoCursoTemp.save(cursoTemporal);
+        }
+        
     }
 
     public void alumnoVerificado(Long alumnoId, Long cursoId, String asistencia, String nota){
@@ -774,7 +792,6 @@ public class Servicio {
         if(alumnoTempOpt.isPresent() && cursoTempOpt.isPresent()){
             AlumnoTemporal alumnoTemporal = alumnoTempOpt.get();
             CursoTemporal cursoTemporal = cursoTempOpt.get();
-            
             Alumno alumno = new Alumno();
             alumno.setAsistencia(asistencia);
             alumno.setNotaAprobacion(nota);
@@ -796,6 +813,12 @@ public class Servicio {
             alumno.setIdentificador(cursoTemporal.getIdentificador());
             comprobarYGuardar(alumno, "No");
             repoAlumTemp.delete(alumnoTemporal);
+            if(repoAlumTemp.countByCursoTemporalId(cursoId)>0){
+                cursoTemporal.setEstado("Revisando...");
+            }else{
+                cursoTemporal.setEstado("Listo");
+            }
+            repoCursoTemp.save(cursoTemporal);
         }
     }
 

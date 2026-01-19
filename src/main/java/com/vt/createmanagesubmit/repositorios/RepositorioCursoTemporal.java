@@ -24,4 +24,7 @@ public interface RepositorioCursoTemporal extends JpaRepository<CursoTemporal,Lo
     Page<CursoTemporal> findByRelatorContaining(String relator, Pageable pageable);
 
     Page<CursoTemporal> findByIdentificadorContaining(String identificador, Pageable pageable);
+
+    List<CursoTemporal> findAllByOrderByIdDesc();
+
 }

@@ -22,8 +22,6 @@ public class AlumnoDTO {
 
     private String identificador;
 
-    private String codigo;
-
     private String notaAprovacion;
 
     private String relator;
@@ -61,7 +59,6 @@ public class AlumnoDTO {
         this.numeroCorrelativoInterno = alumno.getNumeroCorrelativoInterno();
         this.cliente = alumno.getCliente();
         this.identificador = alumno.getIdentificador();
-        this.codigo = alumno.getCodigo();
         this.notaAprovacion = alumno.getNotaAprobacion();
         this.relator = alumno.getRelator();
         this.asistencia = alumno.getAsistencia();
@@ -138,14 +135,6 @@ public class AlumnoDTO {
 
     public void setIdentificador(String identificador) {
         this.identificador = identificador;
-    }
-
-    public String getCodigo() {
-        return codigo;
-    }
-
-    public void setCodigo(String codigo) {
-        this.codigo = codigo;
     }
 
     public String getNotaAprovacion() {
