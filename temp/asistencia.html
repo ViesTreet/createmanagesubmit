@@ -1,39 +1,40 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Asistencia para certificado</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="styleAsistencia.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.min.css">
+    <!--<link rel="stylesheet" th:href="@{/css/styleValidacion.css}">-->
+    <!--<link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />-->
+    <!--<link rel="stylesheet" th:href="@{/css/styleCustom.css}" />-->
+    <!--<link rel="icon" th:href="@{/images/Logobgremove.png}" type="image/x-icon" />-->
+    <link rel="stylesheet" href="styleValidacion.css">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </head>
 <body>
     <div class="contenedor">
         <main>
             <div id="carta" class="card">
-                <div id="logo"><img src="/src/main/resources/static/images/Logobgremove.png" alt="Logo E-volution"></div>
+                <!--<div id="logo"><img th:src="@{/images/Logobgremove.png}" alt="Logo E-volution"></div>-->
+                <div id="logo"><img src="Logobgremove.png" alt="Logo E-volution"></div>
                 <div class="card-body">
-                    <form action="" method="post">
-                        <label for="nombre">Nombre completo</label>
-                        <input id="nombre" class="form-control" type="text" name="nombreAsistente" placeholder="Nombre Apellidos">
-                        <br>
-                        <label for="correo">Correo</label>
-                        <input type="email" class="form-control" id="correo" placeholder="correo@dominio.com" name="correoAsistente">
-                        <br>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="checkboxConfirmacion" id="checkboxConfirmacion">
-                            <label id="textoConfirmacion" style="font-style: italic;" class="form-check-label" for="checkboxConfirmacion">
-                                Declaro que los datos proporcionados serán utilizados exclusivamente para la generación del certificado correspondiente, sin ningún otro propósito adicional. Asimismo, confirmo que la información enviada es veraz, correcta y actualizada.
-                            </label>
-                        </div>
-                        <br>
-                        <div style="display: flex;justify-content: center;align-items: center;"><input id="botonEnviar" type="submit" class="btn btn-success" value="Enviar datos"></div>
-                    </form>
+                    <div class="datos">
+                        <h3>Datos Certificado</h3>
+                        <div><p><b>V</b>alidez:</p></div>
+                        <div><p><b>N</b>ombre:</p></div>
+                        <div><p><b>C</b>urso:</p></div>
+                        <div><p><b>C</b>orrelativo:</p></div>
+                    </div>
+                    <div id="divDescargar"><button class="btn-lg btn btn-success">Descargar certificado</button></div>
                 </div>
             </div>
         </main>
@@ -45,6 +46,7 @@
             <a href="https://maps.app.goo.gl/Cpq3uNEGjyKTWv5x9"><i class="bi bi-geo-alt-fill"></i></a>
         </footer>
     </div>
-    <script src="scriptAsistencia.js"></script>
+    <script src="scriptValidacion.js"></script>
+    <!--<script th:src="@{/js/scriptValidacion.js}"></script>-->
 </body>
 </html>

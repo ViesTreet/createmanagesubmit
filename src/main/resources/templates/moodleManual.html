@@ -39,7 +39,7 @@
 
     <main class="container">
         <!-- Formulario en Card -->
-        <div class="card form-card shadow">
+        <div class="card shadow" style="width: 900px !important; margin: 20px auto;">
               <div class="card-body">
                 <h4 class="text-center mb-4">Emitir certificados para Moodle</h4>
                 <form id="formCertificado" th:action="@{/programarCertificadoMoodleManual/crear}" method="post">
@@ -124,8 +124,7 @@
               
                   <div class="d-flex gap-2">
                     <input type="hidden" name="ubicacionSubida" id="ubicacionSubida" th:value="${admin.ubicacion}">
-                    <button id="guardarAlumnos" name="accion" value="guardarAlumnos" class="btn btn-secondary" type="submit">Guardar</button>
-                    <button id="emitirYGuardar" name="accion" value="emitirYGuardar" class="btn btn-success" type="submit">Emitir y Guardar</button>
+                    <button id="guardarAlumnos" name="accion" value="guardarAlumnos" class="btn btn-success" type="submit">Guardar</button>
                   </div>
                 </div>
                 </form>

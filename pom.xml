@@ -241,7 +241,12 @@
 		    <artifactId>spring-boot-starter-quartz</artifactId>
 		    <version>3.5.3</version>
 		</dependency>
-
+		<dependency>
+			<groupId>org.apache.pdfbox</groupId>
+			<artifactId>pdfbox</artifactId>
+			<version>3.0.6</version>
+			<scope>compile</scope>
+		</dependency>
 
 	</dependencies>
 

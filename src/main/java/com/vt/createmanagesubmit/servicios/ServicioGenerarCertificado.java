@@ -275,8 +275,7 @@ public class ServicioGenerarCertificado {
         javaMailSender.send(message);
     }
 
-    @Async
-    private String encryptStudentId(String studentId) throws Exception {
+    public String encryptStudentId(String studentId) throws Exception {
         String secretKey = DecryptKeyGene;
         MessageDigest sha = null;
         try {
@@ -301,8 +300,7 @@ public class ServicioGenerarCertificado {
         }
     }
 
-    @Async
-    private Long decryptStudentId(String encryptedId) throws Exception {
+    public Long decryptStudentId(String encryptedId) throws Exception {
         String secretKey = DecryptKeyGene; // Usa una clave más segura y almacénala adecuadamente
 
         try {

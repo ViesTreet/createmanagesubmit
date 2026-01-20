@@ -1,5 +1,6 @@
 package com.vt.createmanagesubmit.controladores;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
@@ -21,6 +22,9 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.Loader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.Resource;
@@ -232,7 +236,7 @@ public class ControladorApi {
 
     @PostMapping("/dataBaseAlumno/accionAlumnos")
     @ResponseBody
-    public ResponseEntity<Resource> accionAlumnos(@RequestParam("ids") List<Long> ids, @RequestParam("accionElegida") String accionElegida,HttpSession session) throws InterruptedException, ExecutionException, Exception {
+    public ResponseEntity<?> accionAlumnos(@RequestParam("ids") List<Long> ids, @RequestParam("accionElegida") String accionElegida,HttpSession session) throws InterruptedException, ExecutionException, Exception {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuarioTemporal != null) {
         
@@ -298,10 +302,55 @@ public class ControladorApi {
                     }
                 }
 
+            }else if ("descargaJunto".equals(accionElegida)) {
+
+                try (PDDocument pdfFinal = new PDDocument()) {
+
+                    for (Long id : ids) {
+                        Alumno alumno = ser.alumnoPorId(id);
+
+                        byte[] certificadoBytes =
+                                servicioGenerarCertificado
+                                        .descargarCertificadosServicio(alumno)
+                                        .get();
+
+                        try (PDDocument pdfIndividual =
+                                    Loader.loadPDF(certificadoBytes)) {
+
+                            for (PDPage page : pdfIndividual.getPages()) {
+                                pdfFinal.addPage(page);
+                            }
+                        }
+                    }
+
+                    ByteArrayOutputStream out = new ByteArrayOutputStream();
+                    pdfFinal.save(out);
+
+                    byte[] pdfUnico = out.toByteArray();
+
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.setContentDisposition(
+                            ContentDisposition.attachment()
+                                    .filename("certificados.pdf")
+                                    .build()
+                    );
+
+                    return ResponseEntity.ok()
+                            .headers(headers)
+                            .contentType(MediaType.APPLICATION_PDF)
+                            .body(pdfUnico);
+
+                } catch (Exception e) {
+                    throw new RuntimeException("Error generando PDF unificado", e);
+                }
             }
-            return null;
+
+
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        
         }else{
-            return null;
+            return ResponseEntity.badRequest().build();
+
         }
     }
 
@@ -432,7 +481,7 @@ public class ControladorApi {
 
                     // 5. Obtener nota con manejo de errores
                     try {
-                        double nota = servicioTarea.obtenerPromedioNotasSafe(courseId, userId);
+                        double nota = (servicioTarea.obtenerPromedioNotas(courseId, userId));
                         dto.setNotaAprovacion(String.valueOf(nota));
                     } catch (Exception e) {
                         System.out.println("Error al obtener nota para usuario {}: {}"+ userId+ e.getMessage());

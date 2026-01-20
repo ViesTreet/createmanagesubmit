@@ -33,9 +33,9 @@ public class TareaMoodleService {
     private final ObjectMapper objectMapper;
     private final RepositorioAlumnos alumnoRepo;
 
-    @Value("${MOODLE_TOKEN}")
-    private String moodleBaseUrl;
     @Value("${MOODLE_PATH}")
+    private String moodleBaseUrl;
+    @Value("${MOODLE_TOKEN}")
     private String moodleToken;
 
     public TareaMoodleService(RestTemplate restTemplate,
@@ -196,24 +196,23 @@ public class TareaMoodleService {
         JsonNode gradeItems = root.path("usergrades").get(0).path("gradeitems");
         System.out.println(gradeItems);
         
-        double total = 0.0;
-        double totalPeso = 0.0;
+        Double notaFinal = 0.0;
         
         for (JsonNode item : gradeItems) {
-            if (item.hasNonNull("graderaw") && item.hasNonNull("weightraw")&& item.get("weightraw").asDouble() > 0) {
-                double nota = item.get("graderaw").asDouble();
-                double peso = item.get("weightraw").asDouble();
-                total += nota * peso;
-                totalPeso += peso;
+            if ("course".equals(item.path("itemtype").asText())) {
+                Double notaNoFormateada=item.path("graderaw").asDouble();
+                Double notaMaxCalc = item.path("grademax").asDouble();
+                Double exigencia = 0.6;
+                if(notaNoFormateada>=(notaMaxCalc*exigencia)){
+                    notaFinal = ((3.0)*((notaNoFormateada-6.0)/(notaMaxCalc*0.4))+4.0);
+                }else{
+                    notaFinal = ((3.0)*((notaNoFormateada)/(notaMaxCalc*0.6))+1.0);
+                }
             }
-            System.out.println(total);
+            
         }
-    
-        // Si no hay peso, devolvemos 0
-        if (totalPeso == 0.0) return 0.0;
-    
-        double rawAverage= total / totalPeso;
-        return Math.round(rawAverage * 10.0) / 10.0;
+        notaFinal = Math.round(notaFinal * 10.0) / 10.0;
+        return notaFinal;
     }
 
     public double obtenerPromedioNotasSafe(Long courseId, Long userId){

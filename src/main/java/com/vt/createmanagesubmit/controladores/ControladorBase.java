@@ -850,7 +850,26 @@ public class ControladorBase {
     //----------------------Otros-------------------------------------
     @GetMapping("/generarCertificadoQr/{id}")
     public String getMethodName(@PathVariable("id") String idEncriptada, HttpServletResponse response, Model model) {
-        model.addAttribute("id", idEncriptada);
+        Alumno alumnoError = new Alumno();
+        alumnoError.setNombreAsistente("No válido");
+        alumnoError.setNombreCurso("No válido");
+        alumnoError.setNumeroCorrelativoInterno("No válido");
+        try {
+            Alumno alumno;
+            Long idAlumno = servicioGenerarCertificado.decryptStudentId(idEncriptada);
+            alumno = servicio.alumnoPorId(idAlumno);
+            if(alumno != null){
+                model.addAttribute("alumno",alumno);
+                model.addAttribute("val","Válido");
+            }else{
+                model.addAttribute("alumno",alumnoError);
+                model.addAttribute("val","No válido");
+            }
+        } catch (Exception e) {
+            model.addAttribute("alumno",alumnoError);
+            model.addAttribute("val","No válido");
+            e.printStackTrace();
+        }
         return "generarCertificadoQr";
     }
 

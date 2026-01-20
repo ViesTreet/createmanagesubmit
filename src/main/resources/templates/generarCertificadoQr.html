@@ -1,206 +1,49 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Descarga de Certificado</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-    <link rel="icon" th:href="@{/images/Logobgremove.png}" type="image/x-icon">
-    <style>
-        body {
-            overflow-x: hidden;
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
-        }
-        .container {
-            display: flex;
-            height: 100vh;
-            width: 100vw;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            text-align: center;
-            background-color: #f9f9f9;
-        }
-        .contenido {
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            align-items: center;
-            flex-direction: column;
-            justify-content: center;
-            display: flex;
-            height: 100%;
-            width: 100%;
-            background-color: #fff;
-            border-radius: 10px;
-        }
-        h1 {
-            color: #3498db;
-            font-size: 2rem;
-            margin-bottom: 10px;
-        }
-        h2 {
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-            color: #555;
-        }
-        .dot {
-            height: 12px;
-            width: 12px;
-            margin: 0 5px;
-            background-color: #3498db;
-            border-radius: 50%;
-            display: inline-block;
-            animation: blink 1s infinite both;
-        }
-        @keyframes blink {
-            50% { opacity: 0; }
-        }
-        .dot:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-        .dot:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-        footer {
-            background-color: #f0f0f0;
-            padding: 15px;
-            text-align: center;
-            font-size: 0.9rem;
-            margin-top: auto;
-            width: 100vw;
-        }
-        footer a {
-            color: #3498db;
-            text-decoration: none;
-        }
-        footer a:hover {
-            text-decoration: underline;
-        }
-        .contact-info div {
-            margin-bottom: 8px;
-        }
-        .download-message {
-            font-size: 1rem;
-            margin-top: 15px;
-            color: #666;
-        }
-        @media (max-width: 1024px) {
-            .container {
-                height: 100vh;
-                width: 100vw;
-                justify-content: center;
-                align-items: center;
-                text-align: center;
-                padding: 0;
-                margin: 0;
-                background-color: #f9f9f9;
-                border-radius: 10px;
-            }
-            .contenido {
-                align-items: center;
-                flex-direction: column;
-                justify-content: center;
-                display: flex;
-                height: 100%;
-                width: 100%;
-                background-color: #fff;
-            }
-        }
-    </style>
+    <title>Asistencia para certificado</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/styleValidacion.css}">
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/styleCustom.css}" />
+    <link rel="icon" th:href="@{/images/Logobgremove.png}" type="image/x-icon" />
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <div class="contenido">
-            <h1>E-VOLUTION</h1>
-            <h2>Gracias por preferirnos</h2>
-            <p>Su descarga comenzará en breve...</p>
-            <div>
-                <span class="dot"></span>
-                <span class="dot"></span>
-                <span class="dot"></span>
+    <div class="contenedor">
+        <main>
+            <div id="carta" class="card">
+                <div id="logo"><img th:src="@{/images/Logobgremove.png}" alt="Logo E-volution"></div>
+                <div class="card-body">
+                    <div class="datos">
+                        <h3>Datos Certificado</h3>
+                        <div><p><b>V</b>alidez:<span th:text="${val}"></span></p></div>
+                        <div><p><b>N</b>ombre:<span th:text="${alumno.nombreAsistente}"></span></p></div>
+                        <div><p><b>C</b>urso:<span th:text="${alumno.nombreCurso}"></span></p></div>
+                        <div><p><b>C</b>orrelativo:<span th:text="${alumno.numeroCorrelativoInterno}"></span></p></div>
+                    </div>
+                    <div id="divDescargar"><button class="btn-lg btn btn-success">Descargar certificado</button></div>
+                </div>
             </div>
-            <p class="download-message mt-3"></p>
-        </div>
+        </main>
+        <footer>
+            <a href="https://e-volution.cl/"><i class="bi bi-house-door-fill"></i></a>
+            <a href="https://www.facebook.com/p/E-volution-Capacitaci%C3%B3n-100071181459358/"><i class="bi bi-facebook"></i></a>
+            <a href="mailto:contacto@e-volution.cl"><i class="bi bi-envelope-at-fill"></i></a>
+            <a href="tel:+56412223639"><i class="bi bi-telephone-fill"></i></a>
+            <a href="https://maps.app.goo.gl/Cpq3uNEGjyKTWv5x9"><i class="bi bi-geo-alt-fill"></i></a>
+        </footer>
     </div>
-    <footer>
-        <div class="contact-info">
-            <div><i class="fa-solid fa-phone"></i> <a href="tel:+56413830944">+56 41 3830944</a></div>
-            <div><i class="fa-solid fa-location-dot"></i> <a href="https://goo.gl/maps/xQm5mBkxH4N2" target="_blank">Freire 728, Oficina 206</a></div>
-            <div><i class="fa-solid fa-envelope"></i> <a href="mailto:contacto@e-volution.cl">contacto@e-volution.cl</a></div>
-        </div>
-    </footer>
-    <script th:inline="javascript">
-        document.addEventListener('DOMContentLoaded', function () {
-            const maxRequests = 5; // Número máximo de descargas permitidas
-            const timeFrame = 60 * 60 * 1000; // Tiempo en milisegundos (1 hora)
-            
-            async function getIP() {
-                // Llamada al backend para obtener la IP
-                const response = await fetch('/api/getIP');
-                const data = await response.text(); // El backend devuelve texto plano con la IP
-                return data;
-            }
-            
-            async function checkDownloadLimit(ip) {
-                // Llamada al backend para verificar el límite de descargas por IP
-                const response = await fetch('/api/checkIP', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ ip }), // Enviamos la IP al backend
-                });
-            
-                if (response.status === 429) {
-                    // Si el backend devuelve el código HTTP 429 (Too Many Requests)
-                    return false;
-                }
-            
-                return true;
-            }
-            
-            async function iniciarDescarga() {
-                const ip = await getIP(); // Obtén la IP del cliente
-                const isAllowed = await checkDownloadLimit(ip); // Verifica el límite de descargas
-            
-                if (!isAllowed) {
-                    document.querySelector('.download-message').textContent =
-                        'Se ha alcanzado el límite temporal de descargas. Intente más tarde.';
-                    return;
-                }
-            
-                // Iniciar la descarga
-                const id = /*[[${id}]]*/ "default"; // Inyecta el id dinámicamente
-                fetch('/api/dataBaseAlumno/downloadForQr', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ id }),
-                })
-                .then((response) => response.blob())
-                .then((blob) => {
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'certificado.pdf';
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
-            
-                    document.querySelector('.download-message').textContent =
-                        'Gracias por preferirnos. Descarga completada.';
-                })
-                .catch((error) =>
-                    console.error('Error en la descarga:', error)
-                );
-            }
-            
-            iniciarDescarga();
-        });
-    </script>
+    <script th:src="@{/js/scriptValidacion.js}"></script>
 </body>
 </html>
