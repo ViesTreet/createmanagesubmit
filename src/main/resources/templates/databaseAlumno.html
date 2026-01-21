@@ -794,19 +794,25 @@
         </div>
         <div class="d-flex justify-content-center align-items-center">
           <!-- Tarjeta Descargar -->
-          <div class="card mx-2" style="width: 18rem; height: 40vh">
+          <div class="card mx-2" style="width: 18rem; height: 50vh">
             <div class="card-body text-center">
               <div
                 class="d-flex justify-content-center align-items-center text-center flex-column"
-                style="height: 80%"
+                style="height: 70%"
               >
                 <h3 class="card-title">Descargar</h3>
                 <p class="card-text">
-                  Descarga los datos seleccionados en un archivo(.zip), puede
+                  Descarga los datos seleccionados en un archivo(.pdf), puede
                   demorar unos segundos.
                 </p>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="separado">
+                  <label class="form-check-label" for="flexCheckDefault">
+                    Descargar todos los certificados por separado.
+                  </label>
+                </div>
               </div>
-              <div style="height: 20%">
+              <div style="height: 20%;margin-top: 30px;">
                 <button
                   class="btn btn-secondary action-btn"
                   data-action="descarga"
@@ -817,18 +823,18 @@
             </div>
           </div>
           <!-- Tarjeta Enviar -->
-          <div class="card mx-2" style="width: 18rem; height: 40vh">
+          <div class="card mx-2" style="width: 18rem; height: 50vh">
             <div class="card-body text-center">
               <div
                 class="d-flex justify-content-center align-items-center text-center flex-column"
-                style="height: 80%"
+                style="height: 70%"
               >
                 <h3 class="card-title pb-1">Enviar</h3>
                 <p class="card-text">
                   Envía los certificados a los alumnos seleccionados.
                 </p>
               </div>
-              <div style="height: 20%">
+              <div style="height: 20%;margin-top: 30px;">
                 <button class="btn btn-success action-btn" data-action="enviar">
                   Enviar
                 </button>
@@ -894,11 +900,21 @@
         var action = $(this).data("action"); // "descarga" o "enviar"
         // Obtener la lista de IDs de los alumnos seleccionados
         var selectedIds = $('input[type="checkbox"]:checked')
+          .filter(function () {
+            return this.id !== "separado";
+          })
           .map(function () {
             return $(this).val();
           })
           .get();
 
+        
+        let tipoDescarga = document.getElementById("separado");
+        if(tipoDescarga.checked){
+          action="descarga";
+        }else{
+          action="descargaJunto";
+        }
         // Configuración básica del AJAX
         var ajaxConfig = {
           url: "/api/dataBaseAlumno/accionAlumnos",
@@ -939,7 +955,32 @@
               .prop("checked", false)
               .trigger("change");
           };
-        } else {
+        }else if (action === "descargaJunto") {
+          ajaxConfig.xhrFields = {
+            responseType: "blob",
+          };
+          ajaxConfig.success = function (blob, textStatus, xhr) {
+            // Crear Blob y descargar archivo
+            let downloadBlob = new Blob([blob], {
+              type: xhr.getResponseHeader("Content-Type"),
+            });
+            let url = window.URL.createObjectURL(downloadBlob);
+            let link = document.createElement("a");
+            link.href = url;
+            link.download = "certificados_" + Date.now() + ".pdf";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+
+            // Limpieza de la interfaz
+            closeSelectionOverlay();
+            $('input[type="checkbox"]')
+              .prop("checked", false)
+              .trigger("change");
+          };
+        } 
+        else {
           // Lógica específica para enviar
           ajaxConfig.success = function (response) {
             // Manejar respuesta exitosa

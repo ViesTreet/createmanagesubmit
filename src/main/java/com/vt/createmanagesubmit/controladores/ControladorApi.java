@@ -22,9 +22,8 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.io.RandomAccessReadBuffer;
+import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.Resource;
@@ -297,6 +296,7 @@ public class ControladorApi {
                     try {
                         System.out.println(id);
                         servicioAr.generateCertificatesById(id);
+                        return ResponseEntity.ok().build();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -304,45 +304,30 @@ public class ControladorApi {
 
             }else if ("descargaJunto".equals(accionElegida)) {
 
-                try (PDDocument pdfFinal = new PDDocument()) {
+                PDFMergerUtility merger = new PDFMergerUtility();
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-                    for (Long id : ids) {
-                        Alumno alumno = ser.alumnoPorId(id);
+                for (Long id : ids) {
+                    Alumno alumno = ser.alumnoPorId(id);
 
-                        byte[] certificadoBytes =
-                                servicioGenerarCertificado
-                                        .descargarCertificadosServicio(alumno)
-                                        .get();
+                    byte[] certificadoBytes =
+                            servicioGenerarCertificado
+                                    .descargarCertificadosServicio(alumno)
+                                    .get();
 
-                        try (PDDocument pdfIndividual =
-                                    Loader.loadPDF(certificadoBytes)) {
-
-                            for (PDPage page : pdfIndividual.getPages()) {
-                                pdfFinal.addPage(page);
-                            }
-                        }
-                    }
-
-                    ByteArrayOutputStream out = new ByteArrayOutputStream();
-                    pdfFinal.save(out);
-
-                    byte[] pdfUnico = out.toByteArray();
-
-                    HttpHeaders headers = new HttpHeaders();
-                    headers.setContentDisposition(
-                            ContentDisposition.attachment()
-                                    .filename("certificados.pdf")
-                                    .build()
-                    );
-
-                    return ResponseEntity.ok()
-                            .headers(headers)
-                            .contentType(MediaType.APPLICATION_PDF)
-                            .body(pdfUnico);
-
-                } catch (Exception e) {
-                    throw new RuntimeException("Error generando PDF unificado", e);
+                    merger.addSource(new RandomAccessReadBuffer(certificadoBytes));
                 }
+
+                merger.setDestinationStream(out);
+                merger.mergeDocuments(null);
+
+                byte[] pdfUnico = out.toByteArray();
+
+                return ResponseEntity.ok()
+                        .header(HttpHeaders.CONTENT_DISPOSITION,
+                                "attachment; filename=certificados.pdf")
+                        .contentType(MediaType.APPLICATION_PDF)
+                        .body(pdfUnico);
             }
 
 
@@ -357,8 +342,7 @@ public class ControladorApi {
     @PostMapping("/dataBaseAlumno/downloadForQr")
     public CompletableFuture<ResponseEntity<?>> downloadCertificateQr(@RequestBody Map<String, String> data, HttpServletResponse response) {
         try {
-            String idEnc = data.get("id");
-            String id = String.valueOf(servicioGenerarCertificado.decryptStudentId(idEnc));
+            String id = data.get("id");
             return servicioGenerarCertificado.generateCertificateQR(id, response)
                 .thenApply(result -> ResponseEntity.ok().build());
         } catch (Exception e) {

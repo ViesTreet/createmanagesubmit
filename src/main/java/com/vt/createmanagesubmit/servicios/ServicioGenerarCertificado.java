@@ -74,16 +74,20 @@ public class ServicioGenerarCertificado {
     @Autowired
     private JavaMailSender javaMailSender;
 
-    @Value("DIP_MAIL")
+    @Value("${DIP_MAIL}")
     private String correoEmpresa;
 
-    private String DecryptKeyGene=System.getenv("ENCRYPT_KEY_GEN");
+    @Value("${ENCRYPT_KEY_GEN}")
+    private String DecryptKeyGene;
 
-    @Value("URL_PATH")
+    @Value("${URL_PATH}")
     public String urlPath;
 
     @Value("${DIP_MAIL}")
     public String diplomasMail;
+
+    @Value("${ST_FOLDER}")
+    public String stPath;
 
     @Async
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -105,11 +109,11 @@ public class ServicioGenerarCertificado {
 
         // Crea un mapa de los datos del alumno que se usarán para reemplazar en los placeholders
         Map<String, String> alumnoData = new HashMap<>();
-        alumnoData.put("nombre alumno", alumno.getNombreAsistente());
+        alumnoData.put("nombre", alumno.getNombreAsistente());
         alumnoData.put("curso", alumno.getNombreCurso());
         alumnoData.put("duracion", alumno.getDuracion());
         alumnoData.put("nota", alumno.getNotaAprobacion());
-        alumnoData.put("dias curso", alumno.getDiasCursos());
+        alumnoData.put("dias", alumno.getDiasCursos());
         alumnoData.put("relator", alumno.getRelator());
         alumnoData.put("asistencia", alumno.getAsistencia());
         alumnoData.put("emision", alumno.getLugarYfechaEmision());
@@ -122,7 +126,7 @@ public class ServicioGenerarCertificado {
     
 
         // Guarda el PPTX modificado en un archivo temporal
-        String tempPptxPath = "/var/evolution/static/temp/" + alumno.getId() + ".pptx";
+        String tempPptxPath = stPath + "/temp/" + alumno.getId() + ".pptx";
         File tempDir = new File("temp");
         if (!tempDir.exists()) {
             tempDir.mkdirs();
@@ -135,7 +139,7 @@ public class ServicioGenerarCertificado {
         ppt.close();
 
         // Convierte el PPTX a PDF usando JODConverter
-        String tempPdfPath = "/var/evolution/static/temp/" + alumno.getId() + ".pdf";
+        String tempPdfPath = stPath + "/temp/" + alumno.getId() + ".pdf";
         JodConverter
                 .convert(new File(tempPptxPath))
                 .to(new File(tempPdfPath))
@@ -357,11 +361,11 @@ public class ServicioGenerarCertificado {
 
         // Crea un mapa de los datos del alumno que se usarán para reemplazar en los placeholders
         Map<String, String> alumnoData = new HashMap<>();
-        alumnoData.put("nombre alumno", alumno.getNombreAsistente());
+        alumnoData.put("nombre", alumno.getNombreAsistente());
         alumnoData.put("curso", alumno.getNombreCurso());
         alumnoData.put("duracion", alumno.getDuracion());
         alumnoData.put("nota", alumno.getNotaAprobacion());
-        alumnoData.put("dias curso", alumno.getDiasCursos());
+        alumnoData.put("dias", alumno.getDiasCursos());
         alumnoData.put("relator", alumno.getRelator());
         alumnoData.put("asistencia", alumno.getAsistencia());
         alumnoData.put("emision", alumno.getLugarYfechaEmision());
@@ -424,11 +428,11 @@ public class ServicioGenerarCertificado {
 
         // Crea un mapa de los datos del alumno que se usarán para reemplazar en los placeholders
         Map<String, String> alumnoData = new HashMap<>();
-        alumnoData.put("nombre alumno", alumno.getNombreAsistente());
+        alumnoData.put("nombre", alumno.getNombreAsistente());
         alumnoData.put("curso", alumno.getNombreCurso());
         alumnoData.put("duracion", alumno.getDuracion());
         alumnoData.put("nota", alumno.getNotaAprobacion());
-        alumnoData.put("dias curso", alumno.getDiasCursos());
+        alumnoData.put("dias", alumno.getDiasCursos());
         alumnoData.put("relator", alumno.getRelator());
         alumnoData.put("asistencia", alumno.getAsistencia());
         alumnoData.put("emision", alumno.getLugarYfechaEmision());

@@ -57,7 +57,7 @@ public class ServicioArchivos {
     @Lazy
     private ServicioGenerarCertificado servicioGenerarCertificado;
 
-    @Value("DIP_MAIL")
+    @Value("${DIP_MAIL}")
     String correoEmpresa;
 
     @Async
@@ -208,10 +208,16 @@ public class ServicioArchivos {
             case "nº":
             case "número":
                 break;
+            case "Nombre asistente":
+            case "Nombre":
+            case "nombre":
             case "nombre asistente":
                 valorCelda = servicioApi.formatearNombre(valorCelda);
                 alumno.setNombreAsistente(valorCelda);
                 break;
+            case "Nombre curso":
+            case "curso":
+            case "Curos":
             case "nombre curso":
                 alumno.setNombreCurso(valorCelda);
                 break;
@@ -219,6 +225,7 @@ public class ServicioArchivos {
             case "días del curso":
             case "dias curso":
             case "dias del curso":
+            case "dias":
                 alumno.setDiasCursos(valorCelda);
                 break;
             case "nº de horas":
@@ -228,9 +235,11 @@ public class ServicioArchivos {
             case "duracion curso":
             case "duración del curso":
             case "duración curso":
+            case "duracion":
                 alumno.setDuracion(valorCelda);
                 break;
             case "cliente":
+            case "Cliente":
                 alumno.setCliente(valorCelda);
                 break;
             case "identificador":
@@ -239,6 +248,9 @@ public class ServicioArchivos {
                 break;
             case "nota aprobación":
             case "nota aprobacion":
+            case "Nota aprobación":
+            case "Nota aprobacion":
+            case "nota":
                 alumno.setNotaAprobacion(valorCelda);
                 break;
             case "relator":
@@ -246,9 +258,11 @@ public class ServicioArchivos {
                 alumno.setRelator(valorCelda);
                 break;
             case "asistencia":
+            case "Asistencia":
                 alumno.setAsistencia(valorCelda);
                 break;
             case "estado":
+            case "Estado":
                 if (valorCelda.trim().equalsIgnoreCase("aprobado")) {
                     alumno.setEstado("aprobado");
                 } else {
@@ -256,6 +270,7 @@ public class ServicioArchivos {
                 }
                 break;
             case "diploma":
+            case "Diploma":
                 if (valorCelda.trim().equalsIgnoreCase("no enviado")) {
                     alumno.setDiploma("noEnviado");
                 } else if (valorCelda.trim().equalsIgnoreCase("enviado")) {
@@ -265,16 +280,21 @@ public class ServicioArchivos {
                 }
                 break;
             case "rut":
+            case "RUT":
+            case "Rut":
                 String rutForma = formatearRut(valorCelda);
                 alumno.setRut(rutForma);
                 break;
             case "correo":
+            case "Correo":
                 alumno.setCorreo(valorCelda);
                 break;
             case "modalidad":
+            case "Modalidad":
                 alumno.setModalidad(valorCelda);
                 break;
             case "plantilla":
+            case "Plantilla":
                 Optional<Plantilla> plantillaAlumnoOptional = servicio.plantillaPorNombre(valorCelda);
                 if (plantillaAlumnoOptional.isPresent()) {
                     Plantilla plantillaAlumno = plantillaAlumnoOptional.get();
@@ -415,7 +435,7 @@ public class ServicioArchivos {
 
         // Crear la fila de cabecera
         Row headerRow = sheet.createRow(0);
-        String[] headers = {"Nombre Asistente", "Nombre Curso", "Días Curso", "Número Horas", "Correlativo Interno", 
+        String[] headers = {"Nombre Asistente", "Nombre Curso", "Días Curso", "Número Horas", 
                             "Cliente", "Identificador", "Código", "Nota Aprobación", "Relator", "Asistencia", "Estado", 
                             "Diploma", "RUT", "Correo", "Plantilla", "Ubiación", "Emision"};
         
@@ -435,7 +455,6 @@ public class ServicioArchivos {
             row.createCell(1).setCellValue(safeGet(alumnoDTO.getNombreCurso()));
             row.createCell(2).setCellValue(safeGet(alumnoDTO.getDiasCursos()));
             row.createCell(3).setCellValue(safeGet(alumnoDTO.getNumeroHoras()));
-            row.createCell(4).setCellValue(safeGet(alumnoDTO.getNumeroCorrelativoInterno()));
             row.createCell(5).setCellValue(safeGet(alumnoDTO.getCliente()));
             row.createCell(6).setCellValue(safeGet(alumnoDTO.getIdentificador()));
             row.createCell(8).setCellValue(safeGet(alumnoDTO.getNotaAprovacion()));
