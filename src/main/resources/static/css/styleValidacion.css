@@ -92,6 +92,9 @@ p b{
     border-bottom: 0px;
     padding: 0px;
 }
+#botonDescargar{
+    display: none;
+}
 @media (max-width: 576px) {
 
     .contenedor {

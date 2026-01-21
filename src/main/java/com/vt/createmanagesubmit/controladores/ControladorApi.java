@@ -356,8 +356,9 @@ public class ControladorApi {
 
     @PostMapping("/dataBaseAlumno/downloadForQr")
     public CompletableFuture<ResponseEntity<?>> downloadCertificateQr(@RequestBody Map<String, String> data, HttpServletResponse response) {
-        String id = data.get("id");
         try {
+            String idEnc = data.get("id");
+            String id = String.valueOf(servicioGenerarCertificado.decryptStudentId(idEnc));
             return servicioGenerarCertificado.generateCertificateQR(id, response)
                 .thenApply(result -> ResponseEntity.ok().build());
         } catch (Exception e) {

@@ -861,6 +861,7 @@ public class ControladorBase {
             if(alumno != null){
                 model.addAttribute("alumno",alumno);
                 model.addAttribute("val","Válido");
+                model.addAttribute("idEnc",idEncriptada);
             }else{
                 model.addAttribute("alumno",alumnoError);
                 model.addAttribute("val","No válido");

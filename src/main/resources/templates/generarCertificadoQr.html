@@ -19,7 +19,8 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </head>
-<body>
+<body th:data-id-enc="${idEnc}"
+  th:data-validez="${val}">
     <div class="contenedor">
         <main>
             <div id="carta" class="card">
@@ -32,7 +33,7 @@
                         <div><p><b>C</b>urso:<span th:text="${alumno.nombreCurso}"></span></p></div>
                         <div><p><b>C</b>orrelativo:<span th:text="${alumno.numeroCorrelativoInterno}"></span></p></div>
                     </div>
-                    <div id="divDescargar"><button class="btn-lg btn btn-success">Descargar certificado</button></div>
+                    <div id="divDescargar"><button id="botonDescargar" class="btn-lg btn btn-success">Descargar certificado</button></div>
                 </div>
             </div>
         </main>
