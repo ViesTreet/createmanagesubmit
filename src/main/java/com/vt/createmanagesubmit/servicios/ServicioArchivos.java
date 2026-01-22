@@ -405,6 +405,7 @@ public class ServicioArchivos {
     }
 
     @Transactional
+    @Async
     public void generateCertificatesById(Long id) throws Exception {
         Alumno alumno = alumnoRepo.findById(id).orElseThrow(() -> new Exception("Alumno no encontrado con ID: " + id));
 

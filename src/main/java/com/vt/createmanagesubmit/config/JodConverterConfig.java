@@ -13,6 +13,9 @@ public class JodConverterConfig {
     public OfficeManager officeManager() {
         LocalOfficeManager officeManager = LocalOfficeManager.builder()
                 .portNumbers(2002)
+                .maxTasksPerProcess(1)
+                .taskExecutionTimeout(300000L)  // 5 minutos timeout
+                .taskQueueTimeout(300000L)
                 .install()
                 .build();
         try {

@@ -1,0 +1,612 @@
+2026-01-22T16:39:41.120-03:00  INFO 129391 --- [createmanagesubmit] [main] c.v.c.CreatemanagesubmitApplication      : Starting CreatemanagesubmitApplication using Java 17.0.18 with PID 129391 (/home/mal01/Documentos/Work/createmanagesubmit/target/classes started by mal01 in /home/mal01/Documentos/Work/createmanagesubmit)
+2026-01-22T16:39:41.125-03:00  INFO 129391 --- [createmanagesubmit] [main] c.v.c.CreatemanagesubmitApplication      : No active profile set, falling back to 1 default profile: "default"
+2026-01-22T16:39:44.147-03:00  INFO 129391 --- [createmanagesubmit] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-01-22T16:39:44.422-03:00  INFO 129391 --- [createmanagesubmit] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 253 ms. Found 6 JPA repository interfaces.
+2026-01-22T16:39:44.649-03:00  INFO 129391 --- [createmanagesubmit] [main] faultConfiguringBeanFactoryPostProcessor : No bean named 'errorChannel' has been explicitly defined. Therefore, a default PublishSubscribeChannel will be created.
+2026-01-22T16:39:44.667-03:00  INFO 129391 --- [createmanagesubmit] [main] faultConfiguringBeanFactoryPostProcessor : No bean named 'integrationHeaderChannelRegistry' has been explicitly defined. Therefore, a default DefaultHeaderChannelRegistry will be created.
+2026-01-22T16:39:45.986-03:00  INFO 129391 --- [createmanagesubmit] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-01-22T16:39:46.019-03:00  INFO 129391 --- [createmanagesubmit] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-01-22T16:39:46.022-03:00  INFO 129391 --- [createmanagesubmit] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.50]
+2026-01-22T16:39:46.148-03:00  INFO 129391 --- [createmanagesubmit] [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-01-22T16:39:46.151-03:00  INFO 129391 --- [createmanagesubmit] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 4902 ms
+2026-01-22T16:39:46.697-03:00  INFO 129391 --- [createmanagesubmit] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-01-22T16:39:46.771-03:00  INFO 129391 --- [createmanagesubmit] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.39.Final
+2026-01-22T16:39:46.828-03:00  INFO 129391 --- [createmanagesubmit] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-01-22T16:39:47.277-03:00  INFO 129391 --- [createmanagesubmit] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-01-22T16:39:47.331-03:00  INFO 129391 --- [createmanagesubmit] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-01-22T16:39:47.487-03:00  INFO 129391 --- [createmanagesubmit] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.mariadb.jdbc.Connection@5fafa76d
+2026-01-22T16:39:47.492-03:00  INFO 129391 --- [createmanagesubmit] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-01-22T16:39:47.544-03:00  WARN 129391 --- [createmanagesubmit] [main] org.hibernate.orm.deprecation            : HHH90000025: MariaDBDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-01-22T16:39:47.582-03:00  INFO 129391 --- [createmanagesubmit] [main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 11.8.5
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-01-22T16:39:49.366-03:00  INFO 129391 --- [createmanagesubmit] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-01-22T16:39:49.479-03:00  INFO 129391 --- [createmanagesubmit] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-01-22T16:39:51.220-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-offprocmng-1] o.j.local.office.OfficeDescriptor        : soffice info (from exec path): Product: LibreOffice - Version: ??? - useLongOptionNameGnuStyle: true
+2026-01-22T16:39:51.223-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-offprocmng-2] o.j.local.office.OfficeDescriptor        : soffice info (from exec path): Product: LibreOffice - Version: ??? - useLongOptionNameGnuStyle: true
+2026-01-22T16:39:51.219-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from exec path): Product: LibreOffice - Version: ??? - useLongOptionNameGnuStyle: true
+2026-01-22T16:39:51.329-03:00  INFO 129391 --- [createmanagesubmit] [main] org.quartz.impl.StdSchedulerFactory      : Using default implementation for ThreadExecutor
+2026-01-22T16:39:51.382-03:00  INFO 129391 --- [createmanagesubmit] [main] org.quartz.core.SchedulerSignalerImpl    : Initialized Scheduler Signaller of type: class org.quartz.core.SchedulerSignalerImpl
+2026-01-22T16:39:51.383-03:00  INFO 129391 --- [createmanagesubmit] [main] org.quartz.core.QuartzScheduler          : Quartz Scheduler v2.5.2 created.
+2026-01-22T16:39:51.385-03:00  INFO 129391 --- [createmanagesubmit] [main] org.quartz.simpl.RAMJobStore             : RAMJobStore initialized.
+2026-01-22T16:39:51.387-03:00  INFO 129391 --- [createmanagesubmit] [main] org.quartz.core.QuartzScheduler          : Scheduler meta-data: Quartz Scheduler (v2.5.2) 'schedulerFactoryBean' with instanceId 'NON_CLUSTERED'
+  Scheduler class: 'org.quartz.core.QuartzScheduler' - running locally.
+  NOT STARTED.
+  Currently in standby mode.
+  Number of jobs executed: 0
+  Using thread pool 'org.quartz.simpl.SimpleThreadPool' - with 10 threads.
+  Using job-store 'org.quartz.simpl.RAMJobStore' - which does not support persistence. and is not clustered.
+
+2026-01-22T16:39:51.388-03:00  INFO 129391 --- [createmanagesubmit] [main] org.quartz.impl.StdSchedulerFactory      : Quartz scheduler 'schedulerFactoryBean' initialized from an externally provided properties instance.
+2026-01-22T16:39:51.389-03:00  INFO 129391 --- [createmanagesubmit] [main] org.quartz.impl.StdSchedulerFactory      : Quartz scheduler version: 2.5.2
+2026-01-22T16:39:51.391-03:00  INFO 129391 --- [createmanagesubmit] [main] org.quartz.core.QuartzScheduler          : JobFactory set to: org.springframework.scheduling.quartz.SpringBeanJobFactory@51617b93
+2026-01-22T16:39:51.536-03:00  INFO 129391 --- [createmanagesubmit] [main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page template: index
+2026-01-22T16:39:51.927-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-offprocmng-1] o.j.local.office.OfficeDescriptor        : soffice info (from help output): Product: LibreOffice - Version: 25.8.4.2 - useLongOptionNameGnuStyle: true
+2026-01-22T16:39:51.945-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from help output): Product: LibreOffice - Version: 25.8.4.2 - useLongOptionNameGnuStyle: true
+2026-01-22T16:39:51.992-03:00  WARN 129391 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : A process with --accept 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1;urp;StarOffice.ServiceManager' is already running; pid 125268; trying to kill it...
+2026-01-22T16:39:52.136-03:00  WARN 129391 --- [createmanagesubmit] [jodconverter-offprocmng-1] o.j.l.office.LocalOfficeProcessManager   : A process with --accept 'socket,host=127.0.0.1,port=2003,tcpNoDelay=1;urp;StarOffice.ServiceManager' is already running; pid 125215; trying to kill it...
+2026-01-22T16:39:52.212-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-offprocmng-2] o.j.local.office.OfficeDescriptor        : soffice info (from help output): Product: LibreOffice - Version: 25.8.4.2 - useLongOptionNameGnuStyle: true
+2026-01-22T16:39:52.251-03:00  WARN 129391 --- [createmanagesubmit] [jodconverter-offprocmng-2] o.j.l.office.LocalOfficeProcessManager   : A process with --accept 'socket,host=127.0.0.1,port=2004,tcpNoDelay=1;urp;StarOffice.ServiceManager' is already running; pid 125259; trying to kill it...
+2026-01-22T16:39:53.068-03:00  WARN 129391 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Profile dir '/tmp/.jodconverter_socket_host-127.0.0.1_port-2002_tcpNoDelay-1' already exists; deleting
+2026-01-22T16:39:53.123-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Starting process with --accept 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1;urp;StarOffice.ServiceManager' and profileDir '/tmp/.jodconverter_socket_host-127.0.0.1_port-2002_tcpNoDelay-1'
+2026-01-22T16:39:53.325-03:00  WARN 129391 --- [createmanagesubmit] [jodconverter-offprocmng-1] o.j.l.office.LocalOfficeProcessManager   : Profile dir '/tmp/.jodconverter_socket_host-127.0.0.1_port-2003_tcpNoDelay-1' already exists; deleting
+2026-01-22T16:39:53.395-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-offprocmng-1] o.j.l.office.LocalOfficeProcessManager   : Starting process with --accept 'socket,host=127.0.0.1,port=2003,tcpNoDelay=1;urp;StarOffice.ServiceManager' and profileDir '/tmp/.jodconverter_socket_host-127.0.0.1_port-2003_tcpNoDelay-1'
+2026-01-22T16:39:53.477-03:00  WARN 129391 --- [createmanagesubmit] [jodconverter-offprocmng-2] o.j.l.office.LocalOfficeProcessManager   : Profile dir '/tmp/.jodconverter_socket_host-127.0.0.1_port-2004_tcpNoDelay-1' already exists; deleting
+2026-01-22T16:39:53.510-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-offprocmng-2] o.j.l.office.LocalOfficeProcessManager   : Starting process with --accept 'socket,host=127.0.0.1,port=2004,tcpNoDelay=1;urp;StarOffice.ServiceManager' and profileDir '/tmp/.jodconverter_socket_host-127.0.0.1_port-2004_tcpNoDelay-1'
+2026-01-22T16:39:54.037-03:00  INFO 129391 --- [createmanagesubmit] [main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+2026-01-22T16:39:54.549-03:00  INFO 129391 --- [createmanagesubmit] [main] o.s.i.endpoint.EventDrivenConsumer       : Adding {logging-channel-adapter:_org.springframework.integration.errorLogger} as a subscriber to the 'errorChannel' channel
+2026-01-22T16:39:54.551-03:00  INFO 129391 --- [createmanagesubmit] [main] o.s.i.channel.PublishSubscribeChannel    : Channel 'createmanagesubmit.errorChannel' has 1 subscriber(s).
+2026-01-22T16:39:54.552-03:00  INFO 129391 --- [createmanagesubmit] [main] o.s.i.endpoint.EventDrivenConsumer       : started bean '_org.springframework.integration.errorLogger'
+2026-01-22T16:39:54.609-03:00  INFO 129391 --- [createmanagesubmit] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-01-22T16:39:54.611-03:00  INFO 129391 --- [createmanagesubmit] [main] o.s.s.quartz.SchedulerFactoryBean        : Starting Quartz Scheduler now
+2026-01-22T16:39:54.616-03:00  INFO 129391 --- [createmanagesubmit] [main] org.quartz.core.QuartzScheduler          : Scheduler schedulerFactoryBean_$_NON_CLUSTERED started.
+2026-01-22T16:39:54.684-03:00  WARN 129391 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.o.StartProcessAndConnectRetryable  : Office process died with exit code 81; restarting it
+2026-01-22T16:39:54.802-03:00  INFO 129391 --- [createmanagesubmit] [main] c.v.c.CreatemanagesubmitApplication      : Started CreatemanagesubmitApplication in 14.569 seconds (process running for 15.931)
+2026-01-22T16:39:55.279-03:00  WARN 129391 --- [createmanagesubmit] [jodconverter-offprocmng-2] o.j.l.o.StartProcessAndConnectRetryable  : Office process died with exit code 81; restarting it
+2026-01-22T16:39:55.763-03:00  INFO 129391 --- [createmanagesubmit] [RMI TCP Connection(2)-127.0.0.1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-01-22T16:39:55.764-03:00  INFO 129391 --- [createmanagesubmit] [RMI TCP Connection(2)-127.0.0.1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-01-22T16:39:55.768-03:00  INFO 129391 --- [createmanagesubmit] [RMI TCP Connection(2)-127.0.0.1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 3 ms
+2026-01-22T16:39:57.157-03:00  WARN 129391 --- [createmanagesubmit] [jodconverter-offprocmng-1] o.j.l.o.StartProcessAndConnectRetryable  : Office process died with exit code 81; restarting it
+2026-01-22T16:39:57.808-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeConnection        : Connected: 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T16:39:57.810-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Started process; pid: 129831
+2026-01-22T16:39:57.964-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-offprocmng-2] o.j.local.office.OfficeConnection        : Connected: 'socket,host=127.0.0.1,port=2004,tcpNoDelay=1'
+2026-01-22T16:39:57.964-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-offprocmng-2] o.j.l.office.LocalOfficeProcessManager   : Started process; pid: 129855
+2026-01-22T16:39:59.035-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-offprocmng-1] o.j.local.office.OfficeConnection        : Connected: 'socket,host=127.0.0.1,port=2003,tcpNoDelay=1'
+2026-01-22T16:39:59.036-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-offprocmng-1] o.j.l.office.LocalOfficeProcessManager   : Started process; pid: 129891
+2026-01-22T16:40:15.070-03:00  WARN 129391 --- [createmanagesubmit] [Office-1] org.apache.poi.sl.image.ImageHeaderWMF   : WMF file doesn't contain a placeable header - ignore parsing
+2026-01-22T16:40:15.568-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-poolentry-3] o.j.local.task.LocalConversionTask       : Executing local conversion task [pptx -> pdf]...
+2026-01-22T16:40:24.343-03:00  WARN 129391 --- [createmanagesubmit] [Office-1] org.apache.poi.sl.image.ImageHeaderWMF   : WMF file doesn't contain a placeable header - ignore parsing
+2026-01-22T16:40:24.556-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-poolentry-4] o.j.local.task.LocalConversionTask       : Executing local conversion task [pptx -> pdf]...
+2026-01-22T16:40:25.304-03:00  WARN 129391 --- [createmanagesubmit] [Office-1] org.apache.poi.sl.image.ImageHeaderWMF   : WMF file doesn't contain a placeable header - ignore parsing
+2026-01-22T16:40:25.519-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-poolentry-5] o.j.local.task.LocalConversionTask       : Executing local conversion task [pptx -> pdf]...
+2026-01-22T16:40:26.140-03:00  WARN 129391 --- [createmanagesubmit] [Office-1] org.apache.poi.sl.image.ImageHeaderWMF   : WMF file doesn't contain a placeable header - ignore parsing
+2026-01-22T16:40:26.326-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-poolentry-3] o.j.local.task.LocalConversionTask       : Executing local conversion task [pptx -> pdf]...
+2026-01-22T16:41:09.253-03:00  INFO 129391 --- [createmanagesubmit] [SpringApplicationShutdownHook] org.quartz.core.QuartzScheduler          : Scheduler schedulerFactoryBean_$_NON_CLUSTERED paused.
+2026-01-22T16:41:09.258-03:00  INFO 129391 --- [createmanagesubmit] [SpringApplicationShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2026-01-22T16:41:09.263-03:00  INFO 129391 --- [createmanagesubmit] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2026-01-22T16:41:09.271-03:00  INFO 129391 --- [createmanagesubmit] [MessageDispatcher] o.j.local.office.OfficeConnection        : Disconnected from 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T16:41:09.272-03:00  WARN 129391 --- [createmanagesubmit] [MessageDispatcher] o.j.l.o.LocalOfficeManagerPoolEntry      : Connection lost unexpectedly; attempting restart
+2026-01-22T16:41:09.272-03:00  INFO 129391 --- [createmanagesubmit] [MessageDispatcher] o.j.l.office.LocalOfficeProcessManager   : Restarting due to lost connection...
+2026-01-22T16:41:09.287-03:00  INFO 129391 --- [createmanagesubmit] [SpringApplicationShutdownHook] o.s.i.endpoint.EventDrivenConsumer       : Removing {logging-channel-adapter:_org.springframework.integration.errorLogger} as a subscriber to the 'errorChannel' channel
+2026-01-22T16:41:09.288-03:00  INFO 129391 --- [createmanagesubmit] [SpringApplicationShutdownHook] o.s.i.channel.PublishSubscribeChannel    : Channel 'createmanagesubmit.errorChannel' has 0 subscriber(s).
+2026-01-22T16:41:09.293-03:00  INFO 129391 --- [createmanagesubmit] [SpringApplicationShutdownHook] o.s.i.endpoint.EventDrivenConsumer       : stopped bean '_org.springframework.integration.errorLogger'
+2026-01-22T16:41:09.298-03:00  INFO 129391 --- [createmanagesubmit] [MessageDispatcher] o.j.local.office.OfficeConnection        : Disconnected from 'socket,host=127.0.0.1,port=2004,tcpNoDelay=1'
+2026-01-22T16:41:09.298-03:00  WARN 129391 --- [createmanagesubmit] [MessageDispatcher] o.j.l.o.LocalOfficeManagerPoolEntry      : Connection lost unexpectedly; attempting restart
+2026-01-22T16:41:09.299-03:00  INFO 129391 --- [createmanagesubmit] [MessageDispatcher] o.j.l.office.LocalOfficeProcessManager   : Restarting due to lost connection...
+2026-01-22T16:41:09.302-03:00  INFO 129391 --- [createmanagesubmit] [MessageDispatcher] o.j.local.office.OfficeConnection        : Disconnected from 'socket,host=127.0.0.1,port=2003,tcpNoDelay=1'
+2026-01-22T16:41:09.302-03:00  WARN 129391 --- [createmanagesubmit] [MessageDispatcher] o.j.l.o.LocalOfficeManagerPoolEntry      : Connection lost unexpectedly; attempting restart
+2026-01-22T16:41:09.302-03:00  INFO 129391 --- [createmanagesubmit] [MessageDispatcher] o.j.l.office.LocalOfficeProcessManager   : Restarting due to lost connection...
+2026-01-22T16:41:09.344-03:00  INFO 129391 --- [createmanagesubmit] [SpringApplicationShutdownHook] o.s.s.quartz.SchedulerFactoryBean        : Shutting down Quartz Scheduler
+2026-01-22T16:41:09.346-03:00  INFO 129391 --- [createmanagesubmit] [SpringApplicationShutdownHook] org.quartz.core.QuartzScheduler          : Scheduler schedulerFactoryBean_$_NON_CLUSTERED shutting down.
+2026-01-22T16:41:09.346-03:00  INFO 129391 --- [createmanagesubmit] [SpringApplicationShutdownHook] org.quartz.core.QuartzScheduler          : Scheduler schedulerFactoryBean_$_NON_CLUSTERED paused.
+2026-01-22T16:41:09.347-03:00  INFO 129391 --- [createmanagesubmit] [SpringApplicationShutdownHook] org.quartz.core.QuartzScheduler          : Scheduler schedulerFactoryBean_$_NON_CLUSTERED shutdown complete.
+2026-01-22T16:41:09.347-03:00  INFO 129391 --- [createmanagesubmit] [SpringApplicationShutdownHook] o.j.c.office.AbstractOfficeManagerPool   : Stopping the office manager pool...
+2026-01-22T16:41:09.528-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Process exited with code 255
+2026-01-22T16:41:09.535-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from exec path): Product: LibreOffice - Version: ??? - useLongOptionNameGnuStyle: true
+2026-01-22T16:41:09.554-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-offprocmng-1] o.j.l.office.LocalOfficeProcessManager   : Process exited with code 255
+2026-01-22T16:41:09.563-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-offprocmng-2] o.j.l.office.LocalOfficeProcessManager   : Process exited with code 255
+2026-01-22T16:41:09.581-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-offprocmng-2] o.j.local.office.OfficeDescriptor        : soffice info (from exec path): Product: LibreOffice - Version: ??? - useLongOptionNameGnuStyle: true
+2026-01-22T16:41:09.583-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-offprocmng-1] o.j.local.office.OfficeDescriptor        : soffice info (from exec path): Product: LibreOffice - Version: ??? - useLongOptionNameGnuStyle: true
+2026-01-22T16:41:09.792-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from help output): Product: LibreOffice - Version: 25.8.4.2 - useLongOptionNameGnuStyle: true
+2026-01-22T16:41:09.811-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-offprocmng-1] o.j.local.office.OfficeDescriptor        : soffice info (from help output): Product: LibreOffice - Version: 25.8.4.2 - useLongOptionNameGnuStyle: true
+2026-01-22T16:41:09.832-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Starting process with --accept 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1;urp;StarOffice.ServiceManager' and profileDir '/tmp/.jodconverter_socket_host-127.0.0.1_port-2002_tcpNoDelay-1'
+2026-01-22T16:41:09.854-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-offprocmng-2] o.j.local.office.OfficeDescriptor        : soffice info (from help output): Product: LibreOffice - Version: 25.8.4.2 - useLongOptionNameGnuStyle: true
+2026-01-22T16:41:09.868-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-offprocmng-1] o.j.l.office.LocalOfficeProcessManager   : Starting process with --accept 'socket,host=127.0.0.1,port=2003,tcpNoDelay=1;urp;StarOffice.ServiceManager' and profileDir '/tmp/.jodconverter_socket_host-127.0.0.1_port-2003_tcpNoDelay-1'
+2026-01-22T16:41:09.959-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-offprocmng-2] o.j.l.office.LocalOfficeProcessManager   : Starting process with --accept 'socket,host=127.0.0.1,port=2004,tcpNoDelay=1;urp;StarOffice.ServiceManager' and profileDir '/tmp/.jodconverter_socket_host-127.0.0.1_port-2004_tcpNoDelay-1'
+2026-01-22T16:41:10.906-03:00  WARN 129391 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.o.StartProcessAndConnectRetryable  : Office process died with exit code 81; restarting it
+2026-01-22T16:41:10.996-03:00  WARN 129391 --- [createmanagesubmit] [jodconverter-offprocmng-1] o.j.l.o.StartProcessAndConnectRetryable  : Office process died with exit code 81; restarting it
+2026-01-22T16:41:11.117-03:00  WARN 129391 --- [createmanagesubmit] [jodconverter-offprocmng-2] o.j.l.o.StartProcessAndConnectRetryable  : Office process died with exit code 81; restarting it
+2026-01-22T16:41:12.265-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeConnection        : Connected: 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T16:41:12.266-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Started process; pid: 131174
+2026-01-22T16:41:12.310-03:00  INFO 129391 --- [createmanagesubmit] [MessageDispatcher] o.j.local.office.OfficeConnection        : Disconnected from 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T16:41:12.540-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Process exited with code 0
+2026-01-22T16:41:13.089-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-offprocmng-1] o.j.local.office.OfficeConnection        : Connected: 'socket,host=127.0.0.1,port=2003,tcpNoDelay=1'
+2026-01-22T16:41:13.090-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-offprocmng-1] o.j.l.office.LocalOfficeProcessManager   : Started process; pid: 131183
+2026-01-22T16:41:13.117-03:00  INFO 129391 --- [createmanagesubmit] [MessageDispatcher] o.j.local.office.OfficeConnection        : Disconnected from 'socket,host=127.0.0.1,port=2003,tcpNoDelay=1'
+2026-01-22T16:41:13.189-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-offprocmng-2] o.j.local.office.OfficeConnection        : Connected: 'socket,host=127.0.0.1,port=2004,tcpNoDelay=1'
+2026-01-22T16:41:13.191-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-offprocmng-2] o.j.l.office.LocalOfficeProcessManager   : Started process; pid: 131203
+2026-01-22T16:41:13.344-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-offprocmng-1] o.j.l.office.LocalOfficeProcessManager   : Process exited with code 0
+2026-01-22T16:41:13.417-03:00  INFO 129391 --- [createmanagesubmit] [MessageDispatcher] o.j.local.office.OfficeConnection        : Disconnected from 'socket,host=127.0.0.1,port=2004,tcpNoDelay=1'
+2026-01-22T16:41:13.616-03:00  INFO 129391 --- [createmanagesubmit] [jodconverter-offprocmng-2] o.j.l.office.LocalOfficeProcessManager   : Process exited with code 0
+2026-01-22T16:41:13.642-03:00  INFO 129391 --- [createmanagesubmit] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-01-22T16:41:13.663-03:00  INFO 129391 --- [createmanagesubmit] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-01-22T16:41:13.682-03:00  INFO 129391 --- [createmanagesubmit] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2026-01-22T16:46:35.400-03:00  INFO 135680 --- [createmanagesubmit] [main] c.v.c.CreatemanagesubmitApplication      : Starting CreatemanagesubmitApplication using Java 17.0.18 with PID 135680 (/home/mal01/Documentos/Work/createmanagesubmit/target/classes started by mal01 in /home/mal01/Documentos/Work/createmanagesubmit)
+2026-01-22T16:46:35.407-03:00  INFO 135680 --- [createmanagesubmit] [main] c.v.c.CreatemanagesubmitApplication      : No active profile set, falling back to 1 default profile: "default"
+2026-01-22T16:46:38.055-03:00  INFO 135680 --- [createmanagesubmit] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-01-22T16:46:38.283-03:00  INFO 135680 --- [createmanagesubmit] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 199 ms. Found 6 JPA repository interfaces.
+2026-01-22T16:46:38.481-03:00  INFO 135680 --- [createmanagesubmit] [main] faultConfiguringBeanFactoryPostProcessor : No bean named 'errorChannel' has been explicitly defined. Therefore, a default PublishSubscribeChannel will be created.
+2026-01-22T16:46:38.500-03:00  INFO 135680 --- [createmanagesubmit] [main] faultConfiguringBeanFactoryPostProcessor : No bean named 'integrationHeaderChannelRegistry' has been explicitly defined. Therefore, a default DefaultHeaderChannelRegistry will be created.
+2026-01-22T16:46:39.662-03:00  INFO 135680 --- [createmanagesubmit] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-01-22T16:46:39.693-03:00  INFO 135680 --- [createmanagesubmit] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-01-22T16:46:39.695-03:00  INFO 135680 --- [createmanagesubmit] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.50]
+2026-01-22T16:46:39.791-03:00  INFO 135680 --- [createmanagesubmit] [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-01-22T16:46:39.793-03:00  INFO 135680 --- [createmanagesubmit] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 4218 ms
+2026-01-22T16:46:40.333-03:00  INFO 135680 --- [createmanagesubmit] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-01-22T16:46:40.430-03:00  INFO 135680 --- [createmanagesubmit] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.39.Final
+2026-01-22T16:46:40.495-03:00  INFO 135680 --- [createmanagesubmit] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-01-22T16:46:40.998-03:00  INFO 135680 --- [createmanagesubmit] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-01-22T16:46:41.055-03:00  INFO 135680 --- [createmanagesubmit] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-01-22T16:46:41.188-03:00  INFO 135680 --- [createmanagesubmit] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.mariadb.jdbc.Connection@74f89bad
+2026-01-22T16:46:41.191-03:00  INFO 135680 --- [createmanagesubmit] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-01-22T16:46:41.237-03:00  WARN 135680 --- [createmanagesubmit] [main] org.hibernate.orm.deprecation            : HHH90000025: MariaDBDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-01-22T16:46:41.275-03:00  INFO 135680 --- [createmanagesubmit] [main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 11.8.5
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-01-22T16:46:43.327-03:00  INFO 135680 --- [createmanagesubmit] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-01-22T16:46:43.428-03:00  INFO 135680 --- [createmanagesubmit] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-01-22T16:46:45.119-03:00  INFO 135680 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from exec path): Product: LibreOffice - Version: ??? - useLongOptionNameGnuStyle: true
+2026-01-22T16:46:45.127-03:00  INFO 135680 --- [createmanagesubmit] [jodconverter-offprocmng-1] o.j.local.office.OfficeDescriptor        : soffice info (from exec path): Product: LibreOffice - Version: ??? - useLongOptionNameGnuStyle: true
+2026-01-22T16:46:45.132-03:00  INFO 135680 --- [createmanagesubmit] [jodconverter-offprocmng-2] o.j.local.office.OfficeDescriptor        : soffice info (from exec path): Product: LibreOffice - Version: ??? - useLongOptionNameGnuStyle: true
+2026-01-22T16:46:45.402-03:00  INFO 135680 --- [createmanagesubmit] [main] org.quartz.impl.StdSchedulerFactory      : Using default implementation for ThreadExecutor
+2026-01-22T16:46:45.432-03:00  INFO 135680 --- [createmanagesubmit] [main] org.quartz.core.SchedulerSignalerImpl    : Initialized Scheduler Signaller of type: class org.quartz.core.SchedulerSignalerImpl
+2026-01-22T16:46:45.433-03:00  INFO 135680 --- [createmanagesubmit] [main] org.quartz.core.QuartzScheduler          : Quartz Scheduler v2.5.2 created.
+2026-01-22T16:46:45.435-03:00  INFO 135680 --- [createmanagesubmit] [main] org.quartz.simpl.RAMJobStore             : RAMJobStore initialized.
+2026-01-22T16:46:45.437-03:00  INFO 135680 --- [createmanagesubmit] [main] org.quartz.core.QuartzScheduler          : Scheduler meta-data: Quartz Scheduler (v2.5.2) 'schedulerFactoryBean' with instanceId 'NON_CLUSTERED'
+  Scheduler class: 'org.quartz.core.QuartzScheduler' - running locally.
+  NOT STARTED.
+  Currently in standby mode.
+  Number of jobs executed: 0
+  Using thread pool 'org.quartz.simpl.SimpleThreadPool' - with 10 threads.
+  Using job-store 'org.quartz.simpl.RAMJobStore' - which does not support persistence. and is not clustered.
+
+2026-01-22T16:46:45.438-03:00  INFO 135680 --- [createmanagesubmit] [main] org.quartz.impl.StdSchedulerFactory      : Quartz scheduler 'schedulerFactoryBean' initialized from an externally provided properties instance.
+2026-01-22T16:46:45.438-03:00  INFO 135680 --- [createmanagesubmit] [main] org.quartz.impl.StdSchedulerFactory      : Quartz scheduler version: 2.5.2
+2026-01-22T16:46:45.439-03:00  INFO 135680 --- [createmanagesubmit] [main] org.quartz.core.QuartzScheduler          : JobFactory set to: org.springframework.scheduling.quartz.SpringBeanJobFactory@7cc966a9
+2026-01-22T16:46:45.618-03:00  INFO 135680 --- [createmanagesubmit] [main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page template: index
+2026-01-22T16:46:45.715-03:00  INFO 135680 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from help output): Product: LibreOffice - Version: 25.8.4.2 - useLongOptionNameGnuStyle: true
+2026-01-22T16:46:45.853-03:00  INFO 135680 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Starting process with --accept 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1;urp;StarOffice.ServiceManager' and profileDir '/tmp/.jodconverter_socket_host-127.0.0.1_port-2002_tcpNoDelay-1'
+2026-01-22T16:46:45.944-03:00  INFO 135680 --- [createmanagesubmit] [jodconverter-offprocmng-1] o.j.local.office.OfficeDescriptor        : soffice info (from help output): Product: LibreOffice - Version: 25.8.4.2 - useLongOptionNameGnuStyle: true
+2026-01-22T16:46:45.945-03:00  INFO 135680 --- [createmanagesubmit] [jodconverter-offprocmng-2] o.j.local.office.OfficeDescriptor        : soffice info (from help output): Product: LibreOffice - Version: 25.8.4.2 - useLongOptionNameGnuStyle: true
+2026-01-22T16:46:46.009-03:00  INFO 135680 --- [createmanagesubmit] [jodconverter-offprocmng-2] o.j.l.office.LocalOfficeProcessManager   : Starting process with --accept 'socket,host=127.0.0.1,port=2004,tcpNoDelay=1;urp;StarOffice.ServiceManager' and profileDir '/tmp/.jodconverter_socket_host-127.0.0.1_port-2004_tcpNoDelay-1'
+2026-01-22T16:46:46.112-03:00  INFO 135680 --- [createmanagesubmit] [jodconverter-offprocmng-1] o.j.l.office.LocalOfficeProcessManager   : Starting process with --accept 'socket,host=127.0.0.1,port=2003,tcpNoDelay=1;urp;StarOffice.ServiceManager' and profileDir '/tmp/.jodconverter_socket_host-127.0.0.1_port-2003_tcpNoDelay-1'
+2026-01-22T16:46:47.517-03:00  WARN 135680 --- [createmanagesubmit] [jodconverter-offprocmng-2] o.j.l.o.StartProcessAndConnectRetryable  : Office process died with exit code 81; restarting it
+2026-01-22T16:46:47.700-03:00  WARN 135680 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.o.StartProcessAndConnectRetryable  : Office process died with exit code 81; restarting it
+2026-01-22T16:46:47.946-03:00  WARN 135680 --- [createmanagesubmit] [jodconverter-offprocmng-1] o.j.l.o.StartProcessAndConnectRetryable  : Office process died with exit code 81; restarting it
+2026-01-22T16:46:48.552-03:00  INFO 135680 --- [createmanagesubmit] [main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+2026-01-22T16:46:48.977-03:00  INFO 135680 --- [createmanagesubmit] [main] o.s.i.endpoint.EventDrivenConsumer       : Adding {logging-channel-adapter:_org.springframework.integration.errorLogger} as a subscriber to the 'errorChannel' channel
+2026-01-22T16:46:48.980-03:00  INFO 135680 --- [createmanagesubmit] [main] o.s.i.channel.PublishSubscribeChannel    : Channel 'createmanagesubmit.errorChannel' has 1 subscriber(s).
+2026-01-22T16:46:48.981-03:00  INFO 135680 --- [createmanagesubmit] [main] o.s.i.endpoint.EventDrivenConsumer       : started bean '_org.springframework.integration.errorLogger'
+2026-01-22T16:46:49.046-03:00  INFO 135680 --- [createmanagesubmit] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-01-22T16:46:49.053-03:00  INFO 135680 --- [createmanagesubmit] [main] o.s.s.quartz.SchedulerFactoryBean        : Starting Quartz Scheduler now
+2026-01-22T16:46:49.057-03:00  INFO 135680 --- [createmanagesubmit] [main] org.quartz.core.QuartzScheduler          : Scheduler schedulerFactoryBean_$_NON_CLUSTERED started.
+2026-01-22T16:46:49.233-03:00  INFO 135680 --- [createmanagesubmit] [main] c.v.c.CreatemanagesubmitApplication      : Started CreatemanagesubmitApplication in 14.857 seconds (process running for 15.89)
+2026-01-22T16:46:50.534-03:00  INFO 135680 --- [createmanagesubmit] [jodconverter-offprocmng-2] o.j.local.office.OfficeConnection        : Connected: 'socket,host=127.0.0.1,port=2004,tcpNoDelay=1'
+2026-01-22T16:46:50.536-03:00  INFO 135680 --- [createmanagesubmit] [jodconverter-offprocmng-2] o.j.l.office.LocalOfficeProcessManager   : Started process; pid: 136056
+2026-01-22T16:46:50.598-03:00  INFO 135680 --- [createmanagesubmit] [jodconverter-offprocmng-1] o.j.local.office.OfficeConnection        : Connected: 'socket,host=127.0.0.1,port=2003,tcpNoDelay=1'
+2026-01-22T16:46:50.623-03:00  INFO 135680 --- [createmanagesubmit] [jodconverter-offprocmng-1] o.j.l.office.LocalOfficeProcessManager   : Started process; pid: 136086
+2026-01-22T16:46:50.737-03:00  INFO 135680 --- [createmanagesubmit] [RMI TCP Connection(2)-127.0.0.1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-01-22T16:46:50.738-03:00  INFO 135680 --- [createmanagesubmit] [RMI TCP Connection(2)-127.0.0.1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-01-22T16:46:50.743-03:00  INFO 135680 --- [createmanagesubmit] [RMI TCP Connection(2)-127.0.0.1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 3 ms
+2026-01-22T16:46:50.934-03:00  INFO 135680 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeConnection        : Connected: 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T16:46:50.935-03:00  INFO 135680 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Started process; pid: 136074
+2026-01-22T16:47:10.773-03:00  WARN 135680 --- [createmanagesubmit] [PDF-Executor-1] org.apache.poi.sl.image.ImageHeaderWMF   : WMF file doesn't contain a placeable header - ignore parsing
+2026-01-22T16:47:11.381-03:00  INFO 135680 --- [createmanagesubmit] [jodconverter-poolentry-3] o.j.local.task.LocalConversionTask       : Executing local conversion task [pptx -> pdf]...
+2026-01-22T16:47:17.781-03:00  WARN 135680 --- [createmanagesubmit] [PDF-Executor-1] org.apache.poi.sl.image.ImageHeaderWMF   : WMF file doesn't contain a placeable header - ignore parsing
+2026-01-22T16:47:18.045-03:00  INFO 135680 --- [createmanagesubmit] [jodconverter-poolentry-4] o.j.local.task.LocalConversionTask       : Executing local conversion task [pptx -> pdf]...
+2026-01-22T16:47:18.818-03:00  WARN 135680 --- [createmanagesubmit] [PDF-Executor-1] org.apache.poi.sl.image.ImageHeaderWMF   : WMF file doesn't contain a placeable header - ignore parsing
+2026-01-22T16:47:19.053-03:00  INFO 135680 --- [createmanagesubmit] [jodconverter-poolentry-5] o.j.local.task.LocalConversionTask       : Executing local conversion task [pptx -> pdf]...
+2026-01-22T16:47:19.983-03:00  WARN 135680 --- [createmanagesubmit] [PDF-Executor-1] org.apache.poi.sl.image.ImageHeaderWMF   : WMF file doesn't contain a placeable header - ignore parsing
+2026-01-22T16:47:20.247-03:00  INFO 135680 --- [createmanagesubmit] [jodconverter-poolentry-3] o.j.local.task.LocalConversionTask       : Executing local conversion task [pptx -> pdf]...
+2026-01-22T16:54:18.009-03:00  INFO 142925 --- [createmanagesubmit] [main] c.v.c.CreatemanagesubmitApplication      : Starting CreatemanagesubmitApplication using Java 17.0.18 with PID 142925 (/home/mal01/Documentos/Work/createmanagesubmit/target/classes started by mal01 in /home/mal01/Documentos/Work/createmanagesubmit)
+2026-01-22T16:54:18.016-03:00  INFO 142925 --- [createmanagesubmit] [main] c.v.c.CreatemanagesubmitApplication      : No active profile set, falling back to 1 default profile: "default"
+2026-01-22T16:54:20.727-03:00  INFO 142925 --- [createmanagesubmit] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-01-22T16:54:20.987-03:00  INFO 142925 --- [createmanagesubmit] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 244 ms. Found 6 JPA repository interfaces.
+2026-01-22T16:54:21.148-03:00  INFO 142925 --- [createmanagesubmit] [main] faultConfiguringBeanFactoryPostProcessor : No bean named 'errorChannel' has been explicitly defined. Therefore, a default PublishSubscribeChannel will be created.
+2026-01-22T16:54:21.163-03:00  INFO 142925 --- [createmanagesubmit] [main] faultConfiguringBeanFactoryPostProcessor : No bean named 'integrationHeaderChannelRegistry' has been explicitly defined. Therefore, a default DefaultHeaderChannelRegistry will be created.
+2026-01-22T16:54:22.319-03:00  INFO 142925 --- [createmanagesubmit] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-01-22T16:54:22.348-03:00  INFO 142925 --- [createmanagesubmit] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-01-22T16:54:22.349-03:00  INFO 142925 --- [createmanagesubmit] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.50]
+2026-01-22T16:54:22.459-03:00  INFO 142925 --- [createmanagesubmit] [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-01-22T16:54:22.461-03:00  INFO 142925 --- [createmanagesubmit] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 4315 ms
+2026-01-22T16:54:23.003-03:00  INFO 142925 --- [createmanagesubmit] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-01-22T16:54:23.094-03:00  INFO 142925 --- [createmanagesubmit] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.39.Final
+2026-01-22T16:54:23.158-03:00  INFO 142925 --- [createmanagesubmit] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-01-22T16:54:23.656-03:00  INFO 142925 --- [createmanagesubmit] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-01-22T16:54:23.714-03:00  INFO 142925 --- [createmanagesubmit] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-01-22T16:54:23.839-03:00  INFO 142925 --- [createmanagesubmit] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.mariadb.jdbc.Connection@27210a3b
+2026-01-22T16:54:23.842-03:00  INFO 142925 --- [createmanagesubmit] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-01-22T16:54:23.893-03:00  WARN 142925 --- [createmanagesubmit] [main] org.hibernate.orm.deprecation            : HHH90000025: MariaDBDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-01-22T16:54:23.930-03:00  INFO 142925 --- [createmanagesubmit] [main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 11.8.5
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-01-22T16:54:25.901-03:00  INFO 142925 --- [createmanagesubmit] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-01-22T16:54:26.003-03:00  INFO 142925 --- [createmanagesubmit] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-01-22T16:54:27.796-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from exec path): Product: LibreOffice - Version: ??? - useLongOptionNameGnuStyle: true
+2026-01-22T16:54:27.892-03:00  INFO 142925 --- [createmanagesubmit] [main] org.quartz.impl.StdSchedulerFactory      : Using default implementation for ThreadExecutor
+2026-01-22T16:54:27.943-03:00  INFO 142925 --- [createmanagesubmit] [main] org.quartz.core.SchedulerSignalerImpl    : Initialized Scheduler Signaller of type: class org.quartz.core.SchedulerSignalerImpl
+2026-01-22T16:54:27.954-03:00  INFO 142925 --- [createmanagesubmit] [main] org.quartz.core.QuartzScheduler          : Quartz Scheduler v2.5.2 created.
+2026-01-22T16:54:27.959-03:00  INFO 142925 --- [createmanagesubmit] [main] org.quartz.simpl.RAMJobStore             : RAMJobStore initialized.
+2026-01-22T16:54:27.963-03:00  INFO 142925 --- [createmanagesubmit] [main] org.quartz.core.QuartzScheduler          : Scheduler meta-data: Quartz Scheduler (v2.5.2) 'schedulerFactoryBean' with instanceId 'NON_CLUSTERED'
+  Scheduler class: 'org.quartz.core.QuartzScheduler' - running locally.
+  NOT STARTED.
+  Currently in standby mode.
+  Number of jobs executed: 0
+  Using thread pool 'org.quartz.simpl.SimpleThreadPool' - with 10 threads.
+  Using job-store 'org.quartz.simpl.RAMJobStore' - which does not support persistence. and is not clustered.
+
+2026-01-22T16:54:27.965-03:00  INFO 142925 --- [createmanagesubmit] [main] org.quartz.impl.StdSchedulerFactory      : Quartz scheduler 'schedulerFactoryBean' initialized from an externally provided properties instance.
+2026-01-22T16:54:27.965-03:00  INFO 142925 --- [createmanagesubmit] [main] org.quartz.impl.StdSchedulerFactory      : Quartz scheduler version: 2.5.2
+2026-01-22T16:54:27.966-03:00  INFO 142925 --- [createmanagesubmit] [main] org.quartz.core.QuartzScheduler          : JobFactory set to: org.springframework.scheduling.quartz.SpringBeanJobFactory@298f7b0a
+2026-01-22T16:54:28.123-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from help output): Product: LibreOffice - Version: 25.8.4.2 - useLongOptionNameGnuStyle: true
+2026-01-22T16:54:28.159-03:00  INFO 142925 --- [createmanagesubmit] [main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page template: index
+2026-01-22T16:54:28.238-03:00  WARN 142925 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : A process with --accept 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1;urp;StarOffice.ServiceManager' is already running; pid 136074; trying to kill it...
+2026-01-22T16:54:29.300-03:00  WARN 142925 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Profile dir '/tmp/.jodconverter_socket_host-127.0.0.1_port-2002_tcpNoDelay-1' already exists; deleting
+2026-01-22T16:54:29.372-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Starting process with --accept 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1;urp;StarOffice.ServiceManager' and profileDir '/tmp/.jodconverter_socket_host-127.0.0.1_port-2002_tcpNoDelay-1'
+2026-01-22T16:54:29.786-03:00  INFO 142925 --- [createmanagesubmit] [main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+2026-01-22T16:54:29.850-03:00  INFO 142925 --- [createmanagesubmit] [RMI TCP Connection(2)-127.0.0.1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-01-22T16:54:29.859-03:00  INFO 142925 --- [createmanagesubmit] [RMI TCP Connection(2)-127.0.0.1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-01-22T16:54:29.863-03:00  INFO 142925 --- [createmanagesubmit] [RMI TCP Connection(2)-127.0.0.1] o.s.b.f.s.DefaultListableBeanFactory     : Obtaining singleton bean 'webEndpointServletHandlerMapping' in thread "RMI TCP Connection(2)-127.0.0.1" while other thread holds singleton lock for other beans [webEndpointServletHandlerMapping]
+2026-01-22T16:54:29.910-03:00  INFO 142925 --- [createmanagesubmit] [RMI TCP Connection(2)-127.0.0.1] o.s.b.f.s.DefaultListableBeanFactory     : Obtaining singleton bean 'controllerEndpointHandlerMapping' in thread "RMI TCP Connection(2)-127.0.0.1" while other thread holds singleton lock for other beans [controllerEndpointHandlerMapping]
+2026-01-22T16:54:29.936-03:00  INFO 142925 --- [createmanagesubmit] [RMI TCP Connection(2)-127.0.0.1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 75 ms
+2026-01-22T16:54:30.547-03:00  INFO 142925 --- [createmanagesubmit] [main] o.s.i.endpoint.EventDrivenConsumer       : Adding {logging-channel-adapter:_org.springframework.integration.errorLogger} as a subscriber to the 'errorChannel' channel
+2026-01-22T16:54:30.548-03:00  INFO 142925 --- [createmanagesubmit] [main] o.s.i.channel.PublishSubscribeChannel    : Channel 'createmanagesubmit.errorChannel' has 1 subscriber(s).
+2026-01-22T16:54:30.549-03:00  INFO 142925 --- [createmanagesubmit] [main] o.s.i.endpoint.EventDrivenConsumer       : started bean '_org.springframework.integration.errorLogger'
+2026-01-22T16:54:30.816-03:00  INFO 142925 --- [createmanagesubmit] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-01-22T16:54:30.822-03:00  INFO 142925 --- [createmanagesubmit] [main] o.s.s.quartz.SchedulerFactoryBean        : Starting Quartz Scheduler now
+2026-01-22T16:54:30.837-03:00  INFO 142925 --- [createmanagesubmit] [main] org.quartz.core.QuartzScheduler          : Scheduler schedulerFactoryBean_$_NON_CLUSTERED started.
+2026-01-22T16:54:31.077-03:00  INFO 142925 --- [createmanagesubmit] [main] c.v.c.CreatemanagesubmitApplication      : Started CreatemanagesubmitApplication in 13.965 seconds (process running for 14.996)
+2026-01-22T16:54:31.384-03:00  WARN 142925 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.o.StartProcessAndConnectRetryable  : Office process died with exit code 81; restarting it
+2026-01-22T16:54:32.747-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeConnection        : Connected: 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T16:54:32.748-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Started process; pid: 143295
+2026-01-22T16:55:07.820-03:00  WARN 142925 --- [createmanagesubmit] [PDF-Executor-1] org.apache.poi.sl.image.ImageHeaderWMF   : WMF file doesn't contain a placeable header - ignore parsing
+2026-01-22T16:55:08.255-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.local.task.LocalConversionTask       : Executing local conversion task [pptx -> pdf]...
+2026-01-22T16:55:08.920-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.l.o.LocalOfficeManagerPoolEntry      : Reached limit of 1 maximum tasks per process; restarting...
+2026-01-22T16:55:08.921-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.l.office.LocalOfficeProcessManager   : Restarting...
+2026-01-22T16:55:08.966-03:00  INFO 142925 --- [createmanagesubmit] [MessageDispatcher] o.j.local.office.OfficeConnection        : Disconnected from 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T16:55:10.947-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Process exited with code 0
+2026-01-22T16:55:10.948-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from exec path): Product: LibreOffice - Version: ??? - useLongOptionNameGnuStyle: true
+2026-01-22T16:55:11.157-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from help output): Product: LibreOffice - Version: 25.8.4.2 - useLongOptionNameGnuStyle: true
+2026-01-22T16:55:11.191-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Starting process with --accept 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1;urp;StarOffice.ServiceManager' and profileDir '/tmp/.jodconverter_socket_host-127.0.0.1_port-2002_tcpNoDelay-1'
+2026-01-22T16:55:11.737-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeConnection        : Connected: 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T16:55:11.738-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Started process; pid: 143908
+2026-01-22T16:55:14.307-03:00  WARN 142925 --- [createmanagesubmit] [PDF-Executor-1] org.apache.poi.sl.image.ImageHeaderWMF   : WMF file doesn't contain a placeable header - ignore parsing
+2026-01-22T16:55:14.507-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.local.task.LocalConversionTask       : Executing local conversion task [pptx -> pdf]...
+2026-01-22T16:55:15.027-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.l.o.LocalOfficeManagerPoolEntry      : Reached limit of 1 maximum tasks per process; restarting...
+2026-01-22T16:55:15.028-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.l.office.LocalOfficeProcessManager   : Restarting...
+2026-01-22T16:55:15.043-03:00  INFO 142925 --- [createmanagesubmit] [MessageDispatcher] o.j.local.office.OfficeConnection        : Disconnected from 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T16:55:15.245-03:00  WARN 142925 --- [createmanagesubmit] [PDF-Executor-1] org.apache.poi.sl.image.ImageHeaderWMF   : WMF file doesn't contain a placeable header - ignore parsing
+2026-01-22T16:55:17.036-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Process exited with code 0
+2026-01-22T16:55:17.038-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from exec path): Product: LibreOffice - Version: ??? - useLongOptionNameGnuStyle: true
+2026-01-22T16:55:17.219-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from help output): Product: LibreOffice - Version: 25.8.4.2 - useLongOptionNameGnuStyle: true
+2026-01-22T16:55:17.248-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Starting process with --accept 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1;urp;StarOffice.ServiceManager' and profileDir '/tmp/.jodconverter_socket_host-127.0.0.1_port-2002_tcpNoDelay-1'
+2026-01-22T16:55:17.801-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeConnection        : Connected: 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T16:55:17.802-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Started process; pid: 144050
+2026-01-22T16:55:17.802-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.local.task.LocalConversionTask       : Executing local conversion task [pptx -> pdf]...
+2026-01-22T16:55:18.369-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.l.o.LocalOfficeManagerPoolEntry      : Reached limit of 1 maximum tasks per process; restarting...
+2026-01-22T16:55:18.370-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.l.office.LocalOfficeProcessManager   : Restarting...
+2026-01-22T16:55:18.399-03:00  INFO 142925 --- [createmanagesubmit] [MessageDispatcher] o.j.local.office.OfficeConnection        : Disconnected from 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T16:55:18.482-03:00  WARN 142925 --- [createmanagesubmit] [PDF-Executor-1] org.apache.poi.sl.image.ImageHeaderWMF   : WMF file doesn't contain a placeable header - ignore parsing
+2026-01-22T16:55:20.375-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Process exited with code 0
+2026-01-22T16:55:20.376-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from exec path): Product: LibreOffice - Version: ??? - useLongOptionNameGnuStyle: true
+2026-01-22T16:55:20.573-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from help output): Product: LibreOffice - Version: 25.8.4.2 - useLongOptionNameGnuStyle: true
+2026-01-22T16:55:20.606-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Starting process with --accept 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1;urp;StarOffice.ServiceManager' and profileDir '/tmp/.jodconverter_socket_host-127.0.0.1_port-2002_tcpNoDelay-1'
+2026-01-22T16:55:21.169-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeConnection        : Connected: 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T16:55:21.169-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Started process; pid: 144163
+2026-01-22T16:55:21.169-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.local.task.LocalConversionTask       : Executing local conversion task [pptx -> pdf]...
+2026-01-22T16:55:21.810-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.l.o.LocalOfficeManagerPoolEntry      : Reached limit of 1 maximum tasks per process; restarting...
+2026-01-22T16:55:21.810-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.l.office.LocalOfficeProcessManager   : Restarting...
+2026-01-22T16:55:21.839-03:00  INFO 142925 --- [createmanagesubmit] [MessageDispatcher] o.j.local.office.OfficeConnection        : Disconnected from 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T16:55:23.817-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Process exited with code 0
+2026-01-22T16:55:23.818-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from exec path): Product: LibreOffice - Version: ??? - useLongOptionNameGnuStyle: true
+2026-01-22T16:55:24.006-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from help output): Product: LibreOffice - Version: 25.8.4.2 - useLongOptionNameGnuStyle: true
+2026-01-22T16:55:24.035-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Starting process with --accept 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1;urp;StarOffice.ServiceManager' and profileDir '/tmp/.jodconverter_socket_host-127.0.0.1_port-2002_tcpNoDelay-1'
+2026-01-22T16:55:24.594-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeConnection        : Connected: 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T16:55:24.597-03:00  INFO 142925 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Started process; pid: 144256
+2026-01-22T17:06:29.222-03:00  INFO 152889 --- [createmanagesubmit] [main] c.v.c.CreatemanagesubmitApplication      : Starting CreatemanagesubmitApplication using Java 17.0.18 with PID 152889 (/home/mal01/Documentos/Work/createmanagesubmit/target/classes started by mal01 in /home/mal01/Documentos/Work/createmanagesubmit)
+2026-01-22T17:06:29.227-03:00  INFO 152889 --- [createmanagesubmit] [main] c.v.c.CreatemanagesubmitApplication      : No active profile set, falling back to 1 default profile: "default"
+2026-01-22T17:06:32.108-03:00  INFO 152889 --- [createmanagesubmit] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-01-22T17:06:32.374-03:00  INFO 152889 --- [createmanagesubmit] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 243 ms. Found 6 JPA repository interfaces.
+2026-01-22T17:06:32.538-03:00  INFO 152889 --- [createmanagesubmit] [main] faultConfiguringBeanFactoryPostProcessor : No bean named 'errorChannel' has been explicitly defined. Therefore, a default PublishSubscribeChannel will be created.
+2026-01-22T17:06:32.549-03:00  INFO 152889 --- [createmanagesubmit] [main] faultConfiguringBeanFactoryPostProcessor : No bean named 'integrationHeaderChannelRegistry' has been explicitly defined. Therefore, a default DefaultHeaderChannelRegistry will be created.
+2026-01-22T17:06:33.713-03:00  INFO 152889 --- [createmanagesubmit] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-01-22T17:06:33.740-03:00  INFO 152889 --- [createmanagesubmit] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-01-22T17:06:33.742-03:00  INFO 152889 --- [createmanagesubmit] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.50]
+2026-01-22T17:06:33.860-03:00  INFO 152889 --- [createmanagesubmit] [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-01-22T17:06:33.860-03:00  INFO 152889 --- [createmanagesubmit] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 4484 ms
+2026-01-22T17:06:34.372-03:00  INFO 152889 --- [createmanagesubmit] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-01-22T17:06:34.459-03:00  INFO 152889 --- [createmanagesubmit] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.39.Final
+2026-01-22T17:06:34.564-03:00  INFO 152889 --- [createmanagesubmit] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-01-22T17:06:34.990-03:00  INFO 152889 --- [createmanagesubmit] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-01-22T17:06:35.061-03:00  INFO 152889 --- [createmanagesubmit] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-01-22T17:06:35.213-03:00  INFO 152889 --- [createmanagesubmit] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.mariadb.jdbc.Connection@4b99648a
+2026-01-22T17:06:35.217-03:00  INFO 152889 --- [createmanagesubmit] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-01-22T17:06:35.346-03:00  WARN 152889 --- [createmanagesubmit] [main] org.hibernate.orm.deprecation            : HHH90000025: MariaDBDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-01-22T17:06:35.405-03:00  INFO 152889 --- [createmanagesubmit] [main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 11.8.5
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-01-22T17:06:37.309-03:00  INFO 152889 --- [createmanagesubmit] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-01-22T17:06:37.424-03:00  INFO 152889 --- [createmanagesubmit] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-01-22T17:06:39.317-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from exec path): Product: LibreOffice - Version: ??? - useLongOptionNameGnuStyle: true
+2026-01-22T17:06:39.408-03:00  INFO 152889 --- [createmanagesubmit] [main] org.quartz.impl.StdSchedulerFactory      : Using default implementation for ThreadExecutor
+2026-01-22T17:06:39.454-03:00  INFO 152889 --- [createmanagesubmit] [main] org.quartz.core.SchedulerSignalerImpl    : Initialized Scheduler Signaller of type: class org.quartz.core.SchedulerSignalerImpl
+2026-01-22T17:06:39.457-03:00  INFO 152889 --- [createmanagesubmit] [main] org.quartz.core.QuartzScheduler          : Quartz Scheduler v2.5.2 created.
+2026-01-22T17:06:39.459-03:00  INFO 152889 --- [createmanagesubmit] [main] org.quartz.simpl.RAMJobStore             : RAMJobStore initialized.
+2026-01-22T17:06:39.462-03:00  INFO 152889 --- [createmanagesubmit] [main] org.quartz.core.QuartzScheduler          : Scheduler meta-data: Quartz Scheduler (v2.5.2) 'schedulerFactoryBean' with instanceId 'NON_CLUSTERED'
+  Scheduler class: 'org.quartz.core.QuartzScheduler' - running locally.
+  NOT STARTED.
+  Currently in standby mode.
+  Number of jobs executed: 0
+  Using thread pool 'org.quartz.simpl.SimpleThreadPool' - with 10 threads.
+  Using job-store 'org.quartz.simpl.RAMJobStore' - which does not support persistence. and is not clustered.
+
+2026-01-22T17:06:39.472-03:00  INFO 152889 --- [createmanagesubmit] [main] org.quartz.impl.StdSchedulerFactory      : Quartz scheduler 'schedulerFactoryBean' initialized from an externally provided properties instance.
+2026-01-22T17:06:39.473-03:00  INFO 152889 --- [createmanagesubmit] [main] org.quartz.impl.StdSchedulerFactory      : Quartz scheduler version: 2.5.2
+2026-01-22T17:06:39.475-03:00  INFO 152889 --- [createmanagesubmit] [main] org.quartz.core.QuartzScheduler          : JobFactory set to: org.springframework.scheduling.quartz.SpringBeanJobFactory@1368ed98
+2026-01-22T17:06:39.671-03:00  INFO 152889 --- [createmanagesubmit] [main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page template: index
+2026-01-22T17:06:39.690-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from help output): Product: LibreOffice - Version: 25.8.4.2 - useLongOptionNameGnuStyle: true
+2026-01-22T17:06:39.743-03:00  WARN 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : A process with --accept 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1;urp;StarOffice.ServiceManager' is already running; pid 144256; trying to kill it...
+2026-01-22T17:06:40.813-03:00  WARN 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Profile dir '/tmp/.jodconverter_socket_host-127.0.0.1_port-2002_tcpNoDelay-1' already exists; deleting
+2026-01-22T17:06:40.840-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Starting process with --accept 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1;urp;StarOffice.ServiceManager' and profileDir '/tmp/.jodconverter_socket_host-127.0.0.1_port-2002_tcpNoDelay-1'
+2026-01-22T17:06:41.569-03:00  INFO 152889 --- [createmanagesubmit] [main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+2026-01-22T17:06:41.962-03:00  INFO 152889 --- [createmanagesubmit] [main] o.s.i.endpoint.EventDrivenConsumer       : Adding {logging-channel-adapter:_org.springframework.integration.errorLogger} as a subscriber to the 'errorChannel' channel
+2026-01-22T17:06:41.965-03:00  INFO 152889 --- [createmanagesubmit] [main] o.s.i.channel.PublishSubscribeChannel    : Channel 'createmanagesubmit.errorChannel' has 1 subscriber(s).
+2026-01-22T17:06:41.966-03:00  INFO 152889 --- [createmanagesubmit] [main] o.s.i.endpoint.EventDrivenConsumer       : started bean '_org.springframework.integration.errorLogger'
+2026-01-22T17:06:41.999-03:00  INFO 152889 --- [createmanagesubmit] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-01-22T17:06:42.004-03:00  INFO 152889 --- [createmanagesubmit] [main] o.s.s.quartz.SchedulerFactoryBean        : Starting Quartz Scheduler now
+2026-01-22T17:06:42.008-03:00  INFO 152889 --- [createmanagesubmit] [main] org.quartz.core.QuartzScheduler          : Scheduler schedulerFactoryBean_$_NON_CLUSTERED started.
+2026-01-22T17:06:42.120-03:00  INFO 152889 --- [createmanagesubmit] [main] c.v.c.CreatemanagesubmitApplication      : Started CreatemanagesubmitApplication in 13.707 seconds (process running for 14.773)
+2026-01-22T17:06:44.035-03:00  INFO 152889 --- [createmanagesubmit] [RMI TCP Connection(2)-127.0.0.1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-01-22T17:06:44.038-03:00  INFO 152889 --- [createmanagesubmit] [RMI TCP Connection(2)-127.0.0.1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-01-22T17:06:44.042-03:00  INFO 152889 --- [createmanagesubmit] [RMI TCP Connection(2)-127.0.0.1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 3 ms
+2026-01-22T17:06:44.087-03:00  WARN 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.o.StartProcessAndConnectRetryable  : Office process died with exit code 81; restarting it
+2026-01-22T17:06:46.123-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeConnection        : Connected: 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T17:06:46.125-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Started process; pid: 153274
+2026-01-22T17:07:15.899-03:00  WARN 152889 --- [createmanagesubmit] [PDF-Executor-1] org.apache.poi.sl.image.ImageHeaderWMF   : WMF file doesn't contain a placeable header - ignore parsing
+2026-01-22T17:07:16.457-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.local.task.LocalConversionTask       : Executing local conversion task [pptx -> pdf]...
+2026-01-22T17:07:17.190-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.l.o.LocalOfficeManagerPoolEntry      : Reached limit of 1 maximum tasks per process; restarting...
+2026-01-22T17:07:17.190-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.l.office.LocalOfficeProcessManager   : Restarting...
+2026-01-22T17:07:17.234-03:00  INFO 152889 --- [createmanagesubmit] [MessageDispatcher] o.j.local.office.OfficeConnection        : Disconnected from 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T17:07:17.388-03:00  WARN 152889 --- [createmanagesubmit] [PDF-Executor-1] org.apache.poi.sl.image.ImageHeaderWMF   : WMF file doesn't contain a placeable header - ignore parsing
+2026-01-22T17:07:19.211-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Process exited with code 0
+2026-01-22T17:07:19.212-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from exec path): Product: LibreOffice - Version: ??? - useLongOptionNameGnuStyle: true
+2026-01-22T17:07:19.462-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from help output): Product: LibreOffice - Version: 25.8.4.2 - useLongOptionNameGnuStyle: true
+2026-01-22T17:07:19.485-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Starting process with --accept 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1;urp;StarOffice.ServiceManager' and profileDir '/tmp/.jodconverter_socket_host-127.0.0.1_port-2002_tcpNoDelay-1'
+2026-01-22T17:07:20.054-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeConnection        : Connected: 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T17:07:20.054-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.local.task.LocalConversionTask       : Executing local conversion task [pptx -> pdf]...
+2026-01-22T17:07:20.056-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Started process; pid: 153819
+2026-01-22T17:07:20.772-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.l.o.LocalOfficeManagerPoolEntry      : Reached limit of 1 maximum tasks per process; restarting...
+2026-01-22T17:07:20.772-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.l.office.LocalOfficeProcessManager   : Restarting...
+2026-01-22T17:07:20.791-03:00  INFO 152889 --- [createmanagesubmit] [MessageDispatcher] o.j.local.office.OfficeConnection        : Disconnected from 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T17:07:20.914-03:00  WARN 152889 --- [createmanagesubmit] [PDF-Executor-1] org.apache.poi.sl.image.ImageHeaderWMF   : WMF file doesn't contain a placeable header - ignore parsing
+2026-01-22T17:07:22.780-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Process exited with code 0
+2026-01-22T17:07:22.780-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from exec path): Product: LibreOffice - Version: ??? - useLongOptionNameGnuStyle: true
+2026-01-22T17:07:22.944-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from help output): Product: LibreOffice - Version: 25.8.4.2 - useLongOptionNameGnuStyle: true
+2026-01-22T17:07:22.989-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Starting process with --accept 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1;urp;StarOffice.ServiceManager' and profileDir '/tmp/.jodconverter_socket_host-127.0.0.1_port-2002_tcpNoDelay-1'
+2026-01-22T17:07:23.544-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeConnection        : Connected: 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T17:07:23.544-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Started process; pid: 153931
+2026-01-22T17:07:23.545-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.local.task.LocalConversionTask       : Executing local conversion task [pptx -> pdf]...
+2026-01-22T17:07:24.150-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.l.o.LocalOfficeManagerPoolEntry      : Reached limit of 1 maximum tasks per process; restarting...
+2026-01-22T17:07:24.151-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.l.office.LocalOfficeProcessManager   : Restarting...
+2026-01-22T17:07:24.173-03:00  INFO 152889 --- [createmanagesubmit] [MessageDispatcher] o.j.local.office.OfficeConnection        : Disconnected from 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T17:07:24.277-03:00  WARN 152889 --- [createmanagesubmit] [PDF-Executor-1] org.apache.poi.sl.image.ImageHeaderWMF   : WMF file doesn't contain a placeable header - ignore parsing
+2026-01-22T17:07:26.155-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Process exited with code 0
+2026-01-22T17:07:26.156-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from exec path): Product: LibreOffice - Version: ??? - useLongOptionNameGnuStyle: true
+2026-01-22T17:07:26.377-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from help output): Product: LibreOffice - Version: 25.8.4.2 - useLongOptionNameGnuStyle: true
+2026-01-22T17:07:26.419-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Starting process with --accept 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1;urp;StarOffice.ServiceManager' and profileDir '/tmp/.jodconverter_socket_host-127.0.0.1_port-2002_tcpNoDelay-1'
+2026-01-22T17:07:27.312-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeConnection        : Connected: 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T17:07:27.313-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Started process; pid: 154047
+2026-01-22T17:07:27.313-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.local.task.LocalConversionTask       : Executing local conversion task [pptx -> pdf]...
+2026-01-22T17:07:28.136-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.l.o.LocalOfficeManagerPoolEntry      : Reached limit of 1 maximum tasks per process; restarting...
+2026-01-22T17:07:28.137-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.l.office.LocalOfficeProcessManager   : Restarting...
+2026-01-22T17:07:28.169-03:00  INFO 152889 --- [createmanagesubmit] [MessageDispatcher] o.j.local.office.OfficeConnection        : Disconnected from 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T17:07:28.272-03:00  WARN 152889 --- [createmanagesubmit] [PDF-Executor-1] org.apache.poi.sl.image.ImageHeaderWMF   : WMF file doesn't contain a placeable header - ignore parsing
+2026-01-22T17:07:30.146-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Process exited with code 0
+2026-01-22T17:07:30.146-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from exec path): Product: LibreOffice - Version: ??? - useLongOptionNameGnuStyle: true
+2026-01-22T17:07:30.352-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from help output): Product: LibreOffice - Version: 25.8.4.2 - useLongOptionNameGnuStyle: true
+2026-01-22T17:07:30.393-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Starting process with --accept 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1;urp;StarOffice.ServiceManager' and profileDir '/tmp/.jodconverter_socket_host-127.0.0.1_port-2002_tcpNoDelay-1'
+2026-01-22T17:07:30.979-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeConnection        : Connected: 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T17:07:30.980-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Started process; pid: 154164
+2026-01-22T17:07:30.980-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.local.task.LocalConversionTask       : Executing local conversion task [pptx -> pdf]...
+2026-01-22T17:07:31.706-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.l.o.LocalOfficeManagerPoolEntry      : Reached limit of 1 maximum tasks per process; restarting...
+2026-01-22T17:07:31.707-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.l.office.LocalOfficeProcessManager   : Restarting...
+2026-01-22T17:07:31.731-03:00  INFO 152889 --- [createmanagesubmit] [MessageDispatcher] o.j.local.office.OfficeConnection        : Disconnected from 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T17:07:31.851-03:00  WARN 152889 --- [createmanagesubmit] [PDF-Executor-1] org.apache.poi.sl.image.ImageHeaderWMF   : WMF file doesn't contain a placeable header - ignore parsing
+2026-01-22T17:07:33.744-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Process exited with code 0
+2026-01-22T17:07:33.744-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from exec path): Product: LibreOffice - Version: ??? - useLongOptionNameGnuStyle: true
+2026-01-22T17:07:33.932-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from help output): Product: LibreOffice - Version: 25.8.4.2 - useLongOptionNameGnuStyle: true
+2026-01-22T17:07:33.962-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Starting process with --accept 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1;urp;StarOffice.ServiceManager' and profileDir '/tmp/.jodconverter_socket_host-127.0.0.1_port-2002_tcpNoDelay-1'
+2026-01-22T17:07:34.545-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeConnection        : Connected: 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T17:07:34.545-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Started process; pid: 154250
+2026-01-22T17:07:34.546-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.local.task.LocalConversionTask       : Executing local conversion task [pptx -> pdf]...
+2026-01-22T17:07:35.745-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.l.o.LocalOfficeManagerPoolEntry      : Reached limit of 1 maximum tasks per process; restarting...
+2026-01-22T17:07:35.746-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.l.office.LocalOfficeProcessManager   : Restarting...
+2026-01-22T17:07:35.790-03:00  INFO 152889 --- [createmanagesubmit] [MessageDispatcher] o.j.local.office.OfficeConnection        : Disconnected from 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T17:07:37.501-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Process exited with code 0
+2026-01-22T17:07:37.503-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from exec path): Product: LibreOffice - Version: ??? - useLongOptionNameGnuStyle: true
+2026-01-22T17:07:37.729-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from help output): Product: LibreOffice - Version: 25.8.4.2 - useLongOptionNameGnuStyle: true
+2026-01-22T17:07:37.751-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Starting process with --accept 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1;urp;StarOffice.ServiceManager' and profileDir '/tmp/.jodconverter_socket_host-127.0.0.1_port-2002_tcpNoDelay-1'
+2026-01-22T17:07:38.301-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeConnection        : Connected: 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T17:07:38.301-03:00  INFO 152889 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Started process; pid: 154402
+2026-01-22T17:09:45.892-03:00  INFO 156681 --- [createmanagesubmit] [main] c.v.c.CreatemanagesubmitApplication      : Starting CreatemanagesubmitApplication using Java 17.0.18 with PID 156681 (/home/mal01/Documentos/Work/createmanagesubmit/target/classes started by mal01 in /home/mal01/Documentos/Work/createmanagesubmit)
+2026-01-22T17:09:45.905-03:00  INFO 156681 --- [createmanagesubmit] [main] c.v.c.CreatemanagesubmitApplication      : No active profile set, falling back to 1 default profile: "default"
+2026-01-22T17:09:48.589-03:00  INFO 156681 --- [createmanagesubmit] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-01-22T17:09:48.868-03:00  INFO 156681 --- [createmanagesubmit] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 259 ms. Found 6 JPA repository interfaces.
+2026-01-22T17:09:49.009-03:00  INFO 156681 --- [createmanagesubmit] [main] faultConfiguringBeanFactoryPostProcessor : No bean named 'errorChannel' has been explicitly defined. Therefore, a default PublishSubscribeChannel will be created.
+2026-01-22T17:09:49.024-03:00  INFO 156681 --- [createmanagesubmit] [main] faultConfiguringBeanFactoryPostProcessor : No bean named 'integrationHeaderChannelRegistry' has been explicitly defined. Therefore, a default DefaultHeaderChannelRegistry will be created.
+2026-01-22T17:09:50.159-03:00  INFO 156681 --- [createmanagesubmit] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-01-22T17:09:50.185-03:00  INFO 156681 --- [createmanagesubmit] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-01-22T17:09:50.186-03:00  INFO 156681 --- [createmanagesubmit] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.50]
+2026-01-22T17:09:50.317-03:00  INFO 156681 --- [createmanagesubmit] [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-01-22T17:09:50.318-03:00  INFO 156681 --- [createmanagesubmit] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 4268 ms
+2026-01-22T17:09:50.954-03:00  INFO 156681 --- [createmanagesubmit] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-01-22T17:09:51.060-03:00  INFO 156681 --- [createmanagesubmit] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.39.Final
+2026-01-22T17:09:51.122-03:00  INFO 156681 --- [createmanagesubmit] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-01-22T17:09:51.584-03:00  INFO 156681 --- [createmanagesubmit] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-01-22T17:09:51.634-03:00  INFO 156681 --- [createmanagesubmit] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-01-22T17:09:51.779-03:00  INFO 156681 --- [createmanagesubmit] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.mariadb.jdbc.Connection@5ebe903a
+2026-01-22T17:09:51.783-03:00  INFO 156681 --- [createmanagesubmit] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-01-22T17:09:51.836-03:00  WARN 156681 --- [createmanagesubmit] [main] org.hibernate.orm.deprecation            : HHH90000025: MariaDBDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-01-22T17:09:51.879-03:00  INFO 156681 --- [createmanagesubmit] [main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 11.8.5
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-01-22T17:09:53.825-03:00  INFO 156681 --- [createmanagesubmit] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-01-22T17:09:53.936-03:00  INFO 156681 --- [createmanagesubmit] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-01-22T17:09:55.593-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from exec path): Product: LibreOffice - Version: ??? - useLongOptionNameGnuStyle: true
+2026-01-22T17:09:55.684-03:00  INFO 156681 --- [createmanagesubmit] [main] org.quartz.impl.StdSchedulerFactory      : Using default implementation for ThreadExecutor
+2026-01-22T17:09:55.763-03:00  INFO 156681 --- [createmanagesubmit] [main] org.quartz.core.SchedulerSignalerImpl    : Initialized Scheduler Signaller of type: class org.quartz.core.SchedulerSignalerImpl
+2026-01-22T17:09:55.763-03:00  INFO 156681 --- [createmanagesubmit] [main] org.quartz.core.QuartzScheduler          : Quartz Scheduler v2.5.2 created.
+2026-01-22T17:09:55.765-03:00  INFO 156681 --- [createmanagesubmit] [main] org.quartz.simpl.RAMJobStore             : RAMJobStore initialized.
+2026-01-22T17:09:55.767-03:00  INFO 156681 --- [createmanagesubmit] [main] org.quartz.core.QuartzScheduler          : Scheduler meta-data: Quartz Scheduler (v2.5.2) 'schedulerFactoryBean' with instanceId 'NON_CLUSTERED'
+  Scheduler class: 'org.quartz.core.QuartzScheduler' - running locally.
+  NOT STARTED.
+  Currently in standby mode.
+  Number of jobs executed: 0
+  Using thread pool 'org.quartz.simpl.SimpleThreadPool' - with 10 threads.
+  Using job-store 'org.quartz.simpl.RAMJobStore' - which does not support persistence. and is not clustered.
+
+2026-01-22T17:09:55.768-03:00  INFO 156681 --- [createmanagesubmit] [main] org.quartz.impl.StdSchedulerFactory      : Quartz scheduler 'schedulerFactoryBean' initialized from an externally provided properties instance.
+2026-01-22T17:09:55.769-03:00  INFO 156681 --- [createmanagesubmit] [main] org.quartz.impl.StdSchedulerFactory      : Quartz scheduler version: 2.5.2
+2026-01-22T17:09:55.771-03:00  INFO 156681 --- [createmanagesubmit] [main] org.quartz.core.QuartzScheduler          : JobFactory set to: org.springframework.scheduling.quartz.SpringBeanJobFactory@51617b93
+2026-01-22T17:09:55.946-03:00  INFO 156681 --- [createmanagesubmit] [main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page template: index
+2026-01-22T17:09:56.269-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from help output): Product: LibreOffice - Version: 25.8.4.2 - useLongOptionNameGnuStyle: true
+2026-01-22T17:09:56.349-03:00  WARN 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : A process with --accept 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1;urp;StarOffice.ServiceManager' is already running; pid 154402; trying to kill it...
+2026-01-22T17:09:57.461-03:00  WARN 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Profile dir '/tmp/.jodconverter_socket_host-127.0.0.1_port-2002_tcpNoDelay-1' already exists; deleting
+2026-01-22T17:09:57.483-03:00  INFO 156681 --- [createmanagesubmit] [main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+2026-01-22T17:09:57.495-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Starting process with --accept 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1;urp;StarOffice.ServiceManager' and profileDir '/tmp/.jodconverter_socket_host-127.0.0.1_port-2002_tcpNoDelay-1'
+2026-01-22T17:09:58.055-03:00  INFO 156681 --- [createmanagesubmit] [main] o.s.i.endpoint.EventDrivenConsumer       : Adding {logging-channel-adapter:_org.springframework.integration.errorLogger} as a subscriber to the 'errorChannel' channel
+2026-01-22T17:09:58.056-03:00  INFO 156681 --- [createmanagesubmit] [main] o.s.i.channel.PublishSubscribeChannel    : Channel 'createmanagesubmit.errorChannel' has 1 subscriber(s).
+2026-01-22T17:09:58.063-03:00  INFO 156681 --- [createmanagesubmit] [main] o.s.i.endpoint.EventDrivenConsumer       : started bean '_org.springframework.integration.errorLogger'
+2026-01-22T17:09:58.110-03:00  INFO 156681 --- [createmanagesubmit] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-01-22T17:09:58.116-03:00  INFO 156681 --- [createmanagesubmit] [main] o.s.s.quartz.SchedulerFactoryBean        : Starting Quartz Scheduler now
+2026-01-22T17:09:58.118-03:00  INFO 156681 --- [createmanagesubmit] [main] org.quartz.core.QuartzScheduler          : Scheduler schedulerFactoryBean_$_NON_CLUSTERED started.
+2026-01-22T17:09:58.270-03:00  INFO 156681 --- [createmanagesubmit] [main] c.v.c.CreatemanagesubmitApplication      : Started CreatemanagesubmitApplication in 13.303 seconds (process running for 14.395)
+2026-01-22T17:09:58.754-03:00  WARN 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.o.StartProcessAndConnectRetryable  : Office process died with exit code 81; restarting it
+2026-01-22T17:10:00.173-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeConnection        : Connected: 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T17:10:00.175-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Started process; pid: 157028
+2026-01-22T17:10:00.365-03:00  INFO 156681 --- [createmanagesubmit] [RMI TCP Connection(2)-127.0.0.1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-01-22T17:10:00.367-03:00  INFO 156681 --- [createmanagesubmit] [RMI TCP Connection(2)-127.0.0.1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-01-22T17:10:00.370-03:00  INFO 156681 --- [createmanagesubmit] [RMI TCP Connection(2)-127.0.0.1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 3 ms
+2026-01-22T17:10:15.850-03:00  WARN 156681 --- [createmanagesubmit] [Async-1] org.apache.poi.sl.image.ImageHeaderWMF   : WMF file doesn't contain a placeable header - ignore parsing
+2026-01-22T17:10:15.867-03:00  WARN 156681 --- [createmanagesubmit] [Async-3] org.apache.poi.sl.image.ImageHeaderWMF   : WMF file doesn't contain a placeable header - ignore parsing
+2026-01-22T17:10:15.868-03:00  WARN 156681 --- [createmanagesubmit] [Async-2] org.apache.poi.sl.image.ImageHeaderWMF   : WMF file doesn't contain a placeable header - ignore parsing
+2026-01-22T17:10:16.504-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.local.task.LocalConversionTask       : Executing local conversion task [pptx -> pdf]...
+2026-01-22T17:10:17.192-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.l.o.LocalOfficeManagerPoolEntry      : Reached limit of 1 maximum tasks per process; restarting...
+2026-01-22T17:10:17.193-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.l.office.LocalOfficeProcessManager   : Restarting...
+2026-01-22T17:10:17.227-03:00  INFO 156681 --- [createmanagesubmit] [MessageDispatcher] o.j.local.office.OfficeConnection        : Disconnected from 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T17:10:19.207-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Process exited with code 0
+2026-01-22T17:10:19.208-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from exec path): Product: LibreOffice - Version: ??? - useLongOptionNameGnuStyle: true
+2026-01-22T17:10:19.394-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from help output): Product: LibreOffice - Version: 25.8.4.2 - useLongOptionNameGnuStyle: true
+2026-01-22T17:10:19.421-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Starting process with --accept 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1;urp;StarOffice.ServiceManager' and profileDir '/tmp/.jodconverter_socket_host-127.0.0.1_port-2002_tcpNoDelay-1'
+2026-01-22T17:10:19.976-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeConnection        : Connected: 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T17:10:19.976-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Started process; pid: 157412
+2026-01-22T17:10:19.976-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.local.task.LocalConversionTask       : Executing local conversion task [pptx -> pdf]...
+2026-01-22T17:10:20.669-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.l.o.LocalOfficeManagerPoolEntry      : Reached limit of 1 maximum tasks per process; restarting...
+2026-01-22T17:10:20.670-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.l.office.LocalOfficeProcessManager   : Restarting...
+2026-01-22T17:10:20.694-03:00  INFO 156681 --- [createmanagesubmit] [MessageDispatcher] o.j.local.office.OfficeConnection        : Disconnected from 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T17:10:22.686-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Process exited with code 0
+2026-01-22T17:10:22.688-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from exec path): Product: LibreOffice - Version: ??? - useLongOptionNameGnuStyle: true
+2026-01-22T17:10:23.009-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from help output): Product: LibreOffice - Version: 25.8.4.2 - useLongOptionNameGnuStyle: true
+2026-01-22T17:10:23.060-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Starting process with --accept 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1;urp;StarOffice.ServiceManager' and profileDir '/tmp/.jodconverter_socket_host-127.0.0.1_port-2002_tcpNoDelay-1'
+2026-01-22T17:10:23.642-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeConnection        : Connected: 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T17:10:23.642-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Started process; pid: 157520
+2026-01-22T17:10:23.644-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.local.task.LocalConversionTask       : Executing local conversion task [pptx -> pdf]...
+2026-01-22T17:10:24.299-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.l.o.LocalOfficeManagerPoolEntry      : Reached limit of 1 maximum tasks per process; restarting...
+2026-01-22T17:10:24.300-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.l.office.LocalOfficeProcessManager   : Restarting...
+2026-01-22T17:10:24.321-03:00  INFO 156681 --- [createmanagesubmit] [MessageDispatcher] o.j.local.office.OfficeConnection        : Disconnected from 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T17:10:26.309-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Process exited with code 0
+2026-01-22T17:10:26.310-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from exec path): Product: LibreOffice - Version: ??? - useLongOptionNameGnuStyle: true
+2026-01-22T17:10:26.505-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from help output): Product: LibreOffice - Version: 25.8.4.2 - useLongOptionNameGnuStyle: true
+2026-01-22T17:10:26.540-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Starting process with --accept 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1;urp;StarOffice.ServiceManager' and profileDir '/tmp/.jodconverter_socket_host-127.0.0.1_port-2002_tcpNoDelay-1'
+2026-01-22T17:10:27.100-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeConnection        : Connected: 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T17:10:27.101-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Started process; pid: 157632
+2026-01-22T17:10:27.511-03:00  WARN 156681 --- [createmanagesubmit] [Async-3] org.apache.poi.sl.image.ImageHeaderWMF   : WMF file doesn't contain a placeable header - ignore parsing
+2026-01-22T17:10:27.839-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.local.task.LocalConversionTask       : Executing local conversion task [pptx -> pdf]...
+2026-01-22T17:10:28.643-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.l.o.LocalOfficeManagerPoolEntry      : Reached limit of 1 maximum tasks per process; restarting...
+2026-01-22T17:10:28.644-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.l.office.LocalOfficeProcessManager   : Restarting...
+2026-01-22T17:10:28.663-03:00  INFO 156681 --- [createmanagesubmit] [MessageDispatcher] o.j.local.office.OfficeConnection        : Disconnected from 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T17:10:28.782-03:00  WARN 156681 --- [createmanagesubmit] [Async-1] org.apache.poi.sl.image.ImageHeaderWMF   : WMF file doesn't contain a placeable header - ignore parsing
+2026-01-22T17:10:30.650-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Process exited with code 0
+2026-01-22T17:10:30.651-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from exec path): Product: LibreOffice - Version: ??? - useLongOptionNameGnuStyle: true
+2026-01-22T17:10:30.804-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from help output): Product: LibreOffice - Version: 25.8.4.2 - useLongOptionNameGnuStyle: true
+2026-01-22T17:10:30.832-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Starting process with --accept 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1;urp;StarOffice.ServiceManager' and profileDir '/tmp/.jodconverter_socket_host-127.0.0.1_port-2002_tcpNoDelay-1'
+2026-01-22T17:10:31.394-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeConnection        : Connected: 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T17:10:31.395-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Started process; pid: 157742
+2026-01-22T17:10:31.395-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.local.task.LocalConversionTask       : Executing local conversion task [pptx -> pdf]...
+2026-01-22T17:10:32.031-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.l.o.LocalOfficeManagerPoolEntry      : Reached limit of 1 maximum tasks per process; restarting...
+2026-01-22T17:10:32.032-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.l.office.LocalOfficeProcessManager   : Restarting...
+2026-01-22T17:10:32.066-03:00  INFO 156681 --- [createmanagesubmit] [MessageDispatcher] o.j.local.office.OfficeConnection        : Disconnected from 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T17:10:32.227-03:00  WARN 156681 --- [createmanagesubmit] [Async-3] org.apache.poi.sl.image.ImageHeaderWMF   : WMF file doesn't contain a placeable header - ignore parsing
+2026-01-22T17:10:34.040-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Process exited with code 0
+2026-01-22T17:10:34.040-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from exec path): Product: LibreOffice - Version: ??? - useLongOptionNameGnuStyle: true
+2026-01-22T17:10:34.334-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from help output): Product: LibreOffice - Version: 25.8.4.2 - useLongOptionNameGnuStyle: true
+2026-01-22T17:10:34.389-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Starting process with --accept 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1;urp;StarOffice.ServiceManager' and profileDir '/tmp/.jodconverter_socket_host-127.0.0.1_port-2002_tcpNoDelay-1'
+2026-01-22T17:10:34.961-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeConnection        : Connected: 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T17:10:34.962-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.local.task.LocalConversionTask       : Executing local conversion task [pptx -> pdf]...
+2026-01-22T17:10:34.962-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Started process; pid: 157840
+2026-01-22T17:10:35.668-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.l.o.LocalOfficeManagerPoolEntry      : Reached limit of 1 maximum tasks per process; restarting...
+2026-01-22T17:10:35.668-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.l.office.LocalOfficeProcessManager   : Restarting...
+2026-01-22T17:10:35.685-03:00  INFO 156681 --- [createmanagesubmit] [MessageDispatcher] o.j.local.office.OfficeConnection        : Disconnected from 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T17:10:37.676-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Process exited with code 0
+2026-01-22T17:10:37.676-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from exec path): Product: LibreOffice - Version: ??? - useLongOptionNameGnuStyle: true
+2026-01-22T17:10:37.870-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from help output): Product: LibreOffice - Version: 25.8.4.2 - useLongOptionNameGnuStyle: true
+2026-01-22T17:10:37.902-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Starting process with --accept 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1;urp;StarOffice.ServiceManager' and profileDir '/tmp/.jodconverter_socket_host-127.0.0.1_port-2002_tcpNoDelay-1'
+2026-01-22T17:10:38.445-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeConnection        : Connected: 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T17:10:38.446-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Started process; pid: 157953
+2026-01-22T17:12:52.096-03:00  WARN 156681 --- [createmanagesubmit] [Async-2] org.apache.poi.sl.image.ImageHeaderWMF   : WMF file doesn't contain a placeable header - ignore parsing
+2026-01-22T17:12:52.320-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.local.task.LocalConversionTask       : Executing local conversion task [pptx -> pdf]...
+2026-01-22T17:12:52.862-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.l.o.LocalOfficeManagerPoolEntry      : Reached limit of 1 maximum tasks per process; restarting...
+2026-01-22T17:12:52.863-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.l.office.LocalOfficeProcessManager   : Restarting...
+2026-01-22T17:12:52.882-03:00  INFO 156681 --- [createmanagesubmit] [MessageDispatcher] o.j.local.office.OfficeConnection        : Disconnected from 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T17:12:54.873-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Process exited with code 0
+2026-01-22T17:12:54.874-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from exec path): Product: LibreOffice - Version: ??? - useLongOptionNameGnuStyle: true
+2026-01-22T17:12:55.158-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from help output): Product: LibreOffice - Version: 25.8.4.2 - useLongOptionNameGnuStyle: true
+2026-01-22T17:12:55.191-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Starting process with --accept 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1;urp;StarOffice.ServiceManager' and profileDir '/tmp/.jodconverter_socket_host-127.0.0.1_port-2002_tcpNoDelay-1'
+2026-01-22T17:12:56.046-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeConnection        : Connected: 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T17:12:56.046-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Started process; pid: 160001
+2026-01-22T17:13:56.770-03:00  WARN 156681 --- [createmanagesubmit] [Async-1] org.apache.poi.sl.image.ImageHeaderWMF   : WMF file doesn't contain a placeable header - ignore parsing
+2026-01-22T17:13:57.011-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.local.task.LocalConversionTask       : Executing local conversion task [pptx -> pdf]...
+2026-01-22T17:13:57.538-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.l.o.LocalOfficeManagerPoolEntry      : Reached limit of 1 maximum tasks per process; restarting...
+2026-01-22T17:13:57.538-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-poolentry-1] o.j.l.office.LocalOfficeProcessManager   : Restarting...
+2026-01-22T17:13:57.555-03:00  INFO 156681 --- [createmanagesubmit] [MessageDispatcher] o.j.local.office.OfficeConnection        : Disconnected from 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T17:13:59.542-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Process exited with code 0
+2026-01-22T17:13:59.543-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from exec path): Product: LibreOffice - Version: ??? - useLongOptionNameGnuStyle: true
+2026-01-22T17:13:59.746-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeDescriptor        : soffice info (from help output): Product: LibreOffice - Version: 25.8.4.2 - useLongOptionNameGnuStyle: true
+2026-01-22T17:13:59.771-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Starting process with --accept 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1;urp;StarOffice.ServiceManager' and profileDir '/tmp/.jodconverter_socket_host-127.0.0.1_port-2002_tcpNoDelay-1'
+2026-01-22T17:14:00.322-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.local.office.OfficeConnection        : Connected: 'socket,host=127.0.0.1,port=2002,tcpNoDelay=1'
+2026-01-22T17:14:00.322-03:00  INFO 156681 --- [createmanagesubmit] [jodconverter-offprocmng-0] o.j.l.office.LocalOfficeProcessManager   : Started process; pid: 161024

@@ -34,6 +34,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -235,6 +238,7 @@ public class ControladorApi {
 
     @PostMapping("/dataBaseAlumno/accionAlumnos")
     @ResponseBody
+    @Transactional
     public ResponseEntity<?> accionAlumnos(@RequestParam("ids") List<Long> ids, @RequestParam("accionElegida") String accionElegida,HttpSession session) throws InterruptedException, ExecutionException, Exception {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuarioTemporal != null) {
@@ -247,7 +251,7 @@ public class ControladorApi {
                     // Generar certificados y guardarlos en la carpeta
                     for (Long id : ids) {
                         Alumno alumno = ser.alumnoPorId(id); // Método que debes tener o implementar
-                        byte[] certificadoBytes = servicioGenerarCertificado.descargarCertificadosServicio(alumno).get();
+                        byte[] certificadoBytes = servicioGenerarCertificado.descargarCertificadosServicio(alumno).join();
 
                         // Guardar cada certificado como un archivo PDF en la carpeta temporal
                         Path certificadoPath = tempDir.resolve("certificado_" + alumno.getNombreAsistente() +"_"+alumno.getNumeroCorrelativoInterno()+ ".pdf");
@@ -296,11 +300,11 @@ public class ControladorApi {
                     try {
                         System.out.println(id);
                         servicioAr.generateCertificatesById(id);
-                        return ResponseEntity.ok().build();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
+                return ResponseEntity.ok().build();
 
             }else if ("descargaJunto".equals(accionElegida)) {
 
@@ -313,7 +317,7 @@ public class ControladorApi {
                     byte[] certificadoBytes =
                             servicioGenerarCertificado
                                     .descargarCertificadosServicio(alumno)
-                                    .get();
+                                    .join();
 
                     merger.addSource(new RandomAccessReadBuffer(certificadoBytes));
                 }
