@@ -601,7 +601,7 @@ public class ControladorBase {
     }
 
     @PostMapping("/dataBasePlantilla/nuevaPlantilla")
-    public String crearNuevaPlantilla(@RequestParam String nombreCertificado,@RequestParam String descripcion,@RequestParam String asistenciaMin,@RequestParam String notaMin,@RequestParam(required = false) MultipartFile pathArchivo,@RequestParam(required = false) String pathArchivoS,@RequestParam(defaultValue = "false") boolean clonarPlantilla,HttpSession session,Model model) {
+    public String crearNuevaPlantilla(@RequestParam String nombreCertificado,@RequestParam String descripcion,@RequestParam String asistenciaMin,@RequestParam String notaMin,@RequestParam(required = false) MultipartFile pathArchivo,@RequestParam(required = false) String pathArchivoS,@RequestParam(defaultValue = "false") boolean clonarPlantilla,@RequestParam(required = false) MultipartFile pathLogo,HttpSession session,Model model) {
 
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuarioTemporal != null) {
@@ -633,11 +633,13 @@ public class ControladorBase {
                 if (clonarPlantilla) {
                     if (pathArchivoS != null && !pathArchivoS.isEmpty()) {
                         nuevaPlantilla.setPathArchivo(servicio.clonarArchivo(pathArchivoS, "/plantillas/"));
+                        nuevaPlantilla.setPathLogo(servicio.guardarArchivo(pathLogo, "/logos/"));
                     } else {
                         throw new IllegalArgumentException("Debe proporcionar una plantilla existente si desea clonar.");
                     }
                 } else if (pathArchivo != null && !pathArchivo.isEmpty()) {
                     nuevaPlantilla.setPathArchivo(servicio.guardarArchivo(pathArchivo, "/plantillas/"));
+                    nuevaPlantilla.setPathLogo(servicio.guardarArchivo(pathLogo, "/logos/"));
                 } else {
                     throw new IllegalArgumentException("Debe proporcionar una plantilla válida para guardar.");
                 }

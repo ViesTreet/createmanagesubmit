@@ -261,8 +261,10 @@ public class Servicio {
         Plantilla plantilla = plantillaPorId(id);
         if(!plantilla.getNombreCertificado().trim().equals("Error en encontrar plantilla")){
             Path deletePlantillaPath = Paths.get(plantilla.getPathArchivo());
+            Path deteleLogoPath = Paths.get(plantilla.getPathLogo());
             try {
                 Files.deleteIfExists(deletePlantillaPath);
+                Files.deleteIfExists(deteleLogoPath);
             } catch (IOException ex) {
                 throw new IOException("No se encontró la ruta de la plantilla.",ex);
             }

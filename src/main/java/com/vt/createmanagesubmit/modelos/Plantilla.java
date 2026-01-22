@@ -32,6 +32,8 @@ public class Plantilla {
 
     private String pathArchivo;
 
+    private String pathLogo;
+
     private int asistenciaMin;
 
     private float notaMin; 
@@ -51,27 +53,23 @@ public class Plantilla {
 
     
 
-
-    public Plantilla(Long id, String nombreCertificado, String descripcion, String tipoArchivo, String pathArchivo,
-            String pathLogo, int asistenciaMin, float notaMin, List<Alumno> alumnos, Date createdAt, Date updatedAt) {
+    public Plantilla(Long id, String nombreCertificado, String descripcion, String pathArchivo, String pathLogo,
+            int asistenciaMin, float notaMin, List<Alumno> alumnos, Date createdAt, Date updatedAt) {
         this.id = id;
         this.nombreCertificado = nombreCertificado;
         this.descripcion = descripcion;
         this.pathArchivo = pathArchivo;
+        this.pathLogo = pathLogo;
         this.asistenciaMin = asistenciaMin;
         this.notaMin = notaMin;
         this.alumnos = alumnos;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
-
     
-
-
     public Long getId() {
         return id;
     }
-
 
 
 
@@ -81,11 +79,9 @@ public class Plantilla {
 
 
 
-
     public String getNombreCertificado() {
         return nombreCertificado;
     }
-
 
 
 
@@ -95,11 +91,9 @@ public class Plantilla {
 
 
 
-
     public String getDescripcion() {
         return descripcion;
     }
-
 
 
 
@@ -108,10 +102,10 @@ public class Plantilla {
     }
 
 
+
     public String getPathArchivo() {
         return pathArchivo;
     }
-
 
 
 
@@ -120,11 +114,22 @@ public class Plantilla {
     }
 
 
-    
+
+    public String getPathLogo() {
+        return pathLogo;
+    }
+
+
+
+    public void setPathLogo(String pathLogo) {
+        this.pathLogo = pathLogo;
+    }
+
+
+
     public int getAsistenciaMin() {
         return asistenciaMin;
     }
-
 
 
 
@@ -134,11 +139,9 @@ public class Plantilla {
 
 
 
-
     public float getNotaMin() {
         return notaMin;
     }
-
 
 
 
@@ -147,10 +150,10 @@ public class Plantilla {
     }
 
 
+
     public List<Alumno> getAlumnos() {
         return alumnos;
     }
-
 
 
 
@@ -160,11 +163,9 @@ public class Plantilla {
 
 
 
-
     public Date getCreatedAt() {
         return createdAt;
     }
-
 
 
 
@@ -174,18 +175,15 @@ public class Plantilla {
 
 
 
-
     public Date getUpdatedAt() {
         return updatedAt;
     }
 
 
 
-
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
     }
-
 
 
 

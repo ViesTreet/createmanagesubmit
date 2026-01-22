@@ -137,8 +137,12 @@ public class ServicioGenerarCertificado {
         alumnoData.put("correlativo", alumno.getNumeroCorrelativoInterno());
         alumnoData.put("modalidad", alumno.getModalidad());
 
+        byte[] logoCliente = Files.readAllBytes(Paths.get(plantilla.getPathLogo()));
+
+
         Map<String, byte[]> imageData = new HashMap<>();
         imageData.put("imagen_qr", qrCodeBytes);
+        imageData.put("imagen_cliente", logoCliente);
 
         for (XSLFSlide slide : ppt.getSlides()) {
             processSlide(slide, alumnoData, imageData);
@@ -429,8 +433,12 @@ public class ServicioGenerarCertificado {
         alumnoData.put("correlativo", alumno.getNumeroCorrelativoInterno());
         alumnoData.put("modalidad", alumno.getModalidad());
 
+        byte[] logoCliente = Files.readAllBytes(Paths.get(plantilla.getPathLogo()));
+
+
         Map<String, byte[]> imageData = new HashMap<>();
         imageData.put("imagen_qr", qrCodeBytes);
+        imageData.put("imagen_cliente", logoCliente);
 
         // Procesa las slides y shapes
         for (XSLFSlide slide : ppt.getSlides()) {
@@ -505,8 +513,12 @@ public class ServicioGenerarCertificado {
         alumnoData.put("correlativo", alumno.getNumeroCorrelativoInterno());
         alumnoData.put("modalidad", alumno.getModalidad());
         
+        byte[] logoCliente = Files.readAllBytes(Paths.get(plantilla.getPathLogo()));
+
+
         Map<String, byte[]> imageData = new HashMap<>();
         imageData.put("imagen_qr", qrCodeBytes);
+        imageData.put("imagen_cliente", logoCliente);
 
 
         // Procesa las slides y shapes
