@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<!--<html lang="es" xmlns:th="http://www.thymeleaf.org">-->
+  <head>
+    <title>Cursos temporales - Asistencia</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/styleCustom.css}" />
+    <link rel="icon" th:href="@{/images/Logobgremove.png}" type="image/x-icon" />
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+
+    <style>    
+      .popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        max-height: 100vh;
+        width: auto;
+        max-width: 90vw;
+        background: #ffffff;
+        padding: 20px 24px;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+        overflow: hidden;
+      }
+
+      .popup h4 {
+        margin-bottom: 20px;
+        font-weight: 600;
+      }
+
+      .popup form {
+        max-height: calc(100vh - 160px);
+        overflow-y: auto;
+        padding-right: 6px;
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(220px, 1fr));
+        gap: 16px;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .form-group label {
+        font-size: 0.9rem;
+        margin-bottom: 4px;
+      }
+
+      .form-actions {
+        margin-top: 20px;
+        text-align: center;
+      }
+
+      .popup::-webkit-scrollbar,
+      form::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .popup::-webkit-scrollbar-thumb,
+      form::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 6px;
+      }
+      /* estilos adaptados del ejemplo */
+      th { font-size: 13px; }
+      td { overflow-x: auto; font-size: 12px; }
+      #filtros-activos .card { margin-right:8px; margin-bottom:8px; }
+      .overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.7); z-index: 1050; }
+      .modal-qr-img { display:block; margin: 0 auto 12px; max-width:100%; height:auto; }
+      @media (max-width:768px) { th, td { font-size: 12px; } #tablaCursos { width: 150vw; } }
+    </style>
+  </head>
+  <body>
+    <header class="d-flex align-items-center justify-content-between p-3 bg-light" style="height: 10vh; z-index: 1">
+      <a th:href="@{/home}" class="logo">
+        <img th:src="@{/images/Logobgremove.png}" alt="[LOGO]" style="height:48px;" />
+      </a>
+      <nav class="d-flex justify-content-center align-items-center flex-nowrap">
+        <a th:href="@{/home}" class="btn btn-primary mx-2">Regresar</a>
+        <a th:href="@{/home}" class="btn btn-primary mx-2">Inicio</a>
+        <a th:href="@{/documentacion}" target="_blank" class="btn btn-primary mx-2">Documentación</a>
+        <div class="d-flex flex-column justify-content-center align-items-center">
+          <i class="fa-solid fa-user"></i>
+          <p class="p-0 m-0" th:text="${admin.nombre}">Usuario</p>
+        </div>
+      </nav>
+    </header>
+
+    <div id="contenderBase" class="container pt-3 pb-3" style="height:90vh;">
+      <h2 class="text-center">Base de datos flyer</h2>
+
+      <div class="d-flex align-items-center justify-content-between pb-2" style="max-width:95vw;">
+        <div style="flex:1;">
+          <form id="cursoBuscador" class="d-flex">
+            <select id="filtroBusquedaCurso" class="form-select" name="filtroBusquedaCurso" style="max-width:180px;">
+              <option value="nombreCurso">Nombre Curso</option>
+              <option value="relator">Relator</option>
+              <option value="cliente">Cliente</option>
+              <option value="estado">Estado</option>
+              <option value="Ubicacion">Ubicación</option>
+            </select>
+            <input id="busquedaCurso" type="search" class="form-control mx-2" placeholder="Buscar" name="busquedaCurso" onkeydown="submitOnEnter(event)" />
+            <button type="button" class="btn btn-outline-primary" onclick="agregarFiltroCurso()">Agregar Filtro</button>
+          </form>
+          <div id="filtros-activos" class="d-flex flex-wrap mt-2"></div>
+        </div>
+
+        <div style="padding-left: 5%;">
+          <button id="btn-open-create" class="btn btn-success" onclick="openCreateModal()">Crear Flyer</button>
+        </div>
+      </div>
+
+      <div id="contenedorTabla" style="overflow-y:auto; max-height:65vh; max-width:95vw;">
+        <table class="table table-hover table-bordered mb-5" style="table-layout: fixed;" id="tablaCursos">
+          <thead class="thead-dark">
+            <tr>
+              <th>Título</th>
+              <th>Relator</th>
+              <th>Cliente</th>
+              <th>Ubicacion</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- llenado por JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+
+    <!-- MODAL CREAR CURSO -->
+    <div class="overlay" id="overlayCreate">
+      <div class="popup">
+        <div class="d-flex justify-content-end mb-2">
+          <button class="btn btn-danger btn-sm" onclick="closeCreateModal()">Cerrar</button>
+        </div>
+
+        <h4 class="text-center">Generar flyer</h4>
+
+        <form id="formCreateCurso" onsubmit="submitCreateForm(event)">
+          <div class="form-grid">
+
+            <div class="form-group" style="grid-column: span 3;">
+              <label for="nombreCurso">Nombre del curso</label>
+              <input required type="text" id="nombreCurso" name="nombreCurso"
+                    class="form-control" maxlength="500" />
+            </div>
+
+            <div class="form-group">
+              <label for="diasCursos">Días</label>
+              <input type="text" id="diasCursos" name="diasCursos" class="form-control" />
+            </div>
+
+            <div class="form-group">
+              <label for="duracion">Duración</label>
+              <input type="text" id="duracion" name="duracion" class="form-control" />
+            </div>
+
+            <div class="form-group">
+              <label for="modalidad">Modalidad</label>
+              <input type="text" id="modalidad" name="modalidad" class="form-control" />
+            </div>
+
+            <div class="form-group">
+              <label for="relator">Relator</label>
+              <input type="text" id="relator" name="relator" class="form-control" />
+            </div>
+
+            <div class="form-group">
+              <label for="cliente">Cliente</label>
+              <input type="text" id="cliente" name="cliente" class="form-control" />
+            </div>
+
+            <div class="form-group">
+              <label for="lugarYfechaEmision">Lugar y fecha emisión</label>
+              <input type="text" id="lugarYfechaEmision" name="lugarYfechaEmision" class="form-control" />
+            </div>
+
+            <div class="form-group">
+              <label for="ubicacionSubida">Ubicación del curso</label>
+              <select id="ubicacionSubida" name="ubicacionSubida" class="form-control" required>
+                <option value="">Seleccione región</option>
+                <option value="arica">Arica y Parinacota</option>
+                <option value="tarapaca">Tarapacá</option>
+                <option value="antofagasta">Antofagasta</option>
+                <option value="atacama">Atacama</option>
+                <option value="coquimbo">Coquimbo</option>
+                <option value="valparaiso">Valparaíso</option>
+                <option value="metropolitana">Metropolitana de Santiago</option>
+                <option value="ohiggins">O'Higgins</option>
+                <option value="maule">Maule</option>
+                <option value="nuble">Ñuble</option>
+                <option value="biobio">Biobío</option>
+                <option value="araucania">La Araucanía</option>
+                <option value="rios">Los Ríos</option>
+                <option value="lagos">Los Lagos</option>
+                <option value="aysen">Aysén</option>
+                <option value="magallanes">Magallanes</option>
+              </select>
+            </div>
+
+          </div>
+
+          <div class="form-actions">
+            <button class="btn btn-success px-4" type="submit">Generar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <footer class="text-center p-3 d-flex justify-content-center align-items-center" style="height:12vh; background-color:#f8f9fa;">
+      <div>
+        <div><i class="fa-solid fa-phone"></i> <a href="tel:+56 41 3830944">+56 41 3830944</a></div>
+        <div><i class="fa-solid fa-location-dot"></i> Freire 728, Oficina 206</div>
+        <div><i class="fa-solid fa-envelope"></i> contacto@e-volution.cl</div>
+      </div>
+    </footer>
+
+    <script th:inline="javascript">
+      // variables que puedes inyectar desde el servidor si quieres:
+      /*[[*/
+      const contextPath = /*[[@{/}]]*/ "/";
+      /*]]*/
+    </script>
+
+    <script th:inline="javaScript">
+      const ubicacionAdmin = /*[[${admin.ubicacion}]]*/ "default";
+      let filtrosActivos = [];
+
+      function crearCardFiltro(f, v) {
+        return `<div class="card filtro-card">
+                  <div class="card-body p-2 d-flex justify-content-between align-items-center">
+                    <span>${f}: ${v}</span>
+                    <button type="button" class="btn-close" data-filtro="${f}" data-valor="${v}"></button>
+                  </div>
+                </div>`;
+      }
+
+      $(document).on('click', '.btn-close', function(){
+        const f = $(this).data('filtro');
+        const v = $(this).data('valor');
+        removerFiltro(f, v);
+      });
+
+      function agregarFiltroCurso(){
+        const filtro = $('#filtroBusquedaCurso').val();
+        const valor = $('#busquedaCurso').val().trim();
+        if(!valor) return;
+        if(!filtrosActivos.some(x => x.campo===filtro && x.valor===valor)){
+          filtrosActivos.push({campo:filtro, valor:valor});
+          actualizarFiltros();
+          cargarCursosConFiltros();
+        }
+        $('#busquedaCurso').val('');
+      }
+
+      function removerFiltro(f,v){
+        filtrosActivos = filtrosActivos.filter(x => !(x.campo===f && x.valor===v));
+        actualizarFiltros();
+        if(filtrosActivos.length) cargarCursosConFiltros(); else cargarCursos();
+      }
+
+      function actualizarFiltros(){
+        const cont = $('#filtros-activos').empty();
+        filtrosActivos.forEach(f => cont.append(crearCardFiltro(f.campo, f.valor)));
+      }
+
+      function submitOnEnter(e){
+        if(e.key === 'Enter'){ e.preventDefault(); agregarFiltroCurso(); }
+      }
+
+      // Cargar cursos (lista)
+      function cargarCursos(){
+        $.ajax({ url: '/api/cursoTemporal', method: 'GET', success: function(data){
+          renderTablaCursos(data);
+        }});
+      }
+      function cargarCursosConFiltros(){
+        $.ajax({
+          url: '/api/cursoTemporal/busquedaMultiFiltro',
+          method: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify(filtrosActivos),
+          success: function(data){ renderTablaCursos(data); }
+        });
+      }
+
+      function renderTablaCursos(data){
+        const tbody = $('#tablaCursos tbody').empty();
+        data.forEach(c => {
+          if (!c.ubicacionSubida || c.ubicacionSubida != ubicacionAdmin) {
+            return; 
+          }
+          const fila = $('<tr>').attr('data-curso-id', c.id);
+          fila.append(`<td>${escapeHtml(c.nombreCurso || '')}</td>`);
+          fila.append(`<td>${escapeHtml(c.relator || '')}</td>`);
+          fila.append(`<td>${escapeHtml(c.cliente || '')}</td>`);
+          fila.append(`<td>${escapeHtml(c.ubicacionSubida || '')}</td>`);
+          fila.append(`<td>${escapeHtml(c.estado || '')}</td>`);
+          fila.append(`<td>${c.plantilla || ''}</td>`);
+          fila.append(`<td>
+                      </td>`);
+          tbody.append(fila);
+        });
+      }
+
+      function escapeHtml(s){ return $('<div>').text(s).html(); }
+      function escapeJs(s){ return s.replace(/'/g, "\\'").replace(/"/g,'\\"'); }
+
+    
+
+      // CREAR CURSO: abrir modal
+      function openCreateModal(){ $('#overlayCreate').show(); cargarPlantillas(); }
+      function closeCreateModal(){ $('#overlayCreate').hide(); $('#formCreateCurso')[0].reset(); }
+
+      // submit creacion via ajax (request params)
+      function submitCreateForm(e){
+        e.preventDefault();
+        const data = {
+          nombreCurso: $('#nombreCurso').val(),
+          diasCursos: $('#diasCursos').val(),
+          duracion: $('#duracion').val(),
+          modalidad: $('#modalidad').val(),
+          relator: $('#relator').val(),
+          cliente: $('#cliente').val(),
+          ubicacionSubida: $('#ubicacionSubida').val(),
+        };
+        $.ajax({
+          url: '/api/cursoTemporal/create',
+          method: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify(data),
+          success: function(res){
+            closeCreateModal();
+            // mostrar popup con qr retornado
+            showQrPopup(res.imageBase64, res.link, res.nombreCurso);
+            cargarCursos();
+          },
+          error: function(err){ alert('Error creando curso: ' + (err.responseText || err.statusText)); }
+        });
+      }
+
+      // init
+      $(document).ready(function(){
+        cargarPlantillas();
+        cargarCursos();
+      });
+    </script>
+  </body>
+</html>
