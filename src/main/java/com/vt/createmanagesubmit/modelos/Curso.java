@@ -58,6 +58,9 @@ public class Curso {
     @OneToMany(mappedBy = "curso", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Alumno> alumnos;
 
+    @OneToMany(mappedBy = "cursoTareaProgramada", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<TareaProgramada> tareaProgramadas;
+
     @OneToMany(mappedBy = "cursoTemporal", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<AlumnoTemporal> alumnosTemporales;
 

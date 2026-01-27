@@ -9,7 +9,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
@@ -56,6 +55,7 @@ import com.vt.createmanagesubmit.modelos.TareaProgramada;
 import com.vt.createmanagesubmit.repositorios.RepositorioAdmin;
 import com.vt.createmanagesubmit.repositorios.RepositorioAlumnoTemporal;
 import com.vt.createmanagesubmit.repositorios.RepositorioAlumnos;
+import com.vt.createmanagesubmit.repositorios.RepositorioCliente;
 import com.vt.createmanagesubmit.repositorios.RepositorioCurso;
 import com.vt.createmanagesubmit.repositorios.RepositorioPlantillas;
 import com.vt.createmanagesubmit.repositorios.RepositorioRelator;
@@ -80,6 +80,9 @@ public class Servicio {
 
     @Autowired
     private RepositorioCurso repoCurso;
+
+    @Autowired
+    private RepositorioCliente repoCliente;
 
     @Autowired
     private RepositorioRelator repoRelator;
@@ -205,9 +208,6 @@ public class Servicio {
                 }else{
                     listaResultante=repoAlum.findByDiploma("noEnviado", pageable);
                 }
-                break;
-            case "identificador":
-                listaResultante = repoAlum.findByIdentificadorContaining(dato, pageable); // Usando Containing
                 break;
             case "correlativo":
                 listaResultante = repoAlum.findByNumeroCorrelativoInternoContaining(dato, pageable);
@@ -799,6 +799,13 @@ public class Servicio {
         }
     }
 
+    public List<Cliente> todosLosClientes(){
+        return repoCliente.findAll();
+    }
+
+    public void guardarCliente(Cliente cliente){
+        repoCliente.save(cliente);
+    }
 
 }
 

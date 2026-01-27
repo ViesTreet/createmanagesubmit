@@ -5,11 +5,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,24 +20,21 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.vt.createmanagesubmit.dto.AlumnoDTO;
-import com.vt.createmanagesubmit.dto.AlumnosWrapper;
 import com.vt.createmanagesubmit.exceptions.MissingAdminIdException;
 import com.vt.createmanagesubmit.exceptions.MissingAlumnoIdException;
 import com.vt.createmanagesubmit.exceptions.MissingNameOrRutException;
 import com.vt.createmanagesubmit.exceptions.MissingTemplateException;
 import com.vt.createmanagesubmit.modelos.Admin;
 import com.vt.createmanagesubmit.modelos.Alumno;
+import com.vt.createmanagesubmit.modelos.Cliente;
 import com.vt.createmanagesubmit.modelos.Curso;
 import com.vt.createmanagesubmit.modelos.Plantilla;
-import com.vt.createmanagesubmit.modelos.Relator;
 import com.vt.createmanagesubmit.repositorios.RepositorioAlumnos;
 import com.vt.createmanagesubmit.repositorios.RepositorioRelator;
 import com.vt.createmanagesubmit.servicios.Servicio;
@@ -796,5 +791,43 @@ public class ControladorBase {
         model.addAttribute("admin",usuarioTemporal);
         return "subirArchivosDrive";
     }
+
+    //-------------------------Cliente---------------------------------------
+    @GetMapping("dataBaseCliente")
+    public String dataBaseCliente(HttpSession session, Model model) {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+	    if (usuarioTemporal == null) {
+	        return "redirect:/";  
+	    }
+        model.addAttribute("admin",usuarioTemporal);
+        return "databaseCliente";
+    }
+
+    @PostMapping("/dataBaseCliente/nuevoCliente")
+    public String crearNuevoCliente(@RequestParam String nombreCliente,@RequestParam String identificador,@RequestParam(required = true) MultipartFile pathLogo,HttpSession session,Model model) {
+
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+        if (usuarioTemporal != null) {
+        model.addAttribute("admin",usuarioTemporal);
+            try {
+                Cliente cliente = new Cliente();
+                cliente.setNombreCliente(nombreCliente);
+                cliente.setIdentificador(identificador);
+                cliente.setPathLogo(servicio.guardarArchivo(pathLogo, "/logos/"));
+                
+                servicio.guardarCliente(cliente);
+                return "redirect:/dataBaseCliente"; 
+
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                model.addAttribute("error", "Ocurrió un error al guardar el nuevo cliente");
+                return "databaseCliente";
+            }
+            
+        }
+        return "redirect:/";
+    }
+    
     
 }

@@ -29,7 +29,9 @@ public class TareaProgramada {
 
     private String accion;       
 
-    private Curso curso;
+    @ManyToOne(fetch = FetchType.LAZY) 
+    @JoinColumn(name = "curso_id") 
+    private Curso cursoTareaProgramada;
 
     private LocalDateTime fechaEjecucion;
 
@@ -50,7 +52,7 @@ public class TareaProgramada {
         this.id = id;
         IDCurso = iDCurso;
         this.accion = accion;
-        this.curso = curso;
+        this.cursoTareaProgramada = curso;
         this.fechaEjecucion = fechaEjecucion;
         this.estado = estado;
         this.createdAt = createdAt;
@@ -82,11 +84,11 @@ public class TareaProgramada {
     }
 
     public Curso getCurso() {
-        return curso;
+        return cursoTareaProgramada;
     }
 
     public void setCurso(Curso curso) {
-        this.curso = curso;
+        this.cursoTareaProgramada = curso;
     }
 
     public LocalDateTime getFechaEjecucion() {
