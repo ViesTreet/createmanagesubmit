@@ -17,22 +17,23 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
-
 @Entity
-@Table(name="plantillas")
-public class Plantilla {
-
+@Table(name="relator")
+public class Relator {
+    
     @Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long id;
 
-    private String nombreCertificado;
+    private String nombre;
 
-    private String descripcion;
+    private String contacto;
 
-    private String pathArchivo;
+    private String foto;
 
-    @OneToMany(mappedBy = "plantilla", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Float horasTrabajados;
+
+    @OneToMany(mappedBy = "relator", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Curso> cursos;
 
     @Column(updatable=false)
@@ -41,21 +42,22 @@ public class Plantilla {
 	
 	@DateTimeFormat(pattern="yyyy-MM-dd")
 	private Date updatedAt;
-
-    public Plantilla() {
+    
+    public Relator() {
     }
     
-    public Plantilla(Long id, String nombreCertificado, String descripcion, String pathArchivo, List<Curso> cursos,
+    public Relator(Long id, String nombre, String contacto, String foto, Float horasTrabajados, List<Curso> cursos,
             Date createdAt, Date updatedAt) {
         this.id = id;
-        this.nombreCertificado = nombreCertificado;
-        this.descripcion = descripcion;
-        this.pathArchivo = pathArchivo;
+        this.nombre = nombre;
+        this.contacto = contacto;
+        this.foto = foto;
+        this.horasTrabajados = horasTrabajados;
         this.cursos = cursos;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
-
+    
     public Long getId() {
         return id;
     }
@@ -64,72 +66,57 @@ public class Plantilla {
         this.id = id;
     }
 
-
-
-    public String getNombreCertificado() {
-        return nombreCertificado;
+    public String getNombre() {
+        return nombre;
     }
 
-
-
-    public void setNombreCertificado(String nombreCertificado) {
-        this.nombreCertificado = nombreCertificado;
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
     }
 
-
-
-    public String getDescripcion() {
-        return descripcion;
+    public String getContacto() {
+        return contacto;
     }
 
-
-
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
+    public void setContacto(String contacto) {
+        this.contacto = contacto;
     }
 
-
-
-    public String getPathArchivo() {
-        return pathArchivo;
+    public String getFoto() {
+        return foto;
     }
 
-
-
-    public void setPathArchivo(String pathArchivo) {
-        this.pathArchivo = pathArchivo;
+    public void setFoto(String foto) {
+        this.foto = foto;
     }
 
-    
+    public Float getHorasTrabajados() {
+        return horasTrabajados;
+    }
+
+    public void setHorasTrabajados(Float horasTrabajados) {
+        this.horasTrabajados = horasTrabajados;
+    }
+
     public List<Curso> getCursos() {
         return cursos;
     }
-
-
 
     public void setCursos(List<Curso> cursos) {
         this.cursos = cursos;
     }
 
-
-
     public Date getCreatedAt() {
         return createdAt;
     }
-
-
 
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
 
-
-
     public Date getUpdatedAt() {
         return updatedAt;
     }
-
-
 
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
@@ -145,5 +132,4 @@ public class Plantilla {
 	protected void onUpdate() {
 		this.updatedAt = new Date();
 	}
-
 }

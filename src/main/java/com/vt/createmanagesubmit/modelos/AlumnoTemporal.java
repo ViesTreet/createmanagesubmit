@@ -4,7 +4,6 @@ import java.util.Date;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
@@ -35,7 +34,7 @@ public class AlumnoTemporal {
     @ManyToOne(fetch = FetchType.LAZY) 
     @JoinColumn(name = "cursoTemporal_id") 
     @JsonIgnore
-    private CursoTemporal cursoTemporal;
+    private Curso cursoTemporal;
 
     @Column(updatable=false)
 	@DateTimeFormat(pattern="yyyy-MM-dd")
@@ -47,7 +46,7 @@ public class AlumnoTemporal {
     public AlumnoTemporal() {
     }
     
-    public AlumnoTemporal(Long id, String nombreAsistente, String rut, String correo, CursoTemporal cursoTemporal, Date createdAt, Date updatedAt) {
+    public AlumnoTemporal(Long id, String nombreAsistente, String rut, String correo, Curso cursoTemporal, Date createdAt, Date updatedAt) {
         this.id = id;
         this.nombreAsistente = nombreAsistente;
         this.rut = rut;
@@ -95,11 +94,11 @@ public class AlumnoTemporal {
         this.correo = correo;
     }
 
-    public CursoTemporal getCursoTemporal() {
+    public Curso getCursoTemporal() {
         return cursoTemporal;
     }
 
-    public void setCursoTemporal(CursoTemporal cursoTemporal) {
+    public void setCursoTemporal(Curso cursoTemporal) {
         this.cursoTemporal = cursoTemporal;
     }
 

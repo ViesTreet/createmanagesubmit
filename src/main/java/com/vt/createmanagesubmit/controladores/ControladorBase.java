@@ -37,9 +37,11 @@ import com.vt.createmanagesubmit.exceptions.MissingNameOrRutException;
 import com.vt.createmanagesubmit.exceptions.MissingTemplateException;
 import com.vt.createmanagesubmit.modelos.Admin;
 import com.vt.createmanagesubmit.modelos.Alumno;
-import com.vt.createmanagesubmit.modelos.CursoTemporal;
+import com.vt.createmanagesubmit.modelos.Curso;
 import com.vt.createmanagesubmit.modelos.Plantilla;
+import com.vt.createmanagesubmit.modelos.Relator;
 import com.vt.createmanagesubmit.repositorios.RepositorioAlumnos;
+import com.vt.createmanagesubmit.repositorios.RepositorioRelator;
 import com.vt.createmanagesubmit.servicios.Servicio;
 import com.vt.createmanagesubmit.servicios.ServicioApi;
 import com.vt.createmanagesubmit.servicios.ServicioArchivos;
@@ -71,6 +73,9 @@ public class ControladorBase {
 
     @Autowired
     private ServicioTareasProgramadas servicioTareaP;
+
+    @Autowired
+    private RepositorioRelator repoRelator;
 
     @Value("${DIP_MAIL}")
     String correoEmpresa;
@@ -196,84 +201,80 @@ public class ControladorBase {
     }
 
     @PostMapping("/dataBaseAlumno/agregarAlumno")
-    public String agregarAlumno(@RequestParam(name = "nombreAsistente") String nombreAsistente,@RequestParam("curso")String curso,@RequestParam(name = "diasCursos") String diasCursos,@RequestParam(name = "numeroHoras") String numeroHoras,@RequestParam(name = "cliente") String cliente,@RequestParam(name = "identificador") String identificador,@RequestParam(name = "notaAprobacion") String notaAprobacion,@RequestParam(name = "relator") String relator,@RequestParam(name = "asistencia") String asistencia,@RequestParam(name = "estado") String estado,@RequestParam(name = "diploma") String diploma,@RequestParam(value="modalidad") String modalidad,@RequestParam(name = "rut") String rut,@RequestParam(name = "correo") String correo,@RequestParam(name = "plantilla",required = false) Long plantilla,@RequestParam(value = "rutificador", defaultValue = "false") boolean rutificador,@RequestParam("lugarYfechaEmision")String lugarYfechaEmision,Model model,HttpSession session) {
-    Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
-	    if (usuarioTemporal == null) {
-	        return "redirect:/";  
-	    }
-        model.addAttribute("admin", usuarioTemporal);
+    public String agregarAlumno(
+            @RequestParam String nombreAsistente,
+            @RequestParam(required = true) Long cursoId,
+            @RequestParam(required = false) String notaAprobacion,
+            @RequestParam(required = false) String asistencia,
+            @RequestParam String estado,
+            @RequestParam String diploma,
+            @RequestParam String rut,
+            @RequestParam String correo,
+            @RequestParam(defaultValue = "false") boolean rutificador,
+            @RequestParam(required = false) Long cursoID,
+            @RequestParam(required = false) Long relatorID,
+            HttpSession session, Model model
+    ) {
+
+        Admin admin = (Admin) session.getAttribute("usuarioEnSesion");
+        if (admin == null) {
+            return "redirect:/";  
+        }
+
         Alumno nuevoAlumno = new Alumno();
         nuevoAlumno.setAsistencia(asistencia);
-        nuevoAlumno.setCliente(cliente);
         nuevoAlumno.setCorreo(correo);
-        nuevoAlumno.setDiasCursos(diasCursos);
         nuevoAlumno.setEstado(estado);
-        nuevoAlumno.setNombreCurso(curso);
         nuevoAlumno.setNotaAprobacion(notaAprobacion);
-        nuevoAlumno.setDuracion(numeroHoras);
-        nuevoAlumno.setModalidad(modalidad);
-        nuevoAlumno.setIdentificador(identificador);
-        nuevoAlumno.setRelator(relator);
         nuevoAlumno.setRut(rut);
-        nuevoAlumno.setLugarYfechaEmision(lugarYfechaEmision);
-        nuevoAlumno.setUbicacionSubida(usuarioTemporal.getUbicacion());
-        List<Plantilla> plantillas=servicio.todasLasPlantillas();
-        model.addAttribute("plantillas",plantillas);
+        nuevoAlumno.setDiploma(diploma);
+        Curso curso = servicio.cursoPorId(cursoID);
+        nuevoAlumno.setCurso(curso);
+        // -------------------------
+        // Nombre / Rutificador
+        // -------------------------
         nombreAsistente = servicioApi.formatearNombre(nombreAsistente);
-        if(rutificador && !rut.trim().isEmpty() && rut != null){
+
+        if (rutificador && rut != null && !rut.trim().isEmpty()) {
             String nombreRutificado = servicioApi.obtenerNombrePorRut(rut);
-            if(!nombreRutificado.trim().equals("nombreNoEncontrado")){
+            if (!"nombreNoEncontrado".equals(nombreRutificado)) {
                 nuevoAlumno.setNombreAsistente(nombreRutificado);
-            }else{
-                if(!nombreAsistente.trim().isEmpty()&&nombreAsistente != null){
-                    nuevoAlumno.setNombreAsistente(nombreAsistente);
-                }else{
-                    model.addAttribute("error", "El nombre no pudo ser encontrado.");
-                    return "addAlumno";
-                }
-            }
-        }else{
-            if(!nombreAsistente.trim().isEmpty()&&nombreAsistente != null){
+            } else if (nombreAsistente != null && !nombreAsistente.trim().isEmpty()) {
                 nuevoAlumno.setNombreAsistente(nombreAsistente);
-            }else{
-                model.addAttribute("error", "El nombre no fue ingresado.");
+            } else {
+                model.addAttribute("error", "El nombre no pudo ser encontrado.");
+                return "addAlumno";
+            }
+        } else {
+            if (nombreAsistente != null && !nombreAsistente.trim().isEmpty()) {
+                nuevoAlumno.setNombreAsistente(nombreAsistente);
+            } else {
+                model.addAttribute("error", "El nombre esta vacio");
                 return "addAlumno";
             }
         }
 
         try {
-            Plantilla plantillausuario = servicio.plantillaPorId(plantilla);
-            nuevoAlumno.setPlantilla(plantillausuario);
-        } catch (MissingTemplateException ex) {
-            model.addAttribute("error", ex.getMessage());
-            return "addAlumno";
-        }
+            nuevoAlumno = servicio.comprobarYGuardar(nuevoAlumno, diploma);
 
-        try {
-            nuevoAlumno=servicio.comprobarYGuardar(nuevoAlumno,diploma);
-        if(diploma.equals("enviar")){
-            if(nuevoAlumno.getEstado().equals("aprobado")){
-                try {
-                    servicioGenerarCertificado.generateCertificateForAlumno(nuevoAlumno);
-                    nuevoAlumno.setDiploma("enviado");
-                } catch (Exception ex) {
-                    model.addAttribute("error", ex.getMessage());
-                    return "addAlumno";
-                }
-            }else{
+            if ("enviar".equalsIgnoreCase(diploma)
+                    && "aprobado".equalsIgnoreCase(nuevoAlumno.getEstado())) {
+                servicioGenerarCertificado.generateCertificateForAlumno(nuevoAlumno);
+                nuevoAlumno.setDiploma("enviado");
+            } else {
                 nuevoAlumno.setDiploma("noEnviado");
             }
-        }else{
-            nuevoAlumno.setDiploma("noEnviado");
-        }
-        servicio.registrarNuevoAlumno(nuevoAlumno);
-        return "redirect:/dataBaseAlumno/addAlumnoBase";
-        } catch (MissingNameOrRutException ex) {
-            model.addAttribute("error", ex.getMessage());
+
+            servicio.registrarNuevoAlumno(nuevoAlumno);
+
+            return "redirect/dataBaseAlumno/addAlumnoBase";
+
+        } catch (Exception ex) {
+            model.addAttribute("error", ex);
             return "addAlumno";
         }
-    
     }
+
 
     
     @GetMapping("/dataBaseAlumno/addAlumnoBase/excel")
@@ -289,7 +290,7 @@ public class ControladorBase {
     }
 
     @PostMapping(value = "/dataBaseAlumno/uploadAlumnoExcel", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public String subirExcel(@RequestPart("file") MultipartFile file, @RequestParam(value = "estadoDiplomaExcel", required = false) String estadoDiplomaExcel, @RequestParam(value = "plantillaNombre") String plantilla, @RequestParam(value = "estadoExcel") String estadoExcel,@RequestParam(value="rutificador")String rutificador,HttpSession session,Model model) {
+    public String subirExcel(@RequestPart("file") MultipartFile file, @RequestParam(value = "estadoDiplomaExcel", required = false) String estadoDiplomaExcel, @RequestParam(value = "cursoId") Long cursoId, @RequestParam(value = "estadoExcel") String estadoExcel,@RequestParam(value="rutificador")String rutificador,HttpSession session,Model model) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
 	    if (usuarioTemporal != null) {
             model.addAttribute("admin", usuarioTemporal);
@@ -302,8 +303,8 @@ public class ControladorBase {
                 // Leer el contenido del archivo en un arreglo de bytes
                 byte[] fileBytes = file.getBytes();
 
-                // Llamar al método asíncrono y pasarle los bytes del archivo
-                servicioAr.leerExcelYGuardarEnBD(fileBytes, estadoDiplomaExcel, plantilla, estadoExcel, rutificador, usuarioTemporal.getUbicacion());
+                Curso curso = servicio.cursoPorId(cursoId);
+                servicioAr.leerExcelYGuardarEnBD(fileBytes, estadoDiplomaExcel, estadoExcel, rutificador, curso);
 
                 // Redirigir inmediatamente sin esperar a que termine el procesamiento
                 return "redirect:/dataBaseAlumno";
@@ -372,13 +373,6 @@ public class ControladorBase {
             throw new IllegalStateException("No autorizado"); // Manejar el caso de no autenticado
         }
         model.addAttribute("admin", usuarioTemporal);
-        try {
-            servicioAr.exportToExcel(response);
-        } catch (Exception e) {
-            e.printStackTrace();
-            // Maneja el error aquí, por ejemplo, escribe un mensaje de error en el response.
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        }
     }    
 
     @GetMapping("/dataBaseAlumno/generateCertificado/{id}")
@@ -435,14 +429,7 @@ public class ControladorBase {
             HttpSession session,
             @RequestParam(name = "cursoMoodle", required = true) String cursoMoodleParam,
             @RequestParam(name = "accion", required = true) String accion,
-            @RequestParam(name = "plantilla",   required = true) String plantillaParam,
-            @RequestParam(name = "curso",       required = false) String nombreCurso,
-            @RequestParam(name = "diasCursos",  required = false) String diasCursos,
-            @RequestParam(name = "numeroHoras", required = false) String duracion,
-            @RequestParam(name = "modalidad",   required = false) String modalidad,
-            @RequestParam(name = "cliente",     required = false) String cliente,
-            @RequestParam(name = "relator",     required = false) String relator,
-            @RequestParam(name = "lugarYfechaEmision", required = false) String lugarYfechaEmision,
+            @RequestParam(name = "cursoId", required = true) Long cursoId,
             @RequestParam(name = "fechaDeEjecucion",   required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaDeEjecucion
     ) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
@@ -454,43 +441,17 @@ public class ControladorBase {
         Long idCurso   = (cursoMoodleParam == null || cursoMoodleParam.isBlank())
                          ? null
                          : Long.valueOf(cursoMoodleParam);
-        Long idPlantilla = (plantillaParam == null || plantillaParam.isBlank())
-                         ? null
-                         : Long.valueOf(plantillaParam);
+    
 
-        if (idCurso == null || idPlantilla == null || accion.isBlank()){
+        if (idCurso == null || accion.isBlank()){
             return "redirect:/programarCertificadoMoodle";
         }
-        // 3) Strings: cadenas vacías o en blanco → null
-        nombreCurso         = (nombreCurso == null || nombreCurso.isBlank()) 
-                              ? null : nombreCurso;
-        diasCursos          = (diasCursos == null || diasCursos.isBlank())
-                              ? null : diasCursos;
-        duracion            = (duracion == null || duracion.isBlank())
-                              ? null : duracion;
-        modalidad           = (modalidad == null || modalidad.isBlank())
-                              ? null : modalidad;
-        cliente             = (cliente == null || cliente.isBlank())
-                              ? null : cliente;
-        relator             = (relator == null || relator.isBlank())
-                              ? null : relator;
-        lugarYfechaEmision  = (lugarYfechaEmision == null || lugarYfechaEmision.isBlank())
-                              ? null : lugarYfechaEmision;
-
-        String lugarSubida = usuarioTemporal.getUbicacion();
+        Curso curso = servicio.cursoPorId(idCurso);
         servicioTareaP.CrearTarea(
             idCurso,
             accion,
-            idPlantilla,
-            nombreCurso,
-            diasCursos,
-            duracion,
-            modalidad,
-            cliente,
-            relator,
-            lugarYfechaEmision,
             fechaDeEjecucion,
-            lugarSubida
+            curso
         );
 
         return "redirect:/programarCertificadoMoodle";
@@ -510,66 +471,6 @@ public class ControladorBase {
         return "moodleManual";
     }
 
-    @PostMapping("/programarCertificadoMoodleManual/crear")
-    public String procesarAlumnos(
-            @RequestParam Long cursoMoodle,
-            @RequestParam Long plantilla,
-            @RequestParam(required=false) String curso,
-            @RequestParam(required=false) String diasCursos,
-            @RequestParam(required=false, name="numeroHoras") String duracion,
-            @RequestParam(required=false) String modalidad,
-            @RequestParam(required=false) String cliente,
-            @RequestParam(required=false) String relator,
-            @RequestParam(required=false) String lugarYfechaEmision,
-            @RequestParam(required=false, name="ubicacionSubida") String ubicacionSubida,
-            @RequestParam String accion,
-            @ModelAttribute("alumnos") AlumnosWrapper wrapper
-    ) {
-        List<AlumnoDTO> alumnosForm = wrapper.getAlumnos();
-        List<AlumnoDTO> habilitados = new ArrayList<AlumnoDTO>();
-        for(AlumnoDTO alumno: alumnosForm){
-            if(alumno.getEstado().equals("Aprobado")){
-                habilitados.add(alumno);
-            }
-        }
-        List<Alumno> alumnos = habilitados.stream().map(f -> {
-            Alumno a = new Alumno();
-            a.setNombreAsistente(f.getNombreAsistente());
-            a.setCorreo(f.getCorreo());
-            a.setNotaAprobacion(f.getNotaAprovacion());
-            a.setAsistencia(f.getAsistencia());
-            a.setEstado("Aprobado");          // o el estado que toque
-            a.setDiploma("noEnviado");       // inicial
-            a.setNombreCurso(curso);
-            a.setDiasCursos(diasCursos);
-            a.setDuracion(duracion);
-            a.setModalidad(modalidad);
-            a.setCliente(cliente);
-            a.setRelator(relator);
-            a.setLugarYfechaEmision(lugarYfechaEmision);
-            Plantilla p = servicio.plantillaPorId(plantilla);
-            a.setPlantilla(p);
-            a.setUbicacionSubida(ubicacionSubida);
-            return a;
-        }).collect(Collectors.toList());
-
-        for(Alumno alumno:alumnos){
-            repositorioAlumnos.save(alumno);
-            servicio.numeroCorrelativoAuto(alumno);
-            if ("emitirYGuardar".equalsIgnoreCase(accion)) {
-                try {
-                    servicioAr.generateCertificatesById(alumno.getId());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        
-
-        return "redirect:/programarCertificadoMoodleManual";
-
-    }
 
     //----------------------------------------------------------------------------------
 
@@ -601,7 +502,7 @@ public class ControladorBase {
     }
 
     @PostMapping("/dataBasePlantilla/nuevaPlantilla")
-    public String crearNuevaPlantilla(@RequestParam String nombreCertificado,@RequestParam String descripcion,@RequestParam String asistenciaMin,@RequestParam String notaMin,@RequestParam(required = false) MultipartFile pathArchivo,@RequestParam(required = false) String pathArchivoS,@RequestParam(defaultValue = "false") boolean clonarPlantilla,@RequestParam(required = false) MultipartFile pathLogo,HttpSession session,Model model) {
+    public String crearNuevaPlantilla(@RequestParam String nombreCertificado,@RequestParam String descripcion,@RequestParam(required = false) MultipartFile pathArchivo,@RequestParam(required = false) String pathArchivoS,@RequestParam(defaultValue = "false") boolean clonarPlantilla,HttpSession session,Model model) {
 
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuarioTemporal != null) {
@@ -617,29 +518,16 @@ public class ControladorBase {
                 Plantilla nuevaPlantilla = new Plantilla();
                 nuevaPlantilla.setNombreCertificado(nombreCertificado);
                 nuevaPlantilla.setDescripcion(descripcion);
-                if(asistenciaMin.isBlank()){
-                    nuevaPlantilla.setAsistenciaMin(0);
-                }else{
-                    nuevaPlantilla.setAsistenciaMin(Integer.parseInt(asistenciaMin));
-                }
-
-                if(notaMin.isBlank()){
-                    nuevaPlantilla.setNotaMin(0);
-                }else{
-                    nuevaPlantilla.setNotaMin(Float.parseFloat(notaMin));
-                }
 
                 // Manejar plantilla
                 if (clonarPlantilla) {
                     if (pathArchivoS != null && !pathArchivoS.isEmpty()) {
                         nuevaPlantilla.setPathArchivo(servicio.clonarArchivo(pathArchivoS, "/plantillas/"));
-                        nuevaPlantilla.setPathLogo(servicio.guardarArchivo(pathLogo, "/logos/"));
                     } else {
                         throw new IllegalArgumentException("Debe proporcionar una plantilla existente si desea clonar.");
                     }
                 } else if (pathArchivo != null && !pathArchivo.isEmpty()) {
                     nuevaPlantilla.setPathArchivo(servicio.guardarArchivo(pathArchivo, "/plantillas/"));
-                    nuevaPlantilla.setPathLogo(servicio.guardarArchivo(pathLogo, "/logos/"));
                 } else {
                     throw new IllegalArgumentException("Debe proporcionar una plantilla válida para guardar.");
                 }
@@ -711,7 +599,7 @@ public class ControladorBase {
     }
 
     @PostMapping("/dataBasePlantilla/editarPlantilla")
-    public String editarPlantilla(@RequestParam("id") Long id,@RequestParam(value = "cambiarPlantilla", required = false) boolean cambiarPlantilla,@RequestParam(value = "pathArchivo", required = false) MultipartFile nuevaPlantilla,@RequestParam(value = "nombreCertificado")String nombre,@RequestParam(value = "descripcion")String descripcion,@RequestParam(value = "asistenciaMin")String asistencia,@RequestParam(value = "notaMin")String nota,HttpSession session,Model model) {  
+    public String editarPlantilla(@RequestParam("id") Long id,@RequestParam(value = "cambiarPlantilla", required = false) boolean cambiarPlantilla,@RequestParam(value = "pathArchivo", required = false) MultipartFile nuevaPlantilla,@RequestParam(value = "nombreCertificado")String nombre,@RequestParam(value = "descripcion")String descripcion,HttpSession session,Model model) {  
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
 	    if (usuarioTemporal != null) {   
             model.addAttribute("admin", usuarioTemporal);
@@ -740,18 +628,6 @@ public class ControladorBase {
             }
             plantilla.setNombreCertificado(nombre);
             plantilla.setDescripcion(descripcion);
-            if(asistencia.isBlank()){
-                plantilla.setAsistenciaMin(0);
-            }else{
-                plantilla.setAsistenciaMin(Integer.parseInt(asistencia));
-            }
-
-            if(nota.isBlank()){
-                plantilla.setNotaMin(0);
-            }else{
-                plantilla.setNotaMin(Float.parseFloat(nota));
-            }
-
             servicio.guardarPlantilla(plantilla);   
             try {
                 if (cambiarPlantilla && nuevaPlantilla != null && !nuevaPlantilla.isEmpty()) {
@@ -782,24 +658,6 @@ public class ControladorBase {
         model.addAttribute("plantilla", plantilla);
         return "probarPlantilla";
     }
-
-    @GetMapping("/dataBasePlantilla/download")
-    public void descargarPlantilla(HttpServletResponse response, HttpSession session,Model model) {
-        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
-        if (usuarioTemporal == null) {
-            throw new IllegalStateException("No autorizado"); // Manejar el caso de no autenticado
-        }
-        model.addAttribute("admin", usuarioTemporal);
-        try {
-            servicioAr.exportToExcel(response);
-        } catch (Exception e) {
-            e.printStackTrace();
-            // Maneja el error aquí, por ejemplo, escribe un mensaje de error en el response.
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        }
-    }    
-
-
 
     //-----------------------------------------------------------------------
 
@@ -853,8 +711,9 @@ public class ControladorBase {
     @GetMapping("/generarCertificadoQr/{id}")
     public String getMethodName(@PathVariable("id") String idEncriptada, HttpServletResponse response, Model model) {
         Alumno alumnoError = new Alumno();
+        Curso cursoError = new Curso();
+        cursoError.setNombreCurso("No válido");
         alumnoError.setNombreAsistente("No válido");
-        alumnoError.setNombreCurso("No válido");
         alumnoError.setNumeroCorrelativoInterno("No válido");
         try {
             Alumno alumno;
@@ -862,14 +721,17 @@ public class ControladorBase {
             alumno = servicio.alumnoPorId(idAlumno);
             if(alumno != null){
                 model.addAttribute("alumno",alumno);
+                model.addAttribute("curso",alumno.getCurso().getNombreCurso());
                 model.addAttribute("val","Válido");
                 model.addAttribute("idEnc",idEncriptada);
             }else{
                 model.addAttribute("alumno",alumnoError);
+                model.addAttribute("curso",cursoError.getNombreCurso());
                 model.addAttribute("val","No válido");
             }
         } catch (Exception e) {
             model.addAttribute("alumno",alumnoError);
+            model.addAttribute("curso",cursoError.getNombreCurso());
             model.addAttribute("val","No válido");
             e.printStackTrace();
         }
@@ -893,16 +755,11 @@ public class ControladorBase {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuarioTemporal != null) {
             Long idR=Long.valueOf(id);
-            Optional<CursoTemporal> cursoTemporalOpt = servicio.cursoTemporalPorId(idR);
-            if(cursoTemporalOpt.isPresent()){
-                CursoTemporal cursoTemporal = cursoTemporalOpt.get();
-                model.addAttribute("idCurso",id);
-                model.addAttribute("cursoTemporal",cursoTemporal);
-                model.addAttribute("admin", usuarioTemporal);
-                return "databaseAlumnoTemporal";
-            }else{
-                return "error404";
-            }
+            Curso cursoTemporal = servicio.cursoPorId(idR);
+            model.addAttribute("idCurso",id);
+            model.addAttribute("cursoTemporal",cursoTemporal);
+            model.addAttribute("admin", usuarioTemporal);
+            return "databaseAlumnoTemporal";
         }
         return "redirect:/";
         

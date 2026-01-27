@@ -26,10 +26,10 @@ public class TareaDTO {
         this.id = tarea.getId();
         this.IDCurso = tarea.getIDCurso();
         this.accion = tarea.getAccion();
-        this.nombreCurso = tarea.getNombreCurso();
+        this.nombreCurso = tarea.getCurso().getNombreCurso();
         this.fechaEjecucion = tarea.getFechaEjecucion();
         this.estado = tarea.getEstado();
-        this.ubicacionSubida = tarea.getUbicacionSubida();
+        this.ubicacionSubida = tarea.getCurso().getUbicacionSubida();
     }
 
     public Long getId() {

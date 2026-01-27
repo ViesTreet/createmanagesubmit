@@ -1,22 +1,29 @@
 package com.vt.createmanagesubmit.servicios;
 
+import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import javax.imageio.ImageIO;
 
 //import org.apache.poi.ss.usermodel.Color;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,6 +32,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -40,29 +48,18 @@ import com.vt.createmanagesubmit.exceptions.MissingTemplateException;
 import com.vt.createmanagesubmit.modelos.Admin;
 import com.vt.createmanagesubmit.modelos.Alumno;
 import com.vt.createmanagesubmit.modelos.AlumnoTemporal;
-import com.vt.createmanagesubmit.modelos.CursoTemporal;
+import com.vt.createmanagesubmit.modelos.Cliente;
+import com.vt.createmanagesubmit.modelos.Curso;
 import com.vt.createmanagesubmit.modelos.Plantilla;
+import com.vt.createmanagesubmit.modelos.Relator;
 import com.vt.createmanagesubmit.modelos.TareaProgramada;
 import com.vt.createmanagesubmit.repositorios.RepositorioAdmin;
 import com.vt.createmanagesubmit.repositorios.RepositorioAlumnoTemporal;
 import com.vt.createmanagesubmit.repositorios.RepositorioAlumnos;
-import com.vt.createmanagesubmit.repositorios.RepositorioCursoTemporal;
+import com.vt.createmanagesubmit.repositorios.RepositorioCurso;
 import com.vt.createmanagesubmit.repositorios.RepositorioPlantillas;
+import com.vt.createmanagesubmit.repositorios.RepositorioRelator;
 import com.vt.createmanagesubmit.repositorios.RepositorioTareasProgramadas;
-
-import java.awt.Color;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.security.MessageDigest;
-
-import java.util.Arrays;
-import java.util.Base64;
-
-import java.util.Map;
-import javax.crypto.Cipher;
-
-
-import org.springframework.transaction.annotation.Transactional;
 
 
 
@@ -82,7 +79,10 @@ public class Servicio {
     private RepositorioAlumnoTemporal repoAlumTemp;
 
     @Autowired
-    private RepositorioCursoTemporal repoCursoTemp;
+    private RepositorioCurso repoCurso;
+
+    @Autowired
+    private RepositorioRelator repoRelator;
 
     @Autowired
     @Lazy
@@ -190,9 +190,6 @@ public class Servicio {
             case "nombreAsistente":
                 listaResultante = repoAlum.findByNombreAsistenteContaining(dato, pageable);
                 break;
-            case "nombreCurso":
-                listaResultante = repoAlum.findByNombreCursoContaining(dato, pageable); // Usando Containing
-                break;
             case "estado":
                 if(dato.trim().equals("No aprobado")||dato.trim().equals("no aprobado")||dato.trim().equals("noAprobado")){
                     listaResultante = repoAlum.findByEstado("noAprobado", pageable);
@@ -209,14 +206,8 @@ public class Servicio {
                     listaResultante=repoAlum.findByDiploma("noEnviado", pageable);
                 }
                 break;
-            case "cliente":
-                listaResultante = repoAlum.findByClienteContaining(dato, pageable); // Usando Containing
-                break;
             case "identificador":
                 listaResultante = repoAlum.findByIdentificadorContaining(dato, pageable); // Usando Containing
-                break;
-            case "relator":
-                listaResultante = repoAlum.findByRelatorContaining(dato, pageable); // Usando Containing
                 break;
             case "correlativo":
                 listaResultante = repoAlum.findByNumeroCorrelativoInternoContaining(dato, pageable);
@@ -254,6 +245,49 @@ public class Servicio {
         repoPlanti.save(plantilla);
     }
 
+    public Relator buscarRelatorPorId(Long relator){
+        Optional<Relator> relatoropt = repoRelator.findById(relator);
+        if(relatoropt.isPresent()){
+            return relatoropt.get();
+        }else{
+            return null;
+        }
+    }
+
+    public Curso cursoPorId(Long id){
+        Optional<Curso> cursOptional = repoCurso.findById(id);
+        if(cursOptional.isPresent()){
+            return cursOptional.get();
+        }else{
+            return null;
+        }
+    }
+
+    public Curso crearCurso(String nombre, String diasCursos, String duracion, Cliente cliente, String modalidad, String ubicacionSubida, String lugarYfechaEmision, Relator relator, Plantilla plantilla){
+        Curso curso = new Curso();
+        curso.setCliente(cliente);
+        curso.setDiasCursos(diasCursos);
+        curso.setDuracion(duracion);
+        curso.setLugarYfechaEmision(lugarYfechaEmision);
+        curso.setModalidad(modalidad);
+        curso.setNombreCurso(nombre);
+        curso.setUbicacionSubida(ubicacionSubida);
+        curso.setRelator(relator);
+        curso.setPlantilla(plantilla);
+        repoCurso.save(curso);
+        return curso;
+    }
+
+    public Relator crearRelator(String nombre, String contacto, String foto, Float horasTrabajados){
+        Relator relator = new Relator();
+        relator.setContacto(contacto);
+        relator.setFoto(foto);
+        relator.setHorasTrabajados(horasTrabajados);
+        relator.setNombre(nombre);
+        repoRelator.save(relator);
+        return relator;
+    }
+
     public void borrarPlantillaPorId(Long id) throws IOException{
         if(id == null){
             throw new IOException("No se encontró la plantilla.");
@@ -261,15 +295,16 @@ public class Servicio {
         Plantilla plantilla = plantillaPorId(id);
         if(!plantilla.getNombreCertificado().trim().equals("Error en encontrar plantilla")){
             Path deletePlantillaPath = Paths.get(plantilla.getPathArchivo());
-            Path deteleLogoPath = Paths.get(plantilla.getPathLogo());
             try {
                 Files.deleteIfExists(deletePlantillaPath);
-                Files.deleteIfExists(deteleLogoPath);
             } catch (IOException ex) {
                 throw new IOException("No se encontró la ruta de la plantilla.",ex);
             }
-            List<Alumno> alumnos = plantilla.getAlumnos();
-            repoAlum.deleteAll(alumnos);
+            List<Curso> cursos = plantilla.getCursos();
+            for (Curso curso : cursos) {
+                repoAlum.deleteAll(curso.getAlumnos());
+            }
+            repoCurso.deleteAll(cursos);
             repoPlanti.delete(plantilla);
         }
     }
@@ -323,20 +358,20 @@ public class Servicio {
             if (tieneNota && !tieneAsistencia) {
                 // Solo nota
                 float nota = Float.parseFloat(nuevoAlumno.getNotaAprobacion().trim());
-                if (nota >= nuevoAlumno.getPlantilla().getNotaMin()) {
+                if (nota >= nuevoAlumno.getCurso().getNotaMin()) {
                     aprobado = true;
                 }
             } else if (!tieneNota && tieneAsistencia) {
                 // Solo asistencia
                 int asistenciaAlumno = Integer.parseInt(nuevoAlumno.getAsistencia().trim());
-                if (asistenciaAlumno >= nuevoAlumno.getPlantilla().getAsistenciaMin()) {
+                if (asistenciaAlumno >= nuevoAlumno.getCurso().getAsistenciaMin()) {
                     aprobado = true;
                 }
             } else if (tieneNota && tieneAsistencia) {
                 // Ambos
                 float nota = Float.parseFloat(nuevoAlumno.getNotaAprobacion().trim());
                 int asistenciaAlumno = Integer.parseInt(nuevoAlumno.getAsistencia().trim());
-                if (nota >= nuevoAlumno.getPlantilla().getNotaMin() && asistenciaAlumno >= nuevoAlumno.getPlantilla().getAsistenciaMin()) {
+                if (nota >= nuevoAlumno.getCurso().getNotaMin() && asistenciaAlumno >= nuevoAlumno.getCurso().getAsistenciaMin()) {
                     aprobado = true;
                 }
             } else {
@@ -371,14 +406,8 @@ public class Servicio {
         if(nuevoAlumno.getAsistencia().isEmpty()){
             nuevoAlumno.setAsistencia(null);
         }
-        if(nuevoAlumno.getCliente().isEmpty()){
-            nuevoAlumno.setCliente(null);
-        }
         if(nuevoAlumno.getCorreo().isEmpty()){
             nuevoAlumno.setCorreo(CORREO_EMPRESA);
-        }
-        if(nuevoAlumno.getDiasCursos().isEmpty()){
-            nuevoAlumno.setDiasCursos(null);
         }
         if(nuevoAlumno.getEstado().isEmpty()){
             nuevoAlumno.setEstado(null);
@@ -386,26 +415,11 @@ public class Servicio {
         if(nuevoAlumno.getNombreAsistente().trim().isEmpty()){
             nuevoAlumno.setNombreAsistente(null);
         }
-        if(nuevoAlumno.getNombreCurso().trim().isEmpty()){
-            nuevoAlumno.setNombreCurso(null);
-        }
         if(nuevoAlumno.getNotaAprobacion().isEmpty()){
             nuevoAlumno.setNotaAprobacion(null);
         }
-        if(nuevoAlumno.getDuracion().isEmpty()){
-            nuevoAlumno.setDuracion(null);
-        }
-        if(nuevoAlumno.getIdentificador().isEmpty()){
-            nuevoAlumno.setIdentificador(null);
-        }
-        if(nuevoAlumno.getRelator().isEmpty()){
-            nuevoAlumno.setRelator(null);
-        }
         if(nuevoAlumno.getRut().trim().isEmpty()){
             nuevoAlumno.setRut(null);
-        }
-        if(nuevoAlumno.getModalidad().isEmpty()){
-            nuevoAlumno.setModalidad(null);
         }
 
         if ((nuevoAlumno.getNombreAsistente() != null && !nuevoAlumno.getNombreAsistente().trim().isEmpty())||(nuevoAlumno.getRut() != null && !nuevoAlumno.getRut().trim().isEmpty())) {
@@ -442,24 +456,16 @@ public class Servicio {
                 correo = CORREO_EMPRESA;
             }
             alumno.setNombreAsistente(normalizarValor(nombreAsistente));
-            alumno.setNombreCurso(normalizarValor(nombreCurso));
-            alumno.setDiasCursos(normalizarValor(diasCursos));
-            alumno.setDuracion(normalizarValor(numeroHoras));
-            alumno.setCliente(normalizarValor(cliente));
-            alumno.setIdentificador(normalizarValor(identificador));
-            alumno.setModalidad(normalizarValor(modalidad));
             alumno.setNotaAprobacion(normalizarValor(notaAprovacion));
-            alumno.setRelator(normalizarValor(relator));
             alumno.setAsistencia(normalizarValor(asistencia));
             alumno.setDiploma(normalizarValor(diploma));
             alumno.setRut(normalizarValor(rut));
             alumno.setCorreo(normalizarValor(correo));
-            alumno.setLugarYfechaEmision(lugarYfechaEmision);
             if((alumno.getNombreAsistente()!=null && !alumno.getNombreAsistente().trim().isEmpty())||(alumno.getRut() != null && !alumno.getRut().trim().isEmpty())){
                 Optional<Plantilla> optplantilla = repoPlanti.findById(plantillaId);
                 if (optplantilla.isPresent()){
                     Plantilla plantilla = optplantilla.get();
-                    alumno.setPlantilla((plantilla));
+                    alumno.getCurso().setPlantilla(plantilla);
                     if(!estado.equals("auto")){
                         alumno.setEstado(normalizarValor(estado));
                     }else{
@@ -596,45 +602,6 @@ public class Servicio {
         repoTarea.deleteById(id);
     }
 
-    public List<CursoTemporal> todosLosCursosTemporales(){
-        return repoCursoTemp.findAllByOrderByIdDesc();
-    }
-
-    public Optional<CursoTemporal> cursoTemporalPorId(Long id){
-        return repoCursoTemp.findById(id);
-    }
-
-    @Transactional
-    public CursoTemporal saveCursoTemporal(CursoTemporal c){
-        return repoCursoTemp.save(c);
-    }
-
-    // Busqueda sencilla con filtros; filtros es lista de objetos {campo, valor}
-    public List<CursoTemporal> buscarConFiltros(List<Map<String,String>> filtros){
-        List<CursoTemporal> all = repoCursoTemp.findAll();
-        if(filtros == null || filtros.isEmpty()) return all;
-        List<CursoTemporal> out = new ArrayList<>();
-        for(CursoTemporal c : all){
-            boolean ok = true;
-            for(Map<String,String> f : filtros){
-                String campo = f.get("campo");
-                String valor = f.get("valor").toLowerCase();
-                String campoVal = "";
-                switch(campo){
-                    case "nombreCurso": campoVal = Optional.ofNullable(c.getNombreCurso()).orElse(""); break;
-                    case "relator": campoVal = Optional.ofNullable(c.getRelator()).orElse(""); break;
-                    case "identificador": campoVal = Optional.ofNullable(c.getIdentificador()).orElse(""); break;
-                    case "cliente": campoVal = Optional.ofNullable(c.getCliente()).orElse(""); break;
-                    case "estado": campoVal = Optional.ofNullable(c.getEstado()).orElse(""); break;
-                    default: campoVal = "";
-                }
-                if(!campoVal.toLowerCase().contains(valor)){ ok = false; break; }
-            }
-            if(ok) out.add(c);
-        }
-        return out;
-    }
-
     public String decryptId(String encryptedId) throws Exception {
         String secretKey = SecretKeyVar;
         try {
@@ -700,9 +667,7 @@ public class Servicio {
 
     // Genera QR por id de curso: devuelve base64+link
     public Map<String,String> generarQrParaCurso(Long cursoId) throws Exception {
-        Optional<CursoTemporal> cursoOpt = repoCursoTemp.findById(cursoId);
-        if(!cursoOpt.isPresent()) throw new IllegalArgumentException("Curso no encontrado");
-        CursoTemporal c = cursoOpt.get();
+       Curso c = cursoPorId(cursoId);
         String encrypted = encryptId(String.valueOf(c.getId()));
         String link = urlAsisencia+"/marcarAsistenciaCurso/" + encrypted;
         byte[] png = generateQrImageBytes(link, 300, 300);
@@ -717,32 +682,17 @@ public class Servicio {
     // Para crear curso desde params y devolver QR (uso simple)
     @Transactional
     public Map<String,String> createCursoAndGenerateQr(Map<String,String> params) throws Exception {
-        CursoTemporal c = new CursoTemporal();
-        c.setNombreCurso(params.getOrDefault("nombreCurso", ""));
-        c.setDiasCursos(params.get("diasCursos"));
-        c.setDuracion(params.get("duracion"));
-        c.setModalidad(params.get("modalidad"));
-        c.setRelator(params.get("relator"));
-        c.setIdentificador(params.get("identificador"));
-        c.setCliente(params.get("cliente"));
-        c.setUbicacionSubida(params.get("ubicacionSubida"));
-        c.setLugarYfechaEmision(params.get("lugarYfechaEmision"));
-        c.setEstado("creado");
-        String plantillaStr = params.get("plantilla");
-        if(plantillaStr != null && !plantillaStr.isEmpty()){
-            try { c.setPlantilla(Long.parseLong(plantillaStr)); } catch(Exception ex){ c.setPlantilla(null); }
-        }
-        CursoTemporal saved = repoCursoTemp.save(c);
-        // generar qr
-        String encrypted = encryptId(String.valueOf(saved.getId()));
+        String cursoTemporal = params.get("idCurso");
+        String encrypted = encryptId(String.valueOf(cursoTemporal));
         String link = urlAsisencia+"/marcarAsistenciaCurso/"+ encrypted;
         byte[] png = generateQrImageBytes(link, 300, 300);
         String base64 = Base64.getEncoder().encodeToString(png);
+        Curso curso = cursoPorId(Long.valueOf(cursoTemporal));
         Map<String,String> res = new HashMap<>();
         res.put("imageBase64", base64);
         res.put("link", link);
-        res.put("nombreCurso", saved.getNombreCurso());
-        res.put("id", String.valueOf(saved.getId()));
+        res.put("nombreCurso", curso.getNombreCurso());
+        res.put("id", String.valueOf(cursoTemporal));
         return res;
     }
 
@@ -751,7 +701,7 @@ public class Servicio {
         Long id;
         try {
             id = Long.valueOf(decryptId(idEncriptada));
-            CursoTemporal curso = repoCursoTemp.findById(id)
+            Curso curso = repoCurso.findById(id)
                 .orElseThrow(() ->
                         new RuntimeException("Curso temporal no encontrado"));
             
@@ -775,52 +725,26 @@ public class Servicio {
         Optional<AlumnoTemporal> alumnoTempOpt = repoAlumTemp.findById(id);
         if(alumnoTempOpt.isPresent()){
             AlumnoTemporal alumnoTemporal = alumnoTempOpt.get();
-            CursoTemporal cursoTemporal = alumnoTemporal.getCursoTemporal();
             repoAlumTemp.deleteById(id);
-            Long cursoTemporalId=cursoTemporal.getId();
-            if(repoAlumTemp.countByCursoTemporalId(cursoTemporalId)>0){
-                cursoTemporal.setEstado("Revisando...");
-            }else{
-                cursoTemporal.setEstado("Listo");
-            }
-            repoCursoTemp.save(cursoTemporal);
         }
         
     }
 
-    public void alumnoVerificado(Long alumnoId, Long cursoId, String asistencia, String nota){
+    public void alumnoVerificado(Long alumnoId,String asistencia, String nota){
         Optional<AlumnoTemporal> alumnoTempOpt = repoAlumTemp.findById(alumnoId);
-        Optional<CursoTemporal> cursoTempOpt = cursoTemporalPorId(cursoId);
-        if(alumnoTempOpt.isPresent() && cursoTempOpt.isPresent()){
+        if(alumnoTempOpt.isPresent()){
             AlumnoTemporal alumnoTemporal = alumnoTempOpt.get();
-            CursoTemporal cursoTemporal = cursoTempOpt.get();
             Alumno alumno = new Alumno();
             alumno.setAsistencia(asistencia);
             alumno.setNotaAprobacion(nota);
             alumno.setNombreAsistente(alumnoTemporal.getNombreAsistente());
             alumno.setCorreo(alumnoTemporal.getCorreo());
             alumno.setRut(alumnoTemporal.getRut());
-            alumno.setCliente(cursoTemporal.getCliente());
-            alumno.setDiasCursos(cursoTemporal.getDiasCursos());
             alumno.setDiploma("noEnviado");
-            alumno.setDuracion(cursoTemporal.getDuracion());
             alumno.setEstado("aprobado");
-            alumno.setLugarYfechaEmision(cursoTemporal.getLugarYfechaEmision());
-            alumno.setModalidad(cursoTemporal.getModalidad());
-            alumno.setNombreCurso(cursoTemporal.getNombreCurso());
-            Plantilla plantilla = plantillaPorId(cursoTemporal.getPlantilla());
-            alumno.setPlantilla(plantilla);
-            alumno.setRelator(cursoTemporal.getRelator());
-            alumno.setUbicacionSubida(cursoTemporal.getUbicacionSubida());
-            alumno.setIdentificador(cursoTemporal.getIdentificador());
+            alumno.setCurso(alumnoTemporal.getCursoTemporal());
             comprobarYGuardar(alumno, "No");
             repoAlumTemp.delete(alumnoTemporal);
-            if(repoAlumTemp.countByCursoTemporalId(cursoId)>0){
-                cursoTemporal.setEstado("Revisando...");
-            }else{
-                cursoTemporal.setEstado("Listo");
-            }
-            repoCursoTemp.save(cursoTemporal);
         }
     }
 

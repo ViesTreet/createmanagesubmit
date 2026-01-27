@@ -29,25 +29,9 @@ public class Alumno {
 
     private String nombreAsistente;
 
-    @Column(length = 500)
-    private String nombreCurso;
-
-    private String diasCursos;
-
-    private String duracion;
-
     private String numeroCorrelativoInterno;
 
-    private String modalidad;
-
-    private String cliente;
-
-    private String identificador;
-
-
     private String notaAprobacion;
-
-    private String relator;
 
     private String asistencia;
 
@@ -59,13 +43,9 @@ public class Alumno {
 
     private String correo;
 
-    private String ubicacionSubida;
-
-    private String lugarYfechaEmision;
-
     @ManyToOne(fetch = FetchType.LAZY) 
-    @JoinColumn(name = "plantilla_id") 
-    private Plantilla plantilla;
+    @JoinColumn(name = "curso_id") 
+    private Curso curso;
 
     @Column(updatable=false)
 	@DateTimeFormat(pattern="yyyy-MM-dd")
@@ -74,38 +54,26 @@ public class Alumno {
 	@DateTimeFormat(pattern="yyyy-MM-dd")
 	private Date updatedAt;
 
-    
     public Alumno() {
     }
-
-    public Alumno(Long id, String nombreAsistente, String nombreCurso, String diasCursos, String duracion,
-            String numeroCorrelativoInterno, String modalidad, String cliente, String identificador,
-            String notaAprobacion, String relator, String asistencia, String estado, String diploma, String rut,
-            String correo, String ubicacionSubida, String lugarYfechaEmision, Plantilla plantilla, Date createdAt,
-            Date updatedAt) {
+    
+    public Alumno(Long id, String nombreAsistente, String numeroCorrelativoInterno,
+            String notaAprobacion, String asistencia, String estado, String diploma, String rut, String correo,
+            Curso curso, Date createdAt, Date updatedAt) {
         this.id = id;
         this.nombreAsistente = nombreAsistente;
-        this.nombreCurso = nombreCurso;
-        this.diasCursos = diasCursos;
-        this.duracion = duracion;
         this.numeroCorrelativoInterno = numeroCorrelativoInterno;
-        this.modalidad = modalidad;
-        this.cliente = cliente;
-        this.identificador = identificador;
         this.notaAprobacion = notaAprobacion;
-        this.relator = relator;
         this.asistencia = asistencia;
         this.estado = estado;
         this.diploma = diploma;
         this.rut = rut;
         this.correo = correo;
-        this.ubicacionSubida = ubicacionSubida;
-        this.lugarYfechaEmision = lugarYfechaEmision;
-        this.plantilla = plantilla;
+        this.curso = curso;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
-
+    
     public Long getId() {
         return id;
     }
@@ -122,30 +90,6 @@ public class Alumno {
         this.nombreAsistente = nombreAsistente;
     }
 
-    public String getNombreCurso() {
-        return nombreCurso;
-    }
-
-    public void setNombreCurso(String nombreCurso) {
-        this.nombreCurso = nombreCurso;
-    }
-
-    public String getDiasCursos() {
-        return diasCursos;
-    }
-
-    public void setDiasCursos(String diasCursos) {
-        this.diasCursos = diasCursos;
-    }
-
-    public String getDuracion() {
-        return duracion;
-    }
-
-    public void setDuracion(String numeroHoras) {
-        this.duracion = numeroHoras;
-    }
-
     public String getNumeroCorrelativoInterno() {
         return numeroCorrelativoInterno;
     }
@@ -154,44 +98,12 @@ public class Alumno {
         this.numeroCorrelativoInterno = numeroCorrelativoInterno;
     }
 
-    public String getModalidad() {
-        return modalidad;
-    }
-
-    public void setModalidad(String Modalidad) {
-        this.modalidad = Modalidad;
-    }
-
-    public String getCliente() {
-        return cliente;
-    }
-
-    public void setCliente(String cliente) {
-        this.cliente = cliente;
-    }
-
-    public String getIdentificador() {
-        return identificador;
-    }
-
-    public void setIdentificador(String identificador) {
-        this.identificador = identificador;
-    }
-
     public String getNotaAprobacion() {
         return notaAprobacion;
     }
 
-    public void setNotaAprobacion(String notaAprovacion) {
-        this.notaAprobacion = notaAprovacion;
-    }
-
-    public String getRelator() {
-        return relator;
-    }
-
-    public void setRelator(String relator) {
-        this.relator = relator;
+    public void setNotaAprobacion(String notaAprobacion) {
+        this.notaAprobacion = notaAprobacion;
     }
 
     public String getAsistencia() {
@@ -234,29 +146,14 @@ public class Alumno {
         this.correo = correo;
     }
 
-    public Plantilla getPlantilla() {
-        return plantilla;
+    public Curso getCurso() {
+        return curso;
     }
 
-    public void setPlantilla(Plantilla plantilla) {
-        this.plantilla = plantilla;
-    }
-    public String getUbicacionSubida() {
-        return ubicacionSubida;
+    public void setCurso(Curso curso) {
+        this.curso = curso;
     }
 
-    public void setUbicacionSubida(String ubicacionSubida) {
-        this.ubicacionSubida = ubicacionSubida;
-    }
-
-    public String getLugarYfechaEmision() {
-        return lugarYfechaEmision;
-    }
-
-    public void setLugarYfechaEmision(String lugarYfechaEmision) {
-        this.lugarYfechaEmision = lugarYfechaEmision;
-    }
-    
     public Date getCreatedAt() {
         return createdAt;
     }
@@ -283,18 +180,6 @@ public class Alumno {
 	protected void onUpdate() {
 		this.updatedAt = new Date();
 	}
-
-    @Override
-    public String toString() {
-        return "Alumno [id=" + id + ", nombreAsistente=" + nombreAsistente + ", nombreCurso=" + nombreCurso
-                + ", diasCursos=" + diasCursos + ", duracion=" + duracion + ", numeroCorrelativoInterno="
-                + numeroCorrelativoInterno + ", modalidad=" + modalidad + ", cliente=" + cliente + ", identificador="
-                + identificador +", notaAprobacion=" + notaAprobacion + ", relator=" + relator
-                + ", asistencia=" + asistencia + ", estado=" + estado + ", diploma=" + diploma + ", rut=" + rut
-                + ", correo=" + correo + ", ubicacionSubida=" + ubicacionSubida + ", lugarYfechaEmision="
-                + lugarYfechaEmision + ", plantilla=" + plantilla + ", createdAt=" + createdAt + ", updatedAt="
-                + updatedAt + "]";
-    }
 
     
 }

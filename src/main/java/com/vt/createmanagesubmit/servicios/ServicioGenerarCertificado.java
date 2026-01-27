@@ -101,7 +101,7 @@ public class ServicioGenerarCertificado {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public CompletableFuture<Void> generateCertificateForAlumno(Alumno alumno) throws Exception {
         // Obtén la plantilla asociada al alumno
-        Plantilla plantilla = alumno.getPlantilla();
+        Plantilla plantilla = alumno.getCurso().getPlantilla();
         if (plantilla == null || plantilla.getNombreCertificado().trim().equals("Error en encontrar plantilla")) {
             throw new Exception("No hay una plantilla asociada al Alumno " + alumno.getNombreAsistente());
         }
@@ -127,23 +127,29 @@ public class ServicioGenerarCertificado {
         // Crea un mapa de los datos del alumno que se usarán para reemplazar en los placeholders
         Map<String, String> alumnoData = new HashMap<>();
         alumnoData.put("nombre", alumno.getNombreAsistente());
-        alumnoData.put("curso", alumno.getNombreCurso());
-        alumnoData.put("duracion", alumno.getDuracion());
+        alumnoData.put("curso", alumno.getCurso().getNombreCurso());
+        alumnoData.put("duracion", alumno.getCurso().getDuracion());
         alumnoData.put("nota", alumno.getNotaAprobacion());
-        alumnoData.put("dias", alumno.getDiasCursos());
-        alumnoData.put("relator", alumno.getRelator());
+        alumnoData.put("dias", alumno.getCurso().getDiasCursos());
+        alumnoData.put("relator", alumno.getCurso().getRelator().getNombre());
         alumnoData.put("asistencia", alumno.getAsistencia());
-        alumnoData.put("emision", alumno.getLugarYfechaEmision());
+        alumnoData.put("emision", alumno.getCurso().getLugarYfechaEmision());
         alumnoData.put("correlativo", alumno.getNumeroCorrelativoInterno());
-        alumnoData.put("modalidad", alumno.getModalidad());
+        alumnoData.put("modalidad", alumno.getCurso().getModalidad());
 
-        byte[] logoCliente = Files.readAllBytes(Paths.get(plantilla.getPathLogo()));
-
+        byte[] logoCliente = null;
+        try {
+            logoCliente = Files.readAllBytes(Paths.get(alumno.getCurso().getCliente().getPathLogo()));
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
 
         Map<String, byte[]> imageData = new HashMap<>();
         imageData.put("imagen_qr", qrCodeBytes);
-        imageData.put("imagen_cliente", logoCliente);
-
+        if(logoCliente != null){
+            imageData.put("imagen_cliente", logoCliente);
+        }
+        
         for (XSLFSlide slide : ppt.getSlides()) {
             processSlide(slide, alumnoData, imageData);
         }
@@ -297,7 +303,7 @@ public class ServicioGenerarCertificado {
         "<tr>" +
         "<td style='text-align: center; margin: 20px 0;'>" +
         "<p>Estimado/a <strong>" + capitalizeName(alumno.getNombreAsistente()) + "</strong>:</p>" +
-        "<p>Adjunto encontrarás tu certificado de participación en el/los curso(s) <strong>" + formatCourseName(alumno.getNombreCurso()) + "</strong>. Junto con un código QR que te permitirá descargarlo nuevamente desde nuestra página web.</p>" +
+        "<p>Adjunto encontrarás tu certificado de participación en el/los curso(s) <strong>" + formatCourseName(alumno.getCurso().getNombreCurso()) + "</strong>. Junto con un código QR que te permitirá descargarlo nuevamente desde nuestra página web.</p>" +
         "<p>También puedes descargar tu certificado escaneando el siguiente código QR:</p>" +
         "</td>" +
         "</tr>" +
@@ -400,7 +406,7 @@ public class ServicioGenerarCertificado {
         Alumno alumno = alumnoRepo.findById(alumnoId).orElseThrow(() -> new Exception("Alumno no encontrado con ID " + alumnoId));
 
         // Obtén la plantilla asociada al alumno
-        Plantilla plantilla = alumno.getPlantilla();
+        Plantilla plantilla = alumno.getCurso().getPlantilla();
         if (plantilla == null || plantilla.getNombreCertificado().trim().equals("Error en encontrar plantilla")) {
             throw new Exception("No hay una plantilla asociada al Alumno " + alumno.getNombreAsistente());
         }
@@ -423,22 +429,28 @@ public class ServicioGenerarCertificado {
         // Crea un mapa de los datos del alumno que se usarán para reemplazar en los placeholders
         Map<String, String> alumnoData = new HashMap<>();
         alumnoData.put("nombre", alumno.getNombreAsistente());
-        alumnoData.put("curso", alumno.getNombreCurso());
-        alumnoData.put("duracion", alumno.getDuracion());
+        alumnoData.put("curso", alumno.getCurso().getNombreCurso());
+        alumnoData.put("duracion", alumno.getCurso().getDuracion());
         alumnoData.put("nota", alumno.getNotaAprobacion());
-        alumnoData.put("dias", alumno.getDiasCursos());
-        alumnoData.put("relator", alumno.getRelator());
+        alumnoData.put("dias", alumno.getCurso().getDiasCursos());
+        alumnoData.put("relator", alumno.getCurso().getRelator().getNombre());
         alumnoData.put("asistencia", alumno.getAsistencia());
-        alumnoData.put("emision", alumno.getLugarYfechaEmision());
+        alumnoData.put("emision", alumno.getCurso().getLugarYfechaEmision());
         alumnoData.put("correlativo", alumno.getNumeroCorrelativoInterno());
-        alumnoData.put("modalidad", alumno.getModalidad());
+        alumnoData.put("modalidad", alumno.getCurso().getModalidad());
 
-        byte[] logoCliente = Files.readAllBytes(Paths.get(plantilla.getPathLogo()));
-
+        byte[] logoCliente = null;
+        try {
+            logoCliente = Files.readAllBytes(Paths.get(alumno.getCurso().getCliente().getPathLogo()));
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
 
         Map<String, byte[]> imageData = new HashMap<>();
         imageData.put("imagen_qr", qrCodeBytes);
-        imageData.put("imagen_cliente", logoCliente);
+        if(logoCliente != null){
+            imageData.put("imagen_cliente", logoCliente);
+        }
 
         // Procesa las slides y shapes
         for (XSLFSlide slide : ppt.getSlides()) {
@@ -480,7 +492,7 @@ public class ServicioGenerarCertificado {
     public CompletableFuture<byte[]> descargarCertificadosServicio(Alumno alumno) throws Exception {
 
         // Obtén la plantilla asociada al alumno
-        Plantilla plantilla = alumno.getPlantilla();
+        Plantilla plantilla = alumno.getCurso().getPlantilla();
         if (plantilla == null || plantilla.getNombreCertificado().trim().equals("Error en encontrar plantilla")) {
             throw new Exception("No hay una plantilla asociada al Alumno " + alumno.getNombreAsistente());
         }
@@ -503,22 +515,28 @@ public class ServicioGenerarCertificado {
         // Crea un mapa de los datos del alumno que se usarán para reemplazar en los placeholders
         Map<String, String> alumnoData = new HashMap<>();
         alumnoData.put("nombre", alumno.getNombreAsistente());
-        alumnoData.put("curso", alumno.getNombreCurso());
-        alumnoData.put("duracion", alumno.getDuracion());
+        alumnoData.put("curso", alumno.getCurso().getNombreCurso());
+        alumnoData.put("duracion", alumno.getCurso().getDuracion());
         alumnoData.put("nota", alumno.getNotaAprobacion());
-        alumnoData.put("dias", alumno.getDiasCursos());
-        alumnoData.put("relator", alumno.getRelator());
+        alumnoData.put("dias", alumno.getCurso().getDiasCursos());
+        alumnoData.put("relator", alumno.getCurso().getRelator().getNombre());
         alumnoData.put("asistencia", alumno.getAsistencia());
-        alumnoData.put("emision", alumno.getLugarYfechaEmision());
+        alumnoData.put("emision", alumno.getCurso().getLugarYfechaEmision());
         alumnoData.put("correlativo", alumno.getNumeroCorrelativoInterno());
-        alumnoData.put("modalidad", alumno.getModalidad());
-        
-        byte[] logoCliente = Files.readAllBytes(Paths.get(plantilla.getPathLogo()));
+        alumnoData.put("modalidad", alumno.getCurso().getModalidad());
 
+        byte[] logoCliente = null;
+        try {
+            logoCliente = Files.readAllBytes(Paths.get(alumno.getCurso().getCliente().getPathLogo()));
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
 
         Map<String, byte[]> imageData = new HashMap<>();
         imageData.put("imagen_qr", qrCodeBytes);
-        imageData.put("imagen_cliente", logoCliente);
+        if(logoCliente != null){
+            imageData.put("imagen_cliente", logoCliente);
+        }
 
 
         // Procesa las slides y shapes

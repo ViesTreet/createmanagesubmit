@@ -72,10 +72,21 @@
                                 <label for="notaAprobacion">Nota aprobación</label>
                                 <input type="text" name="notaAprobacion" id="notaAprobacion" class="form-control" placeholder="Ej: 7.0">
                             </div>
-                            <div>
+                            <div style="position: relative;">
                                 <label for="relator">Relator</label>
-                                <input type="text" name="relator" id="relator" class="form-control" placeholder="Relator">
+                                <input type="text"
+                                    name="relator"
+                                    id="relator"
+                                    class="form-control"
+                                    placeholder="Relator"
+                                    autocomplete="off">
+
+                                <div id="relator-results"
+                                    class="list-group"
+                                    style="position:absolute; z-index:1000; width:100%; display:none;">
+                                </div>
                             </div>
+
                             <div>
                                 <label for="asistencia">Asistencia</label>
                                 <input type="text" name="asistencia" id="asistencia" class="form-control" placeholder="Ej: 100">
@@ -238,5 +249,59 @@
     <script th:inline="javascript" th:if="${error != null}">
         showAlert("[[${error}]]");
     </script>
+    <script>
+    let relatorTimeout = null;
+
+    document.getElementById("relator").addEventListener("input", function () {
+        const query = this.value.trim();
+
+        clearTimeout(relatorTimeout);
+
+        if (query.length < 2) {
+            hideRelatorResults();
+            return;
+        }
+
+        relatorTimeout = setTimeout(() => {
+            fetch(`/api/relatores?query=${encodeURIComponent(query)}`)
+                .then(res => res.json())
+                .then(data => showRelatorResults(data))
+                .catch(err => console.error(err));
+        }, 350); // ← debounce (IMPORTANTE)
+    });
+
+    function showRelatorResults(relatores) {
+        const container = document.getElementById("relator-results");
+        container.innerHTML = "";
+
+        if (relatores.length === 0) {
+            hideRelatorResults();
+            return;
+        }
+
+        relatores.forEach(r => {
+            const item = document.createElement("button");
+            item.type = "button";
+            item.className = "list-group-item list-group-item-action";
+            item.textContent = r.nombre;
+
+            item.onclick = () => {
+                document.getElementById("relator").value = r.nombre;
+                hideRelatorResults();
+            };
+
+            container.appendChild(item);
+        });
+
+        container.style.display = "block";
+    }
+
+    function hideRelatorResults() {
+        const container = document.getElementById("relator-results");
+        container.style.display = "none";
+        container.innerHTML = "";
+    }
+    </script>
+
 </body>
 </html>

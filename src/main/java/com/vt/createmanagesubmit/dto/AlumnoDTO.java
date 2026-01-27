@@ -20,8 +20,6 @@ public class AlumnoDTO {
 
     private String cliente;
 
-    private String identificador;
-
     private String notaAprovacion;
 
     private String relator;
@@ -53,22 +51,21 @@ public class AlumnoDTO {
     public AlumnoDTO(Alumno alumno) {
         this.id = alumno.getId();
         this.nombreAsistente = alumno.getNombreAsistente();
-        this.nombreCurso = alumno.getNombreCurso();
-        this.diasCursos = alumno.getDiasCursos();
-        this.numeroHoras = alumno.getDuracion();
+        this.nombreCurso = alumno.getCurso().getNombreCurso();
+        this.diasCursos = alumno.getCurso().getDiasCursos();
+        this.numeroHoras = alumno.getCurso().getDuracion();
         this.numeroCorrelativoInterno = alumno.getNumeroCorrelativoInterno();
-        this.cliente = alumno.getCliente();
-        this.identificador = alumno.getIdentificador();
+        this.cliente = alumno.getCurso().getCliente().getNombreCliente();
         this.notaAprovacion = alumno.getNotaAprobacion();
-        this.relator = alumno.getRelator();
+        this.relator = alumno.getCurso().getRelator().getNombre();
         this.asistencia = alumno.getAsistencia();
         this.estado = alumno.getEstado();
         this.diploma = alumno.getDiploma();
         this.rut = alumno.getRut();
         this.correo = alumno.getCorreo();
-        this.ubicacionSubida = alumno.getUbicacionSubida();
-        this.lugarYfechaEmision = alumno.getLugarYfechaEmision();
-        this.plantilla = alumno.getPlantilla().getNombreCertificado();
+        this.ubicacionSubida = alumno.getCurso().getUbicacionSubida();
+        this.lugarYfechaEmision = alumno.getCurso().getLugarYfechaEmision();
+        this.plantilla = alumno.getCurso().getPlantilla().getNombreCertificado();
         this.createdAt = alumno.getCreatedAt();
         this.updatedAt = alumno.getUpdatedAt();
     }
@@ -128,15 +125,7 @@ public class AlumnoDTO {
     public void setCliente(String cliente) {
         this.cliente = cliente;
     }
-
-    public String getIdentificador() {
-        return identificador;
-    }
-
-    public void setIdentificador(String identificador) {
-        this.identificador = identificador;
-    }
-
+    
     public String getNotaAprovacion() {
         return notaAprovacion;
     }

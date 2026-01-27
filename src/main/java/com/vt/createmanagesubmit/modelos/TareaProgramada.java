@@ -29,29 +29,11 @@ public class TareaProgramada {
 
     private String accion;       
 
-    private String nombreCurso;
-
-    private String diasCursos;
-
-    private String duracion;
-
-    private String modalidad;
-
-    private String cliente;
-
-    private String relator;
-
-    private String lugarYfechaEmision;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "plantilla_id")
-    private Plantilla plantilla;     
+    private Curso curso;
 
     private LocalDateTime fechaEjecucion;
 
     private String estado;         
-
-    private String ubicacionSubida;
     
     @Column(updatable=false)
 	@DateTimeFormat(pattern="yyyy-MM-dd")
@@ -62,28 +44,19 @@ public class TareaProgramada {
 
     public TareaProgramada() {
     }
-
-    public TareaProgramada(Long id, Long iDCurso, String accion, String nombreCurso, String diasCursos, String duracion,
-            String modalidad, String cliente, String relator, String lugarYfechaEmision, Plantilla plantilla,
-            LocalDateTime fechaEjecucion, String estado, String ubicacionSubida , Date createdAt, Date updatedAt) {
+    
+    public TareaProgramada(Long id, Long iDCurso, String accion, Curso curso, LocalDateTime fechaEjecucion,
+            String estado, Date createdAt, Date updatedAt) {
         this.id = id;
-        this.IDCurso = iDCurso;
+        IDCurso = iDCurso;
         this.accion = accion;
-        this.nombreCurso = nombreCurso;
-        this.diasCursos = diasCursos;
-        this.duracion = duracion;
-        this.modalidad = modalidad;
-        this.cliente = cliente;
-        this.relator = relator;
-        this.lugarYfechaEmision = lugarYfechaEmision;
-        this.plantilla = plantilla;
+        this.curso = curso;
         this.fechaEjecucion = fechaEjecucion;
         this.estado = estado;
-        this.ubicacionSubida = ubicacionSubida;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
-
+    
     public Long getId() {
         return id;
     }
@@ -104,72 +77,16 @@ public class TareaProgramada {
         return accion;
     }
 
-    public void setAccion(String Accion) {
-        accion = Accion;
+    public void setAccion(String accion) {
+        this.accion = accion;
     }
 
-    public String getNombreCurso() {
-        return nombreCurso;
+    public Curso getCurso() {
+        return curso;
     }
 
-    public void setNombreCurso(String nombreCurso) {
-        this.nombreCurso = nombreCurso;
-    }
-
-    public String getDiasCursos() {
-        return diasCursos;
-    }
-
-    public void setDiasCursos(String diasCursos) {
-        this.diasCursos = diasCursos;
-    }
-
-    public String getDuracion() {
-        return duracion;
-    }
-
-    public void setDuracion(String duracion) {
-        this.duracion = duracion;
-    }
-
-    public String getModalidad() {
-        return modalidad;
-    }
-
-    public void setModalidad(String modalidad) {
-        this.modalidad = modalidad;
-    }
-
-    public String getCliente() {
-        return cliente;
-    }
-
-    public void setCliente(String cliente) {
-        this.cliente = cliente;
-    }
-
-    public String getRelator() {
-        return relator;
-    }
-
-    public void setRelator(String relator) {
-        this.relator = relator;
-    }
-
-    public String getLugarYfechaEmision() {
-        return lugarYfechaEmision;
-    }
-
-    public void setLugarYfechaEmision(String lugarYfechaEmision) {
-        this.lugarYfechaEmision = lugarYfechaEmision;
-    }
-
-    public Plantilla getPlantilla() {
-        return plantilla;
-    }
-
-    public void setPlantilla(Plantilla plantilla) {
-        this.plantilla = plantilla;
+    public void setCurso(Curso curso) {
+        this.curso = curso;
     }
 
     public LocalDateTime getFechaEjecucion() {
@@ -188,14 +105,6 @@ public class TareaProgramada {
         this.estado = estado;
     }
 
-    public String getUbicacionSubida(){
-        return ubicacionSubida;
-    }
-
-    public void setUbicacionSubida(String ubicacionSubida){
-        this.ubicacionSubida=ubicacionSubida;
-    }
-
     public Date getCreatedAt() {
         return createdAt;
     }
@@ -210,15 +119,6 @@ public class TareaProgramada {
 
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    @Override
-    public String toString() {
-        return "TareaProgramada [id=" + id + ", IDCurso=" + IDCurso + ", Accion=" + accion + ", nombreCurso="
-                + nombreCurso + ", diasCursos=" + diasCursos + ", duracion=" + duracion + ", modalidad=" + modalidad
-                + ", cliente=" + cliente + ", relator=" + relator + ", lugarYfechaEmision=" + lugarYfechaEmision
-                + ", plantilla=" + plantilla + ", fechaEjecucion=" + fechaEjecucion + ", estado=" + estado
-                + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + "]";
     }
 
     @PrePersist

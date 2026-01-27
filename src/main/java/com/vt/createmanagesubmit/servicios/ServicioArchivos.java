@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.DateUtil;
@@ -30,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.vt.createmanagesubmit.dto.AlumnoDTO;
 import com.vt.createmanagesubmit.exceptions.CertificateGenerationException;
 import com.vt.createmanagesubmit.modelos.Alumno;
+import com.vt.createmanagesubmit.modelos.Curso;
 import com.vt.createmanagesubmit.modelos.Plantilla;
 import com.vt.createmanagesubmit.repositorios.RepositorioAlumnos;
 import com.vt.createmanagesubmit.repositorios.RepositorioPlantillas;
@@ -61,7 +63,7 @@ public class ServicioArchivos {
     String correoEmpresa;
 
     @Async
-    public CompletableFuture<Void> leerExcelYGuardarEnBD(byte[] fileBytes, String estadoDiplomaExcel, String plantilla, String estadoExcel, String rutificador, String ubicacion) throws IOException {
+    public CompletableFuture<Void> leerExcelYGuardarEnBD(byte[] fileBytes, String estadoDiplomaExcel, String estadoExcel, String rutificador, Curso curso) throws IOException {
         try (InputStream fileInputStream = new ByteArrayInputStream(fileBytes)){
             Workbook workbook = WorkbookFactory.create(fileInputStream);
 
@@ -89,7 +91,7 @@ public class ServicioArchivos {
 
                     Alumno alumno = new Alumno();
 
-                    // Iterar sobre las celdas de la fila
+                    
                     for (Cell celda : fila) {
                         int indiceColumna = celda.getColumnIndex();
                         String nombreColumna = mapaColumnas.get(indiceColumna);
@@ -99,13 +101,6 @@ public class ServicioArchivos {
                     }
 
                     if (alumno.getNombreAsistente() != null) {
-                        if (!plantilla.trim().equals("excel")) {
-                            Optional<Plantilla> plantillaOp = servicio.plantillaPorNombre(plantilla);
-                            if (plantillaOp.isPresent()) {
-                                Plantilla plantillaAlumnoEstablecido = plantillaOp.get();
-                                alumno.setPlantilla(plantillaAlumnoEstablecido);
-                            }
-                        }
 
                         if (alumno.getCorreo() == null || alumno.getCorreo().trim().isEmpty() || alumno.getCorreo().trim().isBlank()) {
                             alumno.setCorreo(correoEmpresa);
@@ -149,24 +144,13 @@ public class ServicioArchivos {
                             }
                         }
 
-                        if(alumno.getPlantilla() == null){
-                            Optional<Plantilla> optPlantilla = servicio.plantillaPorNombre("Error en encontrar plantilla");
-                            if(optPlantilla.isPresent()){
-                                Plantilla plantilla3 = optPlantilla.get();
-                                alumno.setPlantilla(plantilla3);
-                            }else{
-                                Plantilla plantilla3 = servicio.plantillaPorId(1L);
-                                alumno.setPlantilla(plantilla3);
-                            }
-                        }
-
                         if(alumno.getDiploma() == null || alumno.getDiploma().trim().isEmpty()){
                             alumno.setDiploma("noEnviado");
                         }
                         String nombre = alumno.getNombreAsistente().trim().toUpperCase();
                         alumno.setNombreAsistente(nombre);
                         if(!alumno.getNombreAsistente().isEmpty()){
-                            alumno.setUbicacionSubida(ubicacion);
+                            alumno.setCurso(curso);
                             alumnoRepo.save(alumno);
                             servicio.numeroCorrelativoAuto(alumno);
                             if(estadoDiplomaExcel.equals("enviarApro")&&estadoExcel.equals("aprobado")){
@@ -215,47 +199,12 @@ public class ServicioArchivos {
                 valorCelda = servicioApi.formatearNombre(valorCelda);
                 alumno.setNombreAsistente(valorCelda);
                 break;
-            case "Nombre curso":
-            case "curso":
-            case "Curos":
-            case "nombre curso":
-                alumno.setNombreCurso(valorCelda);
-                break;
-            case "días curso":
-            case "días del curso":
-            case "dias curso":
-            case "dias del curso":
-            case "dias":
-                alumno.setDiasCursos(valorCelda);
-                break;
-            case "nº de horas":
-            case "numero horas":
-            case "numero de horas":
-            case "duracion del curso":
-            case "duracion curso":
-            case "duración del curso":
-            case "duración curso":
-            case "duracion":
-                alumno.setDuracion(valorCelda);
-                break;
-            case "cliente":
-            case "Cliente":
-                alumno.setCliente(valorCelda);
-                break;
-            case "identificador":
-            case "id":
-                alumno.setIdentificador(valorCelda);
-                break;
             case "nota aprobación":
             case "nota aprobacion":
             case "Nota aprobación":
             case "Nota aprobacion":
             case "nota":
                 alumno.setNotaAprobacion(valorCelda);
-                break;
-            case "relator":
-            case "profesor":
-                alumno.setRelator(valorCelda);
                 break;
             case "asistencia":
             case "Asistencia":
@@ -289,29 +238,6 @@ public class ServicioArchivos {
             case "Correo":
                 alumno.setCorreo(valorCelda);
                 break;
-            case "modalidad":
-            case "Modalidad":
-                alumno.setModalidad(valorCelda);
-                break;
-            case "plantilla":
-            case "Plantilla":
-                Optional<Plantilla> plantillaAlumnoOptional = servicio.plantillaPorNombre(valorCelda);
-                if (plantillaAlumnoOptional.isPresent()) {
-                    Plantilla plantillaAlumno = plantillaAlumnoOptional.get();
-                    alumno.setPlantilla(plantillaAlumno);
-                } else {
-                    Optional<Plantilla> plantillaErrorOptional = servicio.plantillaPorNombre("Error en encontrar plantilla");
-                    if (plantillaErrorOptional.isPresent()) {
-                        Plantilla plantillaAlumno = plantillaErrorOptional.get();
-                        alumno.setPlantilla(plantillaAlumno);
-                    } else {
-                        Plantilla plantillaAlumno = new Plantilla();
-                        plantillaAlumno.setNombreCertificado("Error en encontrar plantilla");
-                        plantillaRepo.save(plantillaAlumno);
-                        alumno.setPlantilla(plantillaAlumno);
-                    }
-                }
-                break;
             case "rutificador":
             case "Rutificador":
                 if(rutificar.trim().equals("rutiExcel")){
@@ -324,12 +250,6 @@ public class ServicioArchivos {
 
                     }
                 }
-                break;
-            case "emision":
-            case "emisión":
-            case "lugar y fecha emision":
-            case "lugar y fecha de emision":
-                alumno.setLugarYfechaEmision(valorCelda);
                 break;
             default:
                 // Ignorar columnas no reconocidas
@@ -396,7 +316,7 @@ public class ServicioArchivos {
             plantillaError = optPlantilla.get();
         }
         for (Alumno alumno : alumnos) {
-            if(alumno.getPlantilla() != plantillaError){
+            if(alumno.getCurso().getPlantilla() != plantillaError){
                 servicioGenerarCertificado.generateCertificateForAlumno(alumno);
                 alumno.setDiploma("enviado");
                 alumnoRepo.save(alumno);
@@ -410,7 +330,7 @@ public class ServicioArchivos {
         Alumno alumno = alumnoRepo.findById(id).orElseThrow(() -> new Exception("Alumno no encontrado con ID: " + id));
 
         if (alumno != null) {
-            Plantilla plantilla = alumno.getPlantilla();
+            Plantilla plantilla = alumno.getCurso().getPlantilla();
             if (plantilla != null) {
                 Hibernate.initialize(plantilla);
             }
@@ -426,63 +346,6 @@ public class ServicioArchivos {
         }
     }
 
-    public void exportToExcel(HttpServletResponse response) throws IOException {
-        // Obtener la lista de alumnos
-        List<Alumno> alumnos = alumnoRepo.findAll();
-
-        // Crear un nuevo libro de Excel
-        Workbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet("Alumnos");
-
-        // Crear la fila de cabecera
-        Row headerRow = sheet.createRow(0);
-        String[] headers = {"Nombre Asistente", "Nombre Curso", "Días Curso", "Número Horas", 
-                            "Cliente", "Identificador", "Código", "Nota Aprobación", "Relator", "Asistencia", "Estado", 
-                            "Diploma", "RUT", "Correo", "Plantilla", "Ubiación", "Emision"};
-        
-        for (int i = 0; i < headers.length; i++) {
-            Cell cell = headerRow.createCell(i);
-            cell.setCellValue(headers[i]);
-        }
-
-        // Llenar los datos de los alumnos
-        int rowNum = 1;
-        for (Alumno alumno : alumnos) {
-            AlumnoDTO alumnoDTO = new AlumnoDTO(alumno);
-            Row row = sheet.createRow(rowNum++);
-
-            // Usar una función auxiliar para manejar los nulls
-            row.createCell(0).setCellValue(safeGet(alumnoDTO.getNombreAsistente()));
-            row.createCell(1).setCellValue(safeGet(alumnoDTO.getNombreCurso()));
-            row.createCell(2).setCellValue(safeGet(alumnoDTO.getDiasCursos()));
-            row.createCell(3).setCellValue(safeGet(alumnoDTO.getNumeroHoras()));
-            row.createCell(5).setCellValue(safeGet(alumnoDTO.getCliente()));
-            row.createCell(6).setCellValue(safeGet(alumnoDTO.getIdentificador()));
-            row.createCell(8).setCellValue(safeGet(alumnoDTO.getNotaAprovacion()));
-            row.createCell(9).setCellValue(safeGet(alumnoDTO.getRelator()));
-            row.createCell(10).setCellValue(safeGet(alumnoDTO.getAsistencia()));
-            row.createCell(11).setCellValue(safeGet(alumnoDTO.getEstado()));
-            row.createCell(12).setCellValue(safeGet(alumnoDTO.getDiploma()));
-            row.createCell(13).setCellValue(safeGet(alumnoDTO.getRut()));
-            row.createCell(14).setCellValue(safeGet(alumnoDTO.getCorreo()));
-            row.createCell(15).setCellValue(safeGet(alumnoDTO.getPlantilla()));
-            row.createCell(16).setCellValue(safeGet(alumnoDTO.getUbicacionSubida()));
-            row.createCell(17).setCellValue(safeGet(alumnoDTO.getLugarYfechaEmision()));
-        }
-
-        // Configuración de la respuesta HTTP para descargar el archivo Excel
-        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        response.setHeader("Content-Disposition", "attachment; filename=alumnos.xlsx");
-
-        // Escribir el archivo Excel en la respuesta HTTP
-        workbook.write(response.getOutputStream());
-        workbook.close();
-    }
-
-    // Función auxiliar para manejar nulls y devolver un espacio vacío
-    private String safeGet(String value) {
-        return value == null ? "" : value;
-    }
 }
 
     

@@ -34,8 +34,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -52,14 +50,17 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.vt.createmanagesubmit.dto.AlumnoDTO;
 import com.vt.createmanagesubmit.dto.AlumnosWrapper;
 import com.vt.createmanagesubmit.dto.CursoTemporalDTO;
+import com.vt.createmanagesubmit.dto.RelatorDTO;
 import com.vt.createmanagesubmit.dto.TareaDTO;
 import com.vt.createmanagesubmit.dto.filtroDTO;
 import com.vt.createmanagesubmit.modelos.Admin;
 import com.vt.createmanagesubmit.modelos.Alumno;
 import com.vt.createmanagesubmit.modelos.AlumnoTemporal;
-import com.vt.createmanagesubmit.modelos.CursoTemporal;
+import com.vt.createmanagesubmit.modelos.Curso;
 import com.vt.createmanagesubmit.modelos.Plantilla;
+import com.vt.createmanagesubmit.modelos.Relator;
 import com.vt.createmanagesubmit.repositorios.RepositorioAlumnos;
+import com.vt.createmanagesubmit.repositorios.RepositorioRelator;
 import com.vt.createmanagesubmit.servicios.Servicio;
 import com.vt.createmanagesubmit.servicios.ServicioArchivos;
 import com.vt.createmanagesubmit.servicios.ServicioGenerarCertificado;
@@ -92,6 +93,9 @@ public class ControladorApi {
 
     @Autowired
     private RepositorioAlumnos repoAlum;
+
+    @Autowired
+    private RepositorioRelator repoRel;
 
     private static final int MAX_DOWNLOADS = 5;
     private static final long TIME_FRAME = 60 * 60 * 1000; // 1 hora
@@ -386,12 +390,13 @@ public class ControladorApi {
     }
 
     @PostMapping("/probarPlantilla")
-    public CompletableFuture<ResponseEntity<byte[]>> probarPlantilla(@ModelAttribute Alumno alumno,@RequestParam("idPlantilla")Long idPlantilla,HttpSession session) throws Exception {
+    public CompletableFuture<ResponseEntity<byte[]>> probarPlantilla(@ModelAttribute Curso curso,@RequestParam("idPlantilla")Long idPlantilla,HttpSession session) throws Exception {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuarioTemporal != null) {
             Plantilla plantilla=ser.plantillaPorId(idPlantilla);
-            alumno.setPlantilla(plantilla);
-            alumno.setNombreAsistente(alumno.getNombreAsistente().toUpperCase());
+            curso.setPlantilla(plantilla);
+            Alumno alumno = new Alumno();
+            alumno.setNombreAsistente("Gabriel Parra");
             return servicioGenerarCertificado.descargarCertificadosServicio(alumno)
                     .thenApply(fileBytes -> {
                         HttpHeaders headers = new HttpHeaders();
@@ -500,15 +505,7 @@ public class ControladorApi {
     @PostMapping("/programarCertificadoMoodleManual/crear")
     public ResponseEntity<?> procesarAlumnos(
             @RequestParam Long cursoMoodle,
-            @RequestParam Long plantilla,
-            @RequestParam(required=false) String curso,
-            @RequestParam(required=false) String diasCursos,
-            @RequestParam(required=false, name="numeroHoras") String duracion,
-            @RequestParam(required=false) String modalidad,
-            @RequestParam(required=false) String cliente,
-            @RequestParam(required=false) String relator,
-            @RequestParam(required=false) String lugarYfechaEmision,
-            @RequestParam(required=false, name="ubicacionSubida") String ubicacionSubida,
+            @RequestParam(required = false, name ="cursoID" )Long cursoID,
             @RequestParam String accion,
             @ModelAttribute("alumnos") AlumnosWrapper wrapper
     ) {
@@ -527,16 +524,8 @@ public class ControladorApi {
             a.setAsistencia(f.getAsistencia());
             a.setEstado("Aprobado");          // o el estado que toque
             a.setDiploma("noEnviado");       // inicial
-            a.setNombreCurso(curso);
-            a.setDiasCursos(diasCursos);
-            a.setDuracion(duracion);
-            a.setModalidad(modalidad);
-            a.setCliente(cliente);
-            a.setRelator(relator);
-            a.setLugarYfechaEmision(lugarYfechaEmision);
-            Plantilla p = ser.plantillaPorId(plantilla);
-            a.setPlantilla(p);
-            a.setUbicacionSubida(ubicacionSubida);
+            Curso curso = ser.cursoPorId(cursoID);
+            a.setCurso(curso);
             return a;
         }).collect(Collectors.toList());
 
@@ -562,7 +551,7 @@ public class ControladorApi {
         ser.borrarTareaPorId(id);
         return ResponseEntity.noContent().build();
     }
-
+/* 
     @GetMapping("/cursoTemporal")
     public ResponseEntity<List<CursoTemporalDTO>> listAll(){
         List<CursoTemporal> list = ser.todosLosCursosTemporales();
@@ -575,6 +564,7 @@ public class ControladorApi {
         return ResponseEntity.ok(dtos);
     }
 
+
     @PostMapping("/cursoTemporal/busquedaMultiFiltro")
     public ResponseEntity<List<CursoTemporalDTO>> buscarMultiFiltro(@RequestBody List<Map<String,String>> filtros){
         List<CursoTemporal> encontrados = ser.buscarConFiltros(filtros);
@@ -582,7 +572,7 @@ public class ControladorApi {
         for(CursoTemporal c : encontrados) dtos.add(CursoTemporalDTO.fromEntity(c));
         return ResponseEntity.ok(dtos);
     }
-
+*/
     @GetMapping("/cursoTemporal/generarQr/{id}")
     public ResponseEntity<?> generarQr(@PathVariable Long id){
         try {
@@ -655,30 +645,23 @@ public class ControladorApi {
     public List<AlumnoTemporal> obtenerAlumnosPorCurso(
             @PathVariable Long idCurso) {
         
-        Optional<CursoTemporal> cursoTempOpt = ser.cursoTemporalPorId(idCurso);
-        if(cursoTempOpt.isPresent()){
-            CursoTemporal cursoTemp = cursoTempOpt.get();
-            List<AlumnoTemporal> alumnoTemporals = cursoTemp.getAlumnosTemporales();
-            return alumnoTemporals;
-        }else{
-            return null;
-        }
+        Curso curso = ser.cursoPorId(idCurso);
+        List<AlumnoTemporal> alumnoTemporals = curso.getAlumnosTemporales();
+        return alumnoTemporals;
         
     }
 
     @PostMapping("/alumnoTemporal/enviar")
     public ResponseEntity<Map<String, Object>> enviarDatos(
             @RequestParam Long alumnoId,
-            @RequestParam Long cursoId,
             @RequestParam String asistencia,
             @RequestParam String nota
     ) {
 
-        ser.alumnoVerificado(alumnoId,cursoId,asistencia,nota);
+        ser.alumnoVerificado(alumnoId,asistencia,nota);
 
         Map<String, Object> response = new HashMap<>();
         response.put("alumnoId", alumnoId);
-        response.put("cursoId", cursoId);
         response.put("asistencia", asistencia);
         response.put("nota", nota);
 
@@ -689,6 +672,21 @@ public class ControladorApi {
     public ResponseEntity<Void> borrarAlumno(@PathVariable Long idAlumno) {
         ser.borrarAlumnoTemporalPorId(idAlumno);
         return ResponseEntity.noContent().build();
+    }
+
+        @GetMapping("/relatores")
+    public List<RelatorDTO> buscarRelatores(
+            @RequestParam String query) {
+
+        if (query.length() < 2) {
+            return List.of();
+        }
+
+        return repoRel
+                .findTop10ByNombreContainingIgnoreCaseOrderByNombreDesc(query)
+                .stream()
+                .map(r -> new RelatorDTO(r.getNombre()))
+                .toList();
     }
 
 

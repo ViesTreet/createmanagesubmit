@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,14 +14,17 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name="cursoTemporal")
-public class CursoTemporal {
+@Table(name="curso")
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler", "plantilla" })
+public class Curso {
 
     @Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -32,24 +37,33 @@ public class CursoTemporal {
 
     private String duracion;
 
+    @ManyToOne(fetch = FetchType.LAZY) 
+    @JoinColumn(name = "cliente_id") 
+    private Cliente cliente;
+
     private String modalidad;
-
-    private String relator;
-
-    private String identificador;
-
-    private String cliente;
 
     private String ubicacionSubida;
 
     private String lugarYfechaEmision;
 
-    private String estado;
+    private int asistenciaMin;
 
-    private Long plantilla;
+    private float notaMin; 
+
+    @ManyToOne(fetch = FetchType.LAZY) 
+    @JoinColumn(name = "plantilla_id") 
+    private Plantilla plantilla;
+
+    @OneToMany(mappedBy = "curso", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Alumno> alumnos;
 
     @OneToMany(mappedBy = "cursoTemporal", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<AlumnoTemporal> alumnosTemporales;
+
+    @ManyToOne(fetch = FetchType.LAZY) 
+    @JoinColumn(name = "relator_id") 
+    private Relator relator;
 
     @Column(updatable=false)
 	@DateTimeFormat(pattern="yyyy-MM-dd")
@@ -57,26 +71,28 @@ public class CursoTemporal {
 	
 	@DateTimeFormat(pattern="yyyy-MM-dd")
 	private Date updatedAt;
-
-    public CursoTemporal() {
+    
+    public Curso() {
     }
-
-    public CursoTemporal(Long id, String nombreCurso, String diasCursos, String duracion, String modalidad,
-            String relator, String identificador, String cliente, String ubicacionSubida, String lugarYfechaEmision,
-            String estado, Long plantilla, List<AlumnoTemporal> alumnosTemporales, Date createdAt, Date updatedAt) {
+    
+    public Curso(Long id, String nombreCurso, String diasCursos, String duracion, Cliente cliente, String modalidad,
+            String ubicacionSubida, String lugarYfechaEmision, int asistenciaMin, float notaMin, Plantilla plantilla,
+            List<Alumno> alumnos, List<AlumnoTemporal> alumnosTemporales, Relator relator, Date createdAt,
+            Date updatedAt) {
         this.id = id;
         this.nombreCurso = nombreCurso;
         this.diasCursos = diasCursos;
         this.duracion = duracion;
-        this.modalidad = modalidad;
-        this.relator = relator;
-        this.identificador = identificador;
         this.cliente = cliente;
+        this.modalidad = modalidad;
         this.ubicacionSubida = ubicacionSubida;
         this.lugarYfechaEmision = lugarYfechaEmision;
-        this.estado = estado;
+        this.asistenciaMin = asistenciaMin;
+        this.notaMin = notaMin;
         this.plantilla = plantilla;
+        this.alumnos = alumnos;
         this.alumnosTemporales = alumnosTemporales;
+        this.relator = relator;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -113,36 +129,20 @@ public class CursoTemporal {
         this.duracion = duracion;
     }
 
+    public Cliente getCliente() {
+        return cliente;
+    }
+
+    public void setCliente(Cliente cliente) {
+        this.cliente = cliente;
+    }
+
     public String getModalidad() {
         return modalidad;
     }
 
     public void setModalidad(String modalidad) {
         this.modalidad = modalidad;
-    }
-
-    public String getRelator() {
-        return relator;
-    }
-
-    public void setRelator(String relator) {
-        this.relator = relator;
-    }
-
-    public String getIdentificador() {
-        return identificador;
-    }
-
-    public void setIdentificador(String identificador) {
-        this.identificador = identificador;
-    }
-
-    public String getCliente() {
-        return cliente;
-    }
-
-    public void setCliente(String cliente) {
-        this.cliente = cliente;
     }
 
     public String getUbicacionSubida() {
@@ -161,20 +161,36 @@ public class CursoTemporal {
         this.lugarYfechaEmision = lugarYfechaEmision;
     }
 
-    public String getEstado() {
-        return estado;
+    public int getAsistenciaMin() {
+        return asistenciaMin;
     }
 
-    public void setEstado(String estado) {
-        this.estado = estado;
+    public void setAsistenciaMin(int asistenciaMin) {
+        this.asistenciaMin = asistenciaMin;
     }
 
-    public Long getPlantilla() {
+    public float getNotaMin() {
+        return notaMin;
+    }
+
+    public void setNotaMin(float notaMin) {
+        this.notaMin = notaMin;
+    }
+
+    public Plantilla getPlantilla() {
         return plantilla;
     }
 
-    public void setPlantilla(Long plantilla) {
+    public void setPlantilla(Plantilla plantilla) {
         this.plantilla = plantilla;
+    }
+
+    public List<Alumno> getAlumnos() {
+        return alumnos;
+    }
+
+    public void setAlumnos(List<Alumno> alumnos) {
+        this.alumnos = alumnos;
     }
 
     public List<AlumnoTemporal> getAlumnosTemporales() {
@@ -183,6 +199,14 @@ public class CursoTemporal {
 
     public void setAlumnosTemporales(List<AlumnoTemporal> alumnosTemporales) {
         this.alumnosTemporales = alumnosTemporales;
+    }
+
+    public Relator getRelator() {
+        return relator;
+    }
+
+    public void setRelator(Relator relator) {
+        this.relator = relator;
     }
 
     public Date getCreatedAt() {

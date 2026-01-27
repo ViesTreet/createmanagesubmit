@@ -80,18 +80,10 @@ public class TareaMoodleService {
             a.setNombreAsistente(nombreAsistente.toUpperCase());
             a.setCorreo(info.get("email").asText());
             // datos heredados de la tarea
-            a.setNombreCurso(tarea.getNombreCurso());
-            a.setDiasCursos(tarea.getDiasCursos());
-            a.setDuracion(tarea.getDuracion());
-            a.setModalidad(tarea.getModalidad());
-            a.setCliente(tarea.getCliente());
-            a.setRelator(tarea.getRelator());
-            a.setLugarYfechaEmision(tarea.getLugarYfechaEmision());
-            a.setPlantilla(tarea.getPlantilla());
+            a.setCurso(tarea.getCurso());
             a.setDiploma("noEnviado");
             a.setEstado("Aprobado");
             a.setRut(null);
-            a.setUbicacionSubida(tarea.getUbicacionSubida());
             a.setAsistencia("100");
             resultado.add(a);
         }

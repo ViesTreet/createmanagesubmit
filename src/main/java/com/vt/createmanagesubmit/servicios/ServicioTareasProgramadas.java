@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.vt.createmanagesubmit.modelos.Curso;
 import com.vt.createmanagesubmit.modelos.Plantilla;
 import com.vt.createmanagesubmit.modelos.TareaProgramada;
 import com.vt.createmanagesubmit.repositorios.RepositorioTareasProgramadas;
@@ -27,34 +28,17 @@ public class ServicioTareasProgramadas {
     public void CrearTarea(
             Long IDCurso,
             String accion,               
-            Long plantillaId,
-            String nombreCurso,
-            String diasCursos,
-            String duracion,
-            String modalidad,
-            String cliente,
-            String relator,
-            String lugarYfechaEmision,
             LocalDateTime fechaDeEjecucion,
-            String lugarSubida
+            Curso curso
     ) {
         TareaProgramada tarea = new TareaProgramada();
 
         // Campos del modelo
         tarea.setIDCurso(IDCurso);
         tarea.setAccion(accion);
-        tarea.setNombreCurso(nombreCurso);
-        tarea.setDiasCursos(diasCursos);
-        tarea.setDuracion(duracion);
-        tarea.setModalidad(modalidad);
-        tarea.setCliente(cliente);
-        tarea.setRelator(relator);
-        tarea.setLugarYfechaEmision(lugarYfechaEmision);
-        tarea.setUbicacionSubida(lugarSubida);
-        Plantilla plantilla = ser.plantillaPorId(plantillaId);
-        tarea.setPlantilla(plantilla);
         tarea.setFechaEjecucion(fechaDeEjecucion);
         tarea.setEstado("En proceso");
+        tarea.setCurso(curso);
 
         repoTarea.save(tarea);
     }
