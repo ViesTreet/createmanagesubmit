@@ -33,6 +33,8 @@ public class Relator {
 
     private Float horasTrabajados;
 
+    private String datosExtras;
+
     @OneToMany(mappedBy = "relator", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Curso> cursos;
 
@@ -46,13 +48,14 @@ public class Relator {
     public Relator() {
     }
     
-    public Relator(Long id, String nombre, String contacto, String foto, Float horasTrabajados, List<Curso> cursos,
-            Date createdAt, Date updatedAt) {
+    public Relator(Long id, String nombre, String contacto, String foto, Float horasTrabajados, String datosExtras,
+            List<Curso> cursos, Date createdAt, Date updatedAt) {
         this.id = id;
         this.nombre = nombre;
         this.contacto = contacto;
         this.foto = foto;
         this.horasTrabajados = horasTrabajados;
+        this.datosExtras = datosExtras;
         this.cursos = cursos;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -96,6 +99,14 @@ public class Relator {
 
     public void setHorasTrabajados(Float horasTrabajados) {
         this.horasTrabajados = horasTrabajados;
+    }
+
+    public String getDatosExtras() {
+        return datosExtras;
+    }
+
+    public void setDatosExtras(String datosExtras) {
+        this.datosExtras = datosExtras;
     }
 
     public List<Curso> getCursos() {

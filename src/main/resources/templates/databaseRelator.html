@@ -2,7 +2,7 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <title>Base de datos clientes</title>
+    <title>Base de datos profesores</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Importar CSS de Bootstrap -->
@@ -142,14 +142,16 @@
         </nav>
     </header>
     <div id="contenderBase" class="container pt-2 pb-2" style="height: 90vh;">
-        <h2 class="text-center">Base de datos clientes</h2>
+        <h2 class="text-center">Base de datos profesores</h2>
         <div class="d-flex align-items-center justify-content-between pb-1" style="max-width: 95vw;">
             <div>
                 <form id="alumnoBuscador" class="d-flex col-12">
                     <select id="filtroBusquedaAlumno" class="form-select" name="filtroBusquedaAlumno">
-                        <option value="nombreCliente">Nombre cliente</option>
-                        <option value="identificador">Identificador</option>
-                        <option value="pathLogo">Path logo</option>
+                        <option value="rut">Rut</option>
+                        <option value="nombre">Nombre profesor</option>
+                        <option value="horasMin">Horas minimas</option>
+                        <option value="horasMax">Horas maximas</option>
+                        <option value="datosExtras">Datos extras</option>
                     </select>
                     <input id="busquedaAlumno" type="search" class="col-5" placeholder="Buscar" name="busquedaAlumno"
                         onkeydown="submitOnEnter(event)" />
@@ -160,18 +162,19 @@
                 <div id="filtros-activos" class="d-flex flex-wrap gap-2 mt-2"></div>
             </div>
             <div>
-                <button class="btn btn-success" onclick="openForm()">Agregar nuevo cliente</button>
+                <button class="btn btn-success" onclick="openForm()">Agregar nuevo profesor</button>
             </div>
         </div>
         <div id="contenedorTabla" style="overflow-y: auto; max-height: 70vh; max-width: 95vw;">
             <table class="table table-hover table-bordered mb-5" style="table-layout: fixed; height: 100%;"
-                id="tablaCliente">
+                id="tablaRelator">
                 <thead class="thead-dark">
                     <tr>
-                        <th>Nombre cliente</th>
-                        <th>Identificador</th>
-                        <th>Logo</th>
-                        <th>Cantidad de curso</th>
+                        <th>Nombre relator</th>
+                        <th>contacto</th>
+                        <th>Foto</th>
+                        <th>Horas trabajadas</th>
+                        <th>datosExtras</th>
                         <th style="width: 25vw;">Acción</th>
                     </tr>
                 </thead>
@@ -185,25 +188,26 @@
         $(document).ready(function () {
             function cargarDatos() {
                 $.ajax({
-                    url: "/api/datosCliente",
+                    url: "/api/datosRelator",
                     method: "GET",
                     success: function (data) {
-                        var tbody = $("#tablaCliente tbody");
+                        var tbody = $("#tablaRelator tbody");
                         tbody.empty(); // Limpiar la tabla antes de agregar nuevos datos
 
-                        $.each(data, function (i, cliente) {
+                        $.each(data, function (i, relator) {
 
                             // Inyectar el correo del admin en sesión desde el modelo
                             var adminCorreo = /*[[${admin.correo}]]*/ "default";
                             // Construir la fila
                             var fila = "<tr>" +
-                                "<td>" + (cliente.nombreCliente != null ? cliente.nombreCliente : "") + "</td>" +
-                                "<td>" + (cliente.identificador != null ? cliente.identificador : "") + "</td>" +
-                                "<td>" + (cliente.pathLogo != null ? cliente.pathLogo : "") + "</td>" +
-                                "<td>" + (cliente.identificador != null ? cliente.identificador : "") + "</td>" +
+                                "<td>" + (relator.nombre != null ? relator.nombre : "") + "</td>" +
+                                "<td>" + (relator.contacto != null ? relator.contacto : "") + "</td>" +
+                                "<td>" + (relator.foto != null ? relator.foto : "") + "</td>" +
+                                "<td>" + (relator.horasTrabajados != null ? relator.horasTrabajados : "") + "</td>" +
+                                "<td>" + (relator.datosExtras != null ? relator.datosExtras : "") + "</td>" +
                                 "<td class='d-flex justify-content-center flex-nowrap' style='width: 25vw;'>" +
-                                "<a class='btn btn-primary' href='/dataBaseCliente/Cliente/" + cliente.id + "/editar'>Editar</a>" +
-                                "<a href='/dataBaseCliente/Cliente/" + cliente.id + "/cursos' class='btn btn-secondary'>Cursos</a>";
+                                "<a class='btn btn-primary' href='/dataBaseRelator/Relator/" + relator.id + "/editar'>Editar</a>" +
+                                "<a href='/dataBaseRelator/Relator/" + relator.id + "/cursos' class='btn btn-secondary'>Cursos</a>";
 
                             fila += "</td></tr>";
 
@@ -229,7 +233,7 @@
                 }, 30000);
         });
     </script>
-    <script>
+    <script th:inline="javascript">
         // Detecta la tecla Enter y simula clic en un botón
         function submitOnEnter(event, buttonId) {
             if (event.key === 'Enter') {
@@ -243,18 +247,19 @@
             <div class="d-flex justify-content-end">
                 <button class="btn btn-danger" onclick="closeForm()">Cerrar</button>
             </div>
-            <h2 class="text-center pb-2">Crear Cliente</h2>
-            <form th:action="@{/dataBaseCliente/nuevoCliente}" method="post" enctype="multipart/form-data">
+            <h2 class="text-center pb-2">Crear profesor</h2>
+            <form th:action="@{/dataBaseRelator/nuevoRelator}" method="post" enctype="multipart/form-data">
                 <div class="d-flex justify-content-around align-items-center flex-column pb-2">
-                    <label for="nombreCliente">Nombre cliente</label>
-                    <input id="nombreCliente" name="nombreCliente" type="text" class="form-control"
-                        placeholder="Nombre del cliente">
-                    <label for="identificador">Numero de compra cliente</label>
-                    <input id="identificador" type="text" name="identificador" class="form-control"
-                        placeholder="Numero de compra del cliente">
-                    <label for="pathLogo">Logo del cliente</label>
-                    <input type="file" class="form-control" name="pathLogo" id="pathLogo"
-                        accept="image/png, image/jpeg">
+                    <label for="nombre">Nombre profesor</label>
+                    <input id="nombre" name="nombre" type="text" class="form-control" placeholder="Nombre del profesor">
+                    <label for="contacto">Datos de contacto</label>
+                    <input id="contacto" type="text" name="contacto" class="form-control"
+                        placeholder="numero,correo,etc">
+                    <label for="datosExtras">Datos extras</label>
+                    <input id="datosExtras" type="text" name="datosExtras" class="form-control"
+                        placeholder="Titulado en ... y certificado en ...">
+                    <label for="foto">Foto del profesor</label>
+                    <input type="file" class="form-control" name="foto" id="foto" accept="image/png, image/jpeg">
                 </div>
 
                 <div class="d-flex justify-content-center">
@@ -264,7 +269,7 @@
             </form>
         </div>
     </div>
-    <script>
+    <script th:inline="javascript">
         // Función para mostrar el formulario
         function openForm() {
             document.getElementById('overlay').style.display = 'block';
@@ -274,7 +279,7 @@
             document.getElementById('overlay').style.display = 'none';
         }
     </script>
-    <script>
+    <script th:inline="javascript">
         function toggleInputs(type) {
             if (type === 'plantilla') {
                 const checkbox = document.getElementById('clonarPlantilla');
@@ -291,7 +296,7 @@
             }
         }
     </script>
-    <script>
+    <script th:inline="javascript">
         function showAlert(message) {
             if (message && message.trim() !== "") {
                 alert(message);
@@ -381,7 +386,7 @@
 
         function cargarDatosConFiltros() {
             $.ajax({
-                url: "/api/datosCliente/busquedaMultiFiltro",
+                url: "/api/datosRelator/busquedaMultiFiltro",
                 method: "POST",
                 contentType: "application/json",
                 data: JSON.stringify(filtrosActivos),
@@ -393,22 +398,21 @@
         }
 
         function actualizarTabla(data) {
-            var tbody = $("#tablaCliente tbody");
+            var tbody = $("#tablaRelator tbody");
             tbody.empty();
 
-            $.each(data, function (i, cliente) {
-                // Construir la fila
+            $.each(data, function (i, relator) {
                 var fila = "<tr>" +
-                    "<td>" + (cliente.nombreCliente != null ? cliente.nombreCliente : "") + "</td>" +
-                    "<td>" + (cliente.identificador != null ? cliente.identificador : "") + "</td>" +
-                    "<td>" + (cliente.pathLogo != null ? cliente.pathLogo : "") + "</td>" +
-                    "<td>" + (cliente.identificador != null ? cliente.identificador : "") + "</td>" +
+                    "<td>" + (relator.nombre != null ? relator.nombre : "") + "</td>" +
+                    "<td>" + (relator.contacto != null ? relator.contacto : "") + "</td>" +
+                    "<td>" + (relator.foto != null ? relator.foto : "") + "</td>" +
+                    "<td>" + (relator.horasTrabajados != null ? relator.horasTrabajados : "") + "</td>" +
+                    "<td>" + (relator.datosExtras != null ? relator.datosExtras : "") + "</td>" +
                     "<td class='d-flex justify-content-center flex-nowrap' style='width: 25vw;'>" +
-                    "<a class='btn btn-primary' href='/dataBaseCliente/Cliente/" + cliente.id + "/editar'>Editar</a>" +
-                    "<a href='/dataBaseCliente/Cliente/" + cliente.id + "/cursos' class='btn btn-secondary'>Cursos</a>";
+                    "<a class='btn btn-primary' href='/dataBaseRelator/Relator/" + relator.id + "/editar'>Editar</a>" +
+                    "<a href='/dataBaseRelator/Relator/" + relator.id + "/cursos' class='btn btn-secondary'>Cursos</a>";
 
                 fila += "</td></tr>";
-
                 tbody.append(fila);
             });
         }

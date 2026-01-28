@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
@@ -61,7 +62,7 @@ import com.vt.createmanagesubmit.repositorios.RepositorioPlantillas;
 import com.vt.createmanagesubmit.repositorios.RepositorioRelator;
 import com.vt.createmanagesubmit.repositorios.RepositorioTareasProgramadas;
 
-
+import jakarta.persistence.criteria.Predicate;
 
 @Service
 public class Servicio {
@@ -102,45 +103,44 @@ public class Servicio {
 
     private String CORREO_ADMIN = System.getenv("AD_MAIL");
 
-    private String SecretKeyVar=System.getenv("ENCRYPT_KEY_ASIS");
+    private String SecretKeyVar = System.getenv("ENCRYPT_KEY_ASIS");
 
     public String urlAsisencia = System.getenv("URL_PATH");
 
-
-    public Alumno registrarNuevoAlumno(Alumno nuevoAlumno){
+    public Alumno registrarNuevoAlumno(Alumno nuevoAlumno) {
         numeroCorrelativoAuto(nuevoAlumno);
         return nuevoAlumno;
     }
 
-    public Alumno alumnoPorId(Long id){
+    public Alumno alumnoPorId(Long id) {
         return repoAlum.findById(id).orElse(null);
     }
 
-    public void borrarAlumnoPorId(Long id){
+    public void borrarAlumnoPorId(Long id) {
         Optional<Alumno> optAlumno = repoAlum.findById(id);
-        if(optAlumno.isPresent()){
+        if (optAlumno.isPresent()) {
             Alumno alumno = optAlumno.get();
             alumno.setEstado("borrado");
             repoAlum.save(alumno);
-        }else{
+        } else {
             throw new MissingAlumnoIdException("No se encontró el alumno a borrar.");
         }
     }
 
-    public Page<Alumno> todosLosAlumnos(){
+    public Page<Alumno> todosLosAlumnos() {
         return repoAlum.findAll(PageRequest.of(0, 200, Sort.by("updatedAt").descending()));
     }
 
     public Page<Alumno> buscarConMultiplesFiltros(List<filtroDTO> filtros) {
         Specification<Alumno> spec = Specification.unrestricted();
-        
+
         for (filtroDTO filtro : filtros) {
             spec = spec.and(crearEspecificacion(filtro));
         }
-        
+
         return repoAlum.findAll(spec, PageRequest.of(0, Integer.MAX_VALUE, Sort.by("updatedAt").descending()));
     }
-    
+
     private Specification<Alumno> crearEspecificacion(filtroDTO filtro) {
         return (root, query, cb) -> {
             String campo = filtro.getCampo();
@@ -181,32 +181,33 @@ public class Servicio {
         };
     }
 
-
-    public Page<Alumno> buscarAlumnosPorCriterio(String filtro, String dato){
+    public Page<Alumno> buscarAlumnosPorCriterio(String filtro, String dato) {
         Page<Alumno> listaResultante;
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by("updatedAt").descending());
-        
+
         switch (filtro) {
             case "rut":
-                listaResultante = repoAlum.findByRutContaining(dato, pageable); // Usando Containing para búsquedas parciales
+                listaResultante = repoAlum.findByRutContaining(dato, pageable); // Usando Containing para búsquedas
+                                                                                // parciales
                 break;
             case "nombreAsistente":
                 listaResultante = repoAlum.findByNombreAsistenteContaining(dato, pageable);
                 break;
             case "estado":
-                if(dato.trim().equals("No aprobado")||dato.trim().equals("no aprobado")||dato.trim().equals("noAprobado")){
+                if (dato.trim().equals("No aprobado") || dato.trim().equals("no aprobado")
+                        || dato.trim().equals("noAprobado")) {
                     listaResultante = repoAlum.findByEstado("noAprobado", pageable);
-                }else if(dato.trim().equals("aprobado")||dato.trim().equals("Aprobado")){
+                } else if (dato.trim().equals("aprobado") || dato.trim().equals("Aprobado")) {
                     listaResultante = repoAlum.findByEstado("aprobado", pageable);
-                }else{
+                } else {
                     listaResultante = repoAlum.findByEstado("revisionManual", pageable);
                 }
-                break;      
+                break;
             case "diploma":
-                if(dato.trim().equals("enviado")||dato.trim().equals("Enviado")){
+                if (dato.trim().equals("enviado") || dato.trim().equals("Enviado")) {
                     listaResultante = repoAlum.findByDiploma("enviado", pageable);
-                }else{
-                    listaResultante=repoAlum.findByDiploma("noEnviado", pageable);
+                } else {
+                    listaResultante = repoAlum.findByDiploma("noEnviado", pageable);
                 }
                 break;
             case "correlativo":
@@ -219,51 +220,52 @@ public class Servicio {
         return listaResultante;
     }
 
-    public List<Plantilla> buscarPlantillaPorCriterio(String dato){
+    public List<Plantilla> buscarPlantillaPorCriterio(String dato) {
         List<Plantilla> plantillas = repoPlanti.findAllByNombreCertificadoContainingOrderByUpdatedAtDesc(dato);
         return plantillas;
     }
-    
-    public List<Plantilla> todasLasPlantillas(){
+
+    public List<Plantilla> todasLasPlantillas() {
         return repoPlanti.findAllByOrderByUpdatedAtDesc();
     }
 
-    public Plantilla plantillaPorId(Long id){
-        if(id == null){
+    public Plantilla plantillaPorId(Long id) {
+        if (id == null) {
             throw new MissingTemplateException("La plantilla no existe o no hay ninguna seleccionada");
         }
         Optional<Plantilla> optPlantilla = repoPlanti.findById(id);
-        if(optPlantilla.isPresent()){
+        if (optPlantilla.isPresent()) {
             Plantilla plantilla = optPlantilla.get();
             return plantilla;
-        }else{
+        } else {
             throw new MissingTemplateException("La plantilla no existe.");
         }
     }
 
-    public void guardarPlantilla(Plantilla plantilla){
+    public void guardarPlantilla(Plantilla plantilla) {
         repoPlanti.save(plantilla);
     }
 
-    public Relator buscarRelatorPorId(Long relator){
+    public Relator buscarRelatorPorId(Long relator) {
         Optional<Relator> relatoropt = repoRelator.findById(relator);
-        if(relatoropt.isPresent()){
+        if (relatoropt.isPresent()) {
             return relatoropt.get();
-        }else{
+        } else {
             return null;
         }
     }
 
-    public Curso cursoPorId(Long id){
+    public Curso cursoPorId(Long id) {
         Optional<Curso> cursOptional = repoCurso.findById(id);
-        if(cursOptional.isPresent()){
+        if (cursOptional.isPresent()) {
             return cursOptional.get();
-        }else{
+        } else {
             return null;
         }
     }
 
-    public Curso crearCurso(String nombre, String diasCursos, String duracion, Cliente cliente, String modalidad, String ubicacionSubida, String lugarYfechaEmision, Relator relator, Plantilla plantilla){
+    public Curso crearCurso(String nombre, String diasCursos, String duracion, Cliente cliente, String modalidad,
+            String ubicacionSubida, String lugarYfechaEmision, Relator relator, Plantilla plantilla) {
         Curso curso = new Curso();
         curso.setCliente(cliente);
         curso.setDiasCursos(diasCursos);
@@ -278,7 +280,7 @@ public class Servicio {
         return curso;
     }
 
-    public Relator crearRelator(String nombre, String contacto, String foto, Float horasTrabajados){
+    public Relator crearRelator(String nombre, String contacto, String foto, Float horasTrabajados) {
         Relator relator = new Relator();
         relator.setContacto(contacto);
         relator.setFoto(foto);
@@ -288,17 +290,17 @@ public class Servicio {
         return relator;
     }
 
-    public void borrarPlantillaPorId(Long id) throws IOException{
-        if(id == null){
+    public void borrarPlantillaPorId(Long id) throws IOException {
+        if (id == null) {
             throw new IOException("No se encontró la plantilla.");
         }
         Plantilla plantilla = plantillaPorId(id);
-        if(!plantilla.getNombreCertificado().trim().equals("Error en encontrar plantilla")){
+        if (!plantilla.getNombreCertificado().trim().equals("Error en encontrar plantilla")) {
             Path deletePlantillaPath = Paths.get(plantilla.getPathArchivo());
             try {
                 Files.deleteIfExists(deletePlantillaPath);
             } catch (IOException ex) {
-                throw new IOException("No se encontró la ruta de la plantilla.",ex);
+                throw new IOException("No se encontró la ruta de la plantilla.", ex);
             }
             List<Curso> cursos = plantilla.getCursos();
             for (Curso curso : cursos) {
@@ -309,49 +311,50 @@ public class Servicio {
         }
     }
 
-    public Optional<Plantilla> plantillaPorNombre(String nombre){
+    public Optional<Plantilla> plantillaPorNombre(String nombre) {
         return repoPlanti.findByNombreCertificado(nombre);
     }
 
-    public void guardarAdmin(Admin admin){
+    public void guardarAdmin(Admin admin) {
         repoAdmin.save(admin);
     }
 
-    public List<Admin> todasLosAdmin(){
+    public List<Admin> todasLosAdmin() {
         return repoAdmin.findAllByOrderByUpdatedAtDesc();
     }
 
-    public Admin adminPorId(Long id){
+    public Admin adminPorId(Long id) {
         Admin admin = repoAdmin.findById(id).orElse(null);
         return admin;
 
     }
 
-    public Admin adminPorCorreo(String correo){
+    public Admin adminPorCorreo(String correo) {
         Optional<Admin> optAdmin = repoAdmin.findByCorreo(correo);
-        if(optAdmin.isPresent()){
+        if (optAdmin.isPresent()) {
             Admin admin = optAdmin.get();
             return admin;
-        }else{
+        } else {
             return null;
         }
     }
 
-    public void borrarAdminPorId(Long id){
+    public void borrarAdminPorId(Long id) {
         Optional<Admin> optAdmin = repoAdmin.findById(id);
-        if(optAdmin.isPresent()){
+        if (optAdmin.isPresent()) {
             Admin admin = optAdmin.get();
-            if(!admin.getCorreo().trim().equals(CORREO_ADMIN)){
+            if (!admin.getCorreo().trim().equals(CORREO_ADMIN)) {
                 repoAdmin.delete(admin);
             }
-        }else{
+        } else {
             throw new MissingAdminIdException("No se encontro al administrador");
         }
-        
+
     }
 
-    public Alumno funcionEstadoManual(Alumno nuevoAlumno){
-        boolean tieneNota = nuevoAlumno.getNotaAprobacion() != null && !nuevoAlumno.getNotaAprobacion().trim().isEmpty();
+    public Alumno funcionEstadoManual(Alumno nuevoAlumno) {
+        boolean tieneNota = nuevoAlumno.getNotaAprobacion() != null
+                && !nuevoAlumno.getNotaAprobacion().trim().isEmpty();
         boolean tieneAsistencia = nuevoAlumno.getAsistencia() != null && !nuevoAlumno.getAsistencia().trim().isEmpty();
         boolean aprobado = false;
         try {
@@ -371,7 +374,8 @@ public class Servicio {
                 // Ambos
                 float nota = Float.parseFloat(nuevoAlumno.getNotaAprobacion().trim());
                 int asistenciaAlumno = Integer.parseInt(nuevoAlumno.getAsistencia().trim());
-                if (nota >= nuevoAlumno.getCurso().getNotaMin() && asistenciaAlumno >= nuevoAlumno.getCurso().getAsistenciaMin()) {
+                if (nota >= nuevoAlumno.getCurso().getNotaMin()
+                        && asistenciaAlumno >= nuevoAlumno.getCurso().getAsistenciaMin()) {
                     aprobado = true;
                 }
             } else {
@@ -395,64 +399,70 @@ public class Servicio {
         int year = calendar.get(java.util.Calendar.YEAR);
         int month = calendar.get(java.util.Calendar.MONTH) + 1; // Se suma 1 porque enero es 0
         Long idC = alumno.getId();
-    
+
         String numeroCorrelativo = String.format("%d-%02d-%d", year, month, idC);
         alumno.setNumeroCorrelativoInterno(numeroCorrelativo);
-        
+
         repoAlum.save(alumno);
     }
 
-    public Alumno comprobarYGuardar(Alumno nuevoAlumno,String orden) {
-        if(nuevoAlumno.getAsistencia().isEmpty()){
+    public Alumno comprobarYGuardar(Alumno nuevoAlumno, String orden) {
+        if (nuevoAlumno.getAsistencia().isEmpty()) {
             nuevoAlumno.setAsistencia(null);
         }
-        if(nuevoAlumno.getCorreo().isEmpty()){
+        if (nuevoAlumno.getCorreo().isEmpty()) {
             nuevoAlumno.setCorreo(CORREO_EMPRESA);
         }
-        if(nuevoAlumno.getEstado().isEmpty()){
+        if (nuevoAlumno.getEstado().isEmpty()) {
             nuevoAlumno.setEstado(null);
         }
-        if(nuevoAlumno.getNombreAsistente().trim().isEmpty()){
+        if (nuevoAlumno.getNombreAsistente().trim().isEmpty()) {
             nuevoAlumno.setNombreAsistente(null);
         }
-        if(nuevoAlumno.getNotaAprobacion().isEmpty()){
+        if (nuevoAlumno.getNotaAprobacion().isEmpty()) {
             nuevoAlumno.setNotaAprobacion(null);
         }
-        if(nuevoAlumno.getRut().trim().isEmpty()){
+        if (nuevoAlumno.getRut().trim().isEmpty()) {
             nuevoAlumno.setRut(null);
         }
 
-        if ((nuevoAlumno.getNombreAsistente() != null && !nuevoAlumno.getNombreAsistente().trim().isEmpty())||(nuevoAlumno.getRut() != null && !nuevoAlumno.getRut().trim().isEmpty())) {
+        if ((nuevoAlumno.getNombreAsistente() != null && !nuevoAlumno.getNombreAsistente().trim().isEmpty())
+                || (nuevoAlumno.getRut() != null && !nuevoAlumno.getRut().trim().isEmpty())) {
             String estadoFormulario = nuevoAlumno.getEstado().trim();
-    
+
             // Si el estado es 'auto', realizamos la evaluación automática
             if (estadoFormulario.equals("auto")) {
                 nuevoAlumno = funcionEstadoManual(nuevoAlumno);
             }
-            // Si el estado es 'aprobado' o 'noAprobado', no hacemos nada (se respeta la elección manual)
-    
+            // Si el estado es 'aprobado' o 'noAprobado', no hacemos nada (se respeta la
+            // elección manual)
+
             // Validación del correo
             if (nuevoAlumno.getCorreo() == null || nuevoAlumno.getCorreo().trim().isEmpty()) {
                 nuevoAlumno.setCorreo(CORREO_EMPRESA);
             }
-    
-            String nombre=nuevoAlumno.getNombreAsistente().trim().toUpperCase();
+
+            String nombre = nuevoAlumno.getNombreAsistente().trim().toUpperCase();
             nuevoAlumno.setNombreAsistente(nombre);
             repoAlum.save(nuevoAlumno);
             numeroCorrelativoAuto(nuevoAlumno);
             return nuevoAlumno;
-        }else{
-            throw new MissingNameOrRutException("Uno de los dos campos(Nombre o Rut) debe tener contenido para guardar un alumno.");
+        } else {
+            throw new MissingNameOrRutException(
+                    "Uno de los dos campos(Nombre o Rut) debe tener contenido para guardar un alumno.");
         }
     }
 
-    public void editarAlumno(Long id,String nombreAsistente,String nombreCurso,String diasCursos,String numeroHoras,String cliente,String identificador,String notaAprovacion,String relator,String asistencia,String estado,String diploma,String rut,String modalidad,String correo,Long plantillaId, String lugarYfechaEmision) {
+    public void editarAlumno(Long id, String nombreAsistente, String nombreCurso, String diasCursos, String numeroHoras,
+            String cliente, String identificador, String notaAprovacion, String relator, String asistencia,
+            String estado, String diploma, String rut, String modalidad, String correo, Long plantillaId,
+            String lugarYfechaEmision) {
 
         Optional<Alumno> optalumno = repoAlum.findById(id);
-        if(optalumno.isPresent()){
+        if (optalumno.isPresent()) {
             Alumno alumno = optalumno.get();
             nombreAsistente = nombreAsistente.trim().toUpperCase();
-            if (correo.trim().isEmpty()){
+            if (correo.trim().isEmpty()) {
                 correo = CORREO_EMPRESA;
             }
             alumno.setNombreAsistente(normalizarValor(nombreAsistente));
@@ -461,115 +471,118 @@ public class Servicio {
             alumno.setDiploma(normalizarValor(diploma));
             alumno.setRut(normalizarValor(rut));
             alumno.setCorreo(normalizarValor(correo));
-            if((alumno.getNombreAsistente()!=null && !alumno.getNombreAsistente().trim().isEmpty())||(alumno.getRut() != null && !alumno.getRut().trim().isEmpty())){
+            if ((alumno.getNombreAsistente() != null && !alumno.getNombreAsistente().trim().isEmpty())
+                    || (alumno.getRut() != null && !alumno.getRut().trim().isEmpty())) {
                 Optional<Plantilla> optplantilla = repoPlanti.findById(plantillaId);
-                if (optplantilla.isPresent()){
+                if (optplantilla.isPresent()) {
                     Plantilla plantilla = optplantilla.get();
                     alumno.getCurso().setPlantilla(plantilla);
-                    if(!estado.equals("auto")){
+                    if (!estado.equals("auto")) {
                         alumno.setEstado(normalizarValor(estado));
-                    }else{
+                    } else {
                         alumno = funcionEstadoManual(alumno);
                     }
 
                     repoAlum.save(alumno);
-                }else{
+                } else {
                     throw new MissingTemplateException("No se encontró la plantilla seleccionada");
                 }
-            }else{
-                throw new MissingNameOrRutException("Uno de los dos campos(Nombre o Rut) debe tener contenido para guardar un alumno.");
+            } else {
+                throw new MissingNameOrRutException(
+                        "Uno de los dos campos(Nombre o Rut) debe tener contenido para guardar un alumno.");
             }
-        }else{
+        } else {
             throw new MissingAlumnoIdException("No se encontró al alumno a editar");
         }
     }
-
 
     private String normalizarValor(String valor) {
         return StringUtils.hasText(valor) ? valor.trim() : null;
     }
 
-    
     public void cambiarPlantilla(Long idPlantilla, MultipartFile nuevaPlantilla) throws IOException {
         // Obtener la plantilla desde la BD
         Plantilla plantilla = repoPlanti.findById(idPlantilla)
                 .orElseThrow(() -> new IllegalArgumentException("Plantilla no encontrada"));
-    
+
         // Verificar si ya existe un archivo con el mismo nombre
         String originalFilename = nuevaPlantilla.getOriginalFilename();
         String relativePath = "/plantillas/" + generarNombreUnico(originalFilename, "/plantillas/");
         Path plantillaPath = Paths.get(STATIC_DIRECTORY + relativePath);
-    
+
         // Crear directorios si no existen
         Files.createDirectories(plantillaPath.getParent());
-    
+
         // Guardar el archivo en el sistema
         Files.write(plantillaPath, nuevaPlantilla.getBytes());
-    
+
         // Borrar el archivo anterior
         if (plantilla.getPathArchivo() != null && !plantilla.getPathArchivo().equals(relativePath)) {
             Path oldPlantillaPath = Paths.get(STATIC_DIRECTORY + plantilla.getPathArchivo());
             Files.deleteIfExists(oldPlantillaPath);
         }
-    
+
         // Actualizar la ruta en la BD
         plantilla.setPathArchivo(STATIC_DIRECTORY + relativePath);
         repoPlanti.save(plantilla);
     }
-    
+
     public String guardarArchivo(MultipartFile archivo, String subdirectorio) throws IOException {
         String originalFilename = archivo.getOriginalFilename();
         String relativePath = subdirectorio + generarNombreUnico(originalFilename, subdirectorio);
         Path fullPath = Paths.get(STATIC_DIRECTORY + relativePath);
-    
+
         // Crear directorios si no existen
         Files.createDirectories(fullPath.getParent());
-    
+
         // Guardar el archivo
         Files.write(fullPath, archivo.getBytes());
-    
+
         return STATIC_DIRECTORY + relativePath;
     }
-    
+
     private String generarNombreUnico(String originalFilename, String subdirectorio) throws IOException {
         Path directoryPath = Paths.get(STATIC_DIRECTORY + subdirectorio);
-    
+
         // Asegurarnos de que el directorio existe
         Files.createDirectories(directoryPath);
-    
+
         // Ruta del archivo inicial
         Path filePath = directoryPath.resolve(originalFilename);
-    
+
         // Si el archivo ya existe, generar un nuevo nombre
         if (Files.exists(filePath)) {
-            String baseName = originalFilename.contains(".") ? originalFilename.substring(0, originalFilename.lastIndexOf('.')) : originalFilename;
-            String extension = originalFilename.contains(".") ? originalFilename.substring(originalFilename.lastIndexOf('.')) : "";
+            String baseName = originalFilename.contains(".")
+                    ? originalFilename.substring(0, originalFilename.lastIndexOf('.'))
+                    : originalFilename;
+            String extension = originalFilename.contains(".")
+                    ? originalFilename.substring(originalFilename.lastIndexOf('.'))
+                    : "";
             String timestamp = String.valueOf(System.currentTimeMillis());
             return baseName + "_" + timestamp + extension;
         }
-    
+
         // Si no existe, devolver el nombre original
         return originalFilename;
     }
-    
+
     public String clonarArchivo(String archivoExistente, String subdirectorio) throws IOException {
         Path sourcePath = Paths.get(archivoExistente);
         String timestamp = String.valueOf(System.currentTimeMillis());
         String newFileName = "clon_" + timestamp + "_" + sourcePath.getFileName().toString();
         String relativePath = subdirectorio + newFileName;
         Path destinationPath = Paths.get(STATIC_DIRECTORY + relativePath);
-    
+
         // Crear directorios si no existen
         Files.createDirectories(destinationPath.getParent());
-    
+
         // Copiar el archivo
         Files.copy(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
-    
+
         return STATIC_DIRECTORY + relativePath;
     }
-    
 
-    public void registrarAdmin(String correo,String nombre, String password, String role) {
+    public void registrarAdmin(String correo, String nombre, String password, String role) {
         // Encriptar la contraseña
         String passwordEncriptada = passwordEncoder.encode(password);
 
@@ -582,23 +595,22 @@ public class Servicio {
         repoAdmin.save(admin);
     }
 
-    
-    public Admin passwordConfirmacion(String correoLogin,String passwordLogin){
+    public Admin passwordConfirmacion(String correoLogin, String passwordLogin) {
         Optional<Admin> adminOptional = repoAdmin.findByCorreo(correoLogin);
-        if(adminOptional.isPresent()){
+        if (adminOptional.isPresent()) {
             Admin admin = adminOptional.get();
-            if(BCrypt.checkpw(passwordLogin, admin.getContrasena())){
+            if (BCrypt.checkpw(passwordLogin, admin.getContrasena())) {
                 return admin;
             }
         }
         return null;
     }
 
-    public Page<TareaProgramada> todasLasTareas(){
+    public Page<TareaProgramada> todasLasTareas() {
         return repoTarea.findAll(PageRequest.of(0, 20, Sort.by("updatedAt").descending()));
     }
 
-    public void borrarTareaPorId(Long id){
+    public void borrarTareaPorId(Long id) {
         repoTarea.deleteById(id);
     }
 
@@ -627,7 +639,6 @@ public class Servicio {
             throw new Exception("Error al desencriptar el ID.", e);
         }
     }
-
 
     public String encryptId(String id) throws Exception {
         String secretKey = SecretKeyVar;
@@ -666,13 +677,13 @@ public class Servicio {
     }
 
     // Genera QR por id de curso: devuelve base64+link
-    public Map<String,String> generarQrParaCurso(Long cursoId) throws Exception {
-       Curso c = cursoPorId(cursoId);
+    public Map<String, String> generarQrParaCurso(Long cursoId) throws Exception {
+        Curso c = cursoPorId(cursoId);
         String encrypted = encryptId(String.valueOf(c.getId()));
-        String link = urlAsisencia+"/marcarAsistenciaCurso/" + encrypted;
+        String link = urlAsisencia + "/marcarAsistenciaCurso/" + encrypted;
         byte[] png = generateQrImageBytes(link, 300, 300);
         String base64 = Base64.getEncoder().encodeToString(png);
-        Map<String,String> res = new HashMap<>();
+        Map<String, String> res = new HashMap<>();
         res.put("imageBase64", base64);
         res.put("link", link);
         res.put("nombreCurso", c.getNombreCurso());
@@ -681,14 +692,14 @@ public class Servicio {
 
     // Para crear curso desde params y devolver QR (uso simple)
     @Transactional
-    public Map<String,String> createCursoAndGenerateQr(Map<String,String> params) throws Exception {
+    public Map<String, String> createCursoAndGenerateQr(Map<String, String> params) throws Exception {
         String cursoTemporal = params.get("idCurso");
         String encrypted = encryptId(String.valueOf(cursoTemporal));
-        String link = urlAsisencia+"/marcarAsistenciaCurso/"+ encrypted;
+        String link = urlAsisencia + "/marcarAsistenciaCurso/" + encrypted;
         byte[] png = generateQrImageBytes(link, 300, 300);
         String base64 = Base64.getEncoder().encodeToString(png);
         Curso curso = cursoPorId(Long.valueOf(cursoTemporal));
-        Map<String,String> res = new HashMap<>();
+        Map<String, String> res = new HashMap<>();
         res.put("imageBase64", base64);
         res.put("link", link);
         res.put("nombreCurso", curso.getNombreCurso());
@@ -696,15 +707,14 @@ public class Servicio {
         return res;
     }
 
-    public void procesarAsistencia(String nombre, String mail, String rut, String idEncriptada){
+    public void procesarAsistencia(String nombre, String mail, String rut, String idEncriptada) {
         validarRut(rut);
         Long id;
         try {
             id = Long.valueOf(decryptId(idEncriptada));
             Curso curso = repoCurso.findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException("Curso temporal no encontrado"));
-            
+                    .orElseThrow(() -> new RuntimeException("Curso temporal no encontrado"));
+
             AlumnoTemporal alumnoTemporal = new AlumnoTemporal();
             alumnoTemporal.setNombreAsistente(nombre.toUpperCase());
             alumnoTemporal.setCorreo(mail);
@@ -717,22 +727,22 @@ public class Servicio {
         } catch (Exception e) {
             new RuntimeException("Error");
             e.printStackTrace();
-        } 
-
-    }
-
-    public void borrarAlumnoTemporalPorId(Long id){
-        Optional<AlumnoTemporal> alumnoTempOpt = repoAlumTemp.findById(id);
-        if(alumnoTempOpt.isPresent()){
-            AlumnoTemporal alumnoTemporal = alumnoTempOpt.get();
-            repoAlumTemp.deleteById(id);
         }
-        
+
     }
 
-    public void alumnoVerificado(Long alumnoId,String asistencia, String nota){
+    public void borrarAlumnoTemporalPorId(Long id) {
+        Optional<AlumnoTemporal> alumnoTempOpt = repoAlumTemp.findById(id);
+        if (alumnoTempOpt.isPresent()) {
+            AlumnoTemporal alumnoTemporal = alumnoTempOpt.get();
+            repoAlumTemp.delete(alumnoTemporal);
+        }
+
+    }
+
+    public void alumnoVerificado(Long alumnoId, String asistencia, String nota) {
         Optional<AlumnoTemporal> alumnoTempOpt = repoAlumTemp.findById(alumnoId);
-        if(alumnoTempOpt.isPresent()){
+        if (alumnoTempOpt.isPresent()) {
             AlumnoTemporal alumnoTemporal = alumnoTempOpt.get();
             Alumno alumno = new Alumno();
             alumno.setAsistencia(asistencia);
@@ -790,25 +800,139 @@ public class Servicio {
         int resto = 11 - (suma % 11);
 
         String dvCalculado;
-        if (resto == 11) dvCalculado = "0";
-        else if (resto == 10) dvCalculado = "K";
-        else dvCalculado = String.valueOf(resto);
+        if (resto == 11)
+            dvCalculado = "0";
+        else if (resto == 10)
+            dvCalculado = "K";
+        else
+            dvCalculado = String.valueOf(resto);
 
         if (!dvCalculado.equals(dvIngresado)) {
             throw new IllegalArgumentException("Dígito verificador incorrecto");
         }
     }
 
-    public List<Cliente> todosLosClientes(){
-        return repoCliente.findAll();
+    public List<Cliente> todosLosClientes() {
+        return repoCliente.findAllByOrderByUpdatedAtDesc();
     }
 
-    public void guardarCliente(Cliente cliente){
+    public void guardarCliente(Cliente cliente) {
         repoCliente.save(cliente);
     }
 
+    public Page<Cliente> buscarConMultiplesFiltrosCliente(List<Map<String, String>> filtros) {
+
+        Specification<Cliente> spec = Specification.unrestricted();
+
+        for (Map<String, String> filtro : filtros) {
+            String campo = filtro.get("campo");
+            String valor = filtro.get("valor");
+
+            if (campo != null && valor != null && !valor.isBlank()) {
+                spec = spec.and(crearEspecificacionCliente(campo, valor));
+            }
+        }
+
+        return repoCliente.findAll(
+                spec,
+                PageRequest.of(0, Integer.MAX_VALUE, Sort.by("updatedAt").descending())
+        );
+    }
+
+    private Specification<Cliente> crearEspecificacionCliente(String campo, String valor) {
+
+        return (root, query, cb) -> {
+
+            switch (campo) {
+
+                case "nombreCliente":
+                    return cb.like(
+                            cb.lower(root.get("nombreCliente")),
+                            "%" + valor.toLowerCase() + "%"
+                    );
+
+                case "identificador":
+                    return cb.like(
+                            cb.lower(root.get("identificador")),
+                            "%" + valor.toLowerCase() + "%"
+                    );
+
+                case "pathLogo":
+                    return cb.like(
+                            cb.lower(root.get("pathLogo")),
+                            "%" + valor.toLowerCase() + "%"
+                    );
+
+                default:
+                    return cb.conjunction();
+            }
+        };
+    }
+
+
+
+    public List<Relator> todosLosRelatores() {
+        return repoRelator.findAllByOrderByUpdatedAtDesc();
+    }
+
+    public void guardarRelator(Relator relator) {
+        repoRelator.save(relator);
+    }
+
+    public Page<Relator> buscarConMultiplesFiltrosRelator(List<Map<String, String>> filtros) {
+
+        Specification<Relator> spec = Specification.unrestricted();
+
+        for (Map<String, String> filtro : filtros) {
+            String campo = filtro.get("campo");
+            String valor = filtro.get("valor");
+
+            if (campo != null && valor != null && !valor.isBlank()) {
+                spec = spec.and(crearEspecificacionRelator(campo, valor));
+            }
+        }
+
+        return repoRelator.findAll(
+                spec,
+                PageRequest.of(0, Integer.MAX_VALUE, Sort.by("updatedAt").descending()));
+    }
+
+    private Specification<Relator> crearEspecificacionRelator(String campo, String valor) {
+
+        return (root, query, cb) -> {
+
+            switch (campo) {
+
+                case "nombre":
+                    return cb.like(
+                            cb.lower(root.get("nombre")),
+                            "%" + valor.toLowerCase() + "%");
+
+                case "contacto":
+                    return cb.like(
+                            cb.lower(root.get("contacto")),
+                            "%" + valor.toLowerCase() + "%");
+
+                case "horasMin":
+                    return cb.greaterThanOrEqualTo(
+                            root.get("horasTrabajados"),
+                            Float.valueOf(valor));
+
+                case "horasMax":
+                    return cb.lessThanOrEqualTo(
+                            root.get("horasTrabajados"),
+                            Float.valueOf(valor));
+
+                case "datosExtras":
+                    return cb.like(
+                            cb.lower(root.get("datosExtras")),
+                            "%" + valor.toLowerCase() + "%");
+
+                default:
+                    return cb.conjunction();
+            }
+        };
+    }
+
+
 }
-
-
-
-

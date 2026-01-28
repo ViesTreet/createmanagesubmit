@@ -7,12 +7,22 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.vt.createmanagesubmit.modelos.Relator;
 
-public interface RepositorioRelator extends JpaRepository<Relator,Long>{
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+
+public interface RepositorioRelator
+        extends JpaRepository<Relator, Long>,
+                JpaSpecificationExecutor<Relator> {
+
 
     List<Relator> findTop10ByNombreContainingIgnoreCaseOrderByNombreDesc(String nombre);
 
-    List<Relator> findByNombre(String nombre);
+    // Exacto (cuando seleccionas uno existente)
+    Optional<Relator> findByNombreIgnoreCase(String nombre);
 
-    Optional<Relator> findById(Long id);
+    // Para combos o listados simples
+    List<Relator> findAllByOrderByNombreAsc();
+
+    List<Relator> findAllByOrderByUpdatedAtDesc();
+
 
 }

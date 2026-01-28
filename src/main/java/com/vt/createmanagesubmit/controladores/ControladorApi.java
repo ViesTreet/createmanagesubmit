@@ -57,6 +57,7 @@ import com.vt.createmanagesubmit.modelos.AlumnoTemporal;
 import com.vt.createmanagesubmit.modelos.Cliente;
 import com.vt.createmanagesubmit.modelos.Curso;
 import com.vt.createmanagesubmit.modelos.Plantilla;
+import com.vt.createmanagesubmit.modelos.Relator;
 import com.vt.createmanagesubmit.repositorios.RepositorioAlumnos;
 import com.vt.createmanagesubmit.repositorios.RepositorioRelator;
 import com.vt.createmanagesubmit.servicios.Servicio;
@@ -695,6 +696,34 @@ public class ControladorApi {
             return cliente;
         }
         return null;
+    }
+
+    @PostMapping("/datosCliente/busquedaMultiFiltro")
+    public List<Cliente> busquedaMultiFiltroCliente(
+            @RequestBody List<Map<String, String>> filtros
+    ) {
+        Page<Cliente> resultado = ser.buscarConMultiplesFiltrosCliente(filtros);
+        return resultado.getContent();
+    }
+
+    @GetMapping("/datosRelator")
+    public List<Relator> getDatosRelator(HttpSession session) {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+        if (usuarioTemporal != null) {
+            List<Relator> relatores = ser.todosLosRelatores();
+            return relatores;
+        }
+        return null;
+    }
+
+    @PostMapping("/datosRelator/busquedaMultiFiltro")
+    public List<Relator> busquedaMultiFiltroRelator(@RequestBody List<Map<String, String>> filtros, HttpSession session) {
+        Admin usuario = (Admin) session.getAttribute("usuarioEnSesion");
+        if (usuario != null) {
+            Page<Relator> resultado = ser.buscarConMultiplesFiltrosRelator(filtros);
+            return resultado.getContent();
+        }
+        return Collections.emptyList();
     }
 
 

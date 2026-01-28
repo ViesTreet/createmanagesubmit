@@ -35,6 +35,7 @@ import com.vt.createmanagesubmit.modelos.Alumno;
 import com.vt.createmanagesubmit.modelos.Cliente;
 import com.vt.createmanagesubmit.modelos.Curso;
 import com.vt.createmanagesubmit.modelos.Plantilla;
+import com.vt.createmanagesubmit.modelos.Relator;
 import com.vt.createmanagesubmit.repositorios.RepositorioAlumnos;
 import com.vt.createmanagesubmit.repositorios.RepositorioRelator;
 import com.vt.createmanagesubmit.servicios.Servicio;
@@ -829,5 +830,43 @@ public class ControladorBase {
         return "redirect:/";
     }
     
+    //-------------------------Relator---------------------------------------
+    @GetMapping("dataBaseRelator")
+    public String dataBaseRelator(HttpSession session, Model model) {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+	    if (usuarioTemporal == null) {
+	        return "redirect:/";  
+	    }
+        model.addAttribute("admin",usuarioTemporal);
+        return "databaseRelator";
+    }
+
+    @PostMapping("/dataBaseRelator/nuevoRelator")
+    public String crearNuevoRelator(@RequestParam String nombre,@RequestParam String contacto,@RequestParam String datosExtras,@RequestParam(required = true) MultipartFile foto,HttpSession session,Model model) {
+
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+        if (usuarioTemporal != null) {
+        model.addAttribute("admin",usuarioTemporal);
+            try {
+                Relator relator = new Relator();
+                relator.setNombre(nombre);
+                relator.setHorasTrabajados(0f);
+                relator.setContacto(contacto);
+                relator.setDatosExtras(datosExtras);
+                relator.setFoto(servicio.guardarArchivo(foto, "/fotos/"));
+                
+                servicio.guardarRelator(relator);
+                return "redirect:/dataBaseRelator"; 
+
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                model.addAttribute("error", "Ocurrió un error al guardar el nuevo cliente");
+                return "databaseRelator";
+            }
+            
+        }
+        return "redirect:/";
+    }
     
 }
