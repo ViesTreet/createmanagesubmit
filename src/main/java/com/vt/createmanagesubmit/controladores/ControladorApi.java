@@ -59,6 +59,8 @@ import com.vt.createmanagesubmit.modelos.Curso;
 import com.vt.createmanagesubmit.modelos.Plantilla;
 import com.vt.createmanagesubmit.modelos.Relator;
 import com.vt.createmanagesubmit.repositorios.RepositorioAlumnos;
+import com.vt.createmanagesubmit.repositorios.RepositorioCliente;
+import com.vt.createmanagesubmit.repositorios.RepositorioPlantillas;
 import com.vt.createmanagesubmit.repositorios.RepositorioRelator;
 import com.vt.createmanagesubmit.servicios.Servicio;
 import com.vt.createmanagesubmit.servicios.ServicioArchivos;
@@ -94,7 +96,13 @@ public class ControladorApi {
     private RepositorioAlumnos repoAlum;
 
     @Autowired
+    private RepositorioCliente repoCliente;
+
+    @Autowired
     private RepositorioRelator repoRel;
+
+    @Autowired
+    private RepositorioPlantillas repoPlanti;
 
     private static final int MAX_DOWNLOADS = 5;
     private static final long TIME_FRAME = 60 * 60 * 1000; // 1 hora
@@ -393,7 +401,7 @@ public class ControladorApi {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuarioTemporal != null) {
             Plantilla plantilla=ser.plantillaPorId(idPlantilla);
-            curso.setPlantilla(plantilla);
+            curso.setPlantillaDiploma(plantilla);
             Alumno alumno = new Alumno();
             alumno.setNombreAsistente("Gabriel Parra");
             return servicioGenerarCertificado.descargarCertificadosServicio(alumno)
@@ -706,6 +714,13 @@ public class ControladorApi {
         return resultado.getContent();
     }
 
+    @GetMapping("/clientes/buscar")
+    @ResponseBody
+    public List<Cliente> buscarClientes(@RequestParam String q) {
+        return repoCliente.findTop10ByNombreClienteContainingIgnoreCase(q);
+    }
+
+
     @GetMapping("/datosRelator")
     public List<Relator> getDatosRelator(HttpSession session) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
@@ -724,6 +739,28 @@ public class ControladorApi {
             return resultado.getContent();
         }
         return Collections.emptyList();
+    }
+
+    @GetMapping("/relator/buscar")
+    @ResponseBody
+    public List<Relator> buscarRelator(@RequestParam String q) {
+        return repoRel.findTop10ByNombreContainingIgnoreCase(q);
+    }
+
+    @GetMapping("/datosCurso")
+    public List<Curso> getDatosCurso(HttpSession session) {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+        if (usuarioTemporal != null) {
+            List<Curso> cursos = ser.todosLosCursos();
+            return cursos;
+        }
+        return null;
+    }
+
+    @GetMapping("/plantilla/buscar")
+    @ResponseBody
+    public List<Plantilla> buscarPlantilla(@RequestParam String q,@RequestParam String t) {
+        return repoPlanti.findTop10ByNombreCertificadoContainingIgnoreCaseAndTipo(q, t);
     }
 
 

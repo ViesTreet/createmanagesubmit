@@ -65,7 +65,7 @@ public class AlumnoDTO {
         this.correo = alumno.getCorreo();
         this.ubicacionSubida = alumno.getCurso().getUbicacionSubida();
         this.lugarYfechaEmision = alumno.getCurso().getLugarYfechaEmision();
-        this.plantilla = alumno.getCurso().getPlantilla().getNombreCertificado();
+        this.plantilla = alumno.getCurso().getPlantillaDiploma().getNombreCertificado();
         this.createdAt = alumno.getCreatedAt();
         this.updatedAt = alumno.getUpdatedAt();
     }

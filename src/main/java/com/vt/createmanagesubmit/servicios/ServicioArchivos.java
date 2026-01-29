@@ -316,7 +316,7 @@ public class ServicioArchivos {
             plantillaError = optPlantilla.get();
         }
         for (Alumno alumno : alumnos) {
-            if(alumno.getCurso().getPlantilla() != plantillaError){
+            if(alumno.getCurso().getPlantillaDiploma() != plantillaError){
                 servicioGenerarCertificado.generateCertificateForAlumno(alumno);
                 alumno.setDiploma("enviado");
                 alumnoRepo.save(alumno);
@@ -330,7 +330,7 @@ public class ServicioArchivos {
         Alumno alumno = alumnoRepo.findById(id).orElseThrow(() -> new Exception("Alumno no encontrado con ID: " + id));
 
         if (alumno != null) {
-            Plantilla plantilla = alumno.getCurso().getPlantilla();
+            Plantilla plantilla = alumno.getCurso().getPlantillaDiploma();
             if (plantilla != null) {
                 Hibernate.initialize(plantilla);
             }

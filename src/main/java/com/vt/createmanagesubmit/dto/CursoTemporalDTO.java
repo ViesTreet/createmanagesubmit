@@ -20,7 +20,7 @@ public class CursoTemporalDTO {
         d.identificador = c.getCliente().getIdentificador();
         d.cliente = c.getCliente().getNombreCliente();
         d.ubicacionSubida = c.getUbicacionSubida();
-        d.plantilla = c.getPlantilla().getId();
+        d.plantilla = c.getPlantillaDiploma().getId();
         return d;
     }
 }

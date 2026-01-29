@@ -21,4 +21,6 @@ public interface RepositorioPlantillas extends JpaRepository<Plantilla, Long>{
 
     List<Plantilla> findAllByNombreCertificadoContainingOrderByUpdatedAtDesc(String nombreCertificado);
 
+    List<Plantilla> findTop10ByNombreCertificadoContainingIgnoreCaseAndTipo(String nombre,String tipo);
+
 }    

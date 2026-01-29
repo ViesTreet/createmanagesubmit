@@ -10,7 +10,6 @@ import com.vt.createmanagesubmit.modelos.Cliente;
 
 public interface RepositorioCliente extends JpaRepository<Cliente,Long>,JpaSpecificationExecutor<Cliente>{
 
-    Optional<Cliente> findById(long id);
     List<Cliente> findAll();
 
     Optional<Cliente> findByNombreClienteIgnoreCase(String nombre);
@@ -19,4 +18,6 @@ public interface RepositorioCliente extends JpaRepository<Cliente,Long>,JpaSpeci
     List<Cliente> findAllByOrderByNombreClienteAsc();
 
     List<Cliente> findAllByOrderByUpdatedAtDesc();
+
+    List<Cliente> findTop10ByNombreClienteContainingIgnoreCase(String q);
 }

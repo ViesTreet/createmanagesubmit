@@ -1,5 +1,6 @@
 package com.vt.createmanagesubmit.modelos;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -45,15 +46,30 @@ public class Curso {
 
     private String ubicacionSubida;
 
+    private String ciudad;
+
+    private String ubicacionDelCurso;
+
+    private String ubicacionCliente;
+
+    private LocalDateTime fechaInicio;
+
+    private LocalDateTime fechaFin;
+
+
     private String lugarYfechaEmision;
 
     private int asistenciaMin;
 
     private float notaMin; 
 
-    @ManyToOne(fetch = FetchType.LAZY) 
-    @JoinColumn(name = "plantilla_id") 
-    private Plantilla plantilla;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "plantilla_diploma_id")
+    private Plantilla plantillaDiploma;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "plantilla_flyer_id")
+    private Plantilla plantillaFlyer;
 
     @OneToMany(mappedBy = "curso", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Alumno> alumnos;
@@ -79,9 +95,11 @@ public class Curso {
     }
     
     public Curso(Long id, String nombreCurso, String diasCursos, String duracion, Cliente cliente, String modalidad,
-            String ubicacionSubida, String lugarYfechaEmision, int asistenciaMin, float notaMin, Plantilla plantilla,
-            List<Alumno> alumnos, List<AlumnoTemporal> alumnosTemporales, Relator relator, Date createdAt,
-            Date updatedAt) {
+            String ubicacionSubida, String ciudad, String ubicacionDelCurso, String ubicacionCliente,
+            LocalDateTime fechaInicio, LocalDateTime fechaFin, String lugarYfechaEmision, int asistenciaMin,
+            float notaMin, Plantilla plantillaDiploma, Plantilla plantillaFlyer, List<Alumno> alumnos,
+            List<TareaProgramada> tareaProgramadas, List<AlumnoTemporal> alumnosTemporales, Relator relator,
+            Date createdAt, Date updatedAt) {
         this.id = id;
         this.nombreCurso = nombreCurso;
         this.diasCursos = diasCursos;
@@ -89,11 +107,18 @@ public class Curso {
         this.cliente = cliente;
         this.modalidad = modalidad;
         this.ubicacionSubida = ubicacionSubida;
+        this.ciudad = ciudad;
+        this.ubicacionDelCurso = ubicacionDelCurso;
+        this.ubicacionCliente = ubicacionCliente;
+        this.fechaInicio = fechaInicio;
+        this.fechaFin = fechaFin;
         this.lugarYfechaEmision = lugarYfechaEmision;
         this.asistenciaMin = asistenciaMin;
         this.notaMin = notaMin;
-        this.plantilla = plantilla;
+        this.plantillaDiploma = plantillaDiploma;
+        this.plantillaFlyer = plantillaFlyer;
         this.alumnos = alumnos;
+        this.tareaProgramadas = tareaProgramadas;
         this.alumnosTemporales = alumnosTemporales;
         this.relator = relator;
         this.createdAt = createdAt;
@@ -156,6 +181,46 @@ public class Curso {
         this.ubicacionSubida = ubicacionSubida;
     }
 
+    public String getCiudad() {
+        return ciudad;
+    }
+
+    public void setCiudad(String ciudad) {
+        this.ciudad = ciudad;
+    }
+
+    public String getUbicacionDelCurso() {
+        return ubicacionDelCurso;
+    }
+
+    public void setUbicacionDelCurso(String ubicacionDelCurso) {
+        this.ubicacionDelCurso = ubicacionDelCurso;
+    }
+
+    public String getUbicacionCliente() {
+        return ubicacionCliente;
+    }
+
+    public void setUbicacionCliente(String ubicacionCliente) {
+        this.ubicacionCliente = ubicacionCliente;
+    }
+
+    public LocalDateTime getFechaInicio() {
+        return fechaInicio;
+    }
+
+    public void setFechaInicio(LocalDateTime fechaInicio) {
+        this.fechaInicio = fechaInicio;
+    }
+
+    public LocalDateTime getFechaFin() {
+        return fechaFin;
+    }
+
+    public void setFechaFin(LocalDateTime fechaFin) {
+        this.fechaFin = fechaFin;
+    }
+
     public String getLugarYfechaEmision() {
         return lugarYfechaEmision;
     }
@@ -180,12 +245,20 @@ public class Curso {
         this.notaMin = notaMin;
     }
 
-    public Plantilla getPlantilla() {
-        return plantilla;
+    public Plantilla getPlantillaDiploma() {
+        return plantillaDiploma;
     }
 
-    public void setPlantilla(Plantilla plantilla) {
-        this.plantilla = plantilla;
+    public void setPlantillaDiploma(Plantilla plantillaDiploma) {
+        this.plantillaDiploma = plantillaDiploma;
+    }
+
+    public Plantilla getPlantillaFlyer() {
+        return plantillaFlyer;
+    }
+
+    public void setPlantillaFlyer(Plantilla plantillaFlyer) {
+        this.plantillaFlyer = plantillaFlyer;
     }
 
     public List<Alumno> getAlumnos() {
@@ -194,6 +267,14 @@ public class Curso {
 
     public void setAlumnos(List<Alumno> alumnos) {
         this.alumnos = alumnos;
+    }
+
+    public List<TareaProgramada> getTareaProgramadas() {
+        return tareaProgramadas;
+    }
+
+    public void setTareaProgramadas(List<TareaProgramada> tareaProgramadas) {
+        this.tareaProgramadas = tareaProgramadas;
     }
 
     public List<AlumnoTemporal> getAlumnosTemporales() {

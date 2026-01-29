@@ -101,7 +101,7 @@ public class ServicioGenerarCertificado {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public CompletableFuture<Void> generateCertificateForAlumno(Alumno alumno) throws Exception {
         // Obtén la plantilla asociada al alumno
-        Plantilla plantilla = alumno.getCurso().getPlantilla();
+        Plantilla plantilla = alumno.getCurso().getPlantillaDiploma();
         if (plantilla == null || plantilla.getNombreCertificado().trim().equals("Error en encontrar plantilla")) {
             throw new Exception("No hay una plantilla asociada al Alumno " + alumno.getNombreAsistente());
         }
@@ -406,7 +406,7 @@ public class ServicioGenerarCertificado {
         Alumno alumno = alumnoRepo.findById(alumnoId).orElseThrow(() -> new Exception("Alumno no encontrado con ID " + alumnoId));
 
         // Obtén la plantilla asociada al alumno
-        Plantilla plantilla = alumno.getCurso().getPlantilla();
+        Plantilla plantilla = alumno.getCurso().getPlantillaDiploma();
         if (plantilla == null || plantilla.getNombreCertificado().trim().equals("Error en encontrar plantilla")) {
             throw new Exception("No hay una plantilla asociada al Alumno " + alumno.getNombreAsistente());
         }
@@ -492,7 +492,7 @@ public class ServicioGenerarCertificado {
     public CompletableFuture<byte[]> descargarCertificadosServicio(Alumno alumno) throws Exception {
 
         // Obtén la plantilla asociada al alumno
-        Plantilla plantilla = alumno.getCurso().getPlantilla();
+        Plantilla plantilla = alumno.getCurso().getPlantillaDiploma();
         if (plantilla == null || plantilla.getNombreCertificado().trim().equals("Error en encontrar plantilla")) {
             throw new Exception("No hay una plantilla asociada al Alumno " + alumno.getNombreAsistente());
         }

@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.vt.createmanagesubmit.exceptions.MissingAdminIdException;
 import com.vt.createmanagesubmit.exceptions.MissingAlumnoIdException;
@@ -868,5 +871,106 @@ public class ControladorBase {
         }
         return "redirect:/";
     }
-    
+
+    //-------------------------Curso---------------------------------------
+    @GetMapping("dataBaseCurso")
+    public String dataBaseCurso(HttpSession session, Model model) {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+	    if (usuarioTemporal == null) {
+	        return "redirect:/";  
+	    }
+        model.addAttribute("admin",usuarioTemporal);
+        return "databaseCurso";
+    }
+
+    @PostMapping("/dataBaseCurso/nuevoCurso")
+    public String crearNuevoCurso(
+
+            // ===== DIPLOMA =====
+            @RequestParam String nombreCurso,
+            @RequestParam String diasCursos,
+            @RequestParam String duracion,
+
+            @RequestParam Long clienteId,
+            @RequestParam String modalidad,
+            @RequestParam String ubicacionSubida,
+            @RequestParam String ciudad,
+
+            @RequestParam Long relatorId,
+            @RequestParam Long plantillaDipId,
+
+            @RequestParam Float NotaMin,
+            @RequestParam Integer asistenciaMin,
+
+            // ===== FLYER =====
+            @RequestParam String ubicacionDelCurso,
+            @RequestParam String ubicacionCliente,
+
+            @RequestParam String fecha,   // yyyy-MM-dd
+            @RequestParam String horaI,   // HH:mm
+            @RequestParam String horaF,   // HH:mm
+
+            @RequestParam Long plantillaFlyId,
+
+            RedirectAttributes redirectAttrs
+    ) {
+
+        try {
+            // =============================
+            // ARMADO FECHA + HORA
+            // =============================
+            LocalDate fechaCurso = LocalDate.parse(fecha);
+            LocalTime horaInicio = LocalTime.parse(horaI);
+            LocalTime horaFin = LocalTime.parse(horaF);
+
+            LocalDateTime fechaDeInicio= LocalDateTime.of(fechaCurso, horaInicio);
+            LocalDateTime fechaDeFinalizacion= LocalDateTime.of(fechaCurso, horaFin);
+
+            // =============================
+            // ENTIDADES RELACIONADAS
+            // =============================
+            Cliente cliente = servicio.clientePorId(clienteId);
+
+            Relator relator = servicio.buscarRelatorPorId(relatorId);
+
+            Plantilla plantillaDiploma = servicio.plantillaPorId(plantillaDipId);
+
+            Plantilla plantillaFlyer = servicio.plantillaPorId(plantillaFlyId);
+
+            // =============================
+            // CREAR CURSO
+            // =============================
+            Curso curso = new Curso();
+            curso.setNombreCurso(nombreCurso);
+            curso.setDiasCursos(diasCursos);
+            curso.setDuracion(duracion);
+
+            curso.setCliente(cliente);
+            curso.setModalidad(modalidad);
+            curso.setUbicacionSubida(ubicacionSubida);
+            curso.setCiudad(ciudad);
+
+            curso.setRelator(relator);
+            curso.setNotaMin(NotaMin);
+            curso.setAsistenciaMin(asistenciaMin);
+
+            curso.setUbicacionDelCurso(ubicacionDelCurso);
+            curso.setUbicacionCliente(ubicacionCliente);
+            curso.setFechaInicio(fechaDeInicio);
+            curso.setFechaFin(fechaDeFinalizacion);
+
+            // 🔥 aquí asumo que ya decidiste tener 2 relaciones
+            curso.setPlantillaDiploma(plantillaDiploma);
+            curso.setPlantillaFlyer(plantillaFlyer);
+
+            servicio.guardarCurso(curso);
+
+            return "redirect:/dataBaseCurso";
+
+        } catch (Exception e) {
+            redirectAttrs.addFlashAttribute("error", e.getMessage());
+            return "redirect:/dataBaseCurso";
+        }
+    }
+
 }

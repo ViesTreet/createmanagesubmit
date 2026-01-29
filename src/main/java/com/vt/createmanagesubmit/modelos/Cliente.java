@@ -32,6 +32,8 @@ public class Cliente {
 
     private String pathLogo;
 
+    private String pathLogoFooter;
+
     private String identificador;
 
     @Column(updatable=false)
@@ -44,12 +46,13 @@ public class Cliente {
     public Cliente() {
     }
     
-    public Cliente(Long id, String nombreCliente, List<Curso> cursos, String pathLogo, String identificador,
-            Date createdAt, Date updatedAt) {
+    public Cliente(Long id, String nombreCliente, List<Curso> cursos, String pathLogo, String pathLogoFooter,
+            String identificador, Date createdAt, Date updatedAt) {
         this.id = id;
         this.nombreCliente = nombreCliente;
         this.cursos = cursos;
         this.pathLogo = pathLogo;
+        this.pathLogoFooter = pathLogoFooter;
         this.identificador = identificador;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -85,6 +88,14 @@ public class Cliente {
 
     public void setPathLogo(String pathLogo) {
         this.pathLogo = pathLogo;
+    }
+
+    public String getPathLogoFooter() {
+        return pathLogoFooter;
+    }
+
+    public void setPathLogoFooter(String pathLogoFooter) {
+        this.pathLogoFooter = pathLogoFooter;
     }
 
     public String getIdentificador() {

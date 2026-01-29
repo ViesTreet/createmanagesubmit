@@ -275,7 +275,7 @@ public class Servicio {
         curso.setNombreCurso(nombre);
         curso.setUbicacionSubida(ubicacionSubida);
         curso.setRelator(relator);
-        curso.setPlantilla(plantilla);
+        curso.setPlantillaDiploma(plantilla);
         repoCurso.save(curso);
         return curso;
     }
@@ -302,11 +302,22 @@ public class Servicio {
             } catch (IOException ex) {
                 throw new IOException("No se encontró la ruta de la plantilla.", ex);
             }
-            List<Curso> cursos = plantilla.getCursos();
-            for (Curso curso : cursos) {
-                repoAlum.deleteAll(curso.getAlumnos());
+            if(plantilla.getTipo().equalsIgnoreCase("diploma")){
+                List<Curso> cursos = repoCurso.findByPlantillaDiplomaId(id);
+                for (Curso curso : cursos) {
+                    repoAlum.deleteAll(curso.getAlumnos());
+                }
+                repoCurso.deleteAll(cursos);
+
+            }else{
+                List<Curso> cursos = repoCurso.findByPlantillaFlyerId(id);
+                for (Curso curso : cursos) {
+                    repoAlum.deleteAll(curso.getAlumnos());
+                }
+                repoCurso.deleteAll(cursos);
+
             }
-            repoCurso.deleteAll(cursos);
+            
             repoPlanti.delete(plantilla);
         }
     }
@@ -476,7 +487,7 @@ public class Servicio {
                 Optional<Plantilla> optplantilla = repoPlanti.findById(plantillaId);
                 if (optplantilla.isPresent()) {
                     Plantilla plantilla = optplantilla.get();
-                    alumno.getCurso().setPlantilla(plantilla);
+                    alumno.getCurso().setPlantillaDiploma(plantilla);;
                     if (!estado.equals("auto")) {
                         alumno.setEstado(normalizarValor(estado));
                     } else {
@@ -820,6 +831,14 @@ public class Servicio {
         repoCliente.save(cliente);
     }
 
+    public Cliente clientePorId(Long id)throws Exception{
+        
+        Optional<Cliente> clienteOpt= repoCliente.findById(id);
+
+        return clienteOpt.get();
+
+    }
+
     public Page<Cliente> buscarConMultiplesFiltrosCliente(List<Map<String, String>> filtros) {
 
         Specification<Cliente> spec = Specification.unrestricted();
@@ -879,6 +898,11 @@ public class Servicio {
         repoRelator.save(relator);
     }
 
+    public Relator relatorPorId(Long Id) throws Exception{
+        Optional<Relator> relatorOpt = repoRelator.findById(Id);
+        return relatorOpt.get();
+    }
+
     public Page<Relator> buscarConMultiplesFiltrosRelator(List<Map<String, String>> filtros) {
 
         Specification<Relator> spec = Specification.unrestricted();
@@ -932,6 +956,14 @@ public class Servicio {
                     return cb.conjunction();
             }
         };
+    }
+
+    public List<Curso> todosLosCursos(){
+        return repoCurso.findAllByOrderByUpdatedAtDesc();
+    }
+
+    public void guardarCurso(Curso curso){
+        repoCurso.save(curso);
     }
 
 

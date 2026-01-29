@@ -1,18 +1,14 @@
 package com.vt.createmanagesubmit.modelos;
 
 import java.util.Date;
-import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -32,8 +28,7 @@ public class Plantilla {
 
     private String pathArchivo;
 
-    @OneToMany(mappedBy = "plantilla", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Curso> cursos;
+    private String tipo;
 
     @Column(updatable=false)
 	@DateTimeFormat(pattern="yyyy-MM-dd")
@@ -45,17 +40,17 @@ public class Plantilla {
     public Plantilla() {
     }
     
-    public Plantilla(Long id, String nombreCertificado, String descripcion, String pathArchivo, List<Curso> cursos,
+    public Plantilla(Long id, String nombreCertificado, String descripcion, String pathArchivo, String tipo,
             Date createdAt, Date updatedAt) {
         this.id = id;
         this.nombreCertificado = nombreCertificado;
         this.descripcion = descripcion;
         this.pathArchivo = pathArchivo;
-        this.cursos = cursos;
+        this.tipo = tipo;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
-
+    
     public Long getId() {
         return id;
     }
@@ -64,72 +59,49 @@ public class Plantilla {
         this.id = id;
     }
 
-
-
     public String getNombreCertificado() {
         return nombreCertificado;
     }
-
-
 
     public void setNombreCertificado(String nombreCertificado) {
         this.nombreCertificado = nombreCertificado;
     }
 
-
-
     public String getDescripcion() {
         return descripcion;
     }
-
-
 
     public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
     }
 
-
-
     public String getPathArchivo() {
         return pathArchivo;
     }
-
-
 
     public void setPathArchivo(String pathArchivo) {
         this.pathArchivo = pathArchivo;
     }
 
-    
-    public List<Curso> getCursos() {
-        return cursos;
+    public String getTipo() {
+        return tipo;
     }
 
-
-
-    public void setCursos(List<Curso> cursos) {
-        this.cursos = cursos;
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
     }
-
-
 
     public Date getCreatedAt() {
         return createdAt;
     }
 
-
-
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
 
-
-
     public Date getUpdatedAt() {
         return updatedAt;
     }
-
-
 
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;

@@ -16,6 +16,8 @@ public interface RepositorioRelator
 
     List<Relator> findTop10ByNombreContainingIgnoreCaseOrderByNombreDesc(String nombre);
 
+    List<Relator> findTop10ByNombreContainingIgnoreCase(String q);
+
     // Exacto (cuando seleccionas uno existente)
     Optional<Relator> findByNombreIgnoreCase(String nombre);
 

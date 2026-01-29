@@ -13,4 +13,9 @@ public interface RepositorioCurso extends JpaRepository<Curso,Long>{
     Optional<Curso> findById(Long id);
 
     List<Curso> findAllByOrderByUpdatedAtDesc();
+
+    List<Curso> findByPlantillaDiplomaId(Long plantillaId);
+
+    List<Curso> findByPlantillaFlyerId(Long plantillaId);
+
 }
