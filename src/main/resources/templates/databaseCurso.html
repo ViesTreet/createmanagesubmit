@@ -189,7 +189,7 @@
         $(document).ready(function () {
             function cargarDatos() {
                 $.ajax({
-                    url: "/api/datosCursos",
+                    url: "/api/datosCurso",
                     method: "GET",
                     success: function (data) {
                         var tbody = $("#tablaCurso tbody");
@@ -325,6 +325,8 @@
                     <label for="horaF">Hora de finalización</label>
                     <input id="horaF" type="time" name="horaF" class="form-control"
                         placeholder="14:00 pm">
+                    <label for="horasRelatorCurso">Horas trabajadas por el relator</label>
+                    <input type="number" name="horasRelatorCurso" step="0.1" placeholder="3" class="form-control" />
                     <label for="plantillaFlyInput">Plantilla del flyer</label>
                     <input  id="plantillaFlyInput" type="text" placeholder="Escribe para buscar una plantilla" autocomplete="off" class="form-control">
                     <input  type="hidden" name="plantillaFlyId" id="plantillaFlyId" required >
@@ -499,6 +501,12 @@
         function openForm() {
             document.getElementById('overlay').style.display = 'block';
         }
+
+        function closeForm() {
+                document.getElementById('overlay').style.display = 'none';
+                flyer.style.display="none";
+                diploma.style.display="block";
+        }
         $("form").on("submit", function () {
             $("#enviarCurso").prop("disabled", true);
         });
@@ -672,11 +680,7 @@
             });
 
             // BLOQUEO SI NO SE SELECCIONÓ
-            function closeForm() {
-                document.getElementById('overlay').style.display = 'none';
-                flyer.style.display="none";
-                diploma.style.display="block";
-            }
+            
 
         });
         </script>

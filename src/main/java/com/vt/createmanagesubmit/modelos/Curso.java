@@ -56,6 +56,7 @@ public class Curso {
 
     private LocalDateTime fechaFin;
 
+    private Float horasRelatorCurso;
 
     private String lugarYfechaEmision;
 
@@ -96,10 +97,10 @@ public class Curso {
     
     public Curso(Long id, String nombreCurso, String diasCursos, String duracion, Cliente cliente, String modalidad,
             String ubicacionSubida, String ciudad, String ubicacionDelCurso, String ubicacionCliente,
-            LocalDateTime fechaInicio, LocalDateTime fechaFin, String lugarYfechaEmision, int asistenciaMin,
-            float notaMin, Plantilla plantillaDiploma, Plantilla plantillaFlyer, List<Alumno> alumnos,
-            List<TareaProgramada> tareaProgramadas, List<AlumnoTemporal> alumnosTemporales, Relator relator,
-            Date createdAt, Date updatedAt) {
+            LocalDateTime fechaInicio, LocalDateTime fechaFin, Float horasRelatorCurso, String lugarYfechaEmision,
+            int asistenciaMin, float notaMin, Plantilla plantillaDiploma, Plantilla plantillaFlyer,
+            List<Alumno> alumnos, List<TareaProgramada> tareaProgramadas, List<AlumnoTemporal> alumnosTemporales,
+            Relator relator, Date createdAt, Date updatedAt) {
         this.id = id;
         this.nombreCurso = nombreCurso;
         this.diasCursos = diasCursos;
@@ -112,6 +113,7 @@ public class Curso {
         this.ubicacionCliente = ubicacionCliente;
         this.fechaInicio = fechaInicio;
         this.fechaFin = fechaFin;
+        this.horasRelatorCurso = horasRelatorCurso;
         this.lugarYfechaEmision = lugarYfechaEmision;
         this.asistenciaMin = asistenciaMin;
         this.notaMin = notaMin;
@@ -219,6 +221,14 @@ public class Curso {
 
     public void setFechaFin(LocalDateTime fechaFin) {
         this.fechaFin = fechaFin;
+    }
+
+    public Float getHorasRelatorCurso() {
+        return horasRelatorCurso;
+    }
+
+    public void setHorasRelatorCurso(Float horasRelatorCurso) {
+        this.horasRelatorCurso = horasRelatorCurso;
     }
 
     public String getLugarYfechaEmision() {

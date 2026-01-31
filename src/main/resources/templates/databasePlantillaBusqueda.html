@@ -139,6 +139,7 @@
                         <th>Descripción</th>
                         <th>Asistencia mínima</th>
                         <th>Nota mínima</th>
+                        <th>Tipo</th>
                         <th style="width: 25vw;">Acciones</th>
                     </tr>
                 </thead>
@@ -169,6 +170,7 @@
                                 "<td>" + (plantilla.descripcion != null ? plantilla.descripcion : "") + "</td>" +
                                 "<td>" + (plantilla.asistenciaMin != null ? plantilla.asistenciaMin : "") + "</td>" +
                                 "<td>" + (plantilla.notaMin != null ? plantilla.notaMin : "") + "</td>" +
+                                "<td>" + (plantilla.tipo != null ? plantilla.tipo : "") + "</td>" +
                                 "<td class='d-flex justify-content-center flex-nowrap' style='width: 25vw;'>" +
                                 "<a class='btn btn-primary' href='/dataBasePlantilla/plantilla/" + plantilla.id + "/editar'>Editar</a>" +
                                 "<a href='/api/dataBasePlantilla/plantilla/" + plantilla.id + "/descargar' class='btn btn-success'>Descargar</a>" +
@@ -217,16 +219,15 @@
                     <div style="max-width: 40%;">
                         <label for="nombreCertificado">Nombre Plantilla</label>
                         <input id="nombreCertificado" name="nombreCertificado" type="text" class="form-control" placeholder="Nombre de la plantilla">
+                        <label for="tipo">Tipo plantilla</label>
+                        <select name="tipo" id="tipo" class="form-select">
+                            <option value="diploma">Diploma</option>
+                            <option value="flyer">Flyer</option>
+                        </select>
                         <label for="descripcion">Descripción Plantilla</label>
                         <input id="descripcion" type="text" name="descripcion" class="form-control" placeholder="Descripción de la plantilla">
-                        <label for="pathLogo">Logo del cliente</label>
-                        <input type="file" class="form-control" name="pathLogo" id="pathLogo" accept="image/png, image/jpeg">
                     </div>
                     <div style="max-width: 40%;">
-                        <label for="asistenciaMin">Asistencia Mínima</label>
-                        <input id="asistenciaMin" type="text" name="asistenciaMin" class="form-control" placeholder="ej:60">
-                        <label for="notaMin">Nota Mínima</label>
-                        <input id="notaMin" type="text" name="notaMin" class="form-control" placeholder="ej:5.5">
                         <input type="checkbox" id="clonarPlantilla" name="clonarPlantilla" value="true" onclick="toggleInputs('plantilla')">
                         <label for="clonarPlantilla">Clonar Plantilla</label>
                         <!-- Input file para subir la nueva plantilla -->

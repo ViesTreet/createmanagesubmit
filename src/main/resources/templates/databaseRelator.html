@@ -1,422 +1,553 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-
-<head>
+  <head>
     <title>Base de datos profesores</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- Importar CSS de Bootstrap -->
-    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
-    <link rel="stylesheet" th:href="@{/css/styleCustom.css}">
-    <link rel="icon" th:href="@{/images/Logobgremove.png}" type="image/x-icon">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/styleCustom.css}" />
+    <link
+      rel="icon"
+      th:href="@{/images/Logobgremove.png}"
+      type="image/x-icon"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+    />
     <!-- Importar jQuery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <!-- Importar JS de Bootstrap -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <style>
-        th {
-            font-size: 13px;
+      th {
+        font-size: 13px;
+      }
+
+      td {
+        overflow-x: auto;
+        font-size: 11px;
+      }
+
+      #alumnoBuscador {
+        padding-right: 0px;
+        padding-left: 0px;
+      }
+
+      .overlay {
+        display: none;
+        /* Oculto por defecto */
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        /* Fondo oscuro */
+        z-index: 999;
+        /* Por encima de otros elementos */
+      }
+
+      /* Contenedor del formulario emergente */
+      .popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        /* Por encima del overlay */
+      }
+
+      /* Botón cerrar */
+      .close-btn {
+        background-color: red;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      .close-btn:hover {
+        background-color: darkred;
+      }
+
+      /* Botón principal */
+      .open-btn {
+        margin: 20px;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+
+      #alumnosNoEnviados {
+        height: 50vh;
+        /* Define una altura fija */
+        overflow-y: auto;
+        /* Permite el desplazamiento vertical cuando el contenido es grande */
+      }
+
+      @media (min-width: 1024px) {
+        #contenderBase {
+          max-width: 95vw;
+        }
+      }
+
+      @media (max-width: 768px) {
+        #contenderBase {
+          max-width: 100vw !important;
+          padding-left: 0px !important;
+          padding-right: 0px !important;
         }
 
-        td {
-            overflow-x: auto;
-            font-size: 11px;
+        #contenedorTabla {
+          max-width: 100vw !important;
+          overflow-y: auto;
+          overflow-x: auto;
         }
 
         #alumnoBuscador {
-            padding-right: 0px;
-            padding-left: 0px;
+          max-width: 100vw !important;
         }
 
-        .overlay {
-            display: none;
-            /* Oculto por defecto */
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            /* Fondo oscuro */
-            z-index: 999;
-            /* Por encima de otros elementos */
+        th {
+          font-size: 15px;
         }
 
-        /* Contenedor del formulario emergente */
-        .popup {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-            /* Por encima del overlay */
+        td {
+          overflow-x: auto;
+          font-size: 12px;
         }
 
-        /* Botón cerrar */
-        .close-btn {
-            background-color: red;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
+        #tablaPlantilla {
+          width: 250vw;
         }
-
-        .close-btn:hover {
-            background-color: darkred;
-        }
-
-        /* Botón principal */
-        .open-btn {
-            margin: 20px;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        #alumnosNoEnviados {
-            height: 50vh;
-            /* Define una altura fija */
-            overflow-y: auto;
-            /* Permite el desplazamiento vertical cuando el contenido es grande */
-        }
-
-        @media (min-width: 1024px) {
-            #contenderBase {
-                max-width: 95vw;
-            }
-        }
-
-        @media (max-width: 768px) {
-            #contenderBase {
-                max-width: 100vw !important;
-                padding-left: 0px !important;
-                padding-right: 0px !important;
-            }
-
-            #contenedorTabla {
-                max-width: 100vw !important;
-                overflow-y: auto;
-                overflow-x: auto;
-            }
-
-            #alumnoBuscador {
-                max-width: 100vw !important;
-            }
-
-            th {
-                font-size: 15px;
-            }
-
-            td {
-                overflow-x: auto;
-                font-size: 12px;
-            }
-
-            #tablaPlantilla {
-                width: 250vw;
-            }
-        }
+      }
     </style>
-</head>
+  </head>
 
-<body>
-    <header class="d-flex align-items-center justify-content-between p-3 bg-light" style="height: 10vh; z-index: 1;">
-        <a th:href="@{/home}" class="logo">
-            <img th:src="@{/images/Logobgremove.png}" alt="[LOGO]">
-        </a>
-        <nav class="d-flex justify-content-center align-items-center flex-nowrap">
-            <a th:href="@{/home}" class="btn btn-primary mx-2">Regresar</a>
-            <a th:href="@{/home}" class="btn btn-primary mx-2">Inicio</a>
-            <a th:href="@{/documentacion}" target="_blank" class="btn btn-primary mx-2">Documentación</a>
-            <div class="d-flex flex-column justify-content-center align-items-center">
-                <i class="fa-solid fa-user"></i>
-                <p class="p-0 m-0" style="font-size: normal;" th:text="${admin.nombre}"></p>
-            </div>
-        </nav>
+  <body>
+    <header
+      class="d-flex align-items-center justify-content-between p-3 bg-light"
+      style="height: 10vh; z-index: 1"
+    >
+      <a th:href="@{/home}" class="logo">
+        <img th:src="@{/images/Logobgremove.png}" alt="[LOGO]" />
+      </a>
+      <nav class="d-flex justify-content-center align-items-center flex-nowrap">
+        <a th:href="@{/home}" class="btn btn-primary mx-2">Regresar</a>
+        <a th:href="@{/home}" class="btn btn-primary mx-2">Inicio</a>
+        <a
+          th:href="@{/documentacion}"
+          target="_blank"
+          class="btn btn-primary mx-2"
+          >Documentación</a
+        >
+        <div
+          class="d-flex flex-column justify-content-center align-items-center"
+        >
+          <i class="fa-solid fa-user"></i>
+          <p
+            class="p-0 m-0"
+            style="font-size: normal"
+            th:text="${admin.nombre}"
+          ></p>
+        </div>
+      </nav>
     </header>
-    <div id="contenderBase" class="container pt-2 pb-2" style="height: 90vh;">
-        <h2 class="text-center">Base de datos profesores</h2>
-        <div class="d-flex align-items-center justify-content-between pb-1" style="max-width: 95vw;">
-            <div>
-                <form id="alumnoBuscador" class="d-flex col-12">
-                    <select id="filtroBusquedaAlumno" class="form-select" name="filtroBusquedaAlumno">
-                        <option value="rut">Rut</option>
-                        <option value="nombre">Nombre profesor</option>
-                        <option value="horasMin">Horas minimas</option>
-                        <option value="horasMax">Horas maximas</option>
-                        <option value="datosExtras">Datos extras</option>
-                    </select>
-                    <input id="busquedaAlumno" type="search" class="col-5" placeholder="Buscar" name="busquedaAlumno"
-                        onkeydown="submitOnEnter(event)" />
-                    <button type="button" class="btn btn-outline-primary" onclick="agregarFiltro()">
-                        Agregar Filtro
-                    </button>
-                </form>
-                <div id="filtros-activos" class="d-flex flex-wrap gap-2 mt-2"></div>
-            </div>
-            <div>
-                <button class="btn btn-success" onclick="openForm()">Agregar nuevo profesor</button>
-            </div>
+    <div id="contenderBase" class="container pt-2 pb-2" style="height: 90vh">
+      <h2 class="text-center">Base de datos profesores</h2>
+      <div
+        class="d-flex align-items-center justify-content-between pb-1"
+        style="max-width: 95vw"
+      >
+        <div>
+          <form id="alumnoBuscador" class="d-flex col-12">
+            <select
+              id="filtroBusquedaAlumno"
+              class="form-select"
+              name="filtroBusquedaAlumno"
+            >
+              <option value="rut">Rut</option>
+              <option value="nombre">Nombre profesor</option>
+              <option value="horasMin">Horas minimas</option>
+              <option value="horasMax">Horas maximas</option>
+              <option value="datosExtras">Datos extras</option>
+            </select>
+            <input
+              id="busquedaAlumno"
+              type="search"
+              class="col-5"
+              placeholder="Buscar"
+              name="busquedaAlumno"
+              onkeydown="submitOnEnter(event)"
+            />
+            <button
+              type="button"
+              class="btn btn-outline-primary"
+              onclick="agregarFiltro()"
+            >
+              Agregar Filtro
+            </button>
+          </form>
+          <div id="filtros-activos" class="d-flex flex-wrap gap-2 mt-2"></div>
         </div>
-        <div id="contenedorTabla" style="overflow-y: auto; max-height: 70vh; max-width: 95vw;">
-            <table class="table table-hover table-bordered mb-5" style="table-layout: fixed; height: 100%;"
-                id="tablaRelator">
-                <thead class="thead-dark">
-                    <tr>
-                        <th>Nombre relator</th>
-                        <th>contacto</th>
-                        <th>Foto</th>
-                        <th>Horas trabajadas</th>
-                        <th>datosExtras</th>
-                        <th style="width: 25vw;">Acción</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Se cargarán dinámicamente las filas -->
-                </tbody>
-            </table>
+        <div>
+          <button class="btn btn-success" onclick="openForm()">
+            Agregar nuevo profesor
+          </button>
         </div>
+      </div>
+      <div
+        id="contenedorTabla"
+        style="overflow-y: auto; max-height: 70vh; max-width: 95vw"
+      >
+        <table
+          class="table table-hover table-bordered mb-5"
+          style="table-layout: fixed; height: 100%"
+          id="tablaRelator"
+        >
+          <thead class="thead-dark">
+            <tr>
+              <th>Nombre relator</th>
+              <th>contacto</th>
+              <th>Foto</th>
+              <th>Horas trabajadas</th>
+              <th>Cantidad de cursos</th>
+              <th>datosExtras</th>
+              <th style="width: 25vw">Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Se cargarán dinámicamente las filas -->
+          </tbody>
+        </table>
+      </div>
     </div>
     <script th:inline="javascript">
-        $(document).ready(function () {
-            function cargarDatos() {
-                $.ajax({
-                    url: "/api/datosRelator",
-                    method: "GET",
-                    success: function (data) {
-                        var tbody = $("#tablaRelator tbody");
-                        tbody.empty(); // Limpiar la tabla antes de agregar nuevos datos
+      $(document).ready(function () {
+        function cargarDatos() {
+          $.ajax({
+            url: "/api/datosRelator",
+            method: "GET",
+            success: function (data) {
+              var tbody = $("#tablaRelator tbody");
+              tbody.empty(); // Limpiar la tabla antes de agregar nuevos datos
 
-                        $.each(data, function (i, relator) {
-
-                            // Inyectar el correo del admin en sesión desde el modelo
-                            var adminCorreo = /*[[${admin.correo}]]*/ "default";
-                            // Construir la fila
-                            var fila = "<tr>" +
-                                "<td>" + (relator.nombre != null ? relator.nombre : "") + "</td>" +
-                                "<td>" + (relator.contacto != null ? relator.contacto : "") + "</td>" +
-                                "<td>" + (relator.foto != null ? relator.foto : "") + "</td>" +
-                                "<td>" + (relator.horasTrabajados != null ? relator.horasTrabajados : "") + "</td>" +
-                                "<td>" + (relator.datosExtras != null ? relator.datosExtras : "") + "</td>" +
-                                "<td class='d-flex justify-content-center flex-nowrap' style='width: 25vw;'>" +
-                                "<a class='btn btn-primary' href='/dataBaseRelator/Relator/" + relator.id + "/editar'>Editar</a>" +
-                                "<a href='/dataBaseRelator/Relator/" + relator.id + "/cursos' class='btn btn-secondary'>Cursos</a>";
-
-                            fila += "</td></tr>";
-
-                            tbody.append(fila);
-                        });
-                    },
-                    error: function (error) {
-                        console.log("Error al obtener los datos", error);
-                    }
-                });
-            }
-
-            // Cargar datos inicialmente
-            cargarDatos();
-
-            // Actualizar la tabla cada 30 segundos
-            setInterval(function () {
-                if (filtrosActivos.length > 0) {
-                    cargarDatosConFiltros();
+              $.each(data, function (i, relator) {
+                var condiFoto = ">";
+                if (relator.foto == null) {
+                  condiFoto =
+                    " style='background-color: #ff00008c'> No cuenta con foto";
                 } else {
-                    cargarDatos();
+                  condiFoto = "> Con foto";
                 }
-                }, 30000);
-        });
+                // Inyectar el correo del admin en sesión desde el modelo
+                var adminCorreo = /*[[${admin.correo}]]*/ "default";
+                // Construir la fila
+                var fila =
+                  "<tr>" +
+                  "<td>" +
+                  (relator.nombre != null ? relator.nombre : "") +
+                  "</td>" +
+                  "<td>" +
+                  (relator.contacto != null ? relator.contacto : "") +
+                  "</td>" +
+                  "<td" +
+                  condiFoto +
+                  "</td>" +
+                  "<td>" +
+                  (relator.horasTrabajados != null
+                    ? relator.horasTrabajados
+                    : "") +
+                  "</td>" +
+                  "<td>" +
+                  (relator.cursos.length != null ? relator.cursos.length : "") +
+                  "</td>" +
+                  "<td>" +
+                  (relator.datosExtras != null ? relator.datosExtras : "") +
+                  "</td>" +
+                  "<td class='d-flex justify-content-center flex-nowrap' style='width: 25vw;'>" +
+                  "<a class='btn btn-primary' href='/dataBaseRelator/Relator/" +
+                  relator.id +
+                  "/editar'>Editar</a>" +
+                  "<a href='/dataBaseRelator/Relator/" +
+                  relator.id +
+                  "/cursos' class='btn btn-secondary'>Cursos</a>";
+
+                fila += "</td></tr>";
+
+                tbody.append(fila);
+              });
+            },
+            error: function (error) {
+              console.log("Error al obtener los datos", error);
+            },
+          });
+        }
+
+        // Cargar datos inicialmente
+        cargarDatos();
+
+        // Actualizar la tabla cada 30 segundos
+        setInterval(function () {
+          if (filtrosActivos.length > 0) {
+            cargarDatosConFiltros();
+          } else {
+            cargarDatos();
+          }
+        }, 30000);
+      });
     </script>
     <script th:inline="javascript">
-        // Detecta la tecla Enter y simula clic en un botón
-        function submitOnEnter(event, buttonId) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                document.getElementById(buttonId).click();
-            }
+      // Detecta la tecla Enter y simula clic en un botón
+      function submitOnEnter(event, buttonId) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          document.getElementById(buttonId).click();
         }
+      }
     </script>
     <div class="overlay" id="overlay">
-        <div class="popup col-4">
-            <div class="d-flex justify-content-end">
-                <button class="btn btn-danger" onclick="closeForm()">Cerrar</button>
-            </div>
-            <h2 class="text-center pb-2">Crear profesor</h2>
-            <form th:action="@{/dataBaseRelator/nuevoRelator}" method="post" enctype="multipart/form-data">
-                <div class="d-flex justify-content-around align-items-center flex-column pb-2">
-                    <label for="nombre">Nombre profesor</label>
-                    <input id="nombre" name="nombre" type="text" class="form-control" placeholder="Nombre del profesor">
-                    <label for="contacto">Datos de contacto</label>
-                    <input id="contacto" type="text" name="contacto" class="form-control"
-                        placeholder="numero,correo,etc">
-                    <label for="datosExtras">Datos extras</label>
-                    <input id="datosExtras" type="text" name="datosExtras" class="form-control"
-                        placeholder="Titulado en ... y certificado en ...">
-                    <label for="foto">Foto del profesor</label>
-                    <input type="file" class="form-control" name="foto" id="foto" accept="image/png, image/jpeg">
-                </div>
-
-                <div class="d-flex justify-content-center">
-                    <input type="hidden" name="orden" value="true">
-                    <input class="btn btn-success" type="submit" value="Enviar">
-                </div>
-            </form>
+      <div class="popup col-4">
+        <div class="d-flex justify-content-end">
+          <button class="btn btn-danger" onclick="closeForm()">Cerrar</button>
         </div>
+        <h2 class="text-center pb-2">Crear profesor</h2>
+        <form
+          th:action="@{/dataBaseRelator/nuevoRelator}"
+          method="post"
+          enctype="multipart/form-data"
+        >
+          <div
+            class="d-flex justify-content-around align-items-center flex-column pb-2"
+          >
+            <label for="nombre">Nombre profesor</label>
+            <input
+              id="nombre"
+              name="nombre"
+              type="text"
+              class="form-control"
+              placeholder="Nombre del profesor"
+            />
+            <label for="contacto">Datos de contacto</label>
+            <input
+              id="contacto"
+              type="text"
+              name="contacto"
+              class="form-control"
+              placeholder="numero,correo,etc"
+            />
+            <label for="datosExtras">Datos extras</label>
+            <input
+              id="datosExtras"
+              type="text"
+              name="datosExtras"
+              class="form-control"
+              placeholder="Titulado en ... y certificado en ..."
+            />
+            <label for="foto">Foto del profesor</label>
+            <input
+              type="file"
+              class="form-control"
+              name="foto"
+              id="foto"
+              accept="image/png, image/jpeg"
+            />
+          </div>
+
+          <div class="d-flex justify-content-center">
+            <input type="hidden" name="orden" value="true" />
+            <input class="btn btn-success" type="submit" value="Enviar" />
+          </div>
+        </form>
+      </div>
     </div>
     <script th:inline="javascript">
-        // Función para mostrar el formulario
-        function openForm() {
-            document.getElementById('overlay').style.display = 'block';
-        }
-        // Función para ocultar el formulario
-        function closeForm() {
-            document.getElementById('overlay').style.display = 'none';
-        }
+      // Función para mostrar el formulario
+      function openForm() {
+        document.getElementById("overlay").style.display = "block";
+      }
+      // Función para ocultar el formulario
+      function closeForm() {
+        document.getElementById("overlay").style.display = "none";
+      }
     </script>
     <script th:inline="javascript">
-        function toggleInputs(type) {
-            if (type === 'plantilla') {
-                const checkbox = document.getElementById('clonarPlantilla');
-                const inputFile = document.getElementById('inputPlantilla');
-                const selectOptions = document.getElementById('selectPlantilla');
+      function toggleInputs(type) {
+        if (type === "plantilla") {
+          const checkbox = document.getElementById("clonarPlantilla");
+          const inputFile = document.getElementById("inputPlantilla");
+          const selectOptions = document.getElementById("selectPlantilla");
 
-                if (checkbox.checked) {
-                    inputFile.style.display = 'none';
-                    selectOptions.style.display = 'block';
-                } else {
-                    inputFile.style.display = 'block';
-                    selectOptions.style.display = 'none';
-                }
-            }
+          if (checkbox.checked) {
+            inputFile.style.display = "none";
+            selectOptions.style.display = "block";
+          } else {
+            inputFile.style.display = "block";
+            selectOptions.style.display = "none";
+          }
         }
+      }
     </script>
     <script th:inline="javascript">
-        function showAlert(message) {
-            if (message && message.trim() !== "") {
-                alert(message);
-            }
+      function showAlert(message) {
+        if (message && message.trim() !== "") {
+          alert(message);
         }
+      }
     </script>
     <th:block th:if="${error != null}">
-        <script th:inline="javascript">
-            showAlert("[[${error}]]");
-        </script>
+      <script th:inline="javascript">
+        showAlert("[[${error}]]");
+      </script>
     </th:block>
-    <footer class="text-center p-3 d-flex justify-content-center align-items-center"
-        style="height: 15vh; background-color: #f8f9fa;">
+    <footer
+      class="text-center p-3 d-flex justify-content-center align-items-center"
+      style="height: 15vh; background-color: #f8f9fa"
+    >
+      <div>
         <div>
-            <div>
-                <i class="fa-solid fa-phone"></i>
-                <a href="tel:+56 41 3830944">+56 41 3830944</a>
-            </div>
-            <div>
-                <i class="fa-solid fa-location-dot"></i>
-                <a
-                    href="https://www.google.com/maps/place/Consultores+Empresariales+E-Volution+Limitada/@-36.8252678,-73.050754,19z/data=!3m1!4b1!4m6!3m5!1s0x9669b5d0308198b5:0xbd67409566499fa!8m2!3d-36.8252678!4d-73.0501103!16s%2Fg%2F11fzwngw1q?entry=ttu&amp;g_ep=EgoyMDI1MDEwNi4xIKXMDSoASAFQAw%3D%3D">
-                    Freire 728, Oficina 206
-                </a>
-            </div>
-            <div>
-                <i class="fa-solid fa-envelope"></i>
-                <a href="mailto:contacto@e-volution.cl">contacto@e-volution.cl</a>
-            </div>
+          <i class="fa-solid fa-phone"></i>
+          <a href="tel:+56 41 3830944">+56 41 3830944</a>
         </div>
+        <div>
+          <i class="fa-solid fa-location-dot"></i>
+          <a
+            href="https://www.google.com/maps/place/Consultores+Empresariales+E-Volution+Limitada/@-36.8252678,-73.050754,19z/data=!3m1!4b1!4m6!3m5!1s0x9669b5d0308198b5:0xbd67409566499fa!8m2!3d-36.8252678!4d-73.0501103!16s%2Fg%2F11fzwngw1q?entry=ttu&amp;g_ep=EgoyMDI1MDEwNi4xIKXMDSoASAFQAw%3D%3D"
+          >
+            Freire 728, Oficina 206
+          </a>
+        </div>
+        <div>
+          <i class="fa-solid fa-envelope"></i>
+          <a href="mailto:contacto@e-volution.cl">contacto@e-volution.cl</a>
+        </div>
+      </div>
     </footer>
     <script th:inline="javascript">
-        const checkboxKey = "checkboxStates";
-        let filtrosActivos = [];
+      const checkboxKey = "checkboxStates";
+      let filtrosActivos = [];
 
-        function crearCardFiltro(filtro, valor) {
-            return `<div class="card filtro-card" style="max-width: 300px;">
+      function crearCardFiltro(filtro, valor) {
+        return `<div class="card filtro-card" style="max-width: 300px;">
                     <div class="card-body p-2 d-flex justify-content-between align-items-center">
                         <span>${filtro}: ${valor}</span>
                         <button type="button" class="btn-close" data-filtro="${filtro}" data-valor="${valor.replace(
-                /"/g,
-                "&quot;"
-            )}"></button>
+                          /"/g,
+                          "&quot;",
+                        )}"></button>
                     </div>
                 </div>`;
-        }
+      }
 
-        // Agregar este evento delegado para los botones de cerrar
-        $(document).on("click", ".btn-close", function () {
-            const filtro = $(this).data("filtro");
-            const valor = $(this).data("valor");
-            removerFiltro(filtro, valor);
+      // Agregar este evento delegado para los botones de cerrar
+      $(document).on("click", ".btn-close", function () {
+        const filtro = $(this).data("filtro");
+        const valor = $(this).data("valor");
+        removerFiltro(filtro, valor);
+      });
+
+      function actualizarFiltrosVisibles() {
+        const contenedor = $("#filtros-activos");
+        contenedor.empty();
+        filtrosActivos.forEach((filtro) => {
+          contenedor.append(crearCardFiltro(filtro.campo, filtro.valor));
         });
+      }
 
-        function actualizarFiltrosVisibles() {
-            const contenedor = $("#filtros-activos");
-            contenedor.empty();
-            filtrosActivos.forEach((filtro) => {
-                contenedor.append(crearCardFiltro(filtro.campo, filtro.valor));
-            });
-        }
+      function agregarFiltro() {
+        const filtro = $("#filtroBusquedaAlumno").val();
+        const valor = $("#busquedaAlumno").val().trim();
 
-        function agregarFiltro() {
-            const filtro = $("#filtroBusquedaAlumno").val();
-            const valor = $("#busquedaAlumno").val().trim();
-
-            if (valor) {
-                // Evitar duplicados
-                if (
-                    !filtrosActivos.some((f) => f.campo === filtro && f.valor === valor)
-                ) {
-                    filtrosActivos.push({ campo: filtro, valor: valor });
-                    actualizarFiltrosVisibles();
-                    cargarDatosConFiltros();
-                }
-                $("#busquedaAlumno").val("");
-            }
-        }
-
-        function removerFiltro(filtro, valor) {
-            filtrosActivos = filtrosActivos.filter(
-                (f) => !(f.campo === filtro && f.valor === valor)
-            );
+        if (valor) {
+          // Evitar duplicados
+          if (
+            !filtrosActivos.some((f) => f.campo === filtro && f.valor === valor)
+          ) {
+            filtrosActivos.push({ campo: filtro, valor: valor });
             actualizarFiltrosVisibles();
             cargarDatosConFiltros();
+          }
+          $("#busquedaAlumno").val("");
         }
+      }
 
-        function cargarDatosConFiltros() {
-            $.ajax({
-                url: "/api/datosRelator/busquedaMultiFiltro",
-                method: "POST",
-                contentType: "application/json",
-                data: JSON.stringify(filtrosActivos),
-                success: function (data) {
-                    // Actualizar tabla con los datos recibidos
-                    actualizarTabla(data);
-                },
-            });
-        }
+      function removerFiltro(filtro, valor) {
+        filtrosActivos = filtrosActivos.filter(
+          (f) => !(f.campo === filtro && f.valor === valor),
+        );
+        actualizarFiltrosVisibles();
+        cargarDatosConFiltros();
+      }
 
-        function actualizarTabla(data) {
-            var tbody = $("#tablaRelator tbody");
-            tbody.empty();
+      function cargarDatosConFiltros() {
+        $.ajax({
+          url: "/api/datosRelator/busquedaMultiFiltro",
+          method: "POST",
+          contentType: "application/json",
+          data: JSON.stringify(filtrosActivos),
+          success: function (data) {
+            // Actualizar tabla con los datos recibidos
+            actualizarTabla(data);
+          },
+        });
+      }
 
-            $.each(data, function (i, relator) {
-                var fila = "<tr>" +
-                    "<td>" + (relator.nombre != null ? relator.nombre : "") + "</td>" +
-                    "<td>" + (relator.contacto != null ? relator.contacto : "") + "</td>" +
-                    "<td>" + (relator.foto != null ? relator.foto : "") + "</td>" +
-                    "<td>" + (relator.horasTrabajados != null ? relator.horasTrabajados : "") + "</td>" +
-                    "<td>" + (relator.datosExtras != null ? relator.datosExtras : "") + "</td>" +
-                    "<td class='d-flex justify-content-center flex-nowrap' style='width: 25vw;'>" +
-                    "<a class='btn btn-primary' href='/dataBaseRelator/Relator/" + relator.id + "/editar'>Editar</a>" +
-                    "<a href='/dataBaseRelator/Relator/" + relator.id + "/cursos' class='btn btn-secondary'>Cursos</a>";
+      function actualizarTabla(data) {
+        var tbody = $("#tablaRelator tbody");
+        tbody.empty();
 
-                fila += "</td></tr>";
-                tbody.append(fila);
-            });
-        }
+        $.each(data, function (i, relator) {
+          var condiFoto = ">";
+          if (relator.foto == null) {
+            condiFoto =
+              " style='background-color: #ff00008c'> No cuenta con foto";
+          } else {
+            condiFoto = "> Con foto";
+          }
+          // Inyectar el correo del admin en sesión desde el modelo
+          var adminCorreo = /*[[${admin.correo}]]*/ "default";
+          // Construir la fila
+          var fila =
+            "<tr>" +
+            "<td>" +
+            (relator.nombre != null ? relator.nombre : "") +
+            "</td>" +
+            "<td>" +
+            (relator.contacto != null ? relator.contacto : "") +
+            "</td>" +
+            "<td" +
+            condiFoto +
+            "</td>" +
+            "<td>" +
+            (relator.horasTrabajados != null ? relator.horasTrabajados : "") +
+            "</td>" +
+            "<td>" +
+            (relator.cursos.length != null ? relator.cursos.length : "") +
+            "</td>" +
+            "<td>" +
+            (relator.datosExtras != null ? relator.datosExtras : "") +
+            "</td>" +
+            "<td class='d-flex justify-content-center flex-nowrap' style='width: 25vw;'>" +
+            "<a class='btn btn-primary' href='/dataBaseRelator/Relator/" +
+            relator.id +
+            "/editar'>Editar</a>" +
+            "<a href='/dataBaseRelator/Relator/" +
+            relator.id +
+            "/cursos' class='btn btn-secondary'>Cursos</a>";
+
+          fila += "</td></tr>";
+
+          tbody.append(fila);
+        });
+      }
     </script>
-</body>
-
+  </body>
 </html>

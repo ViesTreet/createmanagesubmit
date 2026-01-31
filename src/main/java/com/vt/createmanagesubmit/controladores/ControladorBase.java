@@ -501,7 +501,7 @@ public class ControladorBase {
     }
 
     @PostMapping("/dataBasePlantilla/nuevaPlantilla")
-    public String crearNuevaPlantilla(@RequestParam String nombreCertificado,@RequestParam String descripcion,@RequestParam(required = false) MultipartFile pathArchivo,@RequestParam(required = false) String pathArchivoS,@RequestParam(defaultValue = "false") boolean clonarPlantilla,HttpSession session,Model model) {
+    public String crearNuevaPlantilla(@RequestParam String nombreCertificado,@RequestParam String tipo,@RequestParam String descripcion,@RequestParam(required = false) MultipartFile pathArchivo,@RequestParam(required = false) String pathArchivoS,@RequestParam(defaultValue = "false") boolean clonarPlantilla,HttpSession session,Model model) {
 
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuarioTemporal != null) {
@@ -515,6 +515,7 @@ public class ControladorBase {
             }
             try {
                 Plantilla nuevaPlantilla = new Plantilla();
+                nuevaPlantilla.setTipo(tipo);
                 nuevaPlantilla.setNombreCertificado(nombreCertificado);
                 nuevaPlantilla.setDescripcion(descripcion);
 
@@ -808,7 +809,7 @@ public class ControladorBase {
     }
 
     @PostMapping("/dataBaseCliente/nuevoCliente")
-    public String crearNuevoCliente(@RequestParam String nombreCliente,@RequestParam String identificador,@RequestParam(required = true) MultipartFile pathLogo,HttpSession session,Model model) {
+    public String crearNuevoCliente(@RequestParam String nombreCliente,@RequestParam String identificador,@RequestParam(required = true) MultipartFile pathLogo,@RequestParam MultipartFile pathLogoFoot,HttpSession session,Model model) {
 
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuarioTemporal != null) {
@@ -817,7 +818,18 @@ public class ControladorBase {
                 Cliente cliente = new Cliente();
                 cliente.setNombreCliente(nombreCliente);
                 cliente.setIdentificador(identificador);
-                cliente.setPathLogo(servicio.guardarArchivo(pathLogo, "/logos/"));
+                if(!pathLogo.isEmpty()){
+                    cliente.setPathLogo(servicio.guardarArchivo(pathLogo, "/logos/"));
+                }else{
+                    cliente.setPathLogo(null);
+                }
+                if(!pathLogoFoot.isEmpty()){
+                    cliente.setPathLogoFooter(servicio.guardarArchivo(pathLogoFoot, "/logos/"));
+
+                }else{
+                    cliente.setPathLogoFooter(null);
+                }
+
                 
                 servicio.guardarCliente(cliente);
                 return "redirect:/dataBaseCliente"; 
@@ -856,7 +868,12 @@ public class ControladorBase {
                 relator.setHorasTrabajados(0f);
                 relator.setContacto(contacto);
                 relator.setDatosExtras(datosExtras);
-                relator.setFoto(servicio.guardarArchivo(foto, "/fotos/"));
+                if(!foto.isEmpty()){
+                    relator.setFoto(servicio.guardarArchivo(foto, "/fotos/"));
+                }else{
+                    relator.setFoto(null);
+                }
+                
                 
                 servicio.guardarRelator(relator);
                 return "redirect:/dataBaseRelator"; 
@@ -909,7 +926,7 @@ public class ControladorBase {
             @RequestParam String fecha,   // yyyy-MM-dd
             @RequestParam String horaI,   // HH:mm
             @RequestParam String horaF,   // HH:mm
-
+            @RequestParam Float horasRelatorCurso,
             @RequestParam Long plantillaFlyId,
 
             RedirectAttributes redirectAttrs
@@ -962,7 +979,7 @@ public class ControladorBase {
             // 🔥 aquí asumo que ya decidiste tener 2 relaciones
             curso.setPlantillaDiploma(plantillaDiploma);
             curso.setPlantillaFlyer(plantillaFlyer);
-
+            curso.setHorasRelatorCurso(horasRelatorCurso);
             servicio.guardarCurso(curso);
 
             return "redirect:/dataBaseCurso";
