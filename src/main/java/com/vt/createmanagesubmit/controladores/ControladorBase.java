@@ -829,31 +829,37 @@ public class ControladorBase {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuarioTemporal != null) {
             model.addAttribute("admin", usuarioTemporal);
-            try {
-                Cliente cliente = new Cliente();
-                cliente.setNombreCliente(nombreCliente);
-                cliente.setIdentificador(identificador);
-                if (!pathLogo.isEmpty()) {
-                    cliente.setPathLogo(servicio.guardarArchivo(pathLogo, "/logos/"));
-                } else {
-                    cliente.setPathLogo(null);
+            if (servicio.clientePorIdentificador(identificador) == null) {
+                try {
+                    Cliente cliente = new Cliente();
+                    cliente.setNombreCliente(nombreCliente);
+                    cliente.setIdentificador(identificador);
+                    if (!pathLogo.isEmpty()) {
+                        cliente.setPathLogo(servicio.guardarArchivo(pathLogo, "/logos/"));
+                    } else {
+                        cliente.setPathLogo(null);
+                    }
+                    if (!pathLogoFoot.isEmpty()) {
+                        cliente.setPathLogoFooter(servicio.guardarArchivo(pathLogoFoot, "/logos/"));
+
+                    } else {
+                        cliente.setPathLogoFooter(null);
+                    }
+
+                    servicio.guardarCliente(cliente);
+                    return "redirect:/dataBaseCliente";
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    model.addAttribute("error", "Ocurrió un error al guardar el nuevo cliente");
+                    return "databaseCliente";
                 }
-                if (!pathLogoFoot.isEmpty()) {
-                    cliente.setPathLogoFooter(servicio.guardarArchivo(pathLogoFoot, "/logos/"));
 
-                } else {
-                    cliente.setPathLogoFooter(null);
-                }
-
-                servicio.guardarCliente(cliente);
-                return "redirect:/dataBaseCliente";
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                model.addAttribute("error", "Ocurrió un error al guardar el nuevo cliente");
+            } else {
+                model.addAttribute("error", "El cliente ya existe");
                 return "databaseCliente";
-            }
 
+            }
         }
         return "redirect:/";
     }
@@ -875,17 +881,17 @@ public class ControladorBase {
         }
     }
 
-    @PutMapping("/dataBaseCliente/editarCliente")
+    @PostMapping("/dataBaseCliente/editarCliente")
     public String editarCliente(
             @RequestParam("id") Long id,
             @RequestParam("nombreCliente") String nombreCliente,
             @RequestParam("identificador") String identificador,
 
-            @RequestParam(value = "editarLogoP", required = false) boolean editarLogoP,
-            @RequestParam(value = "editarLogoI", required = false) boolean editarLogoI,
+            @RequestParam(value = "editarLogoP", required = false) Boolean editarLogoP,
+            @RequestParam(value = "editarLogoI", required = false) Boolean editarLogoI,
 
             @RequestParam(value = "pathLogo", required = false) MultipartFile pathLogo,
-            @RequestParam(value = "pathLogoFoot", required = false) MultipartFile pathLogoFoot,HttpSession session) {
+            @RequestParam(value = "pathLogoFoot", required = false) MultipartFile pathLogoFoot, HttpSession session) {
 
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuarioTemporal == null) {
@@ -893,33 +899,40 @@ public class ControladorBase {
         }
         try {
             Cliente clienteEditar = servicio.clientePorId(id);
-            clienteEditar.setNombreCliente(nombreCliente);
-            clienteEditar.setIdentificador(identificador);
-            if (editarLogoP && pathLogo != null && !pathLogo.isEmpty()) {
-                Path deleteClientePath = Paths.get(clienteEditar.getPathLogo());
-                try {
-                    Files.deleteIfExists(deleteClientePath);
-                } catch (IOException ex) {
-                    throw new IOException("No se encontró la ruta de la plantilla.", ex);
+            Cliente clienteComparador = servicio.clientePorIdentificador(identificador);
+
+            if (clienteComparador == null || clienteComparador.getId() == clienteEditar.getId()) {
+                clienteEditar.setNombreCliente(nombreCliente);
+                clienteEditar.setIdentificador(identificador);
+                if (Boolean.TRUE.equals(editarLogoP) && pathLogo != null && !pathLogo.isEmpty()) {
+                    if (clienteEditar.getPathLogo() != null) {
+                        Path deleteClientePath = Paths.get(clienteEditar.getPathLogo());
+                        try {
+                            Files.deleteIfExists(deleteClientePath);
+                        } catch (IOException ex) {
+                            throw new IOException("No se encontró la ruta de la plantilla.", ex);
+                        }
+                    }
+                    clienteEditar.setPathLogo(servicio.guardarArchivo(pathLogo, "/logos/"));
+
                 }
-                clienteEditar.setPathLogo(servicio.guardarArchivo(pathLogo, "/logos/"));
 
-            }
+                if (Boolean.TRUE.equals(editarLogoI) && pathLogoFoot != null && !pathLogoFoot.isEmpty()) {
+                    if (clienteEditar.getPathLogoFooter() != null) {
+                        Path deleteClientePathFoot = Paths.get(clienteEditar.getPathLogoFooter());
+                        try {
+                            Files.deleteIfExists(deleteClientePathFoot);
+                        } catch (IOException ex) {
+                            throw new IOException("No se encontró la ruta de la plantilla.", ex);
+                        }
+                    }
 
-            if (editarLogoI && pathLogoFoot != null && !pathLogoFoot.isEmpty()) {
-                Path deleteClientePathFoot = Paths.get(clienteEditar.getPathLogoFooter());
-                try {
-                    Files.deleteIfExists(deleteClientePathFoot);
-                } catch (IOException ex) {
-                    throw new IOException("No se encontró la ruta de la plantilla.", ex);
+                    clienteEditar.setPathLogoFooter(servicio.guardarArchivo(pathLogoFoot, "/logos/"));
+
                 }
-                clienteEditar.setPathLogoFooter(servicio.guardarArchivo(pathLogoFoot, "/logos/"));
-
+                servicio.guardarCliente(clienteEditar);
             }
-            servicio.guardarCliente(clienteEditar);
             return "redirect:/dataBaseCliente";
-
-
         } catch (Exception e) {
             e.printStackTrace();
             return "redirect:/dataBaseCliente";
@@ -968,6 +981,67 @@ public class ControladorBase {
 
         }
         return "redirect:/";
+    }
+
+    @GetMapping("/dataBaseRelator/Relator/{id}/editar")
+    public String editarDatosRelator(HttpSession session, Model model, @PathVariable("id") Long id) {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+        if (usuarioTemporal == null) {
+            return "redirect:/";
+        }
+        try {
+            Relator relator = servicio.relatorPorId(id);
+            model.addAttribute("relator", relator);
+            model.addAttribute("admin", usuarioTemporal);
+            return "editarRelator";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "redirect:/";
+        }
+    }
+
+    @PostMapping("/dataBaseRelator/editarRelator")
+    public String editarRelator(
+            @RequestParam("id") Long id,
+            @RequestParam("nombre") String nombre,
+            @RequestParam("contacto") String contacto,
+            @RequestParam("datosExtras") String datosExtras,
+
+            @RequestParam(value = "editarFoto", required = false) boolean editarFoto,
+            @RequestParam(value = "foto", required = false) MultipartFile foto,
+
+            HttpSession session) {
+
+        Admin usuario = (Admin) session.getAttribute("usuarioEnSesion");
+        if (usuario == null) {
+            return "redirect:/";
+        }
+
+        try {
+            Relator relator = servicio.relatorPorId(id);
+
+            relator.setNombre(nombre);
+            relator.setContacto(contacto);
+            relator.setDatosExtras(datosExtras);
+
+            if (editarFoto && foto != null && !foto.isEmpty()) {
+
+                if (relator.getFoto() != null) {
+                    Path oldPath = Paths.get(relator.getFoto());
+                    Files.deleteIfExists(oldPath);
+                }
+
+                // guardar nueva
+                relator.setFoto(servicio.guardarArchivo(foto, "/fotos/"));
+            }
+
+            servicio.guardarRelator(relator);
+            return "redirect:/dataBaseRelator";
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "redirect:/dataBaseRelator";
+        }
     }
 
     // -------------------------Curso---------------------------------------
@@ -1061,5 +1135,28 @@ public class ControladorBase {
             return "redirect:/dataBaseCurso";
         }
     }
+
+    @GetMapping("/dataBaseCurso/Cliente/{id}")
+    public String dataBaseCursoPorCliente(HttpSession session, Model model,@PathVariable("id") Long id) {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+        if (usuarioTemporal == null) {
+            return "redirect:/";
+        }
+        model.addAttribute("admin", usuarioTemporal);
+        model.addAttribute("cliente",id);
+        return "databaseCursoFiltroCliente";
+    }
+
+    @GetMapping("/dataBaseCurso/Relator/{id}")
+    public String dataBaseCursoPorRelator(HttpSession session, Model model,@PathVariable("id") Long id) {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+        if (usuarioTemporal == null) {
+            return "redirect:/";
+        }
+        model.addAttribute("admin", usuarioTemporal);
+        model.addAttribute("relator",id);
+        return "databaseCursoFiltroRelator";
+    }
+    
 
 }

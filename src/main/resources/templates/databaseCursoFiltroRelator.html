@@ -2,7 +2,7 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-  <title>Base de datos profesores</title>
+  <title>Base de datos cursos</title>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <!-- Importar CSS de Bootstrap -->
@@ -142,15 +142,16 @@
     </nav>
   </header>
   <div id="contenderBase" class="container pt-2 pb-2" style="height: 90vh">
-    <h2 class="text-center">Base de datos profesores</h2>
+    <h2 class="text-center">Base de datos cursos</h2>
     <div class="d-flex align-items-center justify-content-between pb-1" style="max-width: 95vw">
       <div>
         <form id="alumnoBuscador" class="d-flex col-12">
           <select id="filtroBusquedaAlumno" class="form-select" name="filtroBusquedaAlumno">
-            <option value="nombre">Nombre profesor</option>
-            <option value="horasMin">Horas minimas</option>
-            <option value="horasMax">Horas maximas</option>
-            <option value="datosExtras">Datos extras</option>
+            <option value="nombreCurso">Nombre</option>
+            <option value="fechaInicio">Fecha del curso</option>
+            <option value="ciudad">Ciudad</option>
+            <option value="region">Region</option>
+            <option value="cliente">Cliente</option> 
           </select>
           <input id="busquedaAlumno" type="search" class="col-5" placeholder="Buscar" name="busquedaAlumno"
             onkeydown="submitOnEnter(event)" />
@@ -161,21 +162,18 @@
         <div id="filtros-activos" class="d-flex flex-wrap gap-2 mt-2"></div>
       </div>
       <div>
-        <button class="btn btn-success" onclick="openForm()">
-          Agregar nuevo profesor
-        </button>
       </div>
     </div>
     <div id="contenedorTabla" style="overflow-y: auto; max-height: 70vh; max-width: 95vw">
-      <table class="table table-hover table-bordered mb-5" style="table-layout: fixed; height: 100%" id="tablaRelator">
+      <table class="table table-hover table-bordered mb-5" style="table-layout: fixed; height: 100%" id="tablaCurso">
         <thead class="thead-dark">
           <tr>
-            <th>Nombre relator</th>
-            <th>contacto</th>
-            <th>Foto</th>
-            <th>Horas trabajadas</th>
-            <th>Cantidad de cursos</th>
-            <th>datosExtras</th>
+            <th>Nombre</th>
+            <th>fecha del curso</th>
+            <th>Ubicacion</th>
+            <th>Cliente</th>
+            <th>Relator</th>
+            <th>Cantidad Alumnos</th>
             <th style="width: 25vw">Acción</th>
           </tr>
         </thead>
@@ -186,54 +184,50 @@
     </div>
   </div>
   <script th:inline="javascript">
+    const relator = /*[[${relator}]]*/ "";
     function cargarDatos() {
       $.ajax({
-        url: "/api/datosRelator",
+        url: "/api/datosCurso/relator/"+relator,
         method: "GET",
         success: function (data) {
-          var tbody = $("#tablaRelator tbody");
+          var tbody = $("#tablaCurso tbody");
           tbody.empty(); // Limpiar la tabla antes de agregar nuevos datos
 
-          $.each(data, function (i, relator) {
-            var condiFoto = ">";
-            if (relator.foto == null) {
-              condiFoto =
-                " style='background-color: #ff00008c'> No cuenta con foto";
-            } else {
-              condiFoto = "> Con foto";
-            }
+          $.each(data, function (i, curso) {
             // Inyectar el correo del admin en sesión desde el modelo
             var adminCorreo = /*[[${admin.correo}]]*/ "default";
             // Construir la fila
             var fila =
               "<tr>" +
               "<td>" +
-              (relator.nombre != null ? relator.nombre : "") +
+              (curso.nombreCurso ?? "") +
               "</td>" +
               "<td>" +
-              (relator.contacto != null ? relator.contacto : "") +
-              "</td>" +
-              "<td" +
-              condiFoto +
+              (curso.fechaInicio ? formatearFecha(curso.fechaInicio) : "") +
               "</td>" +
               "<td>" +
-              (relator.horasTrabajados != null
-                ? relator.horasTrabajados
+              (curso.ciudad && curso.ubicacionSubida
+                ? curso.ciudad + ", " + curso.ubicacionSubida
                 : "") +
               "</td>" +
               "<td>" +
-              (relator.cursos != null ? relator.cursos : "") +
+              (curso.cliente ?? "") +
               "</td>" +
               "<td>" +
-              (relator.datosExtras != null ? relator.datosExtras : "") +
+              (curso.relator ?? "") +
+              "</td>" +
+              "<td>" +
+              (curso.alumnos ?? 0) +
               "</td>" +
               "<td style='width: 25vw;display: flex; justify-content: space-around;'>" +
-              "<a class='btn btn-primary' href='/dataBaseRelator/Relator/" +
-              relator.id +
+              "<a class='btn btn-primary' href='/dataBaseCurso/Curso/" +
+              curso.id +
               "/editar'>Editar</a>" +
-              "<a href='/dataBaseCurso/Relator/" +
-              relator.id +
-              "' class='btn btn-secondary'>Cursos</a>";
+              "<a class='btn btn-secondary' href='/dataBaseCurso/Curso/" +
+              curso.id +
+              "/cursos'>Alumnos</a>" +
+              "</td>" +
+              "</tr>";
 
             fila += "</td></tr>";
 
@@ -245,8 +239,8 @@
         },
       });
     }
-
     $(document).ready(function () {
+      // Cargar datos inicialmente
       cargarDatos();
 
       // Actualizar la tabla cada 30 segundos
@@ -259,7 +253,7 @@
       }, 30000);
     });
   </script>
-  <script th:inline="javascript">
+  <script>
     // Detecta la tecla Enter y simula clic en un botón
     function submitOnEnter(event, buttonId) {
       if (event.key === "Enter") {
@@ -268,60 +262,7 @@
       }
     }
   </script>
-  <div class="overlay" id="overlay">
-    <div class="popup col-4">
-      <div class="d-flex justify-content-end">
-        <button class="btn btn-danger" onclick="closeForm()">Cerrar</button>
-      </div>
-      <h2 class="text-center pb-2">Crear profesor</h2>
-      <form th:action="@{/dataBaseRelator/nuevoRelator}" method="post" enctype="multipart/form-data">
-        <div class="d-flex justify-content-around align-items-center flex-column pb-2">
-          <label for="nombre">Nombre profesor</label>
-          <input id="nombre" name="nombre" type="text" class="form-control" placeholder="Nombre del profesor" />
-          <label for="contacto">Datos de contacto</label>
-          <input id="contacto" type="text" name="contacto" class="form-control" placeholder="numero,correo,etc" />
-          <label for="datosExtras">Datos extras</label>
-          <input id="datosExtras" type="text" name="datosExtras" class="form-control"
-            placeholder="Titulado en ... y certificado en ..." />
-          <label for="foto">Foto del profesor</label>
-          <input type="file" class="form-control" name="foto" id="foto" accept="image/png, image/jpeg" />
-        </div>
-
-        <div class="d-flex justify-content-center">
-          <input type="hidden" name="orden" value="true" />
-          <input class="btn btn-success" type="submit" value="Enviar" />
-        </div>
-      </form>
-    </div>
-  </div>
-  <script th:inline="javascript">
-    // Función para mostrar el formulario
-    function openForm() {
-      document.getElementById("overlay").style.display = "block";
-    }
-    // Función para ocultar el formulario
-    function closeForm() {
-      document.getElementById("overlay").style.display = "none";
-    }
-  </script>
-  <script th:inline="javascript">
-    function toggleInputs(type) {
-      if (type === "plantilla") {
-        const checkbox = document.getElementById("clonarPlantilla");
-        const inputFile = document.getElementById("inputPlantilla");
-        const selectOptions = document.getElementById("selectPlantilla");
-
-        if (checkbox.checked) {
-          inputFile.style.display = "none";
-          selectOptions.style.display = "block";
-        } else {
-          inputFile.style.display = "block";
-          selectOptions.style.display = "none";
-        }
-      }
-    }
-  </script>
-  <script th:inline="javascript">
+  <script>
     function showAlert(message) {
       if (message && message.trim() !== "") {
         alert(message);
@@ -416,10 +357,9 @@
       }
     }
 
-
     function cargarDatosConFiltros() {
       $.ajax({
-        url: "/api/datosRelator/busquedaMultiFiltro",
+        url: "/api/datosCurso/busquedaMultiFiltro/relator/"+relator,
         method: "POST",
         contentType: "application/json",
         data: JSON.stringify(filtrosActivos),
@@ -431,52 +371,64 @@
     }
 
     function actualizarTabla(data) {
-      var tbody = $("#tablaRelator tbody");
+      var tbody = $("#tablaCurso tbody");
       tbody.empty();
 
-      $.each(data, function (i, relator) {
-        var condiFoto = ">";
-        if (relator.foto == null) {
-          condiFoto =
-            " style='background-color: #ff00008c'> No cuenta con foto";
-        } else {
-          condiFoto = "> Con foto";
-        }
-        // Inyectar el correo del admin en sesión desde el modelo
-        var adminCorreo = /*[[${admin.correo}]]*/ "default";
+      $.each(data, function (i, curso) {
         // Construir la fila
         var fila =
           "<tr>" +
           "<td>" +
-          (relator.nombre != null ? relator.nombre : "") +
+          (curso.nombreCurso ?? "") +
           "</td>" +
           "<td>" +
-          (relator.contacto != null ? relator.contacto : "") +
-          "</td>" +
-          "<td" +
-          condiFoto +
+          (curso.fechaInicio ? formatearFecha(curso.fechaInicio) : "") +
           "</td>" +
           "<td>" +
-          (relator.horasTrabajados != null ? relator.horasTrabajados : "") +
+          (curso.ciudad && curso.ubicacionSubida
+            ? curso.ciudad + ", " + curso.ubicacionSubida
+            : "") +
           "</td>" +
           "<td>" +
-          (relator.cursos != null ? relator.cursos : "") +
+          (curso.cliente ?? "") +
           "</td>" +
           "<td>" +
-          (relator.datosExtras != null ? relator.datosExtras : "") +
+          (curso.relator ?? "") +
+          "</td>" +
+          "<td>" +
+          (curso.alumnos ?? 0) +
           "</td>" +
           "<td style='width: 25vw;display: flex; justify-content: space-around;'>" +
-          "<a class='btn btn-primary' href='/dataBaseRelator/Relator/" +
-          relator.id +
+          "<a class='btn btn-primary' href='/dataBaseCurso/Curso/" +
+          curso.id +
           "/editar'>Editar</a>" +
-          "<a href='/dataBaseCurso/Relator/" +
-          relator.id +
-          "' class='btn btn-secondary'>Cursos</a>";
+          "<a class='btn btn-secondary' href='/dataBaseCurso/Curso/" +
+          curso.id +
+          "/cursos'>Alumnos</a>" +
+          "</td>" +
+          "</tr>";
 
         fila += "</td></tr>";
 
         tbody.append(fila);
       });
+    }
+  </script>
+
+
+  <script>
+    function formatearFecha(fechaISO) {
+      if (!fechaISO) return "";
+
+      const fecha = new Date(fechaISO);
+
+      const dd = String(fecha.getDate()).padStart(2, "0");
+      const mm = String(fecha.getMonth() + 1).padStart(2, "0");
+      const aa = String(fecha.getFullYear());
+      const hh = String(fecha.getHours()).padStart(2, "0");
+      const min = String(fecha.getMinutes()).padStart(2, "0");
+
+      return `${dd}-${mm}-${aa} ${hh}:${min}`;
     }
   </script>
 </body>

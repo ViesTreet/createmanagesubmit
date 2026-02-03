@@ -695,17 +695,17 @@ public class ControladorApi {
     }
 
     @PostMapping("/datosCliente/busquedaMultiFiltro")
-    public List<Cliente> busquedaMultiFiltroCliente(
+    public List<ClienteDTO> busquedaMultiFiltroCliente(
             @RequestBody List<Map<String, String>> filtros
     ) {
         Page<Cliente> resultado = ser.buscarConMultiplesFiltrosCliente(filtros);
-        return resultado.getContent();
+        return resultado.getContent().stream().map(ClienteDTO::new).collect(Collectors.toList());
     }
 
     @GetMapping("/clientes/buscar")
     @ResponseBody
-    public List<Cliente> buscarClientes(@RequestParam String q) {
-        return repoCliente.findTop10ByNombreClienteContainingIgnoreCase(q);
+    public List<ClienteDTO> buscarClientes(@RequestParam String q) {
+        return repoCliente.findTop10ByNombreClienteContainingIgnoreCase(q).stream().map(ClienteDTO::new).collect(Collectors.toList());
     }
 
 
@@ -720,19 +720,19 @@ public class ControladorApi {
     }
 
     @PostMapping("/datosRelator/busquedaMultiFiltro")
-    public List<Relator> busquedaMultiFiltroRelator(@RequestBody List<Map<String, String>> filtros, HttpSession session) {
+    public List<RelatorDTO> busquedaMultiFiltroRelator(@RequestBody List<Map<String, String>> filtros, HttpSession session) {
         Admin usuario = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuario != null) {
             Page<Relator> resultado = ser.buscarConMultiplesFiltrosRelator(filtros);
-            return resultado.getContent();
+            return resultado.getContent().stream().map(RelatorDTO::new).collect(Collectors.toList());
         }
         return Collections.emptyList();
     }
 
     @GetMapping("/relator/buscar")
     @ResponseBody
-    public List<Relator> buscarRelator(@RequestParam String q) {
-        return repoRel.findTop10ByNombreContainingIgnoreCase(q);
+    public List<RelatorDTO> buscarRelator(@RequestParam String q) {
+        return repoRel.findTop10ByNombreContainingIgnoreCase(q).stream().map(RelatorDTO::new).collect(Collectors.toList());
     }
 
     @GetMapping("/datosCurso")
@@ -744,6 +744,58 @@ public class ControladorApi {
         }
         return null;
     }
+
+    @GetMapping("/datosCurso/cliente/{id}")
+    public List<CursoDTO> getDatosCursoPorCliente(HttpSession session,@PathVariable("id")Long id) {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+        if (usuarioTemporal != null) {
+            List<Curso> cursos = ser.cursosPorCliente(id);
+            return cursos.stream().map(CursoDTO::new).collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    @GetMapping("/datosCurso/relator/{id}")
+    public List<CursoDTO> getDatosCursoPorRelator(HttpSession session,@PathVariable("id")Long id) {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+        if (usuarioTemporal != null) {
+            List<Curso> cursos = ser.cursosPorRelator(id);
+            return cursos.stream().map(CursoDTO::new).collect(Collectors.toList());
+        }
+        return null;
+    }
+    
+
+    @PostMapping("/datosCurso/busquedaMultiFiltro")
+    public List<CursoDTO> busquedaMultiFiltroCurso(@RequestBody List<Map<String, String>> filtros, HttpSession session) {
+        Admin usuario = (Admin) session.getAttribute("usuarioEnSesion");
+        if (usuario != null) {
+            Page<Curso> resultado = ser.buscarConMultiplesFiltrosCurso(filtros);
+            return resultado.getContent().stream().map(CursoDTO::new).collect(Collectors.toList());
+        }
+        return Collections.emptyList();
+    }
+
+    @PostMapping("/datosCurso/busquedaMultiFiltro/cliente/{id}")
+    public List<CursoDTO> busquedaMultiFiltroCursoPorCliente(@RequestBody List<Map<String, String>> filtros, HttpSession session,@PathVariable("id")Long id) {
+        Admin usuario = (Admin) session.getAttribute("usuarioEnSesion");
+        if (usuario != null) {
+            Page<Curso> resultado = ser.buscarConMultiplesFiltrosCursoPorCliente(filtros, id);
+            return resultado.getContent().stream().map(CursoDTO::new).collect(Collectors.toList());
+        }
+        return Collections.emptyList();
+    }
+
+    @PostMapping("/datosCurso/busquedaMultiFiltro/relator/{id}")
+    public List<CursoDTO> busquedaMultiFiltroCursoPorRelator(@RequestBody List<Map<String, String>> filtros, HttpSession session,@PathVariable("id")Long id) {
+        Admin usuario = (Admin) session.getAttribute("usuarioEnSesion");
+        if (usuario != null) {
+            Page<Curso> resultado = ser.buscarConMultiplesFiltrosCursoPorRelator(filtros, id);
+            return resultado.getContent().stream().map(CursoDTO::new).collect(Collectors.toList());
+        }
+        return Collections.emptyList();
+    }
+    
 
     @GetMapping("/plantilla/buscar")
     @ResponseBody

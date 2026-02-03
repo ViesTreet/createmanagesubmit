@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar Cliente</title>
+    <title>Editar Relator</title>
     <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
     <link rel="stylesheet" th:href="@{/css/styleCustom.css}">
     <link rel="icon" th:href="@{/images/Logobgremove.png}" type="image/x-icon">
@@ -20,7 +20,7 @@
             <img th:src="@{/images/Logobgremove.png}" alt="[LOGO]">
         </a>
         <nav class="d-flex justify-content-center align-items-center flex-nowrap">
-            <a th:href="@{'/dataBaseCliente}" class="btn btn-primary mx-2">Regresar</a>
+            <a th:href="@{'/dataBaseRelator}" class="btn btn-primary mx-2">Regresar</a>
             <a th:href="@{/home}" class="btn btn-primary mx-2">Inicio</a>
             <a th:href="@{/documentacion}" target="_blank" class="btn btn-primary mx-2">Documentación</a>
             <div class="d-flex flex-column justify-content-center align-items-center">
@@ -33,42 +33,37 @@
         <div class="card" style="width: auto;">
             <div class="card-body" style="width: 100%;">
                 <h4 class="card-title text-center">
-                    Editar Cliente <span th:text="${cliente.nombreCliente}"></span>
+                    Editar profesor <span th:text="${relator.nombre}"></span>
                 </h4>
-                <!-- Se elimina el modelAttribute para que se envíen parámetros individuales -->
-                <form th:action="@{/dataBaseCliente/editarCliente}" method="post" enctype="multipart/form-data">
+                <form th:action="@{/dataBaseRelator/editarRelator}" method="post" enctype="multipart/form-data">
                     <div class="d-flex justify-content-between">
-                        <div>
+                        <div style="width: 100%;">
                             <div>
-                                <label for="nombreCliente">Nombre cliente</label>
-                                <input type="text" name="nombreCliente" id="nombreAsistente" class="form-control"
-                                    placeholder="ISL" th:value="${cliente.nombreCliente}">
-                            </div>
-                            <div>
-                                <label for="identificador">Orden de compra</label>
-                                <input type="text" name="identificador" id="identificador" class="form-control"
-                                    placeholder="5501" th:value="${cliente.identificador}">
+                                <label for="nombre">Nombre relator</label>
+                                <input type="text" name="nombre" id="nombre" class="form-control"
+                                    placeholder="Isidora" th:value="${relator.nombre}">
                             </div>
                             <div>
-                                <input type="checkbox" name="editarLogoP" id="editarLogoP"  onclick="checkboxLogo()">
-                                <label for="editarLogoP">Editar Logo superior</label>
-                            </div>
-                            <div style="display: none;" id="logoS">
-                                <label for="pathLogo">Logo del cliente</label>
-                                <input type="file" class="form-control" name="pathLogo" id="pathLogo"
-                                    accept="image/png, image/jpeg" />
+                                <label for="contacto">Datos de contacto</label>
+                                <input type="text" name="contacto" id="contacto" class="form-control"
+                                    placeholder="+569..." th:value="${relator.contacto}">
                             </div>
                             <div>
-                                <input type="checkbox" name="editarLogoI" id="editarLogoI"  onclick="checkboxLogo()">
-                                <label for="editarLogoI">Editar Logo inferior</label>
+                                <label for="datosExtras">Datos extras del relator</label>
+                                <input type="text" name="datosExtras" id="datosExtras" class="form-control"
+                                    placeholder="Certificado en ..." th:value="${relator.datosExtras}">
                             </div>
-                            <div style="display: none;" id="logoI">
-                                <label for="pathLogoFoot">Logo del cliente inferior</label>
-                                <input type="file" class="form-control" name="pathLogoFoot" id="pathLogoFoot"
+                            <div>
+                                <input type="checkbox" name="editarFoto" id="editarFoto"  onclick="checkboxLogo()">
+                                <label for="editarFoto">Editar foto</label>
+                            </div>
+                            <div style="display: none;" id="fotoD">
+                                <label for="foto">Foto del relator</label>
+                                <input type="file" class="form-control" name="foto" id="foto"
                                     accept="image/png, image/jpeg" />
                             </div>
                             <div class="d-flex align-items-center justify-content-center pt-1">
-                                <input type="hidden" name="id" th:value="${cliente.id}">
+                                <input type="hidden" name="id" th:value="${relator.id}">
                                 <input class="btn btn-success" type="submit" value="Editar">
                             </div>
                 </form>
@@ -77,20 +72,13 @@
     </main>
     <script th:inline="javascript">
         function checkboxLogo(){
-            let checkboxS = document.getElementById("editarLogoP");
-            let checkboxI = document.getElementById("editarLogoI");
-            let logoS = document.getElementById("logoS"); 
-            let logoI = document.getElementById("logoI"); 
+            let checkboxF = document.getElementById("editarFoto");
+            let fotoD = document.getElementById("fotoD"); 
 
-            if(checkboxS.checked){
-                logoS.style.display="block";
+            if(checkboxF.checked){
+                fotoD.style.display="block";
             }else{
-                logoS.style.display="none";
-            }
-            if(checkboxI.checked){
-                logoI.style.display="block";
-            }else{
-                logoI.style.display="none";
+                fotoD.style.display="none";
             }
         }
         

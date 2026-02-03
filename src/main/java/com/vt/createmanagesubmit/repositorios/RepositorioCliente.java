@@ -20,4 +20,6 @@ public interface RepositorioCliente extends JpaRepository<Cliente,Long>,JpaSpeci
     List<Cliente> findAllByOrderByUpdatedAtDesc();
 
     List<Cliente> findTop10ByNombreClienteContainingIgnoreCase(String q);
+
+    Optional<Cliente> findByIdentificador(String identificador);
 }

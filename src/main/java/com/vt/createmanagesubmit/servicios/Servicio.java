@@ -9,6 +9,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.Year;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -302,14 +308,14 @@ public class Servicio {
             } catch (IOException ex) {
                 throw new IOException("No se encontró la ruta de la plantilla.", ex);
             }
-            if(plantilla.getTipo().equalsIgnoreCase("diploma")){
+            if (plantilla.getTipo().equalsIgnoreCase("diploma")) {
                 List<Curso> cursos = repoCurso.findByPlantillaDiplomaId(id);
                 for (Curso curso : cursos) {
                     repoAlum.deleteAll(curso.getAlumnos());
                 }
                 repoCurso.deleteAll(cursos);
 
-            }else{
+            } else {
                 List<Curso> cursos = repoCurso.findByPlantillaFlyerId(id);
                 for (Curso curso : cursos) {
                     repoAlum.deleteAll(curso.getAlumnos());
@@ -317,7 +323,7 @@ public class Servicio {
                 repoCurso.deleteAll(cursos);
 
             }
-            
+
             repoPlanti.delete(plantilla);
         }
     }
@@ -487,7 +493,8 @@ public class Servicio {
                 Optional<Plantilla> optplantilla = repoPlanti.findById(plantillaId);
                 if (optplantilla.isPresent()) {
                     Plantilla plantilla = optplantilla.get();
-                    alumno.getCurso().setPlantillaDiploma(plantilla);;
+                    alumno.getCurso().setPlantillaDiploma(plantilla);
+                    ;
                     if (!estado.equals("auto")) {
                         alumno.setEstado(normalizarValor(estado));
                     } else {
@@ -831,9 +838,9 @@ public class Servicio {
         repoCliente.save(cliente);
     }
 
-    public Cliente clientePorId(Long id)throws Exception{
-        
-        Optional<Cliente> clienteOpt= repoCliente.findById(id);
+    public Cliente clientePorId(Long id) throws Exception {
+
+        Optional<Cliente> clienteOpt = repoCliente.findById(id);
 
         return clienteOpt.get();
 
@@ -854,8 +861,16 @@ public class Servicio {
 
         return repoCliente.findAll(
                 spec,
-                PageRequest.of(0, Integer.MAX_VALUE, Sort.by("updatedAt").descending())
-        );
+                PageRequest.of(0, Integer.MAX_VALUE, Sort.by("updatedAt").descending()));
+    }
+
+    public Cliente clientePorIdentificador(String identificador) {
+        Optional<Cliente> clienteOPT = repoCliente.findByIdentificador(identificador);
+        if (clienteOPT.isPresent()) {
+            return clienteOPT.get();
+        } else {
+            return null;
+        }
     }
 
     private Specification<Cliente> crearEspecificacionCliente(String campo, String valor) {
@@ -867,28 +882,23 @@ public class Servicio {
                 case "nombreCliente":
                     return cb.like(
                             cb.lower(root.get("nombreCliente")),
-                            "%" + valor.toLowerCase() + "%"
-                    );
+                            "%" + valor.toLowerCase() + "%");
 
                 case "identificador":
                     return cb.like(
                             cb.lower(root.get("identificador")),
-                            "%" + valor.toLowerCase() + "%"
-                    );
+                            "%" + valor.toLowerCase() + "%");
 
                 case "pathLogo":
                     return cb.like(
                             cb.lower(root.get("pathLogo")),
-                            "%" + valor.toLowerCase() + "%"
-                    );
+                            "%" + valor.toLowerCase() + "%");
 
                 default:
                     return cb.conjunction();
             }
         };
     }
-
-
 
     public List<Relator> todosLosRelatores() {
         return repoRelator.findAllByOrderByUpdatedAtDesc();
@@ -898,7 +908,7 @@ public class Servicio {
         repoRelator.save(relator);
     }
 
-    public Relator relatorPorId(Long Id) throws Exception{
+    public Relator relatorPorId(Long Id) throws Exception {
         Optional<Relator> relatorOpt = repoRelator.findById(Id);
         return relatorOpt.get();
     }
@@ -958,13 +968,195 @@ public class Servicio {
         };
     }
 
-    public List<Curso> todosLosCursos(){
+    public List<Curso> todosLosCursos() {
         return repoCurso.findAllByOrderByUpdatedAtDesc();
     }
 
-    public void guardarCurso(Curso curso){
+    public List<Curso> cursosPorCliente(Long id) {
+        return repoCurso.findByClienteId(id);
+    }
+
+    public List<Curso> cursosPorRelator(Long id) {
+        return repoCurso.findByRelatorId(id);
+    }
+
+    public void guardarCurso(Curso curso) {
         repoCurso.save(curso);
     }
 
+    public Page<Curso> buscarConMultiplesFiltrosCurso(List<Map<String, String>> filtros) {
+
+        Specification<Curso> spec = Specification.unrestricted();
+
+        for (Map<String, String> filtro : filtros) {
+            String campo = filtro.get("campo");
+            String valor = filtro.get("valor");
+
+            if (campo != null && valor != null && !valor.isBlank()) {
+                spec = spec.and(crearEspecificacionCurso(campo, valor));
+            }
+        }
+
+        return repoCurso.findAll(
+                spec,
+                PageRequest.of(0, Integer.MAX_VALUE, Sort.by("updatedAt").descending()));
+    }
+
+    private Specification<Curso> crearEspecificacionCurso(String campo, String valor) {
+
+        return (root, query, cb) -> {
+
+            switch (campo) {
+
+                case "nombreCurso":
+                    return cb.like(
+                            cb.lower(root.get("nombreCurso")),
+                            "%" + valor.toLowerCase() + "%");
+
+                case "fechaInicio":
+                    return filtrarPorFechaFlexible(valor).toPredicate(root, query, cb);
+
+                case "ciudad":
+                    return cb.like(
+                            cb.lower(root.get("ciudad")),
+                            "%" + valor.toLowerCase() + "%");
+
+                case "region":
+                    return cb.like(
+                            cb.lower(root.get("ubicacionSubida")),
+                            "%" + valor.toLowerCase() + "%");
+
+                case "cliente":
+                    return cb.like(
+                            cb.lower(root.join("cliente").get("nombreCliente")),
+                            "%" + valor.toLowerCase() + "%");
+
+                case "relator":
+                    return cb.like(
+                            cb.lower(root.join("relator").get("nombre")),
+                            "%" + valor.toLowerCase() + "%");
+
+                default:
+                    return cb.conjunction();
+            }
+        };
+    }
+
+    public Page<Curso> buscarConMultiplesFiltrosCursoPorCliente(
+            List<Map<String, String>> filtros,
+            Long clienteId) {
+
+        Specification<Curso> spec = (root, query, cb) -> {
+            query.distinct(true); // 🔥 CLAVE
+            return cb.equal(root.join("cliente").get("id"), clienteId);
+        };
+
+        for (Map<String, String> filtro : filtros) {
+            String campo = filtro.get("campo");
+            String valor = filtro.get("valor");
+
+            if (campo != null && valor != null && !valor.isBlank()) {
+                spec = spec.and(crearEspecificacionCurso(campo, valor));
+            }
+        }
+
+        return repoCurso.findAll(
+                spec,
+                PageRequest.of(0, Integer.MAX_VALUE,
+                        Sort.by("updatedAt").descending()));
+    }
+
+    public Page<Curso> buscarConMultiplesFiltrosCursoPorRelator(
+            List<Map<String, String>> filtros,
+            Long relatorId) {
+
+        Specification<Curso> spec = (root, query, cb) -> {
+            query.distinct(true); // 🔥 CLAVE
+            return cb.equal(root.join("relator").get("id"), relatorId);
+        };
+
+        for (Map<String, String> filtro : filtros) {
+            String campo = filtro.get("campo");
+            String valor = filtro.get("valor");
+
+            if (campo != null && valor != null && !valor.isBlank()) {
+                spec = spec.and(crearEspecificacionCurso(campo, valor));
+            }
+        }
+
+        return repoCurso.findAll(
+                spec,
+                PageRequest.of(0, Integer.MAX_VALUE,
+                        Sort.by("updatedAt").descending()));
+    }
+
+    private Specification<Curso> filtrarPorFechaFlexible(String valor) {
+
+        return (root, query, cb) -> {
+
+            try {
+
+                LocalDate hoy = LocalDate.now();
+                LocalDateTime inicio;
+                LocalDateTime fin;
+
+                // dd-MM-yyyy
+                if (valor.matches("\\d{2}-\\d{2}-\\d{4}")) {
+                    LocalDate date = LocalDate.parse(valor, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+                    inicio = date.atStartOfDay();
+                    fin = date.atTime(LocalTime.MAX);
+                    return cb.between(root.get("fechaInicio"), inicio, fin);
+                }
+
+                // MM-yyyy
+                if (valor.matches("\\d{2}-\\d{4}")) {
+                    YearMonth ym = YearMonth.parse(valor, DateTimeFormatter.ofPattern("MM-yyyy"));
+                    inicio = ym.atDay(1).atStartOfDay();
+                    fin = ym.atEndOfMonth().atTime(LocalTime.MAX);
+                    return cb.between(root.get("fechaInicio"), inicio, fin);
+                }
+
+                // dd-MM
+                if (valor.matches("\\d{2}-\\d{2}")) {
+                    LocalDate date = LocalDate.parse(
+                            valor + "-" + Year.now().getValue(),
+                            DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+                    inicio = date.atStartOfDay();
+                    fin = date.atTime(LocalTime.MAX);
+                    return cb.between(root.get("fechaInicio"), inicio, fin);
+                }
+
+                // dd (día del mes actual)
+                if (valor.matches("\\d{1,2}")) {
+                    int dia = Integer.parseInt(valor);
+                    LocalDate date = hoy.withDayOfMonth(dia);
+                    inicio = date.atStartOfDay();
+                    fin = date.atTime(LocalTime.MAX);
+                    return cb.between(root.get("fechaInicio"), inicio, fin);
+                }
+
+                // hh:mm
+                if (valor.matches("\\d{1,2}:\\d{2}")) {
+                    LocalTime hora = LocalTime.parse(valor);
+                    inicio = hoy.atTime(hora);
+                    fin = inicio.plusMinutes(1).minusSeconds(1);
+                    return cb.between(root.get("fechaInicio"), inicio, fin);
+                }
+
+                // hh
+                if (valor.matches("\\d{1,2}")) {
+                    int hora = Integer.parseInt(valor);
+                    inicio = hoy.atTime(hora, 0);
+                    fin = hoy.atTime(hora, 59, 59);
+                    return cb.between(root.get("fechaInicio"), inicio, fin);
+                }
+
+            } catch (Exception e) {
+                return cb.conjunction();
+            }
+
+            return cb.conjunction();
+        };
+    }
 
 }
