@@ -48,6 +48,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.vt.createmanagesubmit.dto.AlumnoDTO;
 import com.vt.createmanagesubmit.dto.AlumnosWrapper;
+import com.vt.createmanagesubmit.dto.ClienteDTO;
+import com.vt.createmanagesubmit.dto.CursoDTO;
 import com.vt.createmanagesubmit.dto.RelatorDTO;
 import com.vt.createmanagesubmit.dto.TareaDTO;
 import com.vt.createmanagesubmit.dto.filtroDTO;
@@ -681,27 +683,13 @@ public class ControladorApi {
         return ResponseEntity.noContent().build();
     }
 
-        @GetMapping("/relatores")
-    public List<RelatorDTO> buscarRelatores(
-            @RequestParam String query) {
-
-        if (query.length() < 2) {
-            return List.of();
-        }
-
-        return repoRel
-                .findTop10ByNombreContainingIgnoreCaseOrderByNombreDesc(query)
-                .stream()
-                .map(r -> new RelatorDTO(r.getNombre()))
-                .toList();
-    }
 
     @GetMapping("/datosCliente")
-    public List<Cliente> getDatosCliente(HttpSession session) {
+    public List<ClienteDTO> getDatosCliente(HttpSession session) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuarioTemporal != null) {
             List<Cliente> cliente = ser.todosLosClientes();
-            return cliente;
+            return cliente.stream().map(ClienteDTO::new).collect(Collectors.toList());
         }
         return null;
     }
@@ -722,11 +710,11 @@ public class ControladorApi {
 
 
     @GetMapping("/datosRelator")
-    public List<Relator> getDatosRelator(HttpSession session) {
+    public List<RelatorDTO> getDatosRelator(HttpSession session) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuarioTemporal != null) {
             List<Relator> relatores = ser.todosLosRelatores();
-            return relatores;
+            return relatores.stream().map(RelatorDTO::new).collect(Collectors.toList());
         }
         return null;
     }
@@ -748,11 +736,11 @@ public class ControladorApi {
     }
 
     @GetMapping("/datosCurso")
-    public List<Curso> getDatosCurso(HttpSession session) {
+    public List<CursoDTO> getDatosCurso(HttpSession session) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuarioTemporal != null) {
             List<Curso> cursos = ser.todosLosCursos();
-            return cursos;
+            return cursos.stream().map(CursoDTO::new).collect(Collectors.toList());
         }
         return null;
     }

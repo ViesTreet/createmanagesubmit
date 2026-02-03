@@ -1,0 +1,4 @@
+botones en las bases de datos
+error al editar cliente
+revisar todas las paginas de edicion y creacion para que respeten el nuevo formato
+probar muchas veces

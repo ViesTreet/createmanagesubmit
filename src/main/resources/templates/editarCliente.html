@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Cliente</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/styleCustom.css}">
+    <link rel="icon" th:href="@{/images/Logobgremove.png}" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <style>
+        /* Puedes agregar estilos adicionales aquí si es necesario */
+    </style>
+</head>
+
+<body>
+    <header class="d-flex align-items-center justify-content-between p-3 bg-light" style="height: 10vh;">
+        <a th:href="@{/home}" class="logo">
+            <img th:src="@{/images/Logobgremove.png}" alt="[LOGO]">
+        </a>
+        <nav class="d-flex justify-content-center align-items-center flex-nowrap">
+            <a th:href="@{'/dataBaseCliente}" class="btn btn-primary mx-2">Regresar</a>
+            <a th:href="@{/home}" class="btn btn-primary mx-2">Inicio</a>
+            <a th:href="@{/documentacion}" target="_blank" class="btn btn-primary mx-2">Documentación</a>
+            <div class="d-flex flex-column justify-content-center align-items-center">
+                <i class="fa-solid fa-user"></i>
+                <p class="p-0 m-0" style="font-size: normal;" th:text="${admin.nombre}"></p>
+            </div>
+        </nav>
+    </header>
+    <main class="d-flex flex-column align-items-center justify-content-center" style="height: 90vh;">
+        <div class="card" style="width: auto;">
+            <div class="card-body" style="width: 100%;">
+                <h4 class="card-title text-center">
+                    Editar Cliente <span th:text="${cliente.nombreCliente}"></span>
+                </h4>
+                <!-- Se elimina el modelAttribute para que se envíen parámetros individuales -->
+                <form th:action="@{/dataBaseCliente/editarCliente}" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="_method" value="put">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div>
+                                <label for="nombreCliente">Nombre cliente</label>
+                                <input type="text" name="nombreCliente" id="nombreAsistente" class="form-control"
+                                    placeholder="ISL" th:value="${cliente.nombreCliente}">
+                            </div>
+                            <div>
+                                <label for="identificador">Orden de compra</label>
+                                <input type="text" name="identificador" id="identificador" class="form-control"
+                                    placeholder="5501" th:value="${cliente.identificador}">
+                            </div>
+                            <div>
+                                <input type="checkbox" name="editarLogoP" id="editarLogoP"  onclick="checkboxLogo()">
+                                <label for="editarLogoP">Editar Logo superior</label>
+                            </div>
+                            <div style="display: none;" id="logoS">
+                                <label for="pathLogo">Logo del cliente</label>
+                                <input type="file" class="form-control" name="pathLogo" id="pathLogo"
+                                    accept="image/png, image/jpeg" />
+                            </div>
+                            <div>
+                                <input type="checkbox" name="editarLogoI" id="editarLogoI"  onclick="checkboxLogo()">
+                                <label for="editarLogoI">Editar Logo inferior</label>
+                            </div>
+                            <div style="display: none;" id="logoI">
+                                <label for="pathLogoFoot">Logo del cliente inferior</label>
+                                <input type="file" class="form-control" name="pathLogoFoot" id="pathLogoFoot"
+                                    accept="image/png, image/jpeg" />
+                            </div>
+                            <div class="d-flex align-items-center justify-content-center pt-1">
+                                <input type="hidden" name="id" th:value="${cliente.id}">
+                                <input class="btn btn-success" type="submit" value="Editar">
+                            </div>
+                </form>
+            </div>
+        </div>
+    </main>
+    <script th:inline="javascript">
+        function checkboxLogo(){
+            let checkboxS = document.getElementById("editarLogoP");
+            let checkboxI = document.getElementById("editarLogoI");
+            let logoS = document.getElementById("logoS"); 
+            let logoI = document.getElementById("logoI"); 
+
+            if(checkboxS.checked){
+                logoS.style.display="block";
+            }else{
+                logoS.style.display="none";
+            }
+            if(checkboxI.checked){
+                logoI.style.display="block";
+            }else{
+                logoI.style.display="none";
+            }
+        }
+        
+    </script>
+    <script th:inline="javascript">
+        function showAlert(message) {
+            if (message && message.trim() !== "") {
+                alert(message);
+            }
+        }
+    </script>
+    <th:block th:if="${error != null}">
+        <script th:inline="javascript">
+            showAlert("[[${error}]]");
+        </script>
+    </th:block>
+    <footer class="text-center p-3 bg-light d-flex justify-content-center align-items-center" style="height: 15vh;">
+        <div>
+            <div>
+                <i class="fa-solid fa-phone"></i>
+                <a href="tel:+56 41 3830944">+56 41 3830944</a>
+            </div>
+            <div>
+                <i class="fa-solid fa-location-dot"></i>
+                <a
+                    href="https://www.google.com/maps/place/Consultores+Empresariales+E-Volution+Limitada/@-36.8252678,-73.050754,19z/data=!3m1!4b1!4m6!3m5!1s0x9669b5d0308198b5:0xbd67409566499fa!8m2!3d-36.8252678!4d-73.0501103!16s%2Fg%2F11fzwngw1q?entry=ttu&amp;g_ep=EgoyMDI1MDEwNi4xIKXMDSoASAFQAw%3D%3D">
+                    Freire 728, Oficina 206
+                </a>
+            </div>
+            <div>
+                <i class="fa-solid fa-envelope"></i>
+                <a href="mailto:contacto@e-volution.cl">contacto@e-volution.cl</a>
+            </div>
+        </div>
+    </footer>
+</body>
+
+</html>
