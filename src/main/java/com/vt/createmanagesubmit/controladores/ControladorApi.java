@@ -73,8 +73,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
-
-
 @RestController
 @RequestMapping("/api")
 public class ControladorApi {
@@ -111,7 +109,6 @@ public class ControladorApi {
 
     private final Map<String, List<Long>> downloadTracker = new ConcurrentHashMap<>();
 
-
     @GetMapping("/datosAlumno")
     public List<AlumnoDTO> getDatosAlumno(HttpSession session) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
@@ -122,36 +119,74 @@ public class ControladorApi {
         return null;
     }
 
+    @GetMapping("/datosAlumnoPorCurso/{id}")
+    public List<AlumnoDTO> getDatosAlumnoPorCurso(HttpSession session, @PathVariable("id") Long id) {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+        if (usuarioTemporal != null) {
+            Page<Alumno> alumnos = ser.alumnoPorCursoId(id);
+            return alumnos.getContent().stream().map(AlumnoDTO::new).collect(Collectors.toList());
+        }
+        return null;
+    }
+
     @GetMapping("/tareasProgramadas")
     public List<TareaDTO> getMethodName(HttpSession session) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuarioTemporal != null) {
             return ser.todasLasTareas()
-              .getContent()
-              .stream()
-              .map(TareaDTO::new)
-              .collect(Collectors.toList());
+                    .getContent()
+                    .stream()
+                    .map(TareaDTO::new)
+                    .collect(Collectors.toList());
         }
         return null;
     }
-    
 
     @PostMapping("/datosAlumno/busquedaMultiFiltro")
-    public List<AlumnoDTO> busquedaMultiFiltro(@RequestBody List<filtroDTO> filtros, HttpSession session) {
+    public List<AlumnoDTO> busquedaMultiFiltroAlumno(
+            @RequestBody List<Map<String, String>> filtros,
+            HttpSession session) {
+
         Admin usuario = (Admin) session.getAttribute("usuarioEnSesion");
+
         if (usuario != null) {
-            Page<Alumno> alumnos = ser.buscarConMultiplesFiltros(filtros);
-            return alumnos.getContent().stream().map(AlumnoDTO::new).collect(Collectors.toList());
+            Page<Alumno> alumnos = ser.buscarConMultiplesFiltrosAlumno(filtros);
+            return alumnos.getContent()
+                    .stream()
+                    .map(AlumnoDTO::new)
+                    .collect(Collectors.toList());
         }
+
+        return Collections.emptyList();
+    }
+
+    @PostMapping("/datosAlumno/busquedaMultiFiltroPorCurso/{id}")
+    public List<AlumnoDTO> busquedaMultiFiltroAlumnoPorCurso(
+            @RequestBody List<Map<String, String>> filtros,
+            HttpSession session,
+            @PathVariable("id") Long id) {
+
+        Admin usuario = (Admin) session.getAttribute("usuarioEnSesion");
+
+        if (usuario != null) {
+            Page<Alumno> alumnos = ser.buscarConMultiplesFiltrosAlumnoPorCurso(filtros, id);
+            return alumnos.getContent()
+                    .stream()
+                    .map(AlumnoDTO::new)
+                    .collect(Collectors.toList());
+        }
+
         return Collections.emptyList();
     }
 
     @GetMapping("/datosAlumno/busquedaAlumno")
-    public List<AlumnoDTO> getDatosBusquedaAlumno(@RequestParam String filtro, @RequestParam String busqueda,HttpSession session) {
+    public List<AlumnoDTO> getDatosBusquedaAlumno(@RequestParam String filtro, @RequestParam String busqueda,
+            HttpSession session) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuarioTemporal != null) {
-        
-            Page<Alumno> alumnos = ser.buscarAlumnosPorCriterio(filtro, busqueda); // Implementa este método en tu servicio
+
+            Page<Alumno> alumnos = ser.buscarAlumnosPorCriterio(filtro, busqueda); // Implementa este método en tu
+                                                                                   // servicio
             return alumnos.getContent().stream().map(AlumnoDTO::new).collect(Collectors.toList());
         }
         return null;
@@ -168,7 +203,7 @@ public class ControladorApi {
     }
 
     @GetMapping("/datosPlantilla/busquedaPlantilla")
-    public List<Plantilla> getDatosBusquedaPlantilla(@RequestParam String busqueda,HttpSession session) {
+    public List<Plantilla> getDatosBusquedaPlantilla(@RequestParam String busqueda, HttpSession session) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuarioTemporal != null) {
             List<Plantilla> plantilla = ser.buscarPlantillaPorCriterio(busqueda);
@@ -178,49 +213,51 @@ public class ControladorApi {
     }
 
     @GetMapping("/dataBasePlantilla/plantilla/{id}/descargar")
-    public ResponseEntity<Resource> descargarPlantilla(@PathVariable Long id,HttpSession session) {
+    public ResponseEntity<Resource> descargarPlantilla(@PathVariable Long id, HttpSession session) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuarioTemporal != null) {
             Plantilla plantilla = ser.plantillaPorId(id);
-            
+
             if (plantilla == null) {
                 // Si la plantilla no existe, devolver 404
                 return ResponseEntity.notFound().build();
             }
-        
+
             String pathArchivo = plantilla.getPathArchivo();
-        
-            // Asegúrate de que 'pathArchivo' es una ruta absoluta o está correctamente resuelta
+
+            // Asegúrate de que 'pathArchivo' es una ruta absoluta o está correctamente
+            // resuelta
             Path filePath = Paths.get(pathArchivo).toAbsolutePath();
-        
+
             if (!Files.exists(filePath)) {
                 // Si el archivo no existe, devolver 404
                 return ResponseEntity.notFound().build();
             }
-        
+
             try {
                 // Cargar el archivo como un recurso
                 Resource resource = new UrlResource(filePath.toUri());
-            
+
                 if (!resource.exists() || !resource.isReadable()) {
                     // Si el recurso no es accesible, lanzar excepción o manejar el error
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
                 }
-            
+
                 // Determinar el tipo de contenido
                 String contentType = "application/vnd.openxmlformats-officedocument.presentationml.presentation";
-            
+
                 // Devolver la respuesta con el archivo
                 return ResponseEntity.ok()
                         .contentType(MediaType.parseMediaType(contentType))
-                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+                        .header(HttpHeaders.CONTENT_DISPOSITION,
+                                "attachment; filename=\"" + resource.getFilename() + "\"")
                         .body(resource);
-            
+
             } catch (MalformedURLException e) {
                 // Manejar la excepción
                 return ResponseEntity.badRequest().build();
             }
-        }else{
+        } else {
             return null;
         }
     }
@@ -242,7 +279,7 @@ public class ControladorApi {
             try {
                 servicioAr.generateCertificatesAll();
                 return ResponseEntity.ok("Certificados generados exitosamente.");
-            } catch(Exception e) {
+            } catch (Exception e) {
                 return ResponseEntity.status(500).body("Error al generar certificados: " + e.getMessage());
             }
         }
@@ -252,10 +289,12 @@ public class ControladorApi {
     @PostMapping("/dataBaseAlumno/accionAlumnos")
     @ResponseBody
     @Transactional
-    public ResponseEntity<?> accionAlumnos(@RequestParam("ids") List<Long> ids, @RequestParam("accionElegida") String accionElegida,HttpSession session) throws InterruptedException, ExecutionException, Exception {
+    public ResponseEntity<?> accionAlumnos(@RequestParam("ids") List<Long> ids,
+            @RequestParam("accionElegida") String accionElegida, HttpSession session)
+            throws InterruptedException, ExecutionException, Exception {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuarioTemporal != null) {
-        
+
             if ("descarga".equals(accionElegida)) {
                 String timestamp = String.valueOf(System.currentTimeMillis());
                 Path tempDir = Files.createTempDirectory("certificados_" + timestamp);
@@ -264,10 +303,12 @@ public class ControladorApi {
                     // Generar certificados y guardarlos en la carpeta
                     for (Long id : ids) {
                         Alumno alumno = ser.alumnoPorId(id); // Método que debes tener o implementar
-                        byte[] certificadoBytes = servicioGenerarCertificado.descargarCertificadosServicio(alumno).join();
+                        byte[] certificadoBytes = servicioGenerarCertificado.descargarCertificadosServicio(alumno)
+                                .join();
 
                         // Guardar cada certificado como un archivo PDF en la carpeta temporal
-                        Path certificadoPath = tempDir.resolve("certificado_" + alumno.getNombreAsistente() +"_"+alumno.getNumeroCorrelativoInterno()+ ".pdf");
+                        Path certificadoPath = tempDir.resolve("certificado_" + alumno.getNombreAsistente() + "_"
+                                + alumno.getNumeroCorrelativoInterno() + ".pdf");
                         Files.write(certificadoPath, certificadoBytes);
                     }
 
@@ -289,13 +330,14 @@ public class ControladorApi {
                     // Preparar el archivo para la descarga
                     Resource resource = new UrlResource(zipFile.toUri());
                     HttpHeaders headers = new HttpHeaders();
-                    headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=certificados_" + timestamp + ".zip");
+                    headers.add(HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=certificados_" + timestamp + ".zip");
 
                     // Devolver el archivo ZIP como respuesta
                     return ResponseEntity.ok()
-                                         .headers(headers)
-                                         .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                                         .body(resource);
+                            .headers(headers)
+                            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                            .body(resource);
 
                 } finally {
                     // Limpiar archivos temporales
@@ -309,7 +351,7 @@ public class ControladorApi {
                 }
 
             } else if ("enviar".equals(accionElegida)) {
-                for(Long id: ids){
+                for (Long id : ids) {
                     try {
                         System.out.println(id);
                         servicioAr.generateCertificatesById(id);
@@ -319,7 +361,7 @@ public class ControladorApi {
                 }
                 return ResponseEntity.ok().build();
 
-            }else if ("descargaJunto".equals(accionElegida)) {
+            } else if ("descargaJunto".equals(accionElegida)) {
 
                 PDFMergerUtility merger = new PDFMergerUtility();
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -327,10 +369,9 @@ public class ControladorApi {
                 for (Long id : ids) {
                     Alumno alumno = ser.alumnoPorId(id);
 
-                    byte[] certificadoBytes =
-                            servicioGenerarCertificado
-                                    .descargarCertificadosServicio(alumno)
-                                    .join();
+                    byte[] certificadoBytes = servicioGenerarCertificado
+                            .descargarCertificadosServicio(alumno)
+                            .join();
 
                     merger.addSource(new RandomAccessReadBuffer(certificadoBytes));
                 }
@@ -347,27 +388,27 @@ public class ControladorApi {
                         .body(pdfUnico);
             }
 
-
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        
-        }else{
+
+        } else {
             return ResponseEntity.badRequest().build();
 
         }
     }
 
     @PostMapping("/dataBaseAlumno/downloadForQr")
-    public CompletableFuture<ResponseEntity<?>> downloadCertificateQr(@RequestBody Map<String, String> data, HttpServletResponse response) {
+    public CompletableFuture<ResponseEntity<?>> downloadCertificateQr(@RequestBody Map<String, String> data,
+            HttpServletResponse response) {
         try {
             String id = data.get("id");
             return servicioGenerarCertificado.generateCertificateQR(id, response)
-                .thenApply(result -> ResponseEntity.ok().build());
+                    .thenApply(result -> ResponseEntity.ok().build());
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno del servidor"));
+            return CompletableFuture.completedFuture(
+                    ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno del servidor"));
         }
     }
-
 
     @GetMapping("/getIP")
     public ResponseEntity<String> getClientIP(HttpServletRequest request) {
@@ -399,10 +440,11 @@ public class ControladorApi {
     }
 
     @PostMapping("/probarPlantilla")
-    public CompletableFuture<ResponseEntity<byte[]>> probarPlantilla(@ModelAttribute Curso curso,@RequestParam("idPlantilla")Long idPlantilla,HttpSession session) throws Exception {
+    public CompletableFuture<ResponseEntity<byte[]>> probarPlantilla(@ModelAttribute Curso curso,
+            @RequestParam("idPlantilla") Long idPlantilla, HttpSession session) throws Exception {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuarioTemporal != null) {
-            Plantilla plantilla=ser.plantillaPorId(idPlantilla);
+            Plantilla plantilla = ser.plantillaPorId(idPlantilla);
             curso.setPlantillaDiploma(plantilla);
             Alumno alumno = new Alumno();
             alumno.setNombreAsistente("Gabriel Parra");
@@ -418,7 +460,7 @@ public class ControladorApi {
                         ex.printStackTrace();
                         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
                     });
-        }else{
+        } else {
             return null;
         }
     }
@@ -426,7 +468,7 @@ public class ControladorApi {
     @PostMapping("/dataBaseAlumno/eliminarSeleccionados")
     public ResponseEntity<?> eliminarSeleccionados(@RequestBody List<Long> ids) {
         try {
-            for(Long id:ids){
+            for (Long id : ids) {
                 ser.borrarAlumnoPorId(id);
             }
             return ResponseEntity.ok().build();
@@ -435,198 +477,215 @@ public class ControladorApi {
         }
     }
 
-    @GetMapping("/programarCertificadoMoodleManual/alumnos/{courseId}")
-    public ResponseEntity<?> getAlumnosCurso(@PathVariable Long courseId) {
-        try {
-            System.out.println("Obteniendo alumnos para curso: {}" + courseId);
-
-            // 1. Obtener IDs de usuarios matriculados
-            List<Long> userIds = servicioTarea.obtenerUsuariosMatriculados(courseId);
-            System.out.println("IDs de usuarios encontrados: {}" + userIds);
-
-            if (userIds.isEmpty()) {
-                return ResponseEntity.ok(Collections.emptyList());
-            }
-
-            // 2. Obtener información detallada de usuarios
-            Map<Long, JsonNode> userInfoMap = servicioTarea.obtenerUsuariosInfoBatch(userIds);
-            System.out.println("Información de usuarios obtenida: {}" + userInfoMap.keySet());
-
-            List<AlumnoDTO> alumnos = new ArrayList<>();
-
-            for (Long userId : userIds) {
-                try {
-                    JsonNode userNode = userInfoMap.get(userId);
-                    if (userNode == null) {
-                        System.out.println("Usuario {} no encontrado en la respuesta" + userId);
-                        continue;
-                    }
-                    System.out.println(userNode);
-                    AlumnoDTO dto = new AlumnoDTO();
-                    dto.setId(userId);
-
-                    // 3. Procesar nombre (fullname o firstname + lastname)
-                    if (userNode.has("fullname") && !userNode.get("fullname").isNull()) {
-                        dto.setNombreAsistente(userNode.get("fullname").asText().trim());
-                    } else {
-                        String firstName = userNode.has("firstname") ? userNode.get("firstname").asText("") : "";
-                        String lastName = userNode.has("lastname") ? userNode.get("lastname").asText("") : "";
-                        dto.setNombreAsistente((firstName + " " + lastName).trim());
-                    }
-                    dto.setNombreAsistente(dto.getNombreAsistente().toUpperCase());
-                    // 4. Procesar email
-                    if (userNode.has("email")) {
-                        dto.setCorreo(userNode.get("email").asText());
-                    } else {
-                        System.out.println("Usuario {} no tiene email"+ userId);
-                        dto.setCorreo("sin-email@ejemplo.com");
-                    }
-
-                    // 5. Obtener nota con manejo de errores
-                    try {
-                        double nota = (servicioTarea.obtenerPromedioNotas(courseId, userId));
-                        dto.setNotaAprovacion(String.valueOf(nota));
-                    } catch (Exception e) {
-                        System.out.println("Error al obtener nota para usuario {}: {}"+ userId+ e.getMessage());
-                        dto.setNotaAprovacion(String.valueOf(7.0)); // Valor por defecto
-                    }
-
-                    alumnos.add(dto);
-
-                } catch (Exception e) {
-                    System.out.println("Error procesando usuario {}: {}"+ userId+ e.getMessage());
-                }
-            }
-
-            return ResponseEntity.ok(alumnos);
-
-        } catch (Exception e) {
-            System.out.println("Error crítico al obtener alumnos: {}"+ e.getMessage()+ e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of(
-                        "error", "Error al obtener alumnos",
-                        "detalle", e.getMessage(),
-                        "cursoId", courseId
-                    ));
-        }
-    }
-
-    @PostMapping("/programarCertificadoMoodleManual/crear")
-    public ResponseEntity<?> procesarAlumnos(
-            @RequestParam Long cursoMoodle,
-            @RequestParam(required = false, name ="cursoID" )Long cursoID,
-            @RequestParam String accion,
-            @ModelAttribute("alumnos") AlumnosWrapper wrapper
-    ) {
-        List<AlumnoDTO> alumnosForm = wrapper.getAlumnos();
-        List<AlumnoDTO> habilitados = new ArrayList<AlumnoDTO>();
-        for(AlumnoDTO alumno: alumnosForm){
-            if(alumno.getEstado().equals("Aprobado")){
-                habilitados.add(alumno);
-            }
-        }
-        List<Alumno> alumnos = habilitados.stream().map(f -> {
-            Alumno a = new Alumno();
-            a.setNombreAsistente(f.getNombreAsistente());
-            a.setCorreo(f.getCorreo());
-            a.setNotaAprobacion(f.getNotaAprovacion());
-            a.setAsistencia(f.getAsistencia());
-            a.setEstado("Aprobado");          // o el estado que toque
-            a.setDiploma("noEnviado");       // inicial
-            Curso curso = ser.cursoPorId(cursoID);
-            a.setCurso(curso);
-            return a;
-        }).collect(Collectors.toList());
-
-        for(Alumno alumno:alumnos){
-            repoAlum.save(alumno);
-            if ("emitirYGuardar".equalsIgnoreCase(accion)) {
-                try {
-                    servicioAr.generateCertificatesById(alumno.getId());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        
-
-        return ResponseEntity.ok(Map.of("redirectUrl", "/programarCertificadoMoodleManual"));
-
-    }
-
+    /*
+     * @GetMapping("/programarCertificadoMoodleManual/alumnos/{courseId}")
+     * public ResponseEntity<?> getAlumnosCurso(@PathVariable Long courseId) {
+     * try {
+     * System.out.println("Obteniendo alumnos para curso: {}" + courseId);
+     * 
+     * // 1. Obtener IDs de usuarios matriculados
+     * List<Long> userIds = servicioTarea.obtenerUsuariosMatriculados(courseId);
+     * System.out.println("IDs de usuarios encontrados: {}" + userIds);
+     * 
+     * if (userIds.isEmpty()) {
+     * return ResponseEntity.ok(Collections.emptyList());
+     * }
+     * 
+     * // 2. Obtener información detallada de usuarios
+     * Map<Long, JsonNode> userInfoMap =
+     * servicioTarea.obtenerUsuariosInfoBatch(userIds);
+     * System.out.println("Información de usuarios obtenida: {}" +
+     * userInfoMap.keySet());
+     * 
+     * List<AlumnoDTO> alumnos = new ArrayList<>();
+     * 
+     * for (Long userId : userIds) {
+     * try {
+     * JsonNode userNode = userInfoMap.get(userId);
+     * if (userNode == null) {
+     * System.out.println("Usuario {} no encontrado en la respuesta" + userId);
+     * continue;
+     * }
+     * System.out.println(userNode);
+     * AlumnoDTO dto = new AlumnoDTO();
+     * dto.setId(userId);
+     * 
+     * // 3. Procesar nombre (fullname o firstname + lastname)
+     * if (userNode.has("fullname") && !userNode.get("fullname").isNull()) {
+     * dto.setNombreAsistente(userNode.get("fullname").asText().trim());
+     * } else {
+     * String firstName = userNode.has("firstname") ?
+     * userNode.get("firstname").asText("") : "";
+     * String lastName = userNode.has("lastname") ?
+     * userNode.get("lastname").asText("") : "";
+     * dto.setNombreAsistente((firstName + " " + lastName).trim());
+     * }
+     * dto.setNombreAsistente(dto.getNombreAsistente().toUpperCase());
+     * // 4. Procesar email
+     * if (userNode.has("email")) {
+     * dto.setCorreo(userNode.get("email").asText());
+     * } else {
+     * System.out.println("Usuario {} no tiene email"+ userId);
+     * dto.setCorreo("sin-email@ejemplo.com");
+     * }
+     * 
+     * // 5. Obtener nota con manejo de errores
+     * try {
+     * double nota = (servicioTarea.obtenerPromedioNotas(courseId, userId));
+     * dto.setNotaAprovacion(String.valueOf(nota));
+     * } catch (Exception e) {
+     * System.out.println("Error al obtener nota para usuario {}: {}"+ userId+
+     * e.getMessage());
+     * dto.setNotaAprovacion(String.valueOf(7.0)); // Valor por defecto
+     * }
+     * 
+     * alumnos.add(dto);
+     * 
+     * } catch (Exception e) {
+     * System.out.println("Error procesando usuario {}: {}"+ userId+
+     * e.getMessage());
+     * }
+     * }
+     * 
+     * return ResponseEntity.ok(alumnos);
+     * 
+     * } catch (Exception e) {
+     * System.out.println("Error crítico al obtener alumnos: {}"+ e.getMessage()+
+     * e);
+     * return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+     * .body(Map.of(
+     * "error", "Error al obtener alumnos",
+     * "detalle", e.getMessage(),
+     * "cursoId", courseId
+     * ));
+     * }
+     * }
+     * 
+     * @PostMapping("/programarCertificadoMoodleManual/crear")
+     * public ResponseEntity<?> procesarAlumnos(
+     * 
+     * @RequestParam Long cursoMoodle,
+     * 
+     * @RequestParam(required = false, name ="cursoID" )Long cursoID,
+     * 
+     * @RequestParam String accion,
+     * 
+     * @ModelAttribute("alumnos") AlumnosWrapper wrapper
+     * ) {
+     * List<AlumnoDTO> alumnosForm = wrapper.getAlumnos();
+     * List<AlumnoDTO> habilitados = new ArrayList<AlumnoDTO>();
+     * for(AlumnoDTO alumno: alumnosForm){
+     * if(alumno.getEstado().equals("Aprobado")){
+     * habilitados.add(alumno);
+     * }
+     * }
+     * List<Alumno> alumnos = habilitados.stream().map(f -> {
+     * Alumno a = new Alumno();
+     * a.setNombreAsistente(f.getNombreAsistente());
+     * a.setCorreo(f.getCorreo());
+     * a.setNotaAprobacion(f.getNotaAprovacion());
+     * a.setAsistencia(f.getAsistencia());
+     * a.setEstado("Aprobado"); // o el estado que toque
+     * a.setDiploma("noEnviado"); // inicial
+     * Curso curso = ser.cursoPorId(cursoID);
+     * a.setCurso(curso);
+     * return a;
+     * }).collect(Collectors.toList());
+     * 
+     * for(Alumno alumno:alumnos){
+     * repoAlum.save(alumno);
+     * if ("emitirYGuardar".equalsIgnoreCase(accion)) {
+     * try {
+     * servicioAr.generateCertificatesById(alumno.getId());
+     * } catch (Exception e) {
+     * e.printStackTrace();
+     * }
+     * }
+     * }
+     * 
+     * 
+     * 
+     * return ResponseEntity.ok(Map.of("redirectUrl",
+     * "/programarCertificadoMoodleManual"));
+     * 
+     * }
+     */
     @DeleteMapping("/tareasProgramadas/borrar/{id}")
     public ResponseEntity<Void> borrarTarea(@PathVariable Long id) {
         ser.borrarTareaPorId(id);
         return ResponseEntity.noContent().build();
     }
-/* 
-    @GetMapping("/cursoTemporal")
-    public ResponseEntity<List<CursoTemporalDTO>> listAll(){
-        List<CursoTemporal> list = ser.todosLosCursosTemporales();
-        // mapear a DTO simple (o enviar entidad si quieres)
-        List<CursoTemporalDTO> dtos = new ArrayList<>();
-        for(CursoTemporal c : list){
-            CursoTemporalDTO d = CursoTemporalDTO.fromEntity(c);
-            dtos.add(d);
-        }
-        return ResponseEntity.ok(dtos);
-    }
 
-
-    @PostMapping("/cursoTemporal/busquedaMultiFiltro")
-    public ResponseEntity<List<CursoTemporalDTO>> buscarMultiFiltro(@RequestBody List<Map<String,String>> filtros){
-        List<CursoTemporal> encontrados = ser.buscarConFiltros(filtros);
-        List<CursoTemporalDTO> dtos = new ArrayList<>();
-        for(CursoTemporal c : encontrados) dtos.add(CursoTemporalDTO.fromEntity(c));
-        return ResponseEntity.ok(dtos);
-    }
-*/
+    /*
+     * @GetMapping("/cursoTemporal")
+     * public ResponseEntity<List<CursoTemporalDTO>> listAll(){
+     * List<CursoTemporal> list = ser.todosLosCursosTemporales();
+     * // mapear a DTO simple (o enviar entidad si quieres)
+     * List<CursoTemporalDTO> dtos = new ArrayList<>();
+     * for(CursoTemporal c : list){
+     * CursoTemporalDTO d = CursoTemporalDTO.fromEntity(c);
+     * dtos.add(d);
+     * }
+     * return ResponseEntity.ok(dtos);
+     * }
+     * 
+     * 
+     * @PostMapping("/cursoTemporal/busquedaMultiFiltro")
+     * public ResponseEntity<List<CursoTemporalDTO>> buscarMultiFiltro(@RequestBody
+     * List<Map<String,String>> filtros){
+     * List<CursoTemporal> encontrados = ser.buscarConFiltros(filtros);
+     * List<CursoTemporalDTO> dtos = new ArrayList<>();
+     * for(CursoTemporal c : encontrados) dtos.add(CursoTemporalDTO.fromEntity(c));
+     * return ResponseEntity.ok(dtos);
+     * }
+     */
     @GetMapping("/cursoTemporal/generarQr/{id}")
-    public ResponseEntity<?> generarQr(@PathVariable Long id){
+    public ResponseEntity<?> generarQr(@PathVariable Long id) {
         try {
-            Map<String,String> res = ser.generarQrParaCurso(id);
+            Map<String, String> res = ser.generarQrParaCurso(id);
             return ResponseEntity.ok(res);
-        } catch(Exception ex){
+        } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
         }
     }
 
     // Endpoint que descarga el QR en PNG (por id)
     @GetMapping("/cursoTemporal/downloadQr/{id}")
-    public ResponseEntity<byte[]> downloadQr(@PathVariable Long id, @RequestParam(value="filename", required=false) String filename){
+    public ResponseEntity<byte[]> downloadQr(@PathVariable Long id,
+            @RequestParam(value = "filename", required = false) String filename) {
         try {
-            Map<String,String> res = ser.generarQrParaCurso(id);
+            Map<String, String> res = ser.generarQrParaCurso(id);
             String base64 = res.get("imageBase64");
             byte[] data = Base64.getDecoder().decode(base64);
-            if(filename == null || filename.isEmpty()){
+            if (filename == null || filename.isEmpty()) {
                 filename = res.get("nombreCurso") + "_QR.png";
             }
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.IMAGE_PNG);
             headers.setContentDisposition(ContentDisposition.attachment().filename(filename).build());
             return new ResponseEntity<>(data, headers, HttpStatus.OK);
-        } catch(Exception ex){
+        } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
     // Crear curso (recibe JSON con request params) y devuelve qr
     @PostMapping("/cursoTemporal/create")
-    public ResponseEntity<?> createCursoAndGenerateQr(@RequestBody Map<String,String> params){
+    public ResponseEntity<?> createCursoAndGenerateQr(@RequestBody Map<String, String> params) {
         try {
-            Map<String,String> res = ser.createCursoAndGenerateQr(params);
+            Map<String, String> res = ser.createCursoAndGenerateQr(params);
             return ResponseEntity.ok(res);
-        } catch(Exception ex){
+        } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
         }
     }
+
     @GetMapping("/plantillas")
-    public ResponseEntity<List<Map<String,Object>>> listPlantillas(){
+    public ResponseEntity<List<Map<String, Object>>> listPlantillas() {
         List<Plantilla> list = ser.todasLasPlantillas();
-        List<Map<String,Object>> out = new ArrayList<>();
-        for(Plantilla p : list){
-            Map<String,Object> m = new HashMap<>();
+        List<Map<String, Object>> out = new ArrayList<>();
+        for (Plantilla p : list) {
+            Map<String, Object> m = new HashMap<>();
             m.put("id", p.getId());
             m.put("nombre", p.getNombreCertificado());
             out.add(m);
@@ -639,8 +698,7 @@ public class ControladorApi {
             @RequestParam String nombre,
             @RequestParam String correo,
             @RequestParam String rut,
-            @RequestParam String id
-    ) {
+            @RequestParam String id) {
         try {
             ser.procesarAsistencia(nombre, correo, rut, id);
             return ResponseEntity.ok().build();
@@ -653,21 +711,20 @@ public class ControladorApi {
     @GetMapping("/datosAlumnoTemporal/{idCurso}")
     public List<AlumnoTemporal> obtenerAlumnosPorCurso(
             @PathVariable Long idCurso) {
-        
+
         Curso curso = ser.cursoPorId(idCurso);
         List<AlumnoTemporal> alumnoTemporals = curso.getAlumnosTemporales();
         return alumnoTemporals;
-        
+
     }
 
     @PostMapping("/alumnoTemporal/enviar")
     public ResponseEntity<Map<String, Object>> enviarDatos(
             @RequestParam Long alumnoId,
             @RequestParam String asistencia,
-            @RequestParam String nota
-    ) {
+            @RequestParam String nota) {
 
-        ser.alumnoVerificado(alumnoId,asistencia,nota);
+        ser.alumnoVerificado(alumnoId, asistencia, nota);
 
         Map<String, Object> response = new HashMap<>();
         response.put("alumnoId", alumnoId);
@@ -683,7 +740,6 @@ public class ControladorApi {
         return ResponseEntity.noContent().build();
     }
 
-
     @GetMapping("/datosCliente")
     public List<ClienteDTO> getDatosCliente(HttpSession session) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
@@ -696,8 +752,7 @@ public class ControladorApi {
 
     @PostMapping("/datosCliente/busquedaMultiFiltro")
     public List<ClienteDTO> busquedaMultiFiltroCliente(
-            @RequestBody List<Map<String, String>> filtros
-    ) {
+            @RequestBody List<Map<String, String>> filtros) {
         Page<Cliente> resultado = ser.buscarConMultiplesFiltrosCliente(filtros);
         return resultado.getContent().stream().map(ClienteDTO::new).collect(Collectors.toList());
     }
@@ -705,9 +760,9 @@ public class ControladorApi {
     @GetMapping("/clientes/buscar")
     @ResponseBody
     public List<ClienteDTO> buscarClientes(@RequestParam String q) {
-        return repoCliente.findTop10ByNombreClienteContainingIgnoreCase(q).stream().map(ClienteDTO::new).collect(Collectors.toList());
+        return repoCliente.findTop10ByNombreClienteContainingIgnoreCase(q).stream().map(ClienteDTO::new)
+                .collect(Collectors.toList());
     }
-
 
     @GetMapping("/datosRelator")
     public List<RelatorDTO> getDatosRelator(HttpSession session) {
@@ -720,7 +775,8 @@ public class ControladorApi {
     }
 
     @PostMapping("/datosRelator/busquedaMultiFiltro")
-    public List<RelatorDTO> busquedaMultiFiltroRelator(@RequestBody List<Map<String, String>> filtros, HttpSession session) {
+    public List<RelatorDTO> busquedaMultiFiltroRelator(@RequestBody List<Map<String, String>> filtros,
+            HttpSession session) {
         Admin usuario = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuario != null) {
             Page<Relator> resultado = ser.buscarConMultiplesFiltrosRelator(filtros);
@@ -732,7 +788,8 @@ public class ControladorApi {
     @GetMapping("/relator/buscar")
     @ResponseBody
     public List<RelatorDTO> buscarRelator(@RequestParam String q) {
-        return repoRel.findTop10ByNombreContainingIgnoreCase(q).stream().map(RelatorDTO::new).collect(Collectors.toList());
+        return repoRel.findTop10ByNombreContainingIgnoreCase(q).stream().map(RelatorDTO::new)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/datosCurso")
@@ -746,7 +803,7 @@ public class ControladorApi {
     }
 
     @GetMapping("/datosCurso/cliente/{id}")
-    public List<CursoDTO> getDatosCursoPorCliente(HttpSession session,@PathVariable("id")Long id) {
+    public List<CursoDTO> getDatosCursoPorCliente(HttpSession session, @PathVariable("id") Long id) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuarioTemporal != null) {
             List<Curso> cursos = ser.cursosPorCliente(id);
@@ -756,7 +813,7 @@ public class ControladorApi {
     }
 
     @GetMapping("/datosCurso/relator/{id}")
-    public List<CursoDTO> getDatosCursoPorRelator(HttpSession session,@PathVariable("id")Long id) {
+    public List<CursoDTO> getDatosCursoPorRelator(HttpSession session, @PathVariable("id") Long id) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuarioTemporal != null) {
             List<Curso> cursos = ser.cursosPorRelator(id);
@@ -764,10 +821,10 @@ public class ControladorApi {
         }
         return null;
     }
-    
 
     @PostMapping("/datosCurso/busquedaMultiFiltro")
-    public List<CursoDTO> busquedaMultiFiltroCurso(@RequestBody List<Map<String, String>> filtros, HttpSession session) {
+    public List<CursoDTO> busquedaMultiFiltroCurso(@RequestBody List<Map<String, String>> filtros,
+            HttpSession session) {
         Admin usuario = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuario != null) {
             Page<Curso> resultado = ser.buscarConMultiplesFiltrosCurso(filtros);
@@ -777,7 +834,8 @@ public class ControladorApi {
     }
 
     @PostMapping("/datosCurso/busquedaMultiFiltro/cliente/{id}")
-    public List<CursoDTO> busquedaMultiFiltroCursoPorCliente(@RequestBody List<Map<String, String>> filtros, HttpSession session,@PathVariable("id")Long id) {
+    public List<CursoDTO> busquedaMultiFiltroCursoPorCliente(@RequestBody List<Map<String, String>> filtros,
+            HttpSession session, @PathVariable("id") Long id) {
         Admin usuario = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuario != null) {
             Page<Curso> resultado = ser.buscarConMultiplesFiltrosCursoPorCliente(filtros, id);
@@ -787,7 +845,8 @@ public class ControladorApi {
     }
 
     @PostMapping("/datosCurso/busquedaMultiFiltro/relator/{id}")
-    public List<CursoDTO> busquedaMultiFiltroCursoPorRelator(@RequestBody List<Map<String, String>> filtros, HttpSession session,@PathVariable("id")Long id) {
+    public List<CursoDTO> busquedaMultiFiltroCursoPorRelator(@RequestBody List<Map<String, String>> filtros,
+            HttpSession session, @PathVariable("id") Long id) {
         Admin usuario = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuario != null) {
             Page<Curso> resultado = ser.buscarConMultiplesFiltrosCursoPorRelator(filtros, id);
@@ -795,19 +854,11 @@ public class ControladorApi {
         }
         return Collections.emptyList();
     }
-    
 
     @GetMapping("/plantilla/buscar")
     @ResponseBody
-    public List<Plantilla> buscarPlantilla(@RequestParam String q,@RequestParam String t) {
+    public List<Plantilla> buscarPlantilla(@RequestParam String q, @RequestParam String t) {
         return repoPlanti.findTop10ByNombreCertificadoContainingIgnoreCaseAndTipo(q, t);
     }
 
-
 }
-        
-
-
-
-
-

@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <title>Lista de Alumnos</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Importar CSS de Bootstrap -->
+  <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+  <link rel="stylesheet" th:href="@{/css/styleCustom.css}" />
+  <link rel="icon" th:href="@{/images/Logobgremove.png}" type="image/x-icon" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+  <!-- Importar jQuery -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <!-- Importar JS de Bootstrap -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  <style>
+    th {
+      font-size: 13px;
+    }
+
+    td {
+      overflow-x: auto;
+      font-size: 11px;
+    }
+
+    #alumnoBuscador {
+      padding-right: 0px;
+      padding-left: 0px;
+    }
+
+    .overlay {
+      display: none;
+      /* Oculto por defecto */
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      /* Fondo oscuro */
+      z-index: 999;
+      /* Por encima de otros elementos */
+    }
+
+    /* Contenedor del formulario emergente */
+    .popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+      /* Por encima del overlay */
+      width: 90%;
+      max-width: 400px;
+    }
+
+    .popup2 {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      width: 50%;
+      height: 64%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    /* Botón cerrar */
+    .close-btn {
+      background-color: red;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .close-btn:hover {
+      background-color: darkred;
+    }
+
+    /* Botón principal */
+    .open-btn {
+      margin: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    #alumnosNoEnviados {
+      height: 50vh;
+      /* Define una altura fija */
+      overflow-y: auto;
+      /* Permite el desplazamiento vertical cuando el contenido es grande */
+    }
+
+    .filtro-card {
+      background-color: #e9ecef;
+      border-radius: 5px;
+      transition: transform 0.2s;
+    }
+
+    .filtro-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-close {
+      font-size: 0.75rem;
+      padding: 0.25rem;
+    }
+
+    @media (min-width: 1024px) {
+      #contenderBase {
+        max-width: 95vw;
+      }
+    }
+
+    @media (max-width: 768px) {
+      #contenderBase {
+        max-width: 100vw !important;
+        padding-left: 0px !important;
+        padding-right: 0px !important;
+      }
+
+      #contenedorTabla {
+        max-width: 100vw !important;
+        overflow-y: auto;
+        overflow-x: auto;
+      }
+
+      #alumnoBuscador {
+        max-width: 100vw !important;
+      }
+
+      th {
+        font-size: 15px;
+      }
+
+      td {
+        overflow-x: auto;
+        font-size: 12px;
+      }
+
+      #tablaAlumnos {
+        width: 250vw;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="d-flex align-items-center justify-content-between p-3 bg-light" style="height: 10vh; z-index: 1">
+    <a th:href="@{/home}" class="logo">
+      <img th:src="@{/images/Logobgremove.png}" alt="[LOGO]" />
+    </a>
+    <nav class="d-flex justify-content-center align-items-center flex-nowrap">
+      <a th:href="@{/home}" class="btn btn-primary mx-2">Regresar</a>
+      <a th:href="@{/home}" class="btn btn-primary mx-2">Inicio</a>
+      <a th:href="@{/documentacion}" target="_blank" class="btn btn-primary mx-2">Documentación</a>
+      <div class="d-flex flex-column justify-content-center align-items-center">
+        <i class="fa-solid fa-user"></i>
+        <p class="p-0 m-0" style="font-size: normal" th:text="${admin.nombre}"></p>
+      </div>
+    </nav>
+  </header>
+  <div id="contenderBase" class="container pt-2 pb-2" style="height: 90vh">
+    <h2 class="text-center" th:text="'Base de datos alumnos del curso '+${nombre}"></h2>
+    <div class="d-flex align-items-center justify-content-between pb-1" style="max-width: 95vw">
+      <div>
+        <form id="alumnoBuscador" class="d-flex col-12">
+          <select id="filtroBusquedaAlumno" class="form-select" name="filtroBusquedaAlumno">
+            <option value="rut">Rut</option>
+            <option value="nombreAsistente">Nombre Asistente</option>
+            <option value="estado">Estado</option>
+            <option value="diploma">Diploma</option>
+            <option value="correlativo">Correlativo</option>
+          </select>
+          <input id="busquedaAlumno" type="search" class="col-5" placeholder="Buscar" name="busquedaAlumno"
+            onkeydown="submitOnEnter(event)" />
+          <button type="button" class="btn btn-outline-primary" onclick="agregarFiltro()">
+            Agregar Filtro
+          </button>
+        </form>
+        <div id="filtros-activos" class="d-flex flex-wrap gap-2 mt-2"></div>
+      </div>
+      <div id="button-container">
+        <div id="normal-buttons">
+          <button class="btn btn-primary" onclick="selectAllVisible()">
+            Seleccionar todos
+          </button>
+          <a class="btn btn-success" th:href="@{/dataBaseAlumno/addAlumnoBase}">+</a>
+        </div>
+        <div id="listo-button" style="display: none">
+          <button id="listoBtn" class="btn btn-primary">Listo</button>
+          <button id="deseleccionarBtn" class="btn btn-warning">
+            Deseleccionar
+          </button>
+          <button id="eliminarSeleccionadosBtn" class="btn btn-danger">
+            Eliminar seleccionados
+          </button>
+
+        </div>
+      </div>
+    </div>
+    <div id="contenedorTabla" style="overflow-y: auto; max-height: 70vh; max-width: 95vw">
+      <table class="table table-hover table-bordered mb-5" style="table-layout: fixed; height: 100%" id="tablaAlumnos">
+        <thead class="thead-dark">
+          <tr>
+            <th style="width: 5vw"></th>
+            <th>Nombre</th>
+            <th>Cliente</th>
+            <th>Relator</th>
+            <th>Estado</th>
+            <th>Rut</th>
+            <th>Correo</th>
+            <th>Diploma</th>
+            <th>Correlativo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Las filas se agregarán dinámicamente aquí -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <script th:inline="javascript">
+    const checkboxKey = "checkboxStates";
+    let filtrosActivos = [];
+
+    function crearCardFiltro(filtro, valor) {
+      return `<div class="card filtro-card" style="max-width: 300px;">
+                    <div class="card-body p-2 d-flex justify-content-between align-items-center">
+                        <span>${filtro}: ${valor}</span>
+                        <button type="button" class="btn-close" data-filtro="${filtro}" data-valor="${valor.replace(
+        /"/g,
+        "&quot;"
+      )}"></button>
+                    </div>
+                </div>`;
+    }
+
+    // Agregar este evento delegado para los botones de cerrar
+    $(document).on("click", ".btn-close", function () {
+      const filtro = $(this).data("filtro");
+      const valor = $(this).data("valor");
+      removerFiltro(filtro, valor);
+    });
+
+    function actualizarFiltrosVisibles() {
+      const contenedor = $("#filtros-activos");
+      contenedor.empty();
+      filtrosActivos.forEach((filtro) => {
+        contenedor.append(crearCardFiltro(filtro.campo, filtro.valor));
+      });
+    }
+
+    function agregarFiltro() {
+      const filtro = $("#filtroBusquedaAlumno").val();
+      const valor = $("#busquedaAlumno").val().trim();
+
+      if (valor) {
+        // Evitar duplicados
+        if (
+          !filtrosActivos.some((f) => f.campo === filtro && f.valor === valor)
+        ) {
+          filtrosActivos.push({ campo: filtro, valor: valor });
+          actualizarFiltrosVisibles();
+          cargarDatosConFiltros();
+        }
+        $("#busquedaAlumno").val("");
+      }
+    }
+
+    function removerFiltro(filtro, valor) {
+      filtrosActivos = filtrosActivos.filter(
+        (f) => !(f.campo === filtro && f.valor === valor)
+      );
+      actualizarFiltrosVisibles();
+      cargarDatosConFiltros();
+    }
+
+    const curso = /*[[${curso}]]*/ "";
+
+    function cargarDatosConFiltros() {
+      $.ajax({
+        url: "/api/datosAlumno/busquedaMultiFiltroPorCurso/" + curso,
+        method: "POST",
+        contentType: "application/json",
+        data: JSON.stringify(filtrosActivos),
+        success: function (data) {
+          // Actualizar tabla con los datos recibidos
+          actualizarTabla(data);
+        },
+      });
+    }
+
+    function actualizarTabla(data) {
+      var tbody = $("#tablaAlumnos tbody");
+      // Se utiliza el inline JavaScript para inyectar el valor de admin.ubicacion
+      var contenedorNoEnviados = $("#alumnosNoEnviados");
+      tbody.empty();
+      contenedorNoEnviados.empty();
+
+      $.each(data, function (i, alumno) {
+        if (alumno.estado && alumno.estado.toLowerCase() === "borrado") {
+          return; // Salta al siguiente alumno
+        }
+        var correoText = "sin correo"; // Valor por defecto
+
+        if (alumno.correo) {
+          // Verifica si el correo existe
+          if (alumno.correo === "diplomas@e-volution.cl") {
+            correoText = "correo empresa";
+          } else {
+            correoText = "con correo";
+          }
+        }
+
+        var fila =
+          "<tr data-alumno-id='" +
+          alumno.id +
+          "'>" +
+          "<td class='d-flex justify-content-center align-items-center' style='width: 5vw; height: 100%;'>" +
+          "<input type='checkbox' value='" +
+          alumno.id +
+          "'></td>" +
+          "<td><a href='/dataBaseAlumno/alumno/" +
+          alumno.id +
+          "'>" +
+          (alumno.nombreAsistente != null ? alumno.nombreAsistente : "") +
+          "</a></td>" +
+          "<td>" +
+          (alumno.cliente != null ? alumno.cliente : "") +
+          "</td>" +
+          "<td>" +
+          (alumno.relator != null ? alumno.relator : "") +
+          "</td>" +
+          "<td>" +
+          (alumno.estado != null ? alumno.estado : "") +
+          "</td>" +
+          "<td>" +
+          (alumno.rut != null ? alumno.rut : "") +
+          "</td>" +
+          "<td>" +
+          correoText +
+          "</td>" +
+          "<td>" +
+          (alumno.diploma != null ? alumno.diploma : "") +
+          "</td>" +
+          "<td>" +
+          (alumno.numeroCorrelativoInterno != null
+            ? alumno.numeroCorrelativoInterno
+            : "") +
+          "</td>" +
+          "</tr>";
+        tbody.append(fila);
+
+        // Si el estado es "noEnviado", agregar un <p> al contenedor
+        if (
+          alumno.diploma === "noEnviado" &&
+          alumno.estado === "aprobado" &&
+          alumno.plantilla != "Error en encontrar plantilla"
+        ) {
+          var parrafo =
+            "<p>Alumno: " +
+            (alumno.nombreAsistente != null
+              ? alumno.nombreAsistente
+              : "Desconocido") +
+            " Del curso: " +
+            (alumno.nombreCurso != null
+              ? alumno.nombreCurso
+              : "Desconocido") +
+            " se le enviara el certificado <br></br>";
+          contenedorNoEnviados.append(parrafo);
+        }
+
+        // Se agregó esta línea según el código original, aunque parece redundante
+        var fila = "<tr>...</tr>";
+        tbody.append(fila);
+      });
+
+      restoreCheckboxStates();
+      updateUIAfterRestore();
+    }
+
+    $("#deseleccionarBtn").on("click", function () {
+      // Deseleccionar todos los checkboxes
+      $('input[type="checkbox"]').prop("checked", false).trigger("change");
+      // Remover los estados guardados en localStorage
+      localStorage.removeItem(checkboxKey);
+    });
+    function saveCheckboxState() {
+      var checkedIds = [];
+      $("#tablaAlumnos input[type='checkbox']:checked").each(function () {
+        checkedIds.push($(this).val());
+      });
+      localStorage.setItem(checkboxKey, JSON.stringify(checkedIds));
+    }
+
+    // Agregar un listener para los cambios en los checkboxes
+    $(document).on(
+      "change",
+      "#tablaAlumnos input[type='checkbox']",
+      function () {
+        saveCheckboxState(); // Guardar el estado cuando se marca/desmarca un checkbox
+
+        // Cambiar el color de fondo según el estado del checkbox
+        var alumnoId = $(this).val();
+        var rows = $('tr[data-alumno-id="' + alumnoId + '"]');
+        var tds = rows.find("td");
+
+        if ($(this).prop("checked")) {
+          tds.css("background-color", "lightblue");
+        } else {
+          tds.css("background-color", "");
+        }
+
+        updateUIAfterRestore(); // Actualizar botones
+      }
+    );
+
+    function restoreCheckboxStates() {
+      const storedIds = JSON.parse(localStorage.getItem(checkboxKey)) || [];
+      $("#tablaAlumnos input[type='checkbox']").each(function () {
+        var alumnoId = $(this).val();
+        var rows = $('tr[data-alumno-id="' + alumnoId + '"]');
+        var tds = rows.find("td");
+
+        if (storedIds.includes(alumnoId)) {
+          $(this).prop("checked", true);
+          // Cambiar el color de fondo a celeste
+          tds.css("background-color", "lightblue");
+        } else {
+          $(this).prop("checked", false);
+          // Restaurar el color de fondo original
+          tds.css("background-color", "");
+        }
+      });
+
+      // Actualizar la visibilidad de los botones
+      updateUIAfterRestore();
+    }
+
+    // Definir la función updateUIAfterRestore()
+    function updateUIAfterRestore() {
+      var anyChecked =
+        $('#tablaAlumnos input[type="checkbox"]:checked').length > 0;
+      if (anyChecked) {
+        $("#normal-buttons").hide();
+        $("#listo-button").show();
+      } else {
+        $("#normal-buttons").show();
+        $("#listo-button").hide();
+      }
+    }
+  </script>
+
+  <script th:inline="javascript">
+    function selectAllVisible() {
+      $("#tablaAlumnos tbody input[type='checkbox']")
+        .prop("checked", true)
+        .trigger("change");
+    }
+    $(document).ready(function () {
+      const checkboxKey = "checkboxStates";
+      // Se utiliza el inline JavaScript para inyectar el valor de admin.ubicacion
+      $("#deseleccionarBtn").on("click", function () {
+        // Deseleccionar todos los checkboxes
+        $('input[type="checkbox"]').prop("checked", false).trigger("change");
+        // Remover los estados guardados en localStorage
+        localStorage.removeItem(checkboxKey);
+      });
+      function saveCheckboxState() {
+        var checkedIds = [];
+        $("#tablaAlumnos input[type='checkbox']:checked").each(function () {
+          checkedIds.push($(this).val());
+        });
+        localStorage.setItem(checkboxKey, JSON.stringify(checkedIds));
+      }
+
+      // Agregar un listener para los cambios en los checkboxes
+      $(document).on(
+        "change",
+        "#tablaAlumnos input[type='checkbox']",
+        function () {
+          saveCheckboxState(); // Guardar el estado cuando se marca/desmarca un checkbox
+
+          // Cambiar el color de fondo según el estado del checkbox
+          var alumnoId = $(this).val();
+          var rows = $('tr[data-alumno-id="' + alumnoId + '"]');
+          var tds = rows.find("td");
+
+          if ($(this).prop("checked")) {
+            tds.css("background-color", "lightblue");
+          } else {
+            tds.css("background-color", "");
+          }
+
+          updateUIAfterRestore(); // Actualizar botones
+        }
+      );
+
+      function restoreCheckboxStates() {
+        const storedIds = JSON.parse(localStorage.getItem(checkboxKey)) || [];
+        $("#tablaAlumnos input[type='checkbox']").each(function () {
+          var alumnoId = $(this).val();
+          var rows = $('tr[data-alumno-id="' + alumnoId + '"]');
+          var tds = rows.find("td");
+
+          if (storedIds.includes(alumnoId)) {
+            $(this).prop("checked", true);
+            // Cambiar el color de fondo a celeste
+            tds.css("background-color", "lightblue");
+          } else {
+            $(this).prop("checked", false);
+            // Restaurar el color de fondo original
+            tds.css("background-color", "");
+          }
+        });
+
+        // Actualizar la visibilidad de los botones
+        updateUIAfterRestore();
+      }
+
+      // Definir la función updateUIAfterRestore()
+      function updateUIAfterRestore() {
+        var anyChecked =
+          $('#tablaAlumnos input[type="checkbox"]:checked').length > 0;
+        if (anyChecked) {
+          $("#normal-buttons").hide();
+          $("#listo-button").show();
+        } else {
+          $("#normal-buttons").show();
+          $("#listo-button").hide();
+        }
+      }
+
+      function cargarDatos() {
+        $.ajax({
+          url: "/api/datosAlumnoPorCurso/" + curso,
+          method: "GET",
+          success: function (data) {
+            var tbody = $("#tablaAlumnos tbody");
+            var contenedorNoEnviados = $("#alumnosNoEnviados"); // Un contenedor para los alumnos con estado "noEnviado"
+
+            tbody.empty(); // Limpiar la tabla antes de agregar nuevos datos
+            contenedorNoEnviados.empty(); // Limpiar el contenedor antes de agregar nuevos datos
+
+            $.each(data, function (i, alumno) {
+              if (alumno.estado && alumno.estado.toLowerCase() === "borrado") {
+                return; // Salta al siguiente alumno
+              }
+
+              var correoText = "sin correo"; // Valor por defecto
+
+              if (alumno.correo) {
+                // Verifica si el correo existe
+                if (alumno.correo === "diplomas@e-volution.cl") {
+                  correoText = "correo empresa";
+                } else {
+                  correoText = "con correo";
+                }
+              }
+
+              var fila =
+                "<tr data-alumno-id='" +
+                alumno.id +
+                "'>" +
+                "<td class='d-flex justify-content-center align-items-center' style='width: 5vw; height: 100%;'>" +
+                "<input type='checkbox' value='" +
+                alumno.id +
+                "'></td>" +
+                "<td><a href='/dataBaseAlumno/alumno/" +
+                alumno.id +
+                "'>" +
+                (alumno.nombreAsistente != null ? alumno.nombreAsistente : "") +
+                "</a></td>" +
+                "<td>" +
+                (alumno.cliente != null ? alumno.cliente : "") +
+                "</td>" +
+                "<td>" +
+                (alumno.relator != null ? alumno.relator : "") +
+                "</td>" +
+                "<td>" +
+                (alumno.estado != null ? alumno.estado : "") +
+                "</td>" +
+                "<td>" +
+                (alumno.rut != null ? alumno.rut : "") +
+                "</td>" +
+                "<td>" +
+                correoText +
+                "</td>" +
+                "<td>" +
+                (alumno.diploma != null ? alumno.diploma : "") +
+                "</td>" +
+                "<td>" +
+                (alumno.numeroCorrelativoInterno != null
+                  ? alumno.numeroCorrelativoInterno
+                  : "") +
+                "</td>" +
+                "</tr>";
+              tbody.append(fila);
+
+              // Si el estado es "noEnviado", agregar un <p> al contenedor
+              if (
+                alumno.diploma === "noEnviado" &&
+                alumno.estado === "aprobado" &&
+                alumno.plantilla != "Error en encontrar plantilla"
+              ) {
+                var parrafo =
+                  "<p>Alumno: " +
+                  (alumno.nombreAsistente != null
+                    ? alumno.nombreAsistente
+                    : "Desconocido") +
+                  " Del curso: " +
+                  (alumno.nombreCurso != null
+                    ? alumno.nombreCurso
+                    : "Desconocido") +
+                  " se le enviara el certificado <br></br>";
+                contenedorNoEnviados.append(parrafo);
+              }
+
+            });
+            restoreCheckboxStates();
+            updateUIAfterRestore();
+          },
+          error: function (error) {
+            console.log("Error al obtener los datos", error);
+          },
+        });
+      }
+
+      // Cargar datos inicialmente
+      cargarDatos();
+
+      // Actualizar la tabla cada 30 segundos (30000 milisegundos)
+      setInterval(function () {
+        if (filtrosActivos.length > 0) {
+          cargarDatosConFiltros();
+        } else {
+          cargarDatos();
+        }
+      }, 30000);
+    });
+  </script>
+  <script>
+    // Función que detecta la tecla Enter
+    function submitOnEnter(event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        agregarFiltro(); // Ejecutar directamente la función
+      }
+    }
+  </script>
+
+  <div class="overlay" id="overlay">
+    <div class="popup" style="overflow-y: auto">
+      <div class="d-flex justify-content-end">
+        <button class="btn btn-danger" onclick="closeForm()">Cerrar</button>
+      </div>
+      <h2 class="text-center pb-2">Alumnos que se enviarán:</h2>
+      <form action="/dataBaseAlumno/enviarRestantes" method="get">
+        <div id="alumnosNoEnviados"></div>
+        <div class="d-flex justify-content-center">
+          <input class="btn btn-success" type="submit" value="Enviar" />
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Función para mostrar el formulario
+    function openForm() {
+      document.getElementById("overlay").style.display = "block";
+    }
+
+    // Función para ocultar el formulario
+    function closeForm() {
+      document.getElementById("overlay").style.display = "none";
+    }
+  </script>
+
+  <div class="overlay" id="selection-overlay" style="display: none">
+    <div class="popup2">
+      <div class="d-flex justify-content-end pb-2" style="width: 100%; height: 15%;">
+        <button class="btn btn-danger" onclick="closeSelectionOverlay()">
+          Cerrar
+        </button>
+      </div>
+      <div class="d-flex justify-content-center align-items-center" style="height: 85%;">
+        <!-- Tarjeta Descargar -->
+        <div class="card mx-2" style="width: 50%; height: 50vh">
+          <div class="card-body text-center"
+            style="display: flex; justify-content: space-around; align-items: center; flex-direction: column;">
+            <div class="d-flex text-center flex-column" style="height: 70%">
+              <h3 class="card-title">Descargar</h3>
+              <p class="card-text">
+                Descarga los datos seleccionados en un archivo(.pdf), puede
+                demorar unos segundos.
+              </p>
+              <div class="form-check" style="font-size: x-small; font-style: italic;">
+                <input class="form-check-input" type="checkbox" id="separado">
+                <label class="form-check-label" for="flexCheckDefault">
+                  Descargar todos los certificados por separado(en formato .zip).
+                </label>
+              </div>
+            </div>
+            <div style="height: 20%;margin-top: 30px;">
+              <button class="btn btn-secondary action-btn" data-action="descarga">
+                Descargar
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- Tarjeta Enviar -->
+        <div class="card mx-2" style="width: 50%; height: 50vh">
+          <div class="card-body text-center"
+            style="display: flex; justify-content: space-around; align-items: center; flex-direction: column;">
+            <div class="d-flex flex-column text-center" style="height: 70%">
+              <h3 class="card-title pb-1">Enviar</h3>
+              <p class="card-text">
+                Envía los certificados a los alumnos seleccionados.
+              </p>
+            </div>
+            <div style="height: 20%;margin-top: 30px;">
+              <button class="btn btn-success action-btn" data-action="enviar">
+                Enviar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    $("#eliminarSeleccionadosBtn").on("click", function () {
+      var selectedIds = $('input[type="checkbox"]:checked')
+        .map(function () {
+          return $(this).val();
+        })
+        .get();
+
+      if (selectedIds.length === 0) {
+        alert("No hay registros seleccionados para eliminar.");
+        return;
+      }
+
+      if (!confirm("¿Estás seguro de que quieres eliminar estos registros? Esta acción no se puede deshacer.")) {
+        return;
+      }
+
+      $.ajax({
+        url: "/api/dataBaseAlumno/eliminarSeleccionados", // AJUSTA a tu endpoint
+        method: "POST",
+        contentType: "application/json",
+        data: JSON.stringify(selectedIds),
+        success: function (response) {
+          alert("Registros eliminados correctamente.");
+          if (filtrosActivos.length > 0) {
+            cargarDatosConFiltros();
+          } else {
+            cargarDatos();
+          }
+
+          localStorage.removeItem(checkboxKey); // Limpia estados guardados
+          updateUIAfterRestore(); // Asegúrate de refrescar la UI de botones
+        },
+        error: function (error) {
+          alert("Error al eliminar: " + error.statusText);
+        },
+      });
+    });
+
+  </script>
+  <script>
+    $("#listoBtn").on("click", function () {
+      $("#selection-overlay").show();
+    });
+
+    function closeSelectionOverlay() {
+      $("#selection-overlay").hide();
+    }
+  </script>
+
+  <script>
+    // Manejar clics en los botones de acción dentro del overlay
+    $(document).on("click", ".action-btn", function () {
+      var action = $(this).data("action"); // "descarga" o "enviar"
+      // Obtener la lista de IDs de los alumnos seleccionados
+      var selectedIds = $('input[type="checkbox"]:checked')
+        .filter(function () {
+          return this.id !== "separado";
+        })
+        .map(function () {
+          return $(this).val();
+        })
+        .get();
+
+
+      let tipoDescarga = document.getElementById("separado");
+      if (action == "descarga") {
+        if (tipoDescarga.checked) {
+          action = "descarga";
+        } else {
+          action = "descargaJunto";
+        }
+      }
+
+      // Configuración básica del AJAX
+      var ajaxConfig = {
+        url: "/api/dataBaseAlumno/accionAlumnos",
+        method: "POST",
+        data: {
+          ids: selectedIds,
+          accionElegida: action,
+        },
+        traditional: true, // Para enviar arrays correctamente
+        error: function (error) {
+          // Manejar errores
+          alert("Ocurrió un error: " + error.statusText);
+        },
+      };
+
+      // Lógica específica para descarga
+      if (action === "descarga") {
+        ajaxConfig.xhrFields = {
+          responseType: "blob",
+        };
+        ajaxConfig.success = function (blob, textStatus, xhr) {
+          // Crear Blob y descargar archivo
+          let downloadBlob = new Blob([blob], {
+            type: xhr.getResponseHeader("Content-Type"),
+          });
+          let url = window.URL.createObjectURL(downloadBlob);
+          let link = document.createElement("a");
+          link.href = url;
+          link.download = "certificados_" + Date.now() + ".zip";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+
+          // Limpieza de la interfaz
+          closeSelectionOverlay();
+          $('input[type="checkbox"]')
+            .prop("checked", false)
+            .trigger("change");
+        };
+      } else if (action === "descargaJunto") {
+        ajaxConfig.xhrFields = {
+          responseType: "blob",
+        };
+        ajaxConfig.success = function (blob, textStatus, xhr) {
+          // Crear Blob y descargar archivo
+          let downloadBlob = new Blob([blob], {
+            type: xhr.getResponseHeader("Content-Type"),
+          });
+          let url = window.URL.createObjectURL(downloadBlob);
+          let link = document.createElement("a");
+          link.href = url;
+          link.download = "certificados_" + Date.now() + ".pdf";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+
+          // Limpieza de la interfaz
+          closeSelectionOverlay();
+          $('input[type="checkbox"]')
+            .prop("checked", false)
+            .trigger("change");
+        };
+      }
+      else {
+        // Lógica específica para enviar
+        ajaxConfig.success = function (response) {
+          // Manejar respuesta exitosa
+          closeSelectionOverlay();
+          $('input[type="checkbox"]')
+            .prop("checked", false)
+            .trigger("change");
+        };
+      }
+
+      // Ejecutar el AJAX con la configuración ajustada
+      $.ajax(ajaxConfig);
+    });
+  </script>
+
+  <script>
+    function showAlert(message) {
+      if (message && message.trim() !== "") {
+        alert(message);
+      }
+    }
+  </script>
+
+  <!-- Reemplazo de c:if por Thymeleaf -->
+  <script th:if="${error != null}" th:inline="javascript">
+    showAlert("[[${error}]]");
+  </script>
+
+  <footer class="text-center p-3 d-flex justify-content-center align-items-center"
+    style="height: 15vh; background-color: #f8f9fa">
+    <div>
+      <div>
+        <i class="fa-solid fa-phone"></i>
+        <a href="tel:+56 41 3830944">+56 41 3830944</a>
+      </div>
+      <div>
+        <i class="fa-solid fa-location-dot"></i>
+        <a
+          href="https://www.google.com/maps/place/Consultores+Empresariales+E-Volution+Limitada/@-36.8252678,-73.050754,19z/data=!3m1!4b1!4m6!3m5!1s0x9669b5d0308198b5:0xbd67409566499fa!8m2!3d-36.8252678!4d-73.0501103!16s%2Fg%2F11fzwngw1q?entry=ttu&g_ep=EgoyMDI1MDEwNi4xIKXMDSoASAFQAw%3D%3D">
+          Freire 728, Oficina 206
+        </a>
+      </div>
+      <div>
+        <i class="fa-solid fa-envelope"></i>
+        <a href="mailto:contacto@e-volution.cl">contacto@e-volution.cl</a>
+      </div>
+    </div>
+  </footer>
+</body>
+
+</html>

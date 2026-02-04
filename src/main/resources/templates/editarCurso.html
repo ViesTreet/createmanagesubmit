@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Curso</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/styleCustom.css}">
+    <link rel="icon" th:href="@{/images/Logobgremove.png}" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- Importar JS de Bootstrap -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <style>
+        /* Puedes agregar estilos adicionales aquí si es necesario */
+    </style>
+</head>
+
+<body>
+    <header class="d-flex align-items-center justify-content-between p-3 bg-light" style="height: 10vh;">
+        <a th:href="@{/home}" class="logo">
+            <img th:src="@{/images/Logobgremove.png}" alt="[LOGO]">
+        </a>
+        <nav class="d-flex justify-content-center align-items-center flex-nowrap">
+            <a th:href="@{'/dataBaseCliente}" class="btn btn-primary mx-2">Regresar</a>
+            <a th:href="@{/home}" class="btn btn-primary mx-2">Inicio</a>
+            <a th:href="@{/documentacion}" target="_blank" class="btn btn-primary mx-2">Documentación</a>
+            <div class="d-flex flex-column justify-content-center align-items-center">
+                <i class="fa-solid fa-user"></i>
+                <p class="p-0 m-0" style="font-size: normal;" th:text="${admin.nombre}"></p>
+            </div>
+        </nav>
+    </header>
+    <main class="d-flex flex-column align-items-center justify-content-center" style="height: 90vh;">
+        <div class="card" style="width: 60%;">
+            <div class="card-body" style="width: 100%;">
+                <h3 class="card-title text-center">
+                    Editar Curso <span th:text="${curso.nombreCurso}"></span>
+                </h3>
+                <!-- Se elimina el modelAttribute para que se envíen parámetros individuales -->
+                <form th:action="@{/dataBaseCurso/editarCurso}" method="post">
+                    <div id="diploma">
+                        <h5 class="text-center pb-2">Datos del diploma</h5>
+                        <div class="pb-2" style="display: flex; flex-direction: row;">
+                            <div style="width: 50%; margin-right: 2px;">
+                                <label for="nombreCurso">Nombre del curso</label>
+                                <input th:value="${curso.nombreCurso}" id="nombreCurso" name="nombreCurso" type="text"
+                                    class="form-control" placeholder="Nombre del curso" />
+                                <label for="diasCursos">Dia/s en que se realizara el curso</label>
+                                <input th:value="${curso.diasCursos}" id="diasCursos" type="text" name="diasCursos"
+                                    class="form-control" placeholder="12/03/25 al 13/03/25" />
+                                <label for="duracion">Duración del curso</label>
+                                <input th:value="${curso.duracion}" id="duracion" type="text" name="duracion"
+                                    class="form-control" placeholder="3 horas" />
+                                <label for="clienteInput">Cliente</label>
+                                <input th:value="${curso.cliente.nombreCliente}" id="clienteInput" type="text"
+                                    placeholder="Escribe para buscar un cliente" autocomplete="off"
+                                    class="form-control" />
+                                <input th:value="${curso.cliente.id}" type="hidden" name="clienteId" id="clienteId"
+                                    required />
+                                <div id="clienteResultados" class="list-group position-absolute w-100"
+                                    style="z-index: 1000; display: none">
+                                </div>
+                                <label for="modalidad">Modalidad</label>
+                                <input th:value="${curso.modalidad}" id="modalidad" type="text" name="modalidad"
+                                    class="form-control" placeholder="virtual" />
+                                <label for="ubicacionSubida">Región</label>
+                                <select name="ubicacionSubida" id="ubicacionSubida" class="form-select">
+                                    <option value="">Seleccione región</option>
+                                    <option th:selected="${curso.ubicacionSubida == 'arica'}" value="arica">Arica y
+                                        Parinacota</option>
+                                    <option th:selected="${curso.ubicacionSubida == 'tarapaca'}" value="tarapaca">
+                                        Tarapacá</option>
+                                    <option th:selected="${curso.ubicacionSubida == 'antofagasta'}" value="antofagasta">
+                                        Antofagasta</option>
+                                    <option th:selected="${curso.ubicacionSubida == 'atacama'}" value="atacama">Atacama
+                                    </option>
+                                    <option th:selected="${curso.ubicacionSubida == 'coquimbo'}" value="coquimbo">
+                                        Coquimbo</option>
+                                    <option th:selected="${curso.ubicacionSubida == 'valparaiso'}" value="valparaiso">
+                                        Valparaíso</option>
+                                    <option th:selected="${curso.ubicacionSubida == 'metropolitana'}"
+                                        value="metropolitana">Metropolitana de Santiago</option>
+                                    <option th:selected="${curso.ubicacionSubida == 'ohiggins'}" value="ohiggins">
+                                        O'Higgins</option>
+                                    <option th:selected="${curso.ubicacionSubida == 'maule'}" value="maule">Maule
+                                    </option>
+                                    <option th:selected="${curso.ubicacionSubida == 'nuble'}" value="nuble">Ñuble
+                                    </option>
+                                    <option th:selected="${curso.ubicacionSubida == 'biobio'}" value="biobio">Biobío
+                                    </option>
+                                    <option th:selected="${curso.ubicacionSubida == 'araucania'}" value="araucania">La
+                                        Araucanía</option>
+                                    <option th:selected="${curso.ubicacionSubida == 'rios'}" value="rios">Los Ríos
+                                    </option>
+                                    <option th:selected="${curso.ubicacionSubida == 'lagos'}" value="lagos">Los Lagos
+                                    </option>
+                                    <option th:selected="${curso.ubicacionSubida == 'aysen'}" value="aysen">Aysén
+                                    </option>
+                                    <option th:selected="${curso.ubicacionSubida == 'magallanes'}" value="magallanes">
+                                        Magallanes</option>
+                                </select>
+                            </div>
+                            <div style="width: 50%; margin-left: 2px;">
+                                <label for="ciudad">Ciudad</label>
+                                <input th:value="${curso.ciudad}" id="ciudad" type="text" name="ciudad"
+                                    class="form-control" placeholder="Talca" />
+                                <label for="relatorInput">Profesor</label>
+                                <input th:value="${curso.relator.nombre}" id="relatorInput" type="text"
+                                    placeholder="Escribe para buscar un relator" autocomplete="off"
+                                    class="form-control" />
+                                <input th:value="${curso.relator.id}" type="hidden" name="relatorId" id="relatorId"
+                                    required />
+                                <div id="relatorResultados" class="list-group position-absolute w-100"
+                                    style="z-index: 1000; display: none">
+                                </div>
+                                <label for="plantillaDipInput">Plantilla del diploma</label>
+                                <input th:value="${curso.plantillaDiploma.nombreCertificado}" id="plantillaDipInput"
+                                    type="text" placeholder="Escribe para buscar una plantilla" autocomplete="off"
+                                    class="form-control" />
+                                <input th:value="${curso.plantillaDiploma.id}" type="hidden" name="plantillaDipId"
+                                    id="plantillaDipId" required />
+                                <div id="plantillaDipResultados" class="list-group position-absolute w-100"
+                                    style="z-index: 1000; display: none"></div>
+                                <label for="NotaMin">Nota minima para aprobar</label>
+                                <input th:value="${curso.notaMin}" type="number" name="NotaMin" min="0" max="7"
+                                    step="0.1" placeholder="0.0 - 7.0" class="form-control" />
+                                <label for="asistenciaMin">Asistencia minima para aprobar</label>
+                                <input th:value="${curso.asistenciaMin}" type="number" name="asistenciaMin" min="0"
+                                    max="100" step="1" placeholder="0 - 100" class="form-control" />
+                                <div class="d-flex justify-content-center mt-3">
+                                    <button id="sigForm" type="button" class="btn btn-success">
+                                        Siguiente
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="flyer" style="display: none">
+                        <h5 class="text-center pb-2">Datos del flyer</h5>
+                        <div class="pb-2" style="display: flex; flex-direction: row;">
+                            <div style="width: 50%; margin-left: 2px;">
+                                <label for="ubicacionDelCurso">Ubicación donde se realizara el curso</label>
+                                <input th:value="${curso.ubicacionDelCurso}" id="ubicacionDelCurso"
+                                    name="ubicacionDelCurso" type="text" class="form-control"
+                                    placeholder="SEREMI del Trabajo. Germán Riesco #277, Of.21, Rancagua" />
+                                <label for="ubicacionCliente">Ubicación del cliente</label>
+                                <input th:value="${curso.ubicacionCliente}" id="ubicacionCliente" type="text"
+                                    name="ubicacionCliente" class="form-control"
+                                    placeholder="Instituto de Seguridad Laboral Región OHiggins - Rubio N°329 - Rancagua." />
+                                <label for="fecha">Fecha de cuando se realizara el curso</label>
+                                <input th:value="${fecha}" id="fecha" type="date" name="fecha" class="form-control"
+                                    placeholder="12/03/26" />
+                                <label for="horaI">Hora de inicio</label>
+                                <input th:value="${horaI}" id="horaI" type="time" name="horaI" class="form-control"
+                                    placeholder="12:00 pm" />
+                            </div>
+                            <div style="width: 50%; margin-left: 2px;">
+                                <label for="horaF">Hora de finalización</label>
+                                <input th:value="${horaF}" id="horaF" type="time" name="horaF" class="form-control"
+                                    placeholder="14:00 pm" />
+                                <label for="horasRelatorCurso">Horas trabajadas por el relator</label>
+                                <input th:value="${curso.horasRelatorCurso}" type="number" name="horasRelatorCurso"
+                                    step="0.1" placeholder="3" class="form-control" />
+                                <label for="plantillaFlyInput">Plantilla del flyer</label>
+                                <input th:value="${curso.plantillaFlyer.nombreCertificado}" id="plantillaFlyInput"
+                                    type="text" placeholder="Escribe para buscar una plantilla" autocomplete="off"
+                                    class="form-control" />
+                                <input th:value="${curso.plantillaFlyer.id}" type="hidden" name="plantillaFlyId"
+                                    id="plantillaFlyId" required />
+                                <div id="plantillaFlyResultados" class="list-group position-absolute w-100"
+                                    style="z-index: 1000; display: none"></div>
+                                <div class="d-flex justify-content-center mt-3">
+                                    <input type="hidden" name="id" th:value="${curso.id}">
+                                    <input class="btn btn-primary" type="submit" name="enviar" id="enviarCurso"
+                                        value="Enviar" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+    <script th:inline="javascript">
+        function showAlert(message) {
+            if (message && message.trim() !== "") {
+                alert(message);
+            }
+        }
+    </script>
+    <th:block th:if="${error != null}">
+        <script th:inline="javascript">
+            showAlert("[[${error}]]");
+        </script>
+    </th:block>
+    <footer class="text-center p-3 bg-light d-flex justify-content-center align-items-center" style="height: 15vh;">
+        <div>
+            <div>
+                <i class="fa-solid fa-phone"></i>
+                <a href="tel:+56 41 3830944">+56 41 3830944</a>
+            </div>
+            <div>
+                <i class="fa-solid fa-location-dot"></i>
+                <a
+                    href="https://www.google.com/maps/place/Consultores+Empresariales+E-Volution+Limitada/@-36.8252678,-73.050754,19z/data=!3m1!4b1!4m6!3m5!1s0x9669b5d0308198b5:0xbd67409566499fa!8m2!3d-36.8252678!4d-73.0501103!16s%2Fg%2F11fzwngw1q?entry=ttu&amp;g_ep=EgoyMDI1MDEwNi4xIKXMDSoASAFQAw%3D%3D">
+                    Freire 728, Oficina 206
+                </a>
+            </div>
+            <div>
+                <i class="fa-solid fa-envelope"></i>
+                <a href="mailto:contacto@e-volution.cl">contacto@e-volution.cl</a>
+            </div>
+        </div>
+    </footer>
+    <script th:inline="javascript">
+        let botonSig = document.getElementById("sigForm");
+        let diploma = document.getElementById("diploma");
+        let flyer = document.getElementById("flyer");
+        let botonEnv = document.getElementById("enviarCurso");
+        botonSig.addEventListener("click", function () {
+            botonSig.disabled = true;
+
+            diploma.style.display = "none";
+            flyer.style.display = "block";
+
+            setTimeout(() => {
+                botonSig.disabled = false;
+            }, 300); // pequeño delay
+        });
+    </script>
+    <script th:inline="javascript">
+        $(document).ready(function () {
+            let clienteSeleccionado = $("#clienteId").val() !== "";
+
+            $("#clienteInput").on("input", function () {
+                const texto = $(this).val();
+                clienteSeleccionado = false;
+                $("#clienteId").val("");
+
+                if (texto.length < 2) {
+                    $("#clienteResultados").hide();
+                    return;
+                }
+
+                $.get("/api/clientes/buscar", { q: texto }, function (data) {
+                    const contenedor = $("#clienteResultados");
+                    contenedor.empty();
+
+                    if (data.length === 0) {
+                        contenedor.hide();
+                        return;
+                    }
+
+                    data.forEach((cliente) => {
+                        contenedor.append(`
+                            <button 
+                                type="button"
+                                class="list-group-item list-group-item-action"
+                                data-id="${cliente.id}"
+                                data-nombre="${cliente.nombreCliente}">
+                                ${cliente.nombreCliente}
+                            </button>
+                        `);
+                    });
+
+                    contenedor.show();
+                });
+            });
+
+            // CLICK EN OPCIÓN
+            $(document).on("click", "#clienteResultados button", function () {
+                $("#clienteInput").val($(this).data("nombre"));
+                $("#clienteId").val($(this).data("id"));
+                clienteSeleccionado = true;
+                $("#clienteResultados").hide();
+            });
+
+            // BLOQUEO SI NO SE SELECCIONÓ
+            $("form").on("submit", function (e) {
+                if (!clienteSeleccionado) {
+                    e.preventDefault();
+                    alert("Debes seleccionar un cliente válido de la lista");
+                    $("#clienteInput").focus();
+                }
+            });
+        });
+    </script>
+    <script th:inline="javascript">
+        $(document).ready(function () {
+            let relatorSeleccionado = $("#relatorId").val() !== "";
+
+            $("#relatorInput").on("input", function () {
+                const texto = $(this).val();
+                relatorSeleccionado = false;
+                $("#relatorId").val("");
+
+                if (texto.length < 2) {
+                    $("#relatorResultados").hide();
+                    return;
+                }
+
+                $.get("/api/relator/buscar", { q: texto }, function (data) {
+                    const contenedor = $("#relatorResultados");
+                    contenedor.empty();
+
+                    if (data.length === 0) {
+                        contenedor.hide();
+                        return;
+                    }
+
+                    data.forEach((relator) => {
+                        contenedor.append(`
+                            <button 
+                                type="button"
+                                class="list-group-item list-group-item-action"
+                                data-id="${relator.id}"
+                                data-nombre="${relator.nombre}">
+                                ${relator.nombre}
+                            </button>
+                        `);
+                    });
+
+                    contenedor.show();
+                });
+            });
+
+            // CLICK EN OPCIÓN
+            $(document).on("click", "#relatorResultados button", function () {
+                $("#relatorInput").val($(this).data("nombre"));
+                $("#relatorId").val($(this).data("id"));
+                relatorSeleccionado = true;
+                $("#relatorResultados").hide();
+            });
+
+            // BLOQUEO SI NO SE SELECCIONÓ
+            $("form").on("submit", function (e) {
+                if (!relatorSeleccionado) {
+                    e.preventDefault();
+                    alert("Debes seleccionar un relator válido de la lista");
+                    $("#relatorInput").focus();
+                }
+            });
+        });
+    </script>
+
+    <script th:inline="javascript">
+        $(document).ready(function () {
+            let plantillaDipSeleccionado = $("#plantillaDipId").val() !== "";
+
+            $("#plantillaDipInput").on("input", function () {
+                const texto = $(this).val();
+                plantillaDipSeleccionado = false;
+                $("#plantillaDipId").val("");
+
+                if (texto.length < 2) {
+                    $("#plantillaDipResultados").hide();
+                    return;
+                }
+
+                $.get(
+                    "/api/plantilla/buscar",
+                    { q: texto, t: "diploma" },
+                    function (data) {
+                        const contenedor = $("#plantillaDipResultados");
+                        contenedor.empty();
+
+                        if (data.length === 0) {
+                            contenedor.hide();
+                            return;
+                        }
+
+                        data.forEach((plantillaDip) => {
+                            contenedor.append(`
+                            <button 
+                                type="button"
+                                class="list-group-item list-group-item-action"
+                                data-id="${plantillaDip.id}"
+                                data-nombre="${plantillaDip.nombreCertificado}">
+                                ${plantillaDip.nombreCertificado}
+                            </button>
+                        `);
+                        });
+
+                        contenedor.show();
+                    },
+                );
+            });
+
+            // CLICK EN OPCIÓN
+            $(document).on("click", "#plantillaDipResultados button", function () {
+                $("#plantillaDipInput").val($(this).data("nombre"));
+                $("#plantillaDipId").val($(this).data("id"));
+                plantillaDipSeleccionado = true;
+                $("#plantillaDipResultados").hide();
+            });
+
+            // BLOQUEO SI NO SE SELECCIONÓ
+        });
+    </script>
+
+    <script th:inline="javascript">
+        $(document).ready(function () {
+            let plantillaFlySeleccionado = $("#plantillaFlyId").val() !== "";
+
+            $("#plantillaFlyInput").on("input", function () {
+                const texto = $(this).val();
+                plantillaFlySeleccionado = false;
+                $("#plantillaFlyId").val("");
+
+                if (texto.length < 2) {
+                    $("#plantillaFlyResultados").hide();
+                    return;
+                }
+
+                $.get(
+                    "/api/plantilla/buscar",
+                    { q: texto, t: "flyer" },
+                    function (data) {
+                        const contenedor = $("#plantillaFlyResultados");
+                        contenedor.empty();
+
+                        if (data.length === 0) {
+                            contenedor.hide();
+                            return;
+                        }
+
+                        data.forEach((plantillaFly) => {
+                            contenedor.append(`
+                            <button 
+                                type="button"
+                                class="list-group-item list-group-item-action"
+                                data-id="${plantillaFly.id}"
+                                data-nombre="${plantillaFly.nombreCertificado}">
+                                ${plantillaFly.nombreCertificado}
+                            </button>
+                        `);
+                        });
+
+                        contenedor.show();
+                    },
+                );
+            });
+
+            // CLICK EN OPCIÓN
+            $(document).on("click", "#plantillaFlyResultados button", function () {
+                $("#plantillaFlyInput").val($(this).data("nombre"));
+                $("#plantillaFlyId").val($(this).data("id"));
+                plantillaFlySeleccionado = true;
+                $("#plantillaFlyResultados").hide();
+            });
+
+            // BLOQUEO SI NO SE SELECCIONÓ
+            $("form").on("submit", function (e) {
+                if (!plantillaFlySeleccionado) {
+                    e.preventDefault();
+                    alert("Debes seleccionar una plantilla válida de la lista");
+                    $("#plantillaFlyInput").focus();
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

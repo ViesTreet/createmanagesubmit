@@ -1137,26 +1137,178 @@ public class ControladorBase {
     }
 
     @GetMapping("/dataBaseCurso/Cliente/{id}")
-    public String dataBaseCursoPorCliente(HttpSession session, Model model,@PathVariable("id") Long id) {
+    public String dataBaseCursoPorCliente(HttpSession session, Model model, @PathVariable("id") Long id) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuarioTemporal == null) {
             return "redirect:/";
         }
+        String cliente = "default";
+        try {
+            cliente = servicio.clientePorId(id).getNombreCliente();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        model.addAttribute("nombre", cliente);
         model.addAttribute("admin", usuarioTemporal);
-        model.addAttribute("cliente",id);
+        model.addAttribute("cliente", id);
         return "databaseCursoFiltroCliente";
     }
 
     @GetMapping("/dataBaseCurso/Relator/{id}")
-    public String dataBaseCursoPorRelator(HttpSession session, Model model,@PathVariable("id") Long id) {
+    public String dataBaseCursoPorRelator(HttpSession session, Model model, @PathVariable("id") Long id) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuarioTemporal == null) {
             return "redirect:/";
         }
+        String relator = "default";
+        try {
+            relator = servicio.relatorPorId(id).getNombre();
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        ;
+        model.addAttribute("nombre", relator);
         model.addAttribute("admin", usuarioTemporal);
-        model.addAttribute("relator",id);
+        model.addAttribute("relator", id);
         return "databaseCursoFiltroRelator";
     }
-    
+
+    @GetMapping("/dataBaseCurso/Curso/{id}/editar")
+    public String editarDatosCurso(HttpSession session, Model model, @PathVariable("id") Long id) {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+        if (usuarioTemporal == null) {
+            return "redirect:/";
+        }
+        Curso curso = servicio.cursoPorId(id);
+
+        LocalDate fecha = curso.getFechaInicio().toLocalDate();
+        LocalTime horaInicio = curso.getFechaInicio().toLocalTime();
+        LocalTime horaFin = curso.getFechaFin().toLocalTime();
+        model.addAttribute("admin", usuarioTemporal);
+        model.addAttribute("curso", curso);
+        model.addAttribute("fecha", fecha);
+        model.addAttribute("horaI", horaInicio);
+        model.addAttribute("horaF", horaFin);
+
+        return "editarCurso";
+    }
+
+    @PostMapping("/dataBaseCurso/editarCurso")
+    public String editarCurso(
+
+            // ===== DIPLOMA =====
+
+            @RequestParam String nombreCurso,
+
+            @RequestParam String diasCursos,
+
+            @RequestParam String duracion,
+
+            @RequestParam Long clienteId,
+
+            @RequestParam String modalidad,
+
+            @RequestParam String ubicacionSubida,
+
+            @RequestParam String ciudad,
+
+            @RequestParam Long relatorId,
+
+            @RequestParam Long plantillaDipId,
+
+            @RequestParam Float NotaMin,
+
+            @RequestParam Integer asistenciaMin,
+
+            // ===== FLYER =====
+
+            @RequestParam String ubicacionDelCurso,
+
+            @RequestParam String ubicacionCliente,
+
+            @RequestParam String fecha, // yyyy-MM-dd
+
+            @RequestParam String horaI, // HH:mm
+
+            @RequestParam String horaF, // HH:mm
+
+            @RequestParam Float horasRelatorCurso,
+
+            @RequestParam Long plantillaFlyId,
+
+            @RequestParam Long id,
+
+            RedirectAttributes redirectAttrs) {
+
+        try {
+
+            LocalDate fechaCurso = LocalDate.parse(fecha);
+            LocalTime horaInicio = LocalTime.parse(horaI);
+            LocalTime horaFin = LocalTime.parse(horaF);
+
+            LocalDateTime fechaDeInicio = LocalDateTime.of(fechaCurso, horaInicio);
+            LocalDateTime fechaDeFinalizacion = LocalDateTime.of(fechaCurso, horaFin);
+            Curso curso = servicio.cursoPorId(id);
+            Cliente cliente = servicio.clientePorId(clienteId);
+
+            Relator relator = servicio.buscarRelatorPorId(relatorId);
+            relator.setHorasTrabajados(relator.getHorasTrabajados() + horasRelatorCurso);
+            servicio.guardarRelator(relator);
+
+            Relator relatorAntiguo = curso.getRelator();
+            relatorAntiguo.setHorasTrabajados(relatorAntiguo.getHorasTrabajados() - curso.getHorasRelatorCurso());
+            servicio.guardarRelator(relatorAntiguo);
+            Plantilla plantillaDiploma = servicio.plantillaPorId(plantillaDipId);
+
+            Plantilla plantillaFlyer = servicio.plantillaPorId(plantillaFlyId);
+
+            curso.setNombreCurso(nombreCurso);
+            curso.setDiasCursos(diasCursos);
+            curso.setDuracion(duracion);
+
+            curso.setCliente(cliente);
+            curso.setModalidad(modalidad);
+            curso.setUbicacionSubida(ubicacionSubida);
+            curso.setCiudad(ciudad);
+
+            curso.setRelator(relator);
+            curso.setNotaMin(NotaMin);
+            curso.setAsistenciaMin(asistenciaMin);
+
+            curso.setUbicacionDelCurso(ubicacionDelCurso);
+            curso.setUbicacionCliente(ubicacionCliente);
+            curso.setFechaInicio(fechaDeInicio);
+            curso.setFechaFin(fechaDeFinalizacion);
+
+            curso.setPlantillaDiploma(plantillaDiploma);
+            curso.setPlantillaFlyer(plantillaFlyer);
+            curso.setHorasRelatorCurso(horasRelatorCurso);
+            servicio.guardarCurso(curso);
+            return "redirect:/dataBaseCurso";
+
+        } catch (Exception e) {
+            redirectAttrs.addFlashAttribute("error", e.getMessage());
+            return "redirect:/dataBaseCurso";
+        }
+    }
+
+    @GetMapping("/dataBaseCurso/Curso/{id}/alumnos")
+    public String dataBaseAlumnosPorCurso(HttpSession session, Model model, @PathVariable("id") Long id) {
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+        if (usuarioTemporal == null) {
+            return "redirect:/";
+        }
+        String curso = "default";
+        try {
+            curso = servicio.cursoPorId(id).getNombreCurso();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        model.addAttribute("nombre", curso);
+        model.addAttribute("admin", usuarioTemporal);
+        model.addAttribute("curso", id);
+        return "databaseAlumnoCurso";
+    }
 
 }

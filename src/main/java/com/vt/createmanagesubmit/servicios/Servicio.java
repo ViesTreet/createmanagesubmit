@@ -137,50 +137,109 @@ public class Servicio {
         return repoAlum.findAll(PageRequest.of(0, 200, Sort.by("updatedAt").descending()));
     }
 
-    public Page<Alumno> buscarConMultiplesFiltros(List<filtroDTO> filtros) {
-        Specification<Alumno> spec = Specification.unrestricted();
-
-        for (filtroDTO filtro : filtros) {
-            spec = spec.and(crearEspecificacion(filtro));
-        }
-
-        return repoAlum.findAll(spec, PageRequest.of(0, Integer.MAX_VALUE, Sort.by("updatedAt").descending()));
+    public Page<Alumno> alumnoPorCursoId(Long id) {
+        return repoAlum.findByCursoId(id, PageRequest.of(0, 200, Sort.by("updatedAt").descending()));
     }
 
-    private Specification<Alumno> crearEspecificacion(filtroDTO filtro) {
+    public Page<Alumno> buscarConMultiplesFiltrosAlumno(List<Map<String, String>> filtros) {
+
+        Specification<Alumno> spec = Specification.unrestricted();
+
+        for (Map<String, String> filtro : filtros) {
+            String campo = filtro.get("campo");
+            String valor = filtro.get("valor");
+
+            if (campo != null && valor != null && !valor.isBlank()) {
+                spec = spec.and(crearEspecificacionAlumno(campo, valor));
+            }
+        }
+
+        return repoAlum.findAll(
+                spec,
+                PageRequest.of(0, Integer.MAX_VALUE, Sort.by("updatedAt").descending()));
+    }
+
+    public Page<Alumno> buscarConMultiplesFiltrosAlumnoPorCurso(
+            List<Map<String, String>> filtros,
+            Long cursoId) {
+
+        Specification<Alumno> spec = (root, query, cb) -> {
+            query.distinct(true); // 🔥 CLAVE para evitar duplicados
+            return cb.equal(root.join("curso").get("id"), cursoId);
+        };
+
+        for (Map<String, String> filtro : filtros) {
+            String campo = filtro.get("campo");
+            String valor = filtro.get("valor");
+
+            if (campo != null && valor != null && !valor.isBlank()) {
+                spec = spec.and(crearEspecificacionAlumno(campo, valor));
+            }
+        }
+
+        return repoAlum.findAll(
+                spec,
+                PageRequest.of(0, Integer.MAX_VALUE, Sort.by("updatedAt").descending()));
+    }
+
+    private Specification<Alumno> crearEspecificacionAlumno(String campo, String valor) {
+
         return (root, query, cb) -> {
-            String campo = filtro.getCampo();
-            String valor = filtro.getValor();
 
             switch (campo) {
+
                 case "rut":
-                    return cb.like(root.get("rut"), "%" + valor + "%");
+                    return cb.like(
+                            cb.lower(root.get("rut")),
+                            "%" + valor.toLowerCase() + "%");
+
                 case "nombreAsistente":
-                    return cb.like(root.get("nombreAsistente"), "%" + valor + "%");
+                    return cb.like(
+                            cb.lower(root.get("nombreAsistente")),
+                            "%" + valor.toLowerCase() + "%");
+
                 case "nombreCurso":
-                    return cb.like(root.get("nombreCurso"), "%" + valor + "%");
+                    return cb.like(
+                            cb.lower(root.get("nombreCurso")),
+                            "%" + valor.toLowerCase() + "%");
+
                 case "estado":
-                    if (valor.trim().equalsIgnoreCase("no aprobado") || valor.trim().equalsIgnoreCase("noAprobado")) {
+                    if (valor.equalsIgnoreCase("no aprobado") || valor.equalsIgnoreCase("noAprobado")) {
                         return cb.equal(root.get("estado"), "noAprobado");
-                    } else if (valor.trim().equalsIgnoreCase("aprobado")) {
+                    } else if (valor.equalsIgnoreCase("aprobado")) {
                         return cb.equal(root.get("estado"), "aprobado");
                     } else {
                         return cb.equal(root.get("estado"), "revisionManual");
                     }
+
                 case "diploma":
-                    if (valor.trim().equalsIgnoreCase("enviado")) {
+                    if (valor.equalsIgnoreCase("enviado")) {
                         return cb.equal(root.get("diploma"), "enviado");
                     } else {
                         return cb.equal(root.get("diploma"), "noEnviado");
                     }
+
                 case "cliente":
-                    return cb.like(root.get("cliente"), "%" + valor + "%");
-                case "identificador":
-                    return cb.like(root.get("identificador"), "%" + valor + "%");
+                    return cb.like(
+                            cb.lower(
+                                    root.join("curso")
+                                            .join("cliente")
+                                            .get("nombreCliente")),
+                            "%" + valor.toLowerCase() + "%");
+
                 case "relator":
-                    return cb.like(root.get("relator"), "%" + valor + "%");
+                    return cb.like(
+                            cb.lower(
+                                    root.join("curso")
+                                            .join("relator")
+                                            .get("nombre")),
+                            "%" + valor.toLowerCase() + "%");
+
                 case "correlativo":
-                    return cb.like(root.get("numeroCorrelativoInterno"), "%" + valor + "%");
+                    return cb.like(
+                            cb.lower(root.get("numeroCorrelativoInterno")),
+                            "%" + valor.toLowerCase() + "%");
+
                 default:
                     return cb.conjunction();
             }

@@ -142,7 +142,7 @@
     </nav>
   </header>
   <div id="contenderBase" class="container pt-2 pb-2" style="height: 90vh">
-    <h2 class="text-center">Base de datos cursos</h2>
+    <h2 class="text-center" th:text="'Cursos del cliente: '+ ${nombre}"></h2>
     <div class="d-flex align-items-center justify-content-between pb-1" style="max-width: 95vw">
       <div>
         <form id="alumnoBuscador" class="d-flex col-12">
@@ -225,7 +225,7 @@
               "/editar'>Editar</a>" +
               "<a class='btn btn-secondary' href='/dataBaseCurso/Curso/" +
               curso.id +
-              "/cursos'>Alumnos</a>" +
+              "/alumnos'>Alumnos</a>" +
               "</td>" +
               "</tr>";
 
@@ -404,7 +404,7 @@
           "/editar'>Editar</a>" +
           "<a class='btn btn-secondary' href='/dataBaseCurso/Curso/" +
           curso.id +
-          "/cursos'>Alumnos</a>" +
+          "/alumnos'>Alumnos</a>" +
           "</td>" +
           "</tr>";
 

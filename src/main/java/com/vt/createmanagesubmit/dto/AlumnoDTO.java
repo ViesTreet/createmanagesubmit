@@ -4,25 +4,16 @@ import java.util.Date;
 
 import com.vt.createmanagesubmit.modelos.Alumno;
 
+
 public class AlumnoDTO {
 
-	private Long id;
+    private Long id;
 
     private String nombreAsistente;
 
-    private String nombreCurso;
-
-    private String diasCursos;
-
-    private String numeroHoras;
-
     private String numeroCorrelativoInterno;
 
-    private String cliente;
-
-    private String notaAprovacion;
-
-    private String relator;
+    private String notaAprobacion;
 
     private String asistencia;
 
@@ -34,40 +25,34 @@ public class AlumnoDTO {
 
     private String correo;
 
-    private String plantilla;
+    private String curso;
 
-    private String ubicacionSubida;
+    private String cliente;
 
-    private String lugarYfechaEmision;
+    private String relator;
 
 	private Date createdAt;
 	
 	private Date updatedAt;
 
-    
     public AlumnoDTO() {
     }
 
     public AlumnoDTO(Alumno alumno) {
-        this.id = alumno.getId();
-        this.nombreAsistente = alumno.getNombreAsistente();
-        this.nombreCurso = alumno.getCurso().getNombreCurso();
-        this.diasCursos = alumno.getCurso().getDiasCursos();
-        this.numeroHoras = alumno.getCurso().getDuracion();
-        this.numeroCorrelativoInterno = alumno.getNumeroCorrelativoInterno();
+        this.id = alumno.getId() ;
+        this.nombreAsistente = alumno.getNombreAsistente() ;
+        this.numeroCorrelativoInterno = alumno.getNumeroCorrelativoInterno() ;
+        this.notaAprobacion = alumno.getNotaAprobacion() ;
+        this.asistencia = alumno.getAsistencia() ;
+        this.estado = alumno.getEstado() ;
+        this.diploma = alumno.getDiploma() ;
+        this.rut = alumno.getRut() ;
+        this.correo = alumno.getCorreo() ;
+        this.curso = alumno.getCurso().getNombreCurso() ;
         this.cliente = alumno.getCurso().getCliente().getNombreCliente();
-        this.notaAprovacion = alumno.getNotaAprobacion();
         this.relator = alumno.getCurso().getRelator().getNombre();
-        this.asistencia = alumno.getAsistencia();
-        this.estado = alumno.getEstado();
-        this.diploma = alumno.getDiploma();
-        this.rut = alumno.getRut();
-        this.correo = alumno.getCorreo();
-        this.ubicacionSubida = alumno.getCurso().getUbicacionSubida();
-        this.lugarYfechaEmision = alumno.getCurso().getLugarYfechaEmision();
-        this.plantilla = alumno.getCurso().getPlantillaDiploma().getNombreCertificado();
-        this.createdAt = alumno.getCreatedAt();
-        this.updatedAt = alumno.getUpdatedAt();
+        this.createdAt = alumno.getCreatedAt() ;
+        this.updatedAt = alumno.getUpdatedAt() ;
     }
 
     public Long getId() {
@@ -86,30 +71,6 @@ public class AlumnoDTO {
         this.nombreAsistente = nombreAsistente;
     }
 
-    public String getNombreCurso() {
-        return nombreCurso;
-    }
-
-    public void setNombreCurso(String nombreCurso) {
-        this.nombreCurso = nombreCurso;
-    }
-
-    public String getDiasCursos() {
-        return diasCursos;
-    }
-
-    public void setDiasCursos(String diasCursos) {
-        this.diasCursos = diasCursos;
-    }
-
-    public String getNumeroHoras() {
-        return numeroHoras;
-    }
-
-    public void setNumeroHoras(String numeroHoras) {
-        this.numeroHoras = numeroHoras;
-    }
-
     public String getNumeroCorrelativoInterno() {
         return numeroCorrelativoInterno;
     }
@@ -118,28 +79,12 @@ public class AlumnoDTO {
         this.numeroCorrelativoInterno = numeroCorrelativoInterno;
     }
 
-    public String getCliente() {
-        return cliente;
+    public String getNotaAprobacion() {
+        return notaAprobacion;
     }
 
-    public void setCliente(String cliente) {
-        this.cliente = cliente;
-    }
-    
-    public String getNotaAprovacion() {
-        return notaAprovacion;
-    }
-
-    public void setNotaAprovacion(String notaAprovacion) {
-        this.notaAprovacion = notaAprovacion;
-    }
-
-    public String getRelator() {
-        return relator;
-    }
-
-    public void setRelator(String relator) {
-        this.relator = relator;
+    public void setNotaAprobacion(String notaAprobacion) {
+        this.notaAprobacion = notaAprobacion;
     }
 
     public String getAsistencia() {
@@ -182,30 +127,14 @@ public class AlumnoDTO {
         this.correo = correo;
     }
 
-    public String getPlantilla() {
-        return plantilla;
+    public String getCurso() {
+        return curso;
     }
 
-    public void setPlantilla(String plantilla) {
-        this.plantilla = plantilla;
+    public void setCurso(String curso) {
+        this.curso = curso;
     }
-
-    public String getUbicacionSubida() {
-        return ubicacionSubida;
-    }
-
-    public void setUbicacionSubida(String ubicacionSubida) {
-        this.ubicacionSubida = ubicacionSubida;
-    }
-
-    public String getLugarYfechaEmision() {
-        return lugarYfechaEmision;
-    }
-
-    public void setLugarYfechaEmision(String lugarYfechaEmision) {
-        this.lugarYfechaEmision = lugarYfechaEmision;
-    }
-
+    
     public Date getCreatedAt() {
         return createdAt;
     }
@@ -222,9 +151,21 @@ public class AlumnoDTO {
         this.updatedAt = updatedAt;
     }
 
-    
+    public String getCliente() {
+        return cliente;
+    }
 
-   
-    
+    public void setCliente(String cliente) {
+        this.cliente = cliente;
+    }
 
+    public String getRelator() {
+        return relator;
+    }
+
+    public void setRelator(String relator) {
+        this.relator = relator;
+    }
+    
+    
 }
