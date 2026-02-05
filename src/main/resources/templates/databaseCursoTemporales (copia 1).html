@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <title>Cursos temporales - Asistencia</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+  <link rel="stylesheet" th:href="@{/css/styleCustom.css}" />
+  <link rel="icon" th:href="@{/images/Logobgremove.png}" type="image/x-icon" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  <style>
+    .popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      max-height: 100vh;
+      width: auto;
+      max-width: 90vw;
+      background: #ffffff;
+      padding: 20px 24px;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+      overflow: hidden;
+    }
+
+    .popup h4 {
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+
+    .popup form {
+      max-height: calc(100vh - 160px);
+      overflow-y: auto;
+      padding-right: 6px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group label {
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+    }
+
+    .form-actions {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .popup::-webkit-scrollbar,
+    form::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .popup::-webkit-scrollbar-thumb,
+    form::-webkit-scrollbar-thumb {
+      background: #ccc;
+      border-radius: 6px;
+    }
+
+    /* estilos adaptados del ejemplo */
+    th {
+      font-size: 13px;
+    }
+
+    td {
+      overflow-x: auto;
+      font-size: 12px;
+    }
+
+    #filtros-activos .card {
+      margin-right: 8px;
+      margin-bottom: 8px;
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 1050;
+    }
+
+    .modal-qr-img {
+      display: block;
+      margin: 0 auto 12px;
+      max-width: 100%;
+      height: auto;
+    }
+
+    @media (max-width:768px) {
+
+      th,
+      td {
+        font-size: 12px;
+      }
+
+      #tablaCursos {
+        width: 150vw;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="d-flex align-items-center justify-content-between p-3 bg-light" style="height: 10vh; z-index: 1">
+    <a th:href="@{/home}" class="logo">
+      <img th:src="@{/images/Logobgremove.png}" alt="[LOGO]" style="height:48px;" />
+    </a>
+    <nav class="d-flex justify-content-center align-items-center flex-nowrap">
+      <a th:href="@{/home}" class="btn btn-primary mx-2">Regresar</a>
+      <a th:href="@{/home}" class="btn btn-primary mx-2">Inicio</a>
+      <a th:href="@{/documentacion}" target="_blank" class="btn btn-primary mx-2">Documentación</a>
+      <div class="d-flex flex-column justify-content-center align-items-center">
+        <i class="fa-solid fa-user"></i>
+        <p class="p-0 m-0" th:text="${admin.nombre}">Usuario</p>
+      </div>
+    </nav>
+  </header>
+
+  <div id="contenderBase" class="container pt-3 pb-3" style="height:90vh;">
+    <h2 class="text-center">Cursos temporales — Asistencia</h2>
+
+    <div class="d-flex align-items-center justify-content-between pb-2" style="max-width:95vw;">
+      <div style="flex:1;">
+        <form id="cursoBuscador" class="d-flex">
+          <select id="filtroBusquedaCurso" class="form-select" name="filtroBusquedaCurso" style="max-width:180px;">
+            <option value="nombreCurso">Nombre Curso</option>
+            <option value="relator">Relator</option>
+            <option value="identificador">Identificador</option>
+            <option value="cliente">Cliente</option>
+            <option value="estado">Estado</option>
+          </select>
+          <input id="busquedaCurso" type="search" class="form-control mx-2" placeholder="Buscar" name="busquedaCurso"
+            onkeydown="submitOnEnter(event)" />
+          <button type="button" class="btn btn-outline-primary" onclick="agregarFiltroCurso()">Agregar Filtro</button>
+        </form>
+        <div id="filtros-activos" class="d-flex flex-wrap mt-2"></div>
+      </div>
+    </div>
+
+    <div id="contenedorTabla" style="overflow-y:auto; max-height:65vh; max-width:95vw;">
+      <table class="table table-hover table-bordered mb-5" style="table-layout: fixed;" id="tablaCursos">
+        <thead class="thead-dark">
+          <tr>
+            <th>Curso</th>
+            <th>Relator</th>
+            <th>Identificador</th>
+            <th>Cliente</th>
+            <th>Ubicacion</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- llenado por JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- POPUP QR (usado tanto para fila como tras crear) -->
+  <div class="overlay" id="overlayQr">
+    <div class="popup">
+      <div class="d-flex justify-content-end">
+        <button class="btn btn-danger" onclick="closeOverlayQr()">Cerrar</button>
+      </div>
+      <h4 class="text-center">QR de asistencia</h4>
+      <img id="qrImage" class="modal-qr-img" src="" alt="QR" />
+      <div class="text-center mb-2">
+        <a id="qrLink" href="#" target="_blank"></a>
+      </div>
+      <div class="d-flex justify-content-center">
+        <button id="btnDownloadQr" class="btn btn-primary">Descargar QR</button>
+      </div>
+    </div>
+  </div>
+
+
+  <footer class="text-center p-3 d-flex justify-content-center align-items-center"
+    style="height:12vh; background-color:#f8f9fa;">
+    <div>
+      <div><i class="fa-solid fa-phone"></i> <a href="tel:+56 41 3830944">+56 41 3830944</a></div>
+      <div><i class="fa-solid fa-location-dot"></i> Freire 728, Oficina 206</div>
+      <div><i class="fa-solid fa-envelope"></i> contacto@e-volution.cl</div>
+    </div>
+  </footer>
+
+  <script th:inline="javascript">
+    // variables que puedes inyectar desde el servidor si quieres:
+    /*[[*/
+    const contextPath = /*[[@{/}]]*/ "/";
+    /*]]*/
+  </script>
+
+  <script th:inline="javaScript">
+    const tipoAdmin = /*[[${admin.rol}]]*/ "default";
+    const ubicacionAdmin = /*[[${admin.ubicacion}]]*/ "default";
+    let filtrosActivos = [];
+
+    function crearCardFiltro(f, v) {
+      return `<div class="card filtro-card">
+                  <div class="card-body p-2 d-flex justify-content-between align-items-center">
+                    <span>${f}: ${v}</span>
+                    <button type="button" class="btn-close" data-filtro="${f}" data-valor="${v}"></button>
+                  </div>
+                </div>`;
+    }
+
+    $(document).on('click', '.btn-close', function () {
+      const f = $(this).data('filtro');
+      const v = $(this).data('valor');
+      removerFiltro(f, v);
+    });
+
+    function agregarFiltroCurso() {
+      const filtro = $('#filtroBusquedaCurso').val();
+      const valor = $('#busquedaCurso').val().trim();
+      if (!valor) return;
+      if (!filtrosActivos.some(x => x.campo === filtro && x.valor === valor)) {
+        filtrosActivos.push({ campo: filtro, valor: valor });
+        actualizarFiltros();
+        cargarCursosConFiltros();
+      }
+      $('#busquedaCurso').val('');
+    }
+
+    function removerFiltro(f, v) {
+      filtrosActivos = filtrosActivos.filter(x => !(x.campo === f && x.valor === v));
+      actualizarFiltros();
+      if (filtrosActivos.length) cargarCursosConFiltros(); else cargarCursos();
+    }
+
+    function actualizarFiltros() {
+      const cont = $('#filtros-activos').empty();
+      filtrosActivos.forEach(f => cont.append(crearCardFiltro(f.campo, f.valor)));
+    }
+
+    function submitOnEnter(e) {
+      if (e.key === 'Enter') { e.preventDefault(); agregarFiltroCurso(); }
+    }
+
+    // Cargar cursos (lista)
+    function cargarCursos() {
+      $.ajax({
+        url: '/api/datosCurso', method: 'GET', success: function (data) {
+          renderTablaCursos(data);
+        }
+      });
+    }
+    function cargarCursosConFiltros() {
+      $.ajax({
+        url: '/api/cursoTemporal/busquedaMultiFiltro',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(filtrosActivos),
+        success: function (data) { renderTablaCursos(data); }
+      });
+    }
+
+    function renderTablaCursos(data) {
+      const tbody = $('#tablaCursos tbody').empty();
+      data.forEach(c => {
+        if(!c.asistenciaQr){
+          return;
+        }
+        if (tipoAdmin != "admin") {
+          if (!c.ubicacionSubida || c.ubicacionSubida != ubicacionAdmin) {
+            return;
+          }
+        }
+
+        const fila = $('<tr>').attr('data-curso-id', c.id);
+        fila.append(`<td>${escapeHtml(c.nombreCurso || '')}</td>`);
+        fila.append(`<td>${escapeHtml(c.relator || '')}</td>`);
+        fila.append(`<td>${escapeHtml(c.identificador || '')}</td>`);
+        fila.append(`<td>${escapeHtml(c.cliente || '')}</td>`);
+        fila.append(`<td>${escapeHtml(c.ubicacionSubida || '')}</td>`);
+        fila.append(`<td>${escapeHtml(c.estado || '')}</td>`);
+        fila.append(`<td>
+                        <button class="btn btn-sm btn-primary" onclick="generarQrFila(${c.id}, '${escapeJs(c.nombreCurso || '')}')">Generar QR</button>
+                        <a class="btn btn-sm btn-secondary" href="/seccionAsistencia/revision/${c.id}">Revisar</a>
+                      </td>`);
+        tbody.append(fila);
+      });
+    }
+
+    function escapeHtml(s) { return $('<div>').text(s).html(); }
+    function escapeJs(s) { return s.replace(/'/g, "\\'").replace(/"/g, '\\"'); }
+
+    // Generar QR para una fila (mostrar popup con base64 y link)
+    function generarQrFila(id, cursoNombre) {
+      $.ajax({
+        url: `/api/cursoTemporal/generarQr/${id}`,
+        method: 'GET',
+        success: function (res) {
+          showQrPopup(res.imageBase64, res.link, cursoNombre);
+        },
+        error: function (e) { alert('Error generando QR: ' + (e.responseText || e.statusText)); }
+      });
+    }
+
+    function showQrPopup(base64, link, cursoNombre) {
+      $('#qrImage').attr('src', 'data:image/png;base64,' + base64);
+      $('#qrLink').attr('href', link).text(link);
+      $('#btnDownloadQr').off('click').on('click', function () {
+        // descargar desde endpoint para asegurar nombre
+        const nombre = (cursoNombre || 'curso') + "_QR.png";
+        // solicitar descarga
+        const a = document.createElement('a');
+        a.href = `/api/cursoTemporal/downloadQrByImage?base64=${encodeURIComponent(base64)}&filename=${encodeURIComponent(nombre)}`;
+        // como alternativa, hacemos fetch del endpoint de descarga por id; pero aquí usamos una ruta para descargar el base64 como archivo
+        // mejor: usar endpoint /api/cursoTemporal/downloadQrByBase64 para POST (implementado en backend)
+        // para simplificar, llamaremos al endpoint que sirve archivo por id (si se creó desde el server). Si no, se usará descarga directa:
+        const linkBlob = document.createElement('a');
+        const imageData = atob(base64);
+        const array = new Uint8Array(imageData.length);
+        for (let i = 0; i < imageData.length; i++) array[i] = imageData.charCodeAt(i);
+        const blob = new Blob([array], { type: 'image/png' });
+        const url = URL.createObjectURL(blob);
+        linkBlob.href = url;
+        linkBlob.download = (cursoNombre || 'curso') + "_QR.png";
+        document.body.appendChild(linkBlob);
+        linkBlob.click();
+        document.body.removeChild(linkBlob);
+        URL.revokeObjectURL(url);
+      });
+
+      $('#overlayQr').show();
+    }
+
+    function closeOverlayQr() { $('#overlayQr').hide(); $('#qrImage').attr('src', ''); $('#qrLink').attr('href', '').text(''); }
+
+    // helper: descarga por id (si quieres usar)
+    function descargarQrPorId(id, nombreCurso) {
+      window.location = `/api/cursoTemporal/downloadQr/${id}?filename=${encodeURIComponent((nombreCurso || 'curso') + '_QR.png')}`;
+    }
+
+    // init
+    $(document).ready(function () {
+      cargarPlantillas();
+      cargarCursos();
+    });
+  </script>
+</body>
+
+</html>

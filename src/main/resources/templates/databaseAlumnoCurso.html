@@ -284,10 +284,17 @@
 
     function removerFiltro(filtro, valor) {
       filtrosActivos = filtrosActivos.filter(
-        (f) => !(f.campo === filtro && f.valor === valor)
+        (f) => !(f.campo === filtro && String(f.valor) === String(valor))
       );
+
+
       actualizarFiltrosVisibles();
-      cargarDatosConFiltros();
+
+      if (filtrosActivos.length > 0) {
+        cargarDatosConFiltros();
+      } else {
+        cargarDatos();
+      }
     }
 
     const curso = /*[[${curso}]]*/ "";
@@ -472,6 +479,102 @@
         .prop("checked", true)
         .trigger("change");
     }
+
+    function cargarDatos() {
+      $.ajax({
+        url: "/api/datosAlumnoPorCurso/" + curso,
+        method: "GET",
+        success: function (data) {
+          var tbody = $("#tablaAlumnos tbody");
+          var contenedorNoEnviados = $("#alumnosNoEnviados"); // Un contenedor para los alumnos con estado "noEnviado"
+
+          tbody.empty(); // Limpiar la tabla antes de agregar nuevos datos
+          contenedorNoEnviados.empty(); // Limpiar el contenedor antes de agregar nuevos datos
+
+          $.each(data, function (i, alumno) {
+            if (alumno.estado && alumno.estado.toLowerCase() === "borrado") {
+              return; // Salta al siguiente alumno
+            }
+
+            var correoText = "sin correo"; // Valor por defecto
+
+            if (alumno.correo) {
+              // Verifica si el correo existe
+              if (alumno.correo === "diplomas@e-volution.cl") {
+                correoText = "correo empresa";
+              } else {
+                correoText = "con correo";
+              }
+            }
+
+            var fila =
+              "<tr data-alumno-id='" +
+              alumno.id +
+              "'>" +
+              "<td class='d-flex justify-content-center align-items-center' style='width: 5vw; height: 100%;'>" +
+              "<input type='checkbox' value='" +
+              alumno.id +
+              "'></td>" +
+              "<td><a href='/dataBaseAlumno/alumno/" +
+              alumno.id +
+              "'>" +
+              (alumno.nombreAsistente != null ? alumno.nombreAsistente : "") +
+              "</a></td>" +
+              "<td>" +
+              (alumno.cliente != null ? alumno.cliente : "") +
+              "</td>" +
+              "<td>" +
+              (alumno.relator != null ? alumno.relator : "") +
+              "</td>" +
+              "<td>" +
+              (alumno.estado != null ? alumno.estado : "") +
+              "</td>" +
+              "<td>" +
+              (alumno.rut != null ? alumno.rut : "") +
+              "</td>" +
+              "<td>" +
+              correoText +
+              "</td>" +
+              "<td>" +
+              (alumno.diploma != null ? alumno.diploma : "") +
+              "</td>" +
+              "<td>" +
+              (alumno.numeroCorrelativoInterno != null
+                ? alumno.numeroCorrelativoInterno
+                : "") +
+              "</td>" +
+              "</tr>";
+            tbody.append(fila);
+
+            // Si el estado es "noEnviado", agregar un <p> al contenedor
+            if (
+              alumno.diploma === "noEnviado" &&
+              alumno.estado === "aprobado" &&
+              alumno.plantilla != "Error en encontrar plantilla"
+            ) {
+              var parrafo =
+                "<p>Alumno: " +
+                (alumno.nombreAsistente != null
+                  ? alumno.nombreAsistente
+                  : "Desconocido") +
+                " Del curso: " +
+                (alumno.nombreCurso != null
+                  ? alumno.nombreCurso
+                  : "Desconocido") +
+                " se le enviara el certificado <br></br>";
+              contenedorNoEnviados.append(parrafo);
+            }
+
+          });
+          restoreCheckboxStates();
+          updateUIAfterRestore();
+        },
+        error: function (error) {
+          console.log("Error al obtener los datos", error);
+        },
+      });
+    }
+
     $(document).ready(function () {
       const checkboxKey = "checkboxStates";
       // Se utiliza el inline JavaScript para inyectar el valor de admin.ubicacion
@@ -545,102 +648,6 @@
           $("#listo-button").hide();
         }
       }
-
-      function cargarDatos() {
-        $.ajax({
-          url: "/api/datosAlumnoPorCurso/" + curso,
-          method: "GET",
-          success: function (data) {
-            var tbody = $("#tablaAlumnos tbody");
-            var contenedorNoEnviados = $("#alumnosNoEnviados"); // Un contenedor para los alumnos con estado "noEnviado"
-
-            tbody.empty(); // Limpiar la tabla antes de agregar nuevos datos
-            contenedorNoEnviados.empty(); // Limpiar el contenedor antes de agregar nuevos datos
-
-            $.each(data, function (i, alumno) {
-              if (alumno.estado && alumno.estado.toLowerCase() === "borrado") {
-                return; // Salta al siguiente alumno
-              }
-
-              var correoText = "sin correo"; // Valor por defecto
-
-              if (alumno.correo) {
-                // Verifica si el correo existe
-                if (alumno.correo === "diplomas@e-volution.cl") {
-                  correoText = "correo empresa";
-                } else {
-                  correoText = "con correo";
-                }
-              }
-
-              var fila =
-                "<tr data-alumno-id='" +
-                alumno.id +
-                "'>" +
-                "<td class='d-flex justify-content-center align-items-center' style='width: 5vw; height: 100%;'>" +
-                "<input type='checkbox' value='" +
-                alumno.id +
-                "'></td>" +
-                "<td><a href='/dataBaseAlumno/alumno/" +
-                alumno.id +
-                "'>" +
-                (alumno.nombreAsistente != null ? alumno.nombreAsistente : "") +
-                "</a></td>" +
-                "<td>" +
-                (alumno.cliente != null ? alumno.cliente : "") +
-                "</td>" +
-                "<td>" +
-                (alumno.relator != null ? alumno.relator : "") +
-                "</td>" +
-                "<td>" +
-                (alumno.estado != null ? alumno.estado : "") +
-                "</td>" +
-                "<td>" +
-                (alumno.rut != null ? alumno.rut : "") +
-                "</td>" +
-                "<td>" +
-                correoText +
-                "</td>" +
-                "<td>" +
-                (alumno.diploma != null ? alumno.diploma : "") +
-                "</td>" +
-                "<td>" +
-                (alumno.numeroCorrelativoInterno != null
-                  ? alumno.numeroCorrelativoInterno
-                  : "") +
-                "</td>" +
-                "</tr>";
-              tbody.append(fila);
-
-              // Si el estado es "noEnviado", agregar un <p> al contenedor
-              if (
-                alumno.diploma === "noEnviado" &&
-                alumno.estado === "aprobado" &&
-                alumno.plantilla != "Error en encontrar plantilla"
-              ) {
-                var parrafo =
-                  "<p>Alumno: " +
-                  (alumno.nombreAsistente != null
-                    ? alumno.nombreAsistente
-                    : "Desconocido") +
-                  " Del curso: " +
-                  (alumno.nombreCurso != null
-                    ? alumno.nombreCurso
-                    : "Desconocido") +
-                  " se le enviara el certificado <br></br>";
-                contenedorNoEnviados.append(parrafo);
-              }
-
-            });
-            restoreCheckboxStates();
-            updateUIAfterRestore();
-          },
-          error: function (error) {
-            console.log("Error al obtener los datos", error);
-          },
-        });
-      }
-
       // Cargar datos inicialmente
       cargarDatos();
 

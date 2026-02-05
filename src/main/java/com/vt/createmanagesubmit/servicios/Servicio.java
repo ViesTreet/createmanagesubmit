@@ -200,7 +200,7 @@ public class Servicio {
 
                 case "nombreCurso":
                     return cb.like(
-                            cb.lower(root.get("nombreCurso")),
+                            cb.lower(root.join("curso").get("nombreCurso")),
                             "%" + valor.toLowerCase() + "%");
 
                 case "estado":

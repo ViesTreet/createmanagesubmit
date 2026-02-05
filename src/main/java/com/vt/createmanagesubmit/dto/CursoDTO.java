@@ -51,6 +51,8 @@ public class CursoDTO {
 
     private String relator;
 
+    private boolean asistenciaQr;
+
 	private Date createdAt;
 	
 	private Date updatedAt;
@@ -83,6 +85,7 @@ public class CursoDTO {
         this.relator = curso.getRelator().getNombre();
         this.createdAt = curso.getCreatedAt();
         this.updatedAt = curso.getUpdatedAt();
+        this.asistenciaQr = curso.isAsistenciaQr();
     }
 
     public Long getId() {
@@ -275,6 +278,14 @@ public class CursoDTO {
 
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public boolean isAsistenciaQr() {
+        return asistenciaQr;
+    }
+
+    public void setAsistenciaQr(boolean asistenciaQr) {
+        this.asistenciaQr = asistenciaQr;
     }
     
     

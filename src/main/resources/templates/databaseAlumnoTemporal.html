@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
   <head>
     <title>Lista de Alumnos Temporales</title>
@@ -37,14 +37,17 @@
       }
 
       .overlay {
-        display: none; /* Oculto por defecto */
+        display: none;
+        /* Oculto por defecto */
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(0, 0, 0, 0.7); /* Fondo oscuro */
-        z-index: 999; /* Por encima de otros elementos */
+        background-color: rgba(0, 0, 0, 0.7);
+        /* Fondo oscuro */
+        z-index: 999;
+        /* Por encima de otros elementos */
       }
 
       /* Contenedor del formulario emergente */
@@ -57,7 +60,8 @@
         padding: 20px;
         border-radius: 8px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        z-index: 1000; /* Por encima del overlay */
+        z-index: 1000;
+        /* Por encima del overlay */
         width: 90%;
         max-width: 400px;
       }
@@ -97,8 +101,10 @@
       }
 
       #alumnosNoEnviados {
-        height: 50vh; /* Define una altura fija */
-        overflow-y: auto; /* Permite el desplazamiento vertical cuando el contenido es grande */
+        height: 50vh;
+        /* Define una altura fija */
+        overflow-y: auto;
+        /* Permite el desplazamiento vertical cuando el contenido es grande */
       }
 
       .filtro-card {
@@ -121,12 +127,14 @@
           max-width: 95vw;
         }
       }
+
       @media (max-width: 768px) {
         #contenderBase {
           max-width: 100vw !important;
           padding-left: 0px !important;
           padding-right: 0px !important;
         }
+
         #contenedorTabla {
           max-width: 100vw !important;
           overflow-y: auto;
@@ -152,6 +160,7 @@
       }
     </style>
   </head>
+
   <body>
     <header
       class="d-flex align-items-center justify-content-between p-3 bg-light"
@@ -182,7 +191,10 @@
       </nav>
     </header>
     <div id="contenderBase" class="container pt-2 pb-2" style="height: 90vh">
-      <h2 class="text-center" th:text="'Base de datos del curso '+${cursoTemporal.nombreCurso}"></h2>
+      <h2
+        class="text-center"
+        th:text="'Base de datos del curso '+${cursoTemporal.nombreCurso}"
+      ></h2>
       <div
         id="contenedorTabla"
         style="overflow-y: auto; max-height: 70vh; max-width: 95vw"
@@ -210,30 +222,27 @@
       </div>
     </div>
     <script th:inline="javascript">
-        function actualizarTabla(data) {
+      function actualizarTabla(data) {
         const tbody = $("#tablaAlumnos tbody");
         tbody.empty();
 
-        data.forEach(alumno => {
+        data.forEach((alumno) => {
+          const fecha = formatearFecha(alumno.createdAt);
 
-            const fecha = formatearFecha(alumno.createdAt);
-
-            const fila = `
+          const fila = `
             <tr data-id="${alumno.id}">
                 <td>${alumno.nombreAsistente}</td>
                 <td>${alumno.correo ?? "sin correo"}</td>
                 <td>${alumno.rut ?? ""}</td>
 
                 <td>
-                <input type="number" min="1" max="100"
-                    class="asistencia form-control form-control-sm"
-                    placeholder="100">
+                <input type="number" name="asistencia" min="0" max="100" step="1" placeholder="0 - 100"
+                class="form-control form-control-sm" />
                 </td>
 
                 <td>
-                <input type="text"
-                    class="nota form-control form-control-sm"
-                    placeholder="7.0">
+                <input type="number" name="notaAprobacion" min="0" max="7" step="0.1"
+                placeholder="0.0 - 7.0" class="form-control form-control-sm" />
                 </td>
 
                 <td>${fecha}</td>
@@ -252,112 +261,108 @@
             </tr>
             `;
 
-            tbody.append(fila);
+          tbody.append(fila);
         });
-        }
-    </script>
-    <script th:inline="javascript">
-        function formatearFecha(fechaBD) {
-          if (!fechaBD) return "";
-
-          // Si viene como Date o timestamp
-          let d = new Date(fechaBD);
-
-          // Si falla, intentar formato "yyyy-MM-dd HH:mm:ss.SSS"
-          if (isNaN(d)) {
-              const normalizada = fechaBD.replace(" ", "T").substring(0, 19);
-              d = new Date(normalizada);
-          }
-
-          if (isNaN(d)) return "Fecha inválida";
-
-          const hh = String(d.getHours()).padStart(2, "0");
-          const mm = String(d.getMinutes()).padStart(2, "0");
-          const dd = String(d.getDate()).padStart(2, "0");
-          const MM = String(d.getMonth() + 1).padStart(2, "0");
-          const yyyy = d.getFullYear();
-
-          return `${hh}:${mm} ${dd}-${MM}-${yyyy}`;
       }
-
-
     </script>
     <script th:inline="javascript">
-        const id = /*[[${idCurso}]]*/ "";
+      function formatearFecha(fechaBD) {
+        if (!fechaBD) return "";
 
-        function cargarDatos() {
-            $.ajax({
-            url: "/api/datosAlumnoTemporal/" + id,
-            method: "GET",
-            success: function (data) {
-                actualizarTabla(data);
-            },
-            error: function (error) {
-                console.log("Error al obtener los datos", error);
-            }
-            });
+        // Si viene como Date o timestamp
+        let d = new Date(fechaBD);
+
+        // Si falla, intentar formato "yyyy-MM-dd HH:mm:ss.SSS"
+        if (isNaN(d)) {
+          const normalizada = fechaBD.replace(" ", "T").substring(0, 19);
+          d = new Date(normalizada);
         }
+
+        if (isNaN(d)) return "Fecha inválida";
+
+        const hh = String(d.getHours()).padStart(2, "0");
+        const mm = String(d.getMinutes()).padStart(2, "0");
+        const dd = String(d.getDate()).padStart(2, "0");
+        const MM = String(d.getMonth() + 1).padStart(2, "0");
+        const yyyy = d.getFullYear();
+
+        return `${hh}:${mm} ${dd}-${MM}-${yyyy}`;
+      }
     </script>
     <script th:inline="javascript">
-        function validarNota(valor) {
-            return /^\d+(\.\d+)?$/.test(valor);
-        }
+      const id = /*[[${idCurso}]]*/ "";
+
+      function cargarDatos() {
+        $.ajax({
+          url: "/api/datosAlumnoTemporal/" + id,
+          method: "GET",
+          success: function (data) {
+            actualizarTabla(data);
+          },
+          error: function (error) {
+            console.log("Error al obtener los datos", error);
+          },
+        });
+      }
     </script>
     <script th:inline="javascript">
-        function enviarAlumno(alumnoId) {
+      function validarNota(valor) {
+        return /^\d+(\.\d+)?$/.test(valor);
+      }
+    </script>
+    <script th:inline="javascript">
+      function enviarAlumno(alumnoId) {
         const fila = $(`tr[data-id='${alumnoId}']`);
 
         const asistencia = fila.find(".asistencia").val();
         const nota = fila.find(".nota").val();
 
         if (!asistencia || asistencia < 1 || asistencia > 100) {
-            alert("Asistencia inválida");
-            return;
+          alert("Asistencia inválida");
+          return;
         }
 
         if (!validarNota(nota)) {
-            alert("Nota inválida (ej: 3.0)");
-            return;
+          alert("Nota inválida (ej: 3.0)");
+          return;
         }
 
         $.ajax({
-            url: "/api/alumnoTemporal/enviar",
-            method: "POST",
-            data: {
-                alumnoId: alumnoId,
-                cursoId: id,
-                asistencia: asistencia.toString(),
-                nota: nota.toString()
-            },
-            success: function (resp) {
-                console.log("Respuesta backend:", resp);
-                alert("Datos enviados");
-                cargarDatos();
-            },
-            error: function () {
-                alert("Error al enviar");
-            }
-            });
-        }
-
+          url: "/api/alumnoTemporal/enviar",
+          method: "POST",
+          data: {
+            alumnoId: alumnoId,
+            cursoId: id,
+            asistencia: asistencia.toString(),
+            nota: nota.toString(),
+          },
+          success: function (resp) {
+            console.log("Respuesta backend:", resp);
+            alert("Datos enviados");
+            cargarDatos();
+          },
+          error: function () {
+            alert("Error al enviar");
+          },
+        });
+      }
     </script>
     <script th:inline="javascript">
-        function confirmarBorrado(idAlumno) {
+      function confirmarBorrado(idAlumno) {
         if (!confirm("¿Seguro que deseas borrar este alumno?")) return;
 
         $.ajax({
-            url: "/api/alumnoTemporal/" + idAlumno,
-            method: "DELETE",
-            success: () => cargarDatos(),
-            error: () => alert("Error al borrar")
+          url: "/api/alumnoTemporal/" + idAlumno,
+          method: "DELETE",
+          success: () => cargarDatos(),
+          error: () => alert("Error al borrar"),
         });
-        }
-
+      }
     </script>
     <script th:inline="javascript">
-        document.addEventListener("DOMContentLoaded", function () {
-            cargarDatos();
-        });
+      document.addEventListener("DOMContentLoaded", function () {
+        cargarDatos();
+      });
     </script>
 
     <footer
@@ -371,7 +376,9 @@
         </div>
         <div>
           <i class="fa-solid fa-location-dot"></i>
-          <a href="https://www.google.com/maps/place/Consultores+Empresariales+E-Volution+Limitada/@-36.8252678,-73.050754,19z/data=!3m1!4b1!4m6!3m5!1s0x9669b5d0308198b5:0xbd67409566499fa!8m2!3d-36.8252678!4d-73.0501103!16s%2Fg%2F11fzwngw1q?entry=ttu&g_ep=EgoyMDI1MDEwNi4xIKXMDSoASAFQAw%3D%3D">
+          <a
+            href="https://www.google.com/maps/place/Consultores+Empresariales+E-Volution+Limitada/@-36.8252678,-73.050754,19z/data=!3m1!4b1!4m6!3m5!1s0x9669b5d0308198b5:0xbd67409566499fa!8m2!3d-36.8252678!4d-73.0501103!16s%2Fg%2F11fzwngw1q?entry=ttu&g_ep=EgoyMDI1MDEwNi4xIKXMDSoASAFQAw%3D%3D"
+          >
             Freire 728, Oficina 206
           </a>
         </div>

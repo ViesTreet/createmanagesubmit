@@ -62,6 +62,7 @@ import com.vt.createmanagesubmit.modelos.Plantilla;
 import com.vt.createmanagesubmit.modelos.Relator;
 import com.vt.createmanagesubmit.repositorios.RepositorioAlumnos;
 import com.vt.createmanagesubmit.repositorios.RepositorioCliente;
+import com.vt.createmanagesubmit.repositorios.RepositorioCurso;
 import com.vt.createmanagesubmit.repositorios.RepositorioPlantillas;
 import com.vt.createmanagesubmit.repositorios.RepositorioRelator;
 import com.vt.createmanagesubmit.servicios.Servicio;
@@ -100,6 +101,9 @@ public class ControladorApi {
 
     @Autowired
     private RepositorioRelator repoRel;
+
+    @Autowired
+    private RepositorioCurso repoCurso;
 
     @Autowired
     private RepositorioPlantillas repoPlanti;
@@ -800,6 +804,13 @@ public class ControladorApi {
             return cursos.stream().map(CursoDTO::new).collect(Collectors.toList());
         }
         return null;
+    }
+
+    @GetMapping("/curso/buscar")
+    @ResponseBody
+    public List<CursoDTO> buscarCurso(@RequestParam String q) {
+        return repoCurso.findTop10ByNombreCursoContainingIgnoreCase(q).stream().map(CursoDTO::new)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/datosCurso/cliente/{id}")

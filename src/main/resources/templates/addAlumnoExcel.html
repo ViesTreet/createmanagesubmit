@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,10 +9,14 @@
     <link rel="stylesheet" th:href="@{/css/styleCustom.css}">
     <link rel="icon" th:href="@{/images/Logobgremove.png}" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- Importar JS de Bootstrap -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <style>
-    
+
     </style>
 </head>
+
 <body>
     <header class="d-flex align-items-center justify-content-between p-3 bg-light" style="height: 10vh;">
         <a th:href="@{/home}" class="logo">
@@ -37,38 +42,38 @@
                         <input class="form-control" type="file" id="file" name="file" accept=".xls,.xlsx" required>
                     </div>
                     <div class="pb-2 pt-2">
-                        <label for="plantillaNombre">Elegir la plantilla a usar</label>
-                        <select name="plantillaNombre" id="plantillaNombre" class="form-select">
-                            <option value="excel">Usar plantillas del excel</option>
-                            <th:block th:each="plantilla : ${plantillas}">
-                                <option th:value="${plantilla.nombreCertificado}" th:text="${plantilla.nombreCertificado}"></option>
-                            </th:block>
-                        </select>
+                        <label for="cursoInput">Curso</label>
+                        <input id="cursoInput" type="text" placeholder="Escribe para buscar un curso" autocomplete="off"
+                            class="form-control" />
+                        <input type="hidden" name="cursoId" id="cursoId" required />
+                        <div id="cursoResultados" class="list-group position-absolute w-100"
+                            style="z-index: 1000; display: none">
+                        </div>
                     </div>
                     <div class="pb-2 pt-2">
                         <label for="estadoExcel">Elegir el estado de los alumnos(aprobado/no aprobado):</label>
                         <select name="estadoExcel" id="estadoExcel" class="form-select">
+                            <option value="aprobado">Aprobado</option>
                             <option value="Eexcel">Usar estado del excel</option>
                             <option value="Eauto">Automatico</option>
-                            <option value="aprobado">Aprobado</option>
                             <option value="noAprobado">No aprobado</option>
                         </select>
                     </div>
                     <div class="pb-2 pt-2">
                         <label for="estadoDiplomaExcel">Acciones a realizar(enviar/no enviar):</label>
                         <select name="estadoDiplomaExcel" id="estadoDiplomaExcel" class="form-select">
+                            <option value="noEnviar">No enviar</option>
                             <option value="diploExcel">Realizar segun excel</option>
                             <option value="enviarApro">Enviar(APROBADOS)</option>
                             <option value="enviarTodos">Enviar(TODOS)</option>
-                            <option value="noEnviar">No enviar</option>
                         </select>
                     </div>
                     <div class="pb-2 pt-2">
                         <label for="rutificador">Rutificador</label>
                         <select name="rutificador" id="rutificador" class="form-select">
+                            <option value="rutiNinguno">No rutificar</option>
                             <option value="rutiExcel">Realizar segun excel</option>
                             <option value="rutiTodos">Rutificar Todos</option>
-                            <option value="rutiNinguno">No rutificar</option>
                         </select>
                     </div>
                     <div class="d-flex align-items-end justify-content-between pb-2 pt-2">
@@ -78,12 +83,90 @@
                 </form>
             </div>
         </div>
-        <script>
-            function showAlert(message) {
-                if (message && message.trim() !== "") { 
-                    alert(message);
-                }
+    </main>
+    <footer class="text-center p-3 bg-light d-flex justify-content-center align-items-center" style="height: 15vh;">
+        <div>
+            <div>
+                <i class="fa-solid fa-phone"></i>
+                <a href="tel:+56 41 3830944">+56 41 3830944</a>
+            </div>
+            <div>
+                <i class="fa-solid fa-location-dot"></i>
+                <a
+                    href="https://www.google.com/maps/place/Consultores+Empresariales+E-Volution+Limitada/@-36.8252678,-73.050754,19z/data=!3m1!4b1!4m6!3m5!1s0x9669b5d0308198b5:0xbd67409566499fa!8m2!3d-36.8252678!4d-73.0501103!16s%2Fg%2F11fzwngw1q?entry=ttu&amp;g_ep=EgoyMDI1MDEwNi4xIKXMDSoASAFQAw%3D%3D">
+                    Freire 728, Oficina 206
+                </a>
+            </div>
+            <div>
+                <i class="fa-solid fa-envelope"></i>
+                <a href="mailto:contacto@e-volution.cl">contacto@e-volution.cl</a>
+            </div>
+        </div>
+    </footer>
+    <script>
+        function showAlert(message) {
+            if (message && message.trim() !== "") {
+                alert(message);
             }
-        </script>
-        <script th:inline="javascript" th:if="${error != null}">
-         
+        }
+    </script>
+    <script th:inline="javascript">
+        $(document).ready(function () {
+            let cursoSeleccionado = false;
+
+            $("#cursoInput").on("input", function () {
+                const texto = $(this).val();
+                cursoSeleccionado = false;
+                $("#cursoId").val("");
+
+                if (texto.length < 2) {
+                    $("#cursoResultados").hide();
+                    return;
+                }
+
+                $.get("/api/curso/buscar", { q: texto }, function (data) {
+                    const contenedor = $("#cursoResultados");
+                    contenedor.empty();
+
+                    if (data.length === 0) {
+                        contenedor.hide();
+                        return;
+                    }
+
+                    data.forEach((curso) => {
+                        contenedor.append(`
+                            <button 
+                                type="button"
+                                class="list-group-item list-group-item-action"
+                                data-id="${curso.id}"
+                                data-nombre="${curso.nombreCurso}">
+                                ${curso.nombreCurso}
+                            </button>
+                        `);
+                    });
+
+                    contenedor.show();
+                });
+            });
+
+            // CLICK EN OPCIÓN
+            $(document).on("click", "#cursoResultados button", function () {
+                $("#cursoInput").val($(this).data("nombre"));
+                $("#cursoId").val($(this).data("id"));
+                cursoSeleccionado = true;
+                $("#cursoResultados").hide();
+            });
+
+            // BLOQUEO SI NO SE SELECCIONÓ
+            $("form").on("submit", function (e) {
+                if (!cursoSeleccionado) {
+                    e.preventDefault();
+                    alert("Debes seleccionar un curso válido de la lista");
+                    $("#cursoInput").focus();
+                }
+            });
+        });
+    </script>
+    <script th:inline="javascript" th:if="${error != null}"></script>
+
+</body>

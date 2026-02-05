@@ -23,13 +23,13 @@ import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name="curso")
+@Table(name = "curso")
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler", "plantilla" })
 public class Curso {
 
     @Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private Long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(length = 500)
     private String nombreCurso;
@@ -38,8 +38,8 @@ public class Curso {
 
     private String duracion;
 
-    @ManyToOne(fetch = FetchType.LAZY) 
-    @JoinColumn(name = "cliente_id") 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cliente_id")
     private Cliente cliente;
 
     private String modalidad;
@@ -62,7 +62,9 @@ public class Curso {
 
     private int asistenciaMin;
 
-    private float notaMin; 
+    private float notaMin;
+
+    private boolean asistenciaQr;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "plantilla_diploma_id")
@@ -81,26 +83,26 @@ public class Curso {
     @OneToMany(mappedBy = "cursoTemporal", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<AlumnoTemporal> alumnosTemporales;
 
-    @ManyToOne(fetch = FetchType.LAZY) 
-    @JoinColumn(name = "relator_id") 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "relator_id")
     private Relator relator;
 
-    @Column(updatable=false)
-	@DateTimeFormat(pattern="yyyy-MM-dd")
-	private Date createdAt;
-	
-	@DateTimeFormat(pattern="yyyy-MM-dd")
-	private Date updatedAt;
-    
+    @Column(updatable = false)
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private Date createdAt;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private Date updatedAt;
+
     public Curso() {
     }
-    
+
     public Curso(Long id, String nombreCurso, String diasCursos, String duracion, Cliente cliente, String modalidad,
             String ubicacionSubida, String ciudad, String ubicacionDelCurso, String ubicacionCliente,
             LocalDateTime fechaInicio, LocalDateTime fechaFin, Float horasRelatorCurso, String lugarYfechaEmision,
-            int asistenciaMin, float notaMin, Plantilla plantillaDiploma, Plantilla plantillaFlyer,
-            List<Alumno> alumnos, List<TareaProgramada> tareaProgramadas, List<AlumnoTemporal> alumnosTemporales,
-            Relator relator, Date createdAt, Date updatedAt) {
+            int asistenciaMin, float notaMin, boolean asistenciaQr, Plantilla plantillaDiploma,
+            Plantilla plantillaFlyer, List<Alumno> alumnos, List<TareaProgramada> tareaProgramadas,
+            List<AlumnoTemporal> alumnosTemporales, Relator relator, Date createdAt, Date updatedAt) {
         this.id = id;
         this.nombreCurso = nombreCurso;
         this.diasCursos = diasCursos;
@@ -117,6 +119,7 @@ public class Curso {
         this.lugarYfechaEmision = lugarYfechaEmision;
         this.asistenciaMin = asistenciaMin;
         this.notaMin = notaMin;
+        this.asistenciaQr = asistenciaQr;
         this.plantillaDiploma = plantillaDiploma;
         this.plantillaFlyer = plantillaFlyer;
         this.alumnos = alumnos;
@@ -126,7 +129,7 @@ public class Curso {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
-    
+
     public Long getId() {
         return id;
     }
@@ -303,6 +306,14 @@ public class Curso {
         this.relator = relator;
     }
 
+    public boolean isAsistenciaQr() {
+        return asistenciaQr;
+    }
+
+    public void setAsistenciaQr(boolean asistenciaQr) {
+        this.asistenciaQr = asistenciaQr;
+    }
+
     public Date getCreatedAt() {
         return createdAt;
     }
@@ -320,14 +331,14 @@ public class Curso {
     }
 
     @PrePersist
-	protected void onCreated() {
-		this.createdAt = new Date();
+    protected void onCreated() {
+        this.createdAt = new Date();
         this.updatedAt = new Date();
-	}
-	
-	@PreUpdate
-	protected void onUpdate() {
-		this.updatedAt = new Date();
-	}
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = new Date();
+    }
 
 }

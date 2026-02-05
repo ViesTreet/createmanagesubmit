@@ -194,8 +194,6 @@ public class ControladorBase {
             return "redirect:/";
         }
         model.addAttribute("admin", usuarioTemporal);
-        List<Plantilla> plantillas = servicio.todasLasPlantillas();
-        model.addAttribute("plantillas", plantillas);
         return "addAlumno";
     }
 
@@ -210,8 +208,6 @@ public class ControladorBase {
             @RequestParam String rut,
             @RequestParam String correo,
             @RequestParam(defaultValue = "false") boolean rutificador,
-            @RequestParam(required = false) Long cursoID,
-            @RequestParam(required = false) Long relatorID,
             HttpSession session, Model model) {
 
         Admin admin = (Admin) session.getAttribute("usuarioEnSesion");
@@ -226,7 +222,7 @@ public class ControladorBase {
         nuevoAlumno.setNotaAprobacion(notaAprobacion);
         nuevoAlumno.setRut(rut);
         nuevoAlumno.setDiploma(diploma);
-        Curso curso = servicio.cursoPorId(cursoID);
+        Curso curso = servicio.cursoPorId(cursoId);
         nuevoAlumno.setCurso(curso);
         // -------------------------
         // Nombre / Rutificador
@@ -265,7 +261,7 @@ public class ControladorBase {
 
             servicio.registrarNuevoAlumno(nuevoAlumno);
 
-            return "redirect/dataBaseAlumno/addAlumnoBase";
+            return "redirect:/dataBaseAlumno/addAlumnoBase";
 
         } catch (Exception ex) {
             model.addAttribute("error", ex);
@@ -280,22 +276,21 @@ public class ControladorBase {
             return "redirect:/";
         }
         model.addAttribute("admin", usuarioTemporal);
-        List<Plantilla> plantillas = servicio.todasLasPlantillas();
-        model.addAttribute("plantillas", plantillas);
         return "addAlumnoExcel";
     }
 
     @PostMapping(value = "/dataBaseAlumno/uploadAlumnoExcel", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public String subirExcel(@RequestPart("file") MultipartFile file,
             @RequestParam(value = "estadoDiplomaExcel", required = false) String estadoDiplomaExcel,
-            @RequestParam(value = "cursoId") Long cursoId, @RequestParam(value = "estadoExcel") String estadoExcel,
-            @RequestParam(value = "rutificador") String rutificador, HttpSession session, Model model) {
+            @RequestParam(value = "cursoId") Long cursoId, 
+            @RequestParam(value = "estadoExcel") String estadoExcel,
+            @RequestParam(value = "rutificador") String rutificador, 
+            HttpSession session, 
+            Model model) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuarioTemporal != null) {
             model.addAttribute("admin", usuarioTemporal);
             if (file.isEmpty()) {
-                List<Plantilla> plantillas = servicio.todasLasPlantillas();
-                model.addAttribute("plantillas", plantillas);
                 model.addAttribute("error", "El excel esta vacio.");
             }
             try {
@@ -308,8 +303,6 @@ public class ControladorBase {
                 // Redirigir inmediatamente sin esperar a que termine el procesamiento
                 return "redirect:/dataBaseAlumno";
             } catch (IOException ex) {
-                List<Plantilla> plantillas = servicio.todasLasPlantillas();
-                model.addAttribute("plantillas", plantillas);
                 model.addAttribute("error", ex.getMessage());
                 return "addAlumnoExcel";
             }
@@ -1126,6 +1119,7 @@ public class ControladorBase {
             curso.setPlantillaDiploma(plantillaDiploma);
             curso.setPlantillaFlyer(plantillaFlyer);
             curso.setHorasRelatorCurso(horasRelatorCurso);
+            curso.setAsistenciaQr(true);
             servicio.guardarCurso(curso);
 
             return "redirect:/dataBaseCurso";
@@ -1239,6 +1233,8 @@ public class ControladorBase {
 
             @RequestParam Long id,
 
+            @RequestParam boolean asistenciaQr,
+
             RedirectAttributes redirectAttrs) {
 
         try {
@@ -1284,6 +1280,7 @@ public class ControladorBase {
             curso.setPlantillaDiploma(plantillaDiploma);
             curso.setPlantillaFlyer(plantillaFlyer);
             curso.setHorasRelatorCurso(horasRelatorCurso);
+            curso.setAsistenciaQr(asistenciaQr);
             servicio.guardarCurso(curso);
             return "redirect:/dataBaseCurso";
 

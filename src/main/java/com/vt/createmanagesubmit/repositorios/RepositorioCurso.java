@@ -18,6 +18,8 @@ public interface RepositorioCurso extends JpaRepository<Curso,Long>,JpaSpecifica
 
     List<Curso> findAllByOrderByUpdatedAtDesc();
 
+    List<Curso> findTop10ByNombreCursoContainingIgnoreCase(String q);
+
     List<Curso> findByPlantillaDiplomaId(Long plantillaId);
 
     List<Curso> findByPlantillaFlyerId(Long plantillaId);

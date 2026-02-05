@@ -34,30 +34,20 @@
             <div class="d-flex justify-content-between">
                 <div style="max-width: 50%;">
                     <p><strong>Nombre del alumno:</strong> <span th:text="${alumno.nombreAsistente}"></span></p>
-                    <p><strong>Nombre del curso:</strong> <span th:text="${alumno.nombreCurso}"></span></p>
-                    <p><strong>Días del curso:</strong> <span th:text="${alumno.diasCursos}"></span></p>
-                    <p><strong>Duración del curso:</strong> <span th:text="${alumno.duracion}"></span></p>
+                    <p><strong>Nombre del curso:</strong> <span th:text="${alumno.curso.nombreCurso}"></span></p>
+                    <p><strong>Días del curso:</strong> <span th:text="${alumno.curso.diasCursos}"></span></p>
+                    <p><strong>Duración del curso:</strong> <span th:text="${alumno.curso.duracion}"></span></p>
                     <p><strong>Número correlativo interno:</strong> <span th:text="${alumno.numeroCorrelativoInterno}"></span></p>
-                    <p><strong>Cliente:</strong> <span th:text="${alumno.cliente}"></span></p>
-                    <p><strong>ID:</strong> <span th:text="${alumno.identificador}"></span></p>
-                    <p><strong>Modalidad:</strong> <span th:text="${alumno.modalidad}"></span></p>
+                    <p><strong>Cliente:</strong> <span th:text="${alumno.curso.cliente.nombreCliente}"></span></p>
                     <p><strong>Nota de aprobación:</strong> <span th:text="${alumno.notaAprobacion}"></span></p>
                 </div>
                 <div style="max-width: 50%;">
-                    <p><strong>Relator:</strong> <span th:text="${alumno.relator}"></span></p>
+                    <p><strong>Relator:</strong> <span th:text="${alumno.curso.relator.nombre}"></span></p>
                     <p><strong>Asistencia:</strong> <span th:text="${alumno.asistencia}"></span></p>
                     <p><strong>Estado:</strong> <span th:text="${alumno.estado}"></span></p>
                     <p><strong>Diploma:</strong> <span th:text="${alumno.diploma}"></span></p>
                     <p><strong>RUT:</strong> <span th:text="${alumno.rut}"></span></p>
                     <p><strong>Correo electrónico:</strong> <span th:text="${alumno.correo}"></span></p>
-                    <p>
-                        <strong>Plantilla:</strong>
-                        <span th:text="${alumno.plantilla != null ? alumno.plantilla.nombreCertificado : 'N/A'}"></span>
-                    </p>
-                    <p>
-                        <strong>Lugar y fecha de emisión:</strong>
-                        <span th:text="${alumno.lugarYfechaEmision != null ? alumno.lugarYfechaEmision : 'N/A'}"></span>
-                    </p>
                     <p><strong>Fecha de creación:</strong> <span th:text="${alumno.createdAt}"></span></p>
                     <p><strong>Fecha de actualización:</strong> <span th:text="${alumno.updatedAt}"></span></p>
                 </div>
