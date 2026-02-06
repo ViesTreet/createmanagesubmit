@@ -282,10 +282,10 @@ public class ControladorBase {
     @PostMapping(value = "/dataBaseAlumno/uploadAlumnoExcel", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public String subirExcel(@RequestPart("file") MultipartFile file,
             @RequestParam(value = "estadoDiplomaExcel", required = false) String estadoDiplomaExcel,
-            @RequestParam(value = "cursoId") Long cursoId, 
+            @RequestParam(value = "cursoId") Long cursoId,
             @RequestParam(value = "estadoExcel") String estadoExcel,
-            @RequestParam(value = "rutificador") String rutificador, 
-            HttpSession session, 
+            @RequestParam(value = "rutificador") String rutificador,
+            HttpSession session,
             Model model) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuarioTemporal != null) {
@@ -317,23 +317,21 @@ public class ControladorBase {
             return "redirect:/";
         }
         model.addAttribute("admin", usuarioTemporal);
-        List<Plantilla> plantillas = servicio.todasLasPlantillas();
         Alumno alumno = servicio.alumnoPorId(id);
         model.addAttribute("alumno", alumno);
-        model.addAttribute("plantillas", plantillas);
         return "editarAlumno";
     }
 
     @PostMapping("/dataBaseAlumno/editarAlumno")
-    public String editarAlumno(@RequestParam("id") Long id, @RequestParam("nombreAsistente") String nombreAsistente,
-            @RequestParam("nombreCurso") String nombreCurso, @RequestParam("diasCursos") String diasCursos,
-            @RequestParam("numeroHoras") String numeroHoras, @RequestParam("cliente") String cliente,
-            @RequestParam("identificador") String identificador, @RequestParam("notaAprobacion") String notaAprobacion,
-            @RequestParam("relator") String relator, @RequestParam("modalidad") String modalidad,
-            @RequestParam("asistencia") String asistencia, @RequestParam("estado") String estado,
-            @RequestParam("diploma") String diploma, @RequestParam("rut") String rut,
-            @RequestParam("correo") String correo, @RequestParam("plantilla") Long plantillaId,
-            @RequestParam("lugarYfechaEmision") String lugarYfechaEmision, Model model, HttpSession session) {
+    public String editarAlumno(@RequestParam Long id,
+            @RequestParam String nombreAsistente,
+            @RequestParam(required = true) Long cursoId,
+            @RequestParam(required = false) String notaAprobacion,
+            @RequestParam(required = false) String asistencia,
+            @RequestParam String estado,
+            @RequestParam String diploma,
+            @RequestParam String rut,
+            @RequestParam String correo, Model model, HttpSession session) {
 
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuarioTemporal == null) {
@@ -342,16 +340,13 @@ public class ControladorBase {
         model.addAttribute("admin", usuarioTemporal);
         try {
             nombreAsistente = servicioApi.formatearNombre(nombreAsistente);
-            servicio.editarAlumno(id, nombreAsistente, nombreCurso, diasCursos, numeroHoras, cliente, identificador,
-                    notaAprobacion, relator, asistencia, estado, diploma, rut, modalidad, correo, plantillaId,
-                    lugarYfechaEmision);
+            servicio.editarAlumno(id, nombreAsistente, cursoId, notaAprobacion, asistencia, estado, diploma, rut,
+                    correo);
             return "redirect:/dataBaseAlumno/alumno/" + id;
 
         } catch (MissingTemplateException | MissingAlumnoIdException | MissingNameOrRutException ex) {
-            List<Plantilla> plantillas = servicio.todasLasPlantillas();
             Alumno alumno = servicio.alumnoPorId(id);
             model.addAttribute("alumno", alumno);
-            model.addAttribute("plantillas", plantillas);
             model.addAttribute("error", ex.getMessage());
             return "editarAlumno";
         }
@@ -594,33 +589,36 @@ public class ControladorBase {
         }
         model.addAttribute("admin", usuarioTemporal);
         Plantilla plantilla = servicio.plantillaPorId(id);
+        List<Plantilla> plantillas = servicio.todasLasPlantillas();
         model.addAttribute("plantilla", plantilla);
+        model.addAttribute("plantillas", plantillas);
         return "editarPlantilla";
     }
 
     @PostMapping("/dataBasePlantilla/editarPlantilla")
     public String editarPlantilla(@RequestParam("id") Long id,
-            @RequestParam(value = "cambiarPlantilla", required = false) boolean cambiarPlantilla,
-            @RequestParam(value = "pathArchivo", required = false) MultipartFile nuevaPlantilla,
-            @RequestParam(value = "nombreCertificado") String nombre,
-            @RequestParam(value = "descripcion") String descripcion, HttpSession session, Model model) {
+            @RequestParam String nombreCertificado, @RequestParam String tipo,
+            @RequestParam String descripcion, @RequestParam(defaultValue = "false") boolean cplanti,
+            @RequestParam(required = false) MultipartFile pathArchivo,
+            @RequestParam(required = false) String pathArchivoS,
+            @RequestParam(defaultValue = "false") boolean clonarPlantilla, HttpSession session, Model model) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuarioTemporal != null) {
             model.addAttribute("admin", usuarioTemporal);
             Plantilla plantilla = servicio.plantillaPorId(id);
             String nombreAntiguo = plantilla.getNombreCertificado();
             boolean error;
-            if (nombreAntiguo.equals(nombre)) {
+            if (nombreAntiguo.equals(nombreCertificado)) {
                 error = false;
             } else {
-                Optional<Plantilla> optPlantilla = servicio.plantillaPorNombre(nombre);
+                Optional<Plantilla> optPlantilla = servicio.plantillaPorNombre(nombreCertificado);
                 if (optPlantilla.isPresent()) {
                     error = true;
                 } else {
                     error = false;
                 }
             }
-            if (nombre.trim().isEmpty()) {
+            if (nombreCertificado.trim().isEmpty()) {
                 error = true;
             }
             if (error) {
@@ -630,23 +628,45 @@ public class ControladorBase {
                 return "editarPlantilla";
 
             }
-            plantilla.setNombreCertificado(nombre);
+            plantilla.setNombreCertificado(nombreCertificado);
             plantilla.setDescripcion(descripcion);
-            servicio.guardarPlantilla(plantilla);
-            try {
-                if (cambiarPlantilla && nuevaPlantilla != null && !nuevaPlantilla.isEmpty()) {
-                    Path plantillaPathAntiguo = Paths.get(plantilla.getPathArchivo());
-                    servicio.cambiarPlantilla(id, nuevaPlantilla);
-                    Files.deleteIfExists(plantillaPathAntiguo);
+            plantilla.setTipo(tipo);
+            if (cplanti) {
+                if (clonarPlantilla) {
+                    if (pathArchivoS != null && !pathArchivoS.isEmpty()) {
+                        try {
+                            Path deletePlantillaPath = Paths.get(plantilla.getPathArchivo());
+                            try {
+                                Files.deleteIfExists(deletePlantillaPath);
+                            } catch (IOException ex) {
+                                throw new IOException("No se encontró la ruta de la plantilla.", ex);
+                            }
+                            plantilla.setPathArchivo(servicio.clonarArchivo(pathArchivoS, "/plantillas/"));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        throw new IllegalArgumentException(
+                                "Debe proporcionar una plantilla existente si desea clonar.");
+                    }
+                } else if (pathArchivo != null && !pathArchivo.isEmpty()) {
+                    try {
+                        Path deletePlantillaPath = Paths.get(plantilla.getPathArchivo());
+                        try {
+                            Files.deleteIfExists(deletePlantillaPath);
+                        } catch (IOException ex) {
+                            throw new IOException("No se encontró la ruta de la plantilla.", ex);
+                        }
+                        plantilla.setPathArchivo(servicio.guardarArchivo(pathArchivo, "/plantillas/"));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    throw new IllegalArgumentException("Debe proporcionar una plantilla válida para guardar.");
                 }
-                return "redirect:/dataBasePlantilla";
-            } catch (Exception e) {
-                e.printStackTrace();
-                model.addAttribute("error", "Error al guardar la plantilla.");
-                Plantilla plantillaError = servicio.plantillaPorId(id);
-                model.addAttribute("plantilla", plantillaError);
-                return "editarPlantilla";
             }
+            servicio.guardarPlantilla(plantilla);
+            return "redirect:/dataBasePlantilla";
         }
         return "redirect:/";
     }
@@ -775,6 +795,16 @@ public class ControladorBase {
     @GetMapping("/marcarAsistenciaCurso/{id}")
     public String marcarAsistenciaCurso(HttpSession session, Model model, @PathVariable("id") String idEncriptada) {
         model.addAttribute("id", idEncriptada);
+        try {
+            Curso curso = servicio.cursoPorId(Long.valueOf(servicio.decryptId(idEncriptada)));
+            if (!curso.isAsistenciaQr()) {
+                return "error404";
+            }
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return "asistenciaParaCertificados";
     }
 

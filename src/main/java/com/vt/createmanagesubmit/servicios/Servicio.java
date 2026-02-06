@@ -529,41 +529,27 @@ public class Servicio {
         }
     }
 
-    public void editarAlumno(Long id, String nombreAsistente, String nombreCurso, String diasCursos, String numeroHoras,
-            String cliente, String identificador, String notaAprovacion, String relator, String asistencia,
-            String estado, String diploma, String rut, String modalidad, String correo, Long plantillaId,
-            String lugarYfechaEmision) {
+    public void editarAlumno(Long id, String nombreAsistente, Long cursoId, String notaAprobacion, String asistencia,
+            String estado, String diploma, String rut, String correo) {
 
         Optional<Alumno> optalumno = repoAlum.findById(id);
         if (optalumno.isPresent()) {
             Alumno alumno = optalumno.get();
             nombreAsistente = nombreAsistente.trim().toUpperCase();
+            alumno.setNombreAsistente(nombreAsistente);
+            alumno.setAsistencia(asistencia);
+            Curso curso = cursoPorId(cursoId);
+            alumno.setCurso(curso);
+            alumno.setDiploma(diploma);
+            alumno.setEstado(estado);
+            alumno.setNotaAprobacion(notaAprobacion);
+            alumno.setRut(rut);
             if (correo.trim().isEmpty()) {
                 correo = CORREO_EMPRESA;
             }
-            alumno.setNombreAsistente(normalizarValor(nombreAsistente));
-            alumno.setNotaAprobacion(normalizarValor(notaAprovacion));
-            alumno.setAsistencia(normalizarValor(asistencia));
-            alumno.setDiploma(normalizarValor(diploma));
-            alumno.setRut(normalizarValor(rut));
-            alumno.setCorreo(normalizarValor(correo));
-            if ((alumno.getNombreAsistente() != null && !alumno.getNombreAsistente().trim().isEmpty())
-                    || (alumno.getRut() != null && !alumno.getRut().trim().isEmpty())) {
-                Optional<Plantilla> optplantilla = repoPlanti.findById(plantillaId);
-                if (optplantilla.isPresent()) {
-                    Plantilla plantilla = optplantilla.get();
-                    alumno.getCurso().setPlantillaDiploma(plantilla);
-                    ;
-                    if (!estado.equals("auto")) {
-                        alumno.setEstado(normalizarValor(estado));
-                    } else {
-                        alumno = funcionEstadoManual(alumno);
-                    }
-
-                    repoAlum.save(alumno);
-                } else {
-                    throw new MissingTemplateException("No se encontró la plantilla seleccionada");
-                }
+            alumno.setCorreo(correo);
+            if ((alumno.getNombreAsistente() != null && !alumno.getNombreAsistente().trim().isEmpty()) || (alumno.getRut() != null && !alumno.getRut().trim().isEmpty())) {
+                repoAlum.save(alumno);
             } else {
                 throw new MissingNameOrRutException(
                         "Uno de los dos campos(Nombre o Rut) debe tener contenido para guardar un alumno.");
@@ -817,7 +803,7 @@ public class Servicio {
 
     }
 
-    public void alumnoVerificado(Long alumnoId, String asistencia, String nota) {
+    public void alumnoVerificado(Long alumnoId, Long cursoId, String asistencia, String nota) {
         Optional<AlumnoTemporal> alumnoTempOpt = repoAlumTemp.findById(alumnoId);
         if (alumnoTempOpt.isPresent()) {
             AlumnoTemporal alumnoTemporal = alumnoTempOpt.get();
@@ -829,7 +815,8 @@ public class Servicio {
             alumno.setRut(alumnoTemporal.getRut());
             alumno.setDiploma("noEnviado");
             alumno.setEstado("aprobado");
-            alumno.setCurso(alumnoTemporal.getCursoTemporal());
+            Curso curso = cursoPorId(cursoId);
+            alumno.setCurso(curso);
             comprobarYGuardar(alumno, "No");
             repoAlumTemp.delete(alumnoTemporal);
         }
@@ -1027,8 +1014,8 @@ public class Servicio {
         };
     }
 
-    public List<Curso> todosLosCursos() {
-        return repoCurso.findAllByOrderByUpdatedAtDesc();
+    public Page<Curso> todosLosCursos() {
+        return repoCurso.findAll(PageRequest.of(0, 75, Sort.by("updatedAt").descending()));
     }
 
     public List<Curso> cursosPorCliente(Long id) {

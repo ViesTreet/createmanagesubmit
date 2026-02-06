@@ -134,7 +134,7 @@ public class ServicioArchivos {
                             }
                         }
                         if(rutificador.trim().equals("rutiTodos")){
-                            if(!alumno.getRut().trim().isEmpty() && alumno.getRut() != null){
+                            if(alumno.getRut() != null && !alumno.getRut().trim().isEmpty()){
                                 String rutFormateado = formatearRut(alumno.getRut());
                                 String nombreRutificado = servicioApi.obtenerNombrePorRut(rutFormateado);
                                 if(!nombreRutificado.trim().equals("nombreNoEncontrado")){
@@ -294,7 +294,7 @@ public class ServicioArchivos {
         }
 
         
-        String rutSinPuntos = rut.replaceAll(".", "");
+        String rutSinPuntos = rut.replaceAll("\\.", "");
 
         
         if (!rutSinPuntos.contains("-")) {

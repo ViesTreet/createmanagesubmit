@@ -704,6 +704,10 @@ public class ControladorApi {
             @RequestParam String rut,
             @RequestParam String id) {
         try {
+            Curso curso = ser.cursoPorId(Long.valueOf(ser.decryptId(id)));
+            if(!curso.isAsistenciaQr()){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error");
+            }
             ser.procesarAsistencia(nombre, correo, rut, id);
             return ResponseEntity.ok().build();
 
@@ -725,15 +729,17 @@ public class ControladorApi {
     @PostMapping("/alumnoTemporal/enviar")
     public ResponseEntity<Map<String, Object>> enviarDatos(
             @RequestParam Long alumnoId,
+            @RequestParam Long cursoId,
             @RequestParam String asistencia,
             @RequestParam String nota) {
 
-        ser.alumnoVerificado(alumnoId, asistencia, nota);
+        ser.alumnoVerificado(alumnoId,cursoId, asistencia, nota);
 
         Map<String, Object> response = new HashMap<>();
         response.put("alumnoId", alumnoId);
         response.put("asistencia", asistencia);
         response.put("nota", nota);
+        response.put("cursoId",cursoId);
 
         return ResponseEntity.ok(response);
     }
@@ -800,8 +806,8 @@ public class ControladorApi {
     public List<CursoDTO> getDatosCurso(HttpSession session) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
         if (usuarioTemporal != null) {
-            List<Curso> cursos = ser.todosLosCursos();
-            return cursos.stream().map(CursoDTO::new).collect(Collectors.toList());
+            Page<Curso> cursos = ser.todosLosCursos();
+            return cursos.getContent().stream().map(CursoDTO::new).collect(Collectors.toList());
         }
         return null;
     }

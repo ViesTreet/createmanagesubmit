@@ -1,212 +1,317 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
+  <head>
     <title>Editar Plantilla</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- Importar CSS de Bootstrap -->
-    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
-    <link rel="stylesheet" th:href="@{/css/styleCustom.css}">
-    <link rel="icon" th:href="@{/images/Logobgremove.png}" type="image/x-icon">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/styleCustom.css}" />
+    <link
+      rel="icon"
+      th:href="@{/images/Logobgremove.png}"
+      type="image/x-icon"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+    />
 
     <!-- Importar jQuery -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>  
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <!-- Importar JS de Bootstrap -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <style>
-        th {
-            font-size: 13px;
+      th {
+        font-size: 13px;
+      }
+      td {
+        font-size: 11px;
+      }
+      #alumnoBuscador {
+        padding-right: 0px;
+        padding-left: 0px;
+      }
+      .overlay {
+        display: none; /* Oculto por defecto */
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7); /* Fondo oscuro */
+        z-index: 999; /* Por encima de otros elementos */
+      }
+      /* Contenedor del formulario emergente */
+      .popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        z-index: 1000; /* Por encima del overlay */
+        width: 90%;
+        max-width: 400px;
+      }
+      /* Botón cerrar */
+      .close-btn {
+        background-color: red;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      .close-btn:hover {
+        background-color: darkred;
+      }
+      /* Botón principal */
+      .open-btn {
+        margin: 20px;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+      #alumnosNoEnviados {
+        height: 50vh; /* Define una altura fija */
+        overflow-y: auto; /* Permite el desplazamiento vertical cuando el contenido es grande */
+      }
+      @media (min-width: 1024px) {
+        #contenderBase {
+          max-width: 95vw;
         }
-        td {
-            font-size: 11px;
+      }
+      @media (max-width: 768px) {
+        #contenderBase {
+          max-width: 100vw !important;
+          padding-left: 0px !important;
+          padding-right: 0px !important;
+        }
+        #contenedorTabla {
+          max-width: 100vw !important;
+          overflow-y: auto;
+          overflow-x: auto;
         }
         #alumnoBuscador {
-            padding-right: 0px;
-            padding-left: 0px;
+          max-width: 100vw !important;
         }
-        .overlay {
-            display: none; /* Oculto por defecto */
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7); /* Fondo oscuro */
-            z-index: 999; /* Por encima de otros elementos */
+        th {
+          font-size: 15px;
         }
-        /* Contenedor del formulario emergente */
-        .popup {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            z-index: 1000; /* Por encima del overlay */
-            width: 90%;
-            max-width: 400px;
+        td {
+          font-size: 12px;
         }
-        /* Botón cerrar */
-        .close-btn {
-            background-color: red;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
+        #tablaAlumnos {
+          width: 250vw;
         }
-        .close-btn:hover {
-            background-color: darkred;
-        }
-        /* Botón principal */
-        .open-btn {
-            margin: 20px;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        #alumnosNoEnviados {
-            height: 50vh; /* Define una altura fija */
-            overflow-y: auto; /* Permite el desplazamiento vertical cuando el contenido es grande */
-        }
-        @media (min-width: 1024px) {
-            #contenderBase {
-                max-width: 95vw;
-            }
-        }
-        @media (max-width: 768px) {
-            #contenderBase {
-                max-width: 100vw !important;
-                padding-left: 0px !important;
-                padding-right: 0px !important;
-            }
-            #contenedorTabla {
-                max-width: 100vw !important;
-                overflow-y: auto;
-                overflow-x: auto;
-            }
-            #alumnoBuscador {
-                max-width: 100vw !important;
-            }
-            th {
-                font-size: 15px;
-            }
-            td {
-                font-size: 12px;
-            }
-            #tablaAlumnos {
-                width: 250vw;
-            }
-        }
+      }
     </style>
-</head>
-<body>
-    <header class="d-flex align-items-center justify-content-between p-3 bg-light" style="height: 10vh; z-index: 1;">
-        <a th:href="@{/home}" class="logo">
-            <img th:src="@{/images/Logobgremove.png}" alt="[LOGO]">
-        </a>
-        <nav class="d-flex justify-content-center align-items-center flex-nowrap">
-            <a th:href="@{/dataBasePlantilla}" class="btn btn-primary mx-2">Regresar</a>
-            <a th:href="@{/home}" class="btn btn-primary mx-2">Inicio</a>
-            <a th:href="@{/documentacion}" target="_blank" class="btn btn-primary mx-2">Documentación</a>
-            <div class="d-flex flex-column justify-content-center align-items-center">
-                <i class="fa-solid fa-user"></i>
-                <p class="p-0 m-0" style="font-size: normal;" th:text="${admin.nombre}"></p>
-            </div>
-        </nav>
-    </header>
-    <div id="contenderBase" class="d-flex justify-content-center align-items-center container pt-2 pb-2" style="height: 90vh;">
-        <div class="card col-6">
-            <div class="card-body">
-                <div class="card-title">
-                    <h4 class="text-center">
-                        Editar plantilla: <span th:text="${plantilla.nombreCertificado}"></span>
-                    </h4>
-                </div>
-            </div>
-            <form th:action="@{/dataBasePlantilla/editarPlantilla}" method="post" enctype="multipart/form-data">
-                <div class="d-flex justify-content-around">
-                    <div style="max-width: 40%;">
-                        <label for="nombreCertificado">Nombre Plantilla</label>
-                        <input id="nombreCertificado" name="nombreCertificado" type="text" class="form-control" placeholder="Nombre de la plantilla">
-                        <label for="descripcion">Descripcion Plantilla</label>
-                        <input id="descripcion" type="text" name="descripcion" class="form-control" placeholder="Descripcion de la plantilla">
-                    </div>
-                    <div style="max-width: 40%;">
-                        <label for="asistenciaMin">Asistencia Mínima</label>
-                        <input id="asistenciaMin" type="text" name="asistenciaMin" class="form-control" placeholder="ej:60">
-                        <label for="notaMin">Nota Mínima</label>
-                        <input id="notaMin" type="text" name="notaMin" class="form-control" placeholder="ej:5.5">
-                        <input type="checkbox" id="cambiarPlantilla" name="cambiarPlantilla" value="true" onclick="toggleInputFile('inputPlantilla', this)">
-                        <label for="cambiarPlantilla">Cambiar Plantilla</label>
-                        <!-- Input file para subir la nueva plantilla -->
-                        <div id="inputPlantilla" style="display: none;">
-                            <label for="pathArchivo">Nueva Plantilla(.pptx)</label>
-                            <input type="file" name="pathArchivo" id="pathArchivo" class="form-control" accept=".pptx">
-                        </div>
-                    </div>
-                </div>
-                <div class="d-flex justify-content-between pt-2">
-                    <a th:href="@{/dataBasePlantilla}" class="btn btn-warning">Cancelar</a>
-                    <input type="hidden" name="id" id="id" th:value="${plantilla.id}">
-                    <input type="submit" class="btn btn-success" value="Enviar">
-                </div>
-            </form>
+  </head>
+  <body>
+    <header
+      class="d-flex align-items-center justify-content-between p-3 bg-light"
+      style="height: 10vh; z-index: 1"
+    >
+      <a th:href="@{/home}" class="logo">
+        <img th:src="@{/images/Logobgremove.png}" alt="[LOGO]" />
+      </a>
+      <nav class="d-flex justify-content-center align-items-center flex-nowrap">
+        <a th:href="@{/dataBasePlantilla}" class="btn btn-primary mx-2"
+          >Regresar</a
+        >
+        <a th:href="@{/home}" class="btn btn-primary mx-2">Inicio</a>
+        <a
+          th:href="@{/documentacion}"
+          target="_blank"
+          class="btn btn-primary mx-2"
+          >Documentación</a
+        >
+        <div
+          class="d-flex flex-column justify-content-center align-items-center"
+        >
+          <i class="fa-solid fa-user"></i>
+          <p
+            class="p-0 m-0"
+            style="font-size: normal"
+            th:text="${admin.nombre}"
+          ></p>
         </div>
+      </nav>
+    </header>
+    <div
+      id="contenderBase"
+      class="d-flex justify-content-center align-items-center container pt-2 pb-2"
+      style="height: 90vh"
+    >
+      <div class="card col-6">
+        <div class="card-body">
+          <div class="card-title">
+            <h4 class="text-center">
+              Editar plantilla:
+              <span th:text="${plantilla.nombreCertificado}"></span>
+            </h4>
+          </div>
+        </div>
+        <form
+          th:action="@{/dataBasePlantilla/editarPlantilla}"
+          method="post"
+          enctype="multipart/form-data"
+        >
+          <div class="d-flex justify-content-around pb-2">
+            <div style="max-width: 40%">
+              <label for="nombreCertificado">Nombre Plantilla</label>
+              <input
+                id="nombreCertificado"
+                name="nombreCertificado"
+                type="text"
+                class="form-control"
+                placeholder="Nombre de la plantilla"
+                th:value="${plantilla.nombreCertificado}"
+              />
+              <label for="tipo">Tipo plantilla</label>
+              <select name="tipo" id="tipo" class="form-select">
+                <option
+                  th:selected="${plantilla.tipo == 'diploma'}"
+                  value="diploma"
+                >
+                  Diploma
+                </option>
+                <option
+                  th:selected="${plantilla.tipo == 'flyer'}"
+                  value="flyer"
+                >
+                  Flyer
+                </option>
+              </select>
+              <label for="descripcion">Descripción Plantilla</label>
+              <input
+                id="descripcion"
+                type="text"
+                name="descripcion"
+                class="form-control"
+                placeholder="Descripción de la plantilla"
+                th:value="${plantilla.descripcion}"
+              />
+              <input
+                type="checkbox"
+                name="cplanti"
+                value="true"
+                id="cplanti"
+                onclick="cambiarPlantilla()"
+              />
+              <label for="cplanti">Cambiar la plantilla</label>
+            </div>
+            <div style="max-width: 40%; display: none" id="cambiarPlanti">
+              <input
+                type="checkbox"
+                id="clonarPlantilla"
+                name="clonarPlantilla"
+                value="true"
+                onclick="toggleInputs('plantilla')"
+              />
+              <label for="clonarPlantilla">Clonar Plantilla</label>
+              <div id="inputPlantilla">
+                <label for="pathArchivo">Nueva Plantilla (.pptx)</label>
+                <input
+                  type="file"
+                  name="pathArchivo"
+                  id="pathArchivo"
+                  class="form-control"
+                  accept=".pptx"
+                />
+              </div>
+              <div id="selectPlantilla" style="display: none">
+                <label for="pathArchivoS">Elegir Plantilla</label>
+                <select
+                  name="pathArchivoS"
+                  id="pathArchivoS"
+                  class="form-select"
+                >
+                  <th:block th:each="plantilla : ${plantillas}">
+                    <option
+                      th:value="${plantilla.pathArchivo}"
+                      th:text="${plantilla.nombreCertificado}"
+                    ></option>
+                  </th:block>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-center">
+            <input type="hidden" th:value="${plantilla.id}" name="id" />
+            <input class="btn btn-success" type="submit" value="Enviar" />
+          </div>
+        </form>
+      </div>
     </div>
     <script>
-        // Función para mostrar u ocultar el input file
-        function toggleInputFile(inputId, checkbox) {
-            const inputDiv = document.getElementById(inputId);
-            if (checkbox.checked) {
-                inputDiv.style.display = 'block'; // Mostrar input file
-            } else {
-                inputDiv.style.display = 'none';  // Ocultar input file
-            }
+      // Función para mostrar u ocultar el input file
+      function cambiarPlantilla() {
+        let checkboxPlantilla = document.getElementById("cplanti");
+        let divCPlanti = document.getElementById("cambiarPlanti");
+        if (checkboxPlantilla.checked) {
+          divCPlanti.style.display = "block";
+        } else {
+          divCPlanti.style.display = "none";
         }
-    </script>
-    <script th:inline="javascript">
-        document.addEventListener('DOMContentLoaded', function() {
-            // Rellenar cada campo con su valor correspondiente usando expresiones inline
-            document.getElementById('nombreCertificado').value = /*[[${plantilla.nombreCertificado}]]*/ "";
-            document.getElementById('descripcion').value = /*[[${plantilla.descripcion}]]*/ "";
-            document.getElementById('asistenciaMin').value = /*[[${plantilla.asistenciaMin}]]*/ "";
-            document.getElementById('notaMin').value = /*[[${plantilla.notaMin}]]*/ "";
-        });
+      }
     </script>
     <script>
-        function showAlert(message) {
-            if (message && message.trim() !== "") { 
-                alert(message);
-            }
+      function toggleInputs(type) {
+        if (type === "plantilla") {
+          const checkbox = document.getElementById("clonarPlantilla");
+          const inputFile = document.getElementById("inputPlantilla");
+          const selectOptions = document.getElementById("selectPlantilla");
+
+          if (checkbox.checked) {
+            inputFile.style.display = "none";
+            selectOptions.style.display = "block";
+          } else {
+            inputFile.style.display = "block";
+            selectOptions.style.display = "none";
+          }
         }
+      }
+    </script>
+    <script>
+      function showAlert(message) {
+        if (message && message.trim() !== "") {
+          alert(message);
+        }
+      }
     </script>
     <th:block th:if="${error != null}">
-        <script th:inline="javascript">
-            showAlert("[[${error}]]");
-        </script>
+      <script th:inline="javascript">
+        showAlert("[[${error}]]");
+      </script>
     </th:block>
-    <footer class="text-center p-3 bg-light d-flex justify-content-center align-items-center" style="height: 15vh;">
+    <footer
+      class="text-center p-3 bg-light d-flex justify-content-center align-items-center"
+      style="height: 15vh"
+    >
+      <div>
         <div>
-            <div>
-                <i class="fa-solid fa-phone"></i>
-                <a href="tel:+56 41 3830944">+56 41 3830944</a>
-            </div>
-            <div>
-                <i class="fa-solid fa-location-dot"></i>
-                <a href="https://www.google.com/maps/place/Consultores+Empresariales+E-Volution+Limitada/@-36.8252678,-73.050754,19z/data=!3m1!4b1!4m6!3m5!1s0x9669b5d0308198b5:0xbd67409566499fa!8m2!3d-36.8252678!4d-73.0501103!16s%2Fg%2F11fzwngw1q?entry=ttu&amp;g_ep=EgoyMDI1MDEwNi4xIKXMDSoASAFQAw%3D%3D">
-                    Freire 728, Oficina 206
-                </a>
-            </div>
-            <div>
-                <i class="fa-solid fa-envelope"></i>
-                <a href="mailto:contacto@e-volution.cl">contacto@e-volution.cl</a>
-            </div>
+          <i class="fa-solid fa-phone"></i>
+          <a href="tel:+56 41 3830944">+56 41 3830944</a>
         </div>
+        <div>
+          <i class="fa-solid fa-location-dot"></i>
+          <a
+            href="https://www.google.com/maps/place/Consultores+Empresariales+E-Volution+Limitada/@-36.8252678,-73.050754,19z/data=!3m1!4b1!4m6!3m5!1s0x9669b5d0308198b5:0xbd67409566499fa!8m2!3d-36.8252678!4d-73.0501103!16s%2Fg%2F11fzwngw1q?entry=ttu&amp;g_ep=EgoyMDI1MDEwNi4xIKXMDSoASAFQAw%3D%3D"
+          >
+            Freire 728, Oficina 206
+          </a>
+        </div>
+        <div>
+          <i class="fa-solid fa-envelope"></i>
+          <a href="mailto:contacto@e-volution.cl">contacto@e-volution.cl</a>
+        </div>
+      </div>
     </footer>
-</body>
+  </body>
 </html>
