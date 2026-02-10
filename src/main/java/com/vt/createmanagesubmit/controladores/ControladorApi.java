@@ -443,29 +443,91 @@ public class ControladorApi {
         return ResponseEntity.ok("Descarga permitida.");
     }
 
-    @PostMapping("/probarPlantilla")
-    public CompletableFuture<ResponseEntity<byte[]>> probarPlantilla(@ModelAttribute Curso curso,
-            @RequestParam("idPlantilla") Long idPlantilla, HttpSession session) throws Exception {
+    @PostMapping("/probarPlantillaDiploma")
+    public CompletableFuture<ResponseEntity<byte[]>> probarPlantillaDiploma(
+            @RequestParam String nombreAsistente,
+            @RequestParam Long cursoId,
+            @RequestParam(required = false) String notaAprobacion,
+            @RequestParam(required = false) String asistencia,
+            @RequestParam Long idPlantilla,
+            HttpSession session) {
+
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
-        if (usuarioTemporal != null) {
-            Plantilla plantilla = ser.plantillaPorId(idPlantilla);
-            curso.setPlantillaDiploma(plantilla);
-            Alumno alumno = new Alumno();
-            alumno.setNombreAsistente("Gabriel Parra");
+        if (usuarioTemporal == null) {
+            return CompletableFuture.completedFuture(
+                    ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+        }
+
+        Curso curso = ser.cursoPorId(cursoId);
+        Plantilla plantilla = ser.plantillaPorId(idPlantilla);
+
+        curso.setPlantillaDiploma(plantilla);
+
+        Alumno alumno = new Alumno();
+        alumno.setNombreAsistente(nombreAsistente);
+        alumno.setCurso(curso);
+        alumno.setNotaAprobacion(notaAprobacion);
+        alumno.setAsistencia(asistencia);
+        alumno.setId(1L);
+
+        try {
             return servicioGenerarCertificado.descargarCertificadosServicio(alumno)
                     .thenApply(fileBytes -> {
                         HttpHeaders headers = new HttpHeaders();
-                        headers.setContentType(MediaType.APPLICATION_PDF); // Cambia al tipo de archivo que corresponda
+                        headers.setContentType(MediaType.APPLICATION_PDF);
                         headers.setContentDispositionFormData("attachment", "certificado.pdf");
                         return new ResponseEntity<>(fileBytes, headers, HttpStatus.OK);
                     })
                     .exceptionally(ex -> {
-                        // Manejo de errores
                         ex.printStackTrace();
                         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
                     });
-        } else {
-            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return CompletableFuture.completedFuture(
+                    ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+
+        }
+    }
+
+    @PostMapping("/probarPlantillaFlyer")
+    public CompletableFuture<ResponseEntity<byte[]>> probarPlantillaFlyer(
+            @RequestParam Long cursoId,
+            @RequestParam Long idPlantilla,
+            HttpSession session) {
+
+        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
+        if (usuarioTemporal == null) {
+            return CompletableFuture.completedFuture(
+                    ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+        }
+
+        Curso curso = ser.cursoPorId(cursoId);
+        Plantilla plantilla = ser.plantillaPorId(idPlantilla);
+
+        curso.setPlantillaFlyer(plantilla);
+
+        try {
+            return servicioGenerarCertificado.descargarFlyerServicio(curso)
+                    .thenApply(fileBytes -> {
+                        HttpHeaders headers = new HttpHeaders();
+                        headers.setContentType(
+                                MediaType.parseMediaType(
+                                        "application/vnd.openxmlformats-officedocument.presentationml.presentation"));
+                        headers.setContentDispositionFormData("attachment", "flyer.pptx");
+
+                        return new ResponseEntity<>(fileBytes, headers, HttpStatus.OK);
+                    })
+                    .exceptionally(ex -> {
+                        ex.printStackTrace();
+                        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+                    });
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            return CompletableFuture.completedFuture(
+                    ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+
         }
     }
 
@@ -705,7 +767,7 @@ public class ControladorApi {
             @RequestParam String id) {
         try {
             Curso curso = ser.cursoPorId(Long.valueOf(ser.decryptId(id)));
-            if(!curso.isAsistenciaQr()){
+            if (!curso.isAsistenciaQr()) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error");
             }
             ser.procesarAsistencia(nombre, correo, rut, id);
@@ -733,13 +795,13 @@ public class ControladorApi {
             @RequestParam String asistencia,
             @RequestParam String nota) {
 
-        ser.alumnoVerificado(alumnoId,cursoId, asistencia, nota);
+        ser.alumnoVerificado(alumnoId, cursoId, asistencia, nota);
 
         Map<String, Object> response = new HashMap<>();
         response.put("alumnoId", alumnoId);
         response.put("asistencia", asistencia);
         response.put("nota", nota);
-        response.put("cursoId",cursoId);
+        response.put("cursoId", cursoId);
 
         return ResponseEntity.ok(response);
     }

@@ -6,3 +6,5 @@
 -mantener resolucion de la imagen original(logo)
 -arreglar enviar
 -arreglar probar plantilla
+-arreglar moodle
+-lugar y fecha de emision

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,8 +8,12 @@
     <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
     <link rel="stylesheet" th:href="@{/css/styleCustom.css}">
     <link rel="icon" th:href="@{/images/Logobgremove.png}" type="image/x-icon">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- Importar JS de Bootstrap -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 </head>
+
 <body>
     <header class="d-flex align-items-center justify-content-between p-3 bg-light" style="height: 10vh;">
         <a th:href="@{/home}" class="logo">
@@ -25,60 +30,47 @@
         </nav>
     </header>
     <main class="d-flex flex-column align-items-center justify-content-center" style="height: 90vh;">
-        <div class="card" style="width: 70vw;">
+        <div class="card" style="width: 50vw;">
             <div class="card-body" style="width: 100%;">
                 <h4 class="card-title text-center">
                     Probar plantilla: <span th:text="${plantilla.nombreCertificado}"></span>
                 </h4>
                 <form id="formProbarPlantilla" th:action="@{/api/dataBasePlantilla/probarPlantilla}" method="post">
-                    <div class="d-flex justify-content-between">
-                        <div style="max-width: 33%;">
+                    <div class="d-flex justify-content-center align-items-center flex-column">
+                        <div style="margin: 2px;">
                             <div>
-                                <label for="nombreAsistente">Nombre Asistente</label>
-                                <input type="text" name="nombreAsistente" id="nombreAsistente" class="form-control" placeholder="Nombres Apellidos Asistente">
+                                <label class ="dependeTipo" for="nombreAsistente">Nombre Asistente</label>
+                                <input type="text" name="nombreAsistente" id="nombreAsistente"
+                                    class="form-control dependeTipo" placeholder="Nombres Apellidos Asistente">
                             </div>
                             <div>
-                                <label for="nombreCurso">Cursos</label>
-                                <input type="text" name="nombreCurso" id="nombreCurso" class="form-control" placeholder="curso1|curso2|etc...">
+                                <label for="cursoInput">Curso</label>
+                                <input id="cursoInput" type="text" placeholder="Escribe para buscar un curso"
+                                    autocomplete="off" class="form-control" />
+                                <input type="hidden" name="cursoId" id="cursoId" required />
+                                <div id="cursoResultados" class="list-group position-absolute w-50"
+                                    style="z-index: 1000; display: none">
+                                </div>
                             </div>
+
                             <div>
-                                <label for="diasCursos">Días del curso</label>
-                                <input type="text" name="diasCursos" id="diasCursos" class="form-control" placeholder="dd/m/aa-dd/m/aa">
+                                <label class ="dependeTipo" for="notaAprobacion">Nota aprobación</label>
+                                <input type="number" name="notaAprobacion" min="0" max="7" step="0.1"
+                                    placeholder="0.0 - 7.0" class="form-control dependeTipo" />
                             </div>
-                        </div>
-                        <div style="max-width: 33%;">
+
                             <div>
-                                <label for="duracion">Duración</label>
-                                <input type="text" name="duracion" id="duracion" class="form-control" placeholder="3 horas">
-                            </div>
-                            <div>
-                                <label for="cliente">Cliente</label>
-                                <input type="text" name="cliente" id="cliente" class="form-control" placeholder="Cliente">
-                            </div>
-                            <div>
-                                <label for="lugarYfechaEmision">Lugar y/o fecha de emisión</label>
-                                <input type="text" name="lugarYfechaEmision" id="lugarYfechaEmision" class="form-control" placeholder="lugar y fecha de emisión">
-                            </div>
-                        </div>
-                        <div style="max-width: 33%;">
-                            <div>
-                                <label for="notaAprobacion">Nota aprobación</label>
-                                <input type="text" name="notaAprobacion" id="notaAprobacion" class="form-control" placeholder="Ej: 7.0">
-                            </div>
-                            <div>
-                                <label for="relator">Relator</label>
-                                <input type="text" name="relator" id="relator" class="form-control" placeholder="Relator">
-                            </div>
-                            <div>
-                                <label for="asistencia">Asistencia</label>
-                                <input type="text" name="asistencia" id="asistencia" class="form-control" placeholder="Ej: 100">
+                                <label class ="dependeTipo" for="asistencia">Asistencia</label>
+                                <input type="number" name="asistencia" min="0" max="100" step="1" placeholder="0 - 100"
+                                    class="form-control dependeTipo" />
                             </div>
                         </div>
-                    </div>
-                    <div class="d-flex align-items-center justify-content-center pt-1">
-                        <input type="hidden" name="idPlantilla" th:value="${plantilla.id}">
-                        <input class="btn btn-success" type="submit" value="Probar">
-                    </div>
+                        <div class="d-flex align-items-center justify-content-between pt-1">
+                            <div>
+                            </div>
+                            <input type="hidden" name="idPlantilla" th:value="${plantilla.id}">
+                            <input class="btn btn-success" type="submit" value="Probar">
+                        </div>
                 </form>
             </div>
         </div>
@@ -91,7 +83,8 @@
             </div>
             <div>
                 <i class="fa-solid fa-location-dot"></i>
-                <a href="https://www.google.com/maps/place/Consultores+Empresariales+E-Volution+Limitada/@-36.8252678,-73.050754,19z/data=!3m1!4b1!4m6!3m5!1s0x9669b5d0308198b5:0xbd67409566499fa!8m2!3d-36.8252678!4d-73.0501103!16s%2Fg%2F11fzwngw1q?entry=ttu&amp;g_ep=EgoyMDI1MDEwNi4xIKXMDSoASAFQAw%3D%3D">
+                <a
+                    href="https://www.google.com/maps/place/Consultores+Empresariales+E-Volution+Limitada/@-36.8252678,-73.050754,19z/data=!3m1!4b1!4m6!3m5!1s0x9669b5d0308198b5:0xbd67409566499fa!8m2!3d-36.8252678!4d-73.0501103!16s%2Fg%2F11fzwngw1q?entry=ttu&amp;g_ep=EgoyMDI1MDEwNi4xIKXMDSoASAFQAw%3D%3D">
                     Freire 728, Oficina 206
                 </a>
             </div>
@@ -100,42 +93,51 @@
                 <a href="mailto:contacto@e-volution.cl">contacto@e-volution.cl</a>
             </div>
         </div>
-    </footer>    
+    </footer>
+    <script th:inline="javascript">
+        const tipoDiploma = /*[[${plantilla.tipo}]]*/ "default";
+        let diplo = document.getElementsByClassName("dependeTipo")
+        for (let i = 0; i < diplo.length; i++) {
+            diplo[i].style.display = (tipoDiploma === "diploma") ? "block" : "none";
+        }
+    </script>
     <script>
-        document.getElementById('formProbarPlantilla').addEventListener('submit', function(event) {
+        document.getElementById('formProbarPlantilla').addEventListener('submit', function (event) {
             event.preventDefault(); // Evita el envío tradicional del formulario
 
             // Recopila los datos del formulario
             const formData = new FormData(this);
-
+            let direccionApi = "";
+            direccionApi = (tipoDiploma === "diploma") ? "/api/probarPlantillaDiploma" : "/api/probarPlantillaFlyer";
+            archivo = (tipoDiploma === "diploma") ? "certificado.pdf" : "flyer.pptx";
             // Realiza una solicitud fetch para enviar los datos al servidor
-            fetch('/api/probarPlantilla', {
+            fetch(direccionApi, {
                 method: 'POST',
                 body: formData,
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Error en la respuesta de la red');
-                }
-                return response.blob(); // Obtiene el archivo como Blob
-            })
-            .then(blob => {
-                // Crea un enlace temporal para iniciar la descarga
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'certificado.pdf'; // Nombre del archivo a descargar
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-                window.URL.revokeObjectURL(url);
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error en la respuesta de la red');
+                    }
+                    return response.blob(); // Obtiene el archivo como Blob
+                })
+                .then(blob => {
+                    // Crea un enlace temporal para iniciar la descarga
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = archivo; // Nombre del archivo a descargar
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
 
-                window.location.href = '/dataBasePlantilla';
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Ocurrió un error al generar el certificado.');
-            });
+                    window.location.href = '/dataBasePlantilla';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Ocurrió un error al generar el certificado.');
+                });
         });
     </script>
     <th:block th:if="${error != null}">
@@ -143,5 +145,64 @@
             showAlert("[[${error}]]");
         </script>
     </th:block>
+    <script th:inline="javascript">
+        $(document).ready(function () {
+            let cursoSeleccionado = false;
+
+            $("#cursoInput").on("input", function () {
+                const texto = $(this).val();
+                cursoSeleccionado = false;
+                $("#cursoId").val("");
+
+                if (texto.length < 2) {
+                    $("#cursoResultados").hide();
+                    return;
+                }
+
+                $.get("/api/curso/buscar", { q: texto }, function (data) {
+                    const contenedor = $("#cursoResultados");
+                    contenedor.empty();
+
+                    if (data.length === 0) {
+                        contenedor.hide();
+                        return;
+                    }
+
+                    data.forEach((curso) => {
+                        contenedor.append(`
+                            <button 
+                                type="button"
+                                class="list-group-item list-group-item-action"
+                                data-id="${curso.id}"
+                                data-nombre="${curso.nombreCurso}">
+                                ${curso.nombreCurso}
+                            </button>
+                        `);
+                    });
+
+                    contenedor.show();
+                });
+            });
+
+            // CLICK EN OPCIÓN
+            $(document).on("click", "#cursoResultados button", function () {
+                $("#cursoInput").val($(this).data("nombre"));
+                $("#cursoId").val($(this).data("id"));
+                cursoSeleccionado = true;
+                $("#cursoResultados").hide();
+            });
+
+            // BLOQUEO SI NO SE SELECCIONÓ
+            $("form").on("submit", function (e) {
+                if (!cursoSeleccionado) {
+                    e.preventDefault();
+                    alert("Debes seleccionar un curso válido de la lista");
+                    $("#cursoInput").focus();
+                }
+            });
+        });
+    </script>
+
 </body>
+
 </html>

@@ -326,6 +326,13 @@ public class ServicioArchivos {
 
     @Transactional
     @Async
+    public void generateFlyerById(Long id) throws Exception{
+        Curso curso = servicio.cursoPorId(id);
+        servicioGenerarCertificado.descargarFlyerServicio(curso);
+    }
+
+    @Transactional
+    @Async
     public void generateCertificatesById(Long id) throws Exception {
         Alumno alumno = alumnoRepo.findById(id).orElseThrow(() -> new Exception("Alumno no encontrado con ID: " + id));
 

@@ -1,8 +1,8 @@
 package com.vt.createmanagesubmit.servicios;
 
-import java.awt.Image;
-import java.awt.Graphics2D;
 import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -13,13 +13,16 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -28,8 +31,10 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.imageio.ImageIO;
 
 import org.apache.poi.sl.usermodel.PictureData;
+import org.apache.poi.sl.usermodel.ShapeType;
 import org.apache.poi.sl.usermodel.TextShape.TextAutofit;
 import org.apache.poi.xslf.usermodel.XMLSlideShow;
+import org.apache.poi.xslf.usermodel.XSLFAutoShape;
 import org.apache.poi.xslf.usermodel.XSLFPictureData;
 import org.apache.poi.xslf.usermodel.XSLFPictureShape;
 import org.apache.poi.xslf.usermodel.XSLFShape;
@@ -56,14 +61,15 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+import com.vt.createmanagesubmit.config.ShapeConfig;
 import com.vt.createmanagesubmit.modelos.Alumno;
+import com.vt.createmanagesubmit.modelos.Curso;
 import com.vt.createmanagesubmit.modelos.Plantilla;
 import com.vt.createmanagesubmit.repositorios.RepositorioAlumnos;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpServletResponse;
-
 
 @Service
 public class ServicioGenerarCertificado {
@@ -97,6 +103,27 @@ public class ServicioGenerarCertificado {
     @Value("${ST_FOLDER}")
     public String stPath;
 
+    private static final Map<String, ShapeConfig> REGION_SHAPES = new HashMap<>();
+
+    static {
+        REGION_SHAPES.put("arica", new ShapeConfig(ShapeType.TRIANGLE, new Color(255, 99, 71)));
+        REGION_SHAPES.put("tarapaca", new ShapeConfig(ShapeType.RECT, new Color(255, 165, 0)));
+        REGION_SHAPES.put("antofagasta", new ShapeConfig(ShapeType.DIAMOND, new Color(255, 215, 0)));
+        REGION_SHAPES.put("atacama", new ShapeConfig(ShapeType.PENTAGON, new Color(210, 105, 30)));
+        REGION_SHAPES.put("coquimbo", new ShapeConfig(ShapeType.ELLIPSE, new Color(70, 130, 180)));
+        REGION_SHAPES.put("valparaiso", new ShapeConfig(ShapeType.RECT, new Color(46, 139, 87)));
+        REGION_SHAPES.put("metropolitana", new ShapeConfig(ShapeType.ROUND_RECT, new Color(128, 0, 128)));
+        REGION_SHAPES.put("ohiggins", new ShapeConfig(ShapeType.CHEVRON, new Color(220, 20, 60)));
+        REGION_SHAPES.put("maule", new ShapeConfig(ShapeType.HEXAGON, new Color(139, 69, 19)));
+        REGION_SHAPES.put("nuble", new ShapeConfig(ShapeType.OCTAGON, new Color(0, 128, 128)));
+        REGION_SHAPES.put("biobio", new ShapeConfig(ShapeType.TRIANGLE, new Color(25, 25, 112)));
+        REGION_SHAPES.put("araucania", new ShapeConfig(ShapeType.STAR_5, new Color(34, 139, 34)));
+        REGION_SHAPES.put("rios", new ShapeConfig(ShapeType.ELLIPSE, new Color(0, 191, 255)));
+        REGION_SHAPES.put("lagos", new ShapeConfig(ShapeType.RECT, new Color(65, 105, 225)));
+        REGION_SHAPES.put("aysen", new ShapeConfig(ShapeType.DIAMOND, new Color(72, 61, 139)));
+        REGION_SHAPES.put("magallanes", new ShapeConfig(ShapeType.TRIANGLE, new Color(47, 79, 79)));
+    }
+
     @Async
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public CompletableFuture<Void> generateCertificateForAlumno(Alumno alumno) throws Exception {
@@ -117,14 +144,13 @@ public class ServicioGenerarCertificado {
 
         // Generar código QR con la URL y el ID encriptado
         String encryptedId = encryptStudentId(alumno.getId().toString());
-        String qrCodeText = urlPath+"/generarCertificadoQr/" + encryptedId;
+        String qrCodeText = urlPath + "/generarCertificadoQr/" + encryptedId;
 
         ByteArrayOutputStream qrCodeOutputStream = generateQRCodeImage(qrCodeText, 200, 200);
         byte[] qrCodeBytes = qrCodeOutputStream.toByteArray();
 
-        
-
-        // Crea un mapa de los datos del alumno que se usarán para reemplazar en los placeholders
+        // Crea un mapa de los datos del alumno que se usarán para reemplazar en los
+        // placeholders
         Map<String, String> alumnoData = new HashMap<>();
         alumnoData.put("nombre", alumno.getNombreAsistente());
         alumnoData.put("curso", alumno.getCurso().getNombreCurso());
@@ -146,14 +172,13 @@ public class ServicioGenerarCertificado {
 
         Map<String, byte[]> imageData = new HashMap<>();
         imageData.put("imagen_qr", qrCodeBytes);
-        if(logoCliente != null){
+        if (logoCliente != null) {
             imageData.put("imagen_cliente", logoCliente);
         }
-        
+
         for (XSLFSlide slide : ppt.getSlides()) {
             processSlide(slide, alumnoData, imageData);
         }
-    
 
         // Guarda el PPTX modificado en un archivo temporal
         String tempPptxPath = stPath + "/temp/" + alumno.getId() + ".pptx";
@@ -175,33 +200,32 @@ public class ServicioGenerarCertificado {
                 .to(new File(tempPdfPath))
                 .execute();
 
-        
-
         // Leer el PDF generado como array de bytes
         byte[] pdfBytes = Files.readAllBytes(Paths.get(tempPdfPath));
 
         // Eliminar los archivos temporales
-        
+
         new File(tempPptxPath).delete();
         new File(tempPdfPath).delete();
 
         // Enviar correo electrónico al alumno con el PDF y el código QR como adjuntos
         System.out.println("iniciando correo");
-        sendEmailWithAttachments(alumno.getCorreo(), "Certificado de Curso",alumno, pdfBytes, qrCodeBytes);
+        sendEmailWithAttachments(alumno.getCorreo(), "Certificado de Curso", alumno, pdfBytes, qrCodeBytes);
         System.out.println("termino");
         return CompletableFuture.completedFuture(null);
     }
 
-    private ByteArrayOutputStream generateQRCodeImage(String text, int width, int height) throws WriterException, IOException {
+    private ByteArrayOutputStream generateQRCodeImage(String text, int width, int height)
+            throws WriterException, IOException {
         QRCodeWriter qrCodeWriter = new QRCodeWriter();
         Map<EncodeHintType, Object> hints = new HashMap<>();
         hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H);
         BitMatrix bitMatrix = qrCodeWriter.encode(
-            text,
-            BarcodeFormat.QR_CODE,
-            width,
-            height,
-            hints);
+                text,
+                BarcodeFormat.QR_CODE,
+                width,
+                height,
+                hints);
         BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
@@ -213,23 +237,19 @@ public class ServicioGenerarCertificado {
 
         int originalWidth = logo.getWidth();
         int originalHeight = logo.getHeight();
-        double maxLogoSize = width / 2.2; 
+        double maxLogoSize = width / 2.2;
         double scale = Math.min(
                 (double) maxLogoSize / originalWidth,
-                (double) maxLogoSize / originalHeight
-        );
+                (double) maxLogoSize / originalHeight);
 
         int logoWidth = (int) (originalWidth * scale);
         int logoHeight = (int) (originalHeight * scale);
-
-
 
         // Escalar logo
         Image scaledLogo = logo.getScaledInstance(
                 logoWidth,
                 logoHeight,
-                Image.SCALE_SMOOTH
-        );
+                Image.SCALE_SMOOTH);
 
         // Posición centrada
         int x = (width - logoWidth) / 2;
@@ -241,13 +261,14 @@ public class ServicioGenerarCertificado {
         g.dispose();
 
         ByteArrayOutputStream pngOutputStream = new ByteArrayOutputStream();
-        
+
         ImageIO.write(bufferedImage, "PNG", pngOutputStream);
         return pngOutputStream;
     }
 
     private String capitalizeName(String name) {
-        if (name == null || name.isEmpty()) return name;
+        if (name == null || name.isEmpty())
+            return name;
         String[] parts = name.toLowerCase().split(" ");
         StringBuilder capitalized = new StringBuilder();
         for (String part : parts) {
@@ -256,7 +277,7 @@ public class ServicioGenerarCertificado {
         }
         return capitalized.toString().trim();
     }
-    
+
     private String formatCourseName(String courseName) {
         if (courseName != null && courseName.contains("|")) {
             return courseName.replace("|", ", ");
@@ -264,13 +285,14 @@ public class ServicioGenerarCertificado {
         return courseName;
     }
 
-    private void sendEmailWithAttachments(String toEmail, String subject, Alumno alumno, byte[] pdfBytes, byte[] qrCodeBytes) throws MessagingException {
+    private void sendEmailWithAttachments(String toEmail, String subject, Alumno alumno, byte[] pdfBytes,
+            byte[] qrCodeBytes) throws MessagingException {
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
         helper.setFrom(diplomasMail);
         helper.setTo(toEmail);
         helper.setSubject(subject);
-        byte[] logoBytes=null;
+        byte[] logoBytes = null;
         System.out.println("entro en el servicio email");
         ClassPathResource logoResourceDir = new ClassPathResource("static/images/Logobgremove.png");
         try (InputStream is = logoResourceDir.getInputStream()) {
@@ -280,47 +302,52 @@ public class ServicioGenerarCertificado {
         }
         ByteArrayResource logoResource = new ByteArrayResource(logoBytes);
         String htmlContent = "<!DOCTYPE html>" +
-        "<html lang='es'>" +
-        "<head>" +
-        "<meta charset='UTF-8'>" +
-        "<meta name='viewport' content='width=device-width, initial-scale=1.0'>" +
-        "<title>Document</title>" +
-        "</head>" +
-        "<body style='font-family: Arial, sans-serif; background-color: #f9f9f9; margin: 0; padding: 0;'>" +
-        "<div style='max-width: 600px; margin: 0 auto; background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);'>" +
-        "<table role='presentation' width='100%' style='border-spacing: 0;'>" +
-        "<tr>" +
-        "<td style='text-align: center;'>" +
-        "<img style='width: 234px; height: 58px;' src='cid:logoImage' alt='LOGO'>" +
-        "</td>" +
-        "</tr>" +
-        "<tr>" +
-        "<td style='text-align: center; color: black; padding: 10px 0; border-radius: 8px 8px 0 0;'>" +
-        "<h2>¡Felicitaciones!</h2>" +
-        "<h4>Le hemos emitido un certificado.</h4>" +
-        "</td>" +
-        "</tr>" +
-        "<tr>" +
-        "<td style='text-align: center; margin: 20px 0;'>" +
-        "<p>Estimado/a <strong>" + capitalizeName(alumno.getNombreAsistente()) + "</strong>:</p>" +
-        "<p>Adjunto encontrarás tu certificado de participación en el/los curso(s) <strong>" + formatCourseName(alumno.getCurso().getNombreCurso()) + "</strong>. Junto con un código QR que te permitirá descargarlo nuevamente desde nuestra página web.</p>" +
-        "<p>También puedes descargar tu certificado escaneando el siguiente código QR:</p>" +
-        "</td>" +
-        "</tr>" +
-        "<tr>" +
-        "<td style='text-align: center; margin: 20px 0;'>" +
-        "<img style='width: 200px; height: 200px;' src='cid:qrCodeImage' alt='QR Code'>" +
-        "</td>" +
-        "</tr>" +
-        "<tr>" +
-        "<td style='text-align: center; font-size: 12px; color: #777; margin-top: 20px;'>" +
-        "<p>Si tienes dudas, no dudes en contactarnos a través de <a href='mailto:contacto@e-volution.cl'>contacto@e-volution.cl</a>.</p>" +
-        "</td>" +
-        "</tr>" +
-        "</table>" +
-        "</div>" +
-        "</body>" +
-        "</html>";
+                "<html lang='es'>" +
+                "<head>" +
+                "<meta charset='UTF-8'>" +
+                "<meta name='viewport' content='width=device-width, initial-scale=1.0'>" +
+                "<title>Document</title>" +
+                "</head>" +
+                "<body style='font-family: Arial, sans-serif; background-color: #f9f9f9; margin: 0; padding: 0;'>" +
+                "<div style='max-width: 600px; margin: 0 auto; background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);'>"
+                +
+                "<table role='presentation' width='100%' style='border-spacing: 0;'>" +
+                "<tr>" +
+                "<td style='text-align: center;'>" +
+                "<img style='width: 234px; height: 58px;' src='cid:logoImage' alt='LOGO'>" +
+                "</td>" +
+                "</tr>" +
+                "<tr>" +
+                "<td style='text-align: center; color: black; padding: 10px 0; border-radius: 8px 8px 0 0;'>" +
+                "<h2>¡Felicitaciones!</h2>" +
+                "<h4>Le hemos emitido un certificado.</h4>" +
+                "</td>" +
+                "</tr>" +
+                "<tr>" +
+                "<td style='text-align: center; margin: 20px 0;'>" +
+                "<p>Estimado/a <strong>" + capitalizeName(alumno.getNombreAsistente()) + "</strong>:</p>" +
+                "<p>Adjunto encontrarás tu certificado de participación en el/los curso(s) <strong>"
+                + formatCourseName(alumno.getCurso().getNombreCurso())
+                + "</strong>. Junto con un código QR que te permitirá descargarlo nuevamente desde nuestra página web.</p>"
+                +
+                "<p>También puedes descargar tu certificado escaneando el siguiente código QR:</p>" +
+                "</td>" +
+                "</tr>" +
+                "<tr>" +
+                "<td style='text-align: center; margin: 20px 0;'>" +
+                "<img style='width: 200px; height: 200px;' src='cid:qrCodeImage' alt='QR Code'>" +
+                "</td>" +
+                "</tr>" +
+                "<tr>" +
+                "<td style='text-align: center; font-size: 12px; color: #777; margin-top: 20px;'>" +
+                "<p>Si tienes dudas, no dudes en contactarnos a través de <a href='mailto:contacto@e-volution.cl'>contacto@e-volution.cl</a>.</p>"
+                +
+                "</td>" +
+                "</tr>" +
+                "</table>" +
+                "</div>" +
+                "</body>" +
+                "</html>";
 
         helper.setText(htmlContent, true); // true indica que es formato HTML
 
@@ -380,14 +407,14 @@ public class ServicioGenerarCertificado {
             sha.update(key);
             key = sha.digest();
             key = Arrays.copyOf(key, 16); // Usar solo los primeros 128 bits
-        
+
             SecretKeySpec secretKeySpec = new SecretKeySpec(key, "AES");
             Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
             cipher.init(Cipher.DECRYPT_MODE, secretKeySpec);
-        
+
             // Desencripta el ID
             byte[] decrypted = cipher.doFinal(decodedEncryptedId);
-        
+
             // Convierte el byte array desencriptado en un Long
             String decryptedString = new String(decrypted, "UTF-8");
             return Long.parseLong(decryptedString); // Devuelve el Long desencriptado
@@ -399,11 +426,13 @@ public class ServicioGenerarCertificado {
 
     @Async
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public CompletableFuture<Void> generateCertificateQR(String idEncriptada, HttpServletResponse response) throws Exception {
+    public CompletableFuture<Void> generateCertificateQR(String idEncriptada, HttpServletResponse response)
+            throws Exception {
         Long alumnoId = decryptStudentId(idEncriptada);
 
         // Obtén el alumno por ID
-        Alumno alumno = alumnoRepo.findById(alumnoId).orElseThrow(() -> new Exception("Alumno no encontrado con ID " + alumnoId));
+        Alumno alumno = alumnoRepo.findById(alumnoId)
+                .orElseThrow(() -> new Exception("Alumno no encontrado con ID " + alumnoId));
 
         // Obtén la plantilla asociada al alumno
         Plantilla plantilla = alumno.getCurso().getPlantillaDiploma();
@@ -421,12 +450,13 @@ public class ServicioGenerarCertificado {
         }
         // Generar código QR con la URL y el ID encriptado
         String encryptedId = encryptStudentId(alumno.getId().toString());
-        String qrCodeText = urlPath+"/generarCertificadoQr/" + encryptedId;
+        String qrCodeText = urlPath + "/generarCertificadoQr/" + encryptedId;
 
         ByteArrayOutputStream qrCodeOutputStream = generateQRCodeImage(qrCodeText, 200, 200);
         byte[] qrCodeBytes = qrCodeOutputStream.toByteArray();
 
-        // Crea un mapa de los datos del alumno que se usarán para reemplazar en los placeholders
+        // Crea un mapa de los datos del alumno que se usarán para reemplazar en los
+        // placeholders
         Map<String, String> alumnoData = new HashMap<>();
         alumnoData.put("nombre", alumno.getNombreAsistente());
         alumnoData.put("curso", alumno.getCurso().getNombreCurso());
@@ -448,7 +478,7 @@ public class ServicioGenerarCertificado {
 
         Map<String, byte[]> imageData = new HashMap<>();
         imageData.put("imagen_qr", qrCodeBytes);
-        if(logoCliente != null){
+        if (logoCliente != null) {
             imageData.put("imagen_cliente", logoCliente);
         }
 
@@ -481,7 +511,7 @@ public class ServicioGenerarCertificado {
         response.setHeader("Content-Disposition", "attachment; filename=\"certificado-" + alumno.getId() + ".pdf\"");
         response.getOutputStream().write(pdfBytes);
         response.getOutputStream().flush();
-         // Eliminar los archivos temporales
+        // Eliminar los archivos temporales
         tempPptxFile.delete();
         tempPdfFile.delete();
         return CompletableFuture.completedFuture(null);
@@ -507,12 +537,13 @@ public class ServicioGenerarCertificado {
         }
         // Generar código QR con la URL y el ID encriptado
         String encryptedId = encryptStudentId(alumno.getId().toString());
-        String qrCodeText = urlPath+"/generarCertificadoQr/" + encryptedId;
+        String qrCodeText = urlPath + "/generarCertificadoQr/" + encryptedId;
 
         ByteArrayOutputStream qrCodeOutputStream = generateQRCodeImage(qrCodeText, 200, 200);
         byte[] qrCodeBytes = qrCodeOutputStream.toByteArray();
 
-        // Crea un mapa de los datos del alumno que se usarán para reemplazar en los placeholders
+        // Crea un mapa de los datos del alumno que se usarán para reemplazar en los
+        // placeholders
         Map<String, String> alumnoData = new HashMap<>();
         alumnoData.put("nombre", alumno.getNombreAsistente());
         alumnoData.put("curso", alumno.getCurso().getNombreCurso());
@@ -534,10 +565,9 @@ public class ServicioGenerarCertificado {
 
         Map<String, byte[]> imageData = new HashMap<>();
         imageData.put("imagen_qr", qrCodeBytes);
-        if(logoCliente != null){
+        if (logoCliente != null) {
             imageData.put("imagen_cliente", logoCliente);
         }
-
 
         // Procesa las slides y shapes
         for (XSLFSlide slide : ppt.getSlides()) {
@@ -561,40 +591,39 @@ public class ServicioGenerarCertificado {
                 .to(tempPdfFile)
                 .execute();
 
-
         pdfBytes = Files.readAllBytes(tempPdfFile.toPath());
         // Eliminar los archivos temporales
         tempPptxFile.delete();
         tempPdfFile.delete();
-         
 
-         return CompletableFuture.completedFuture(pdfBytes);
+        return CompletableFuture.completedFuture(pdfBytes);
     }
 
     private void processSlide(XSLFSlide slide, Map<String, String> data, Map<String, byte[]> imageData) {
         List<XSLFShape> shapes = new ArrayList<>(slide.getShapes());
-        
+
         for (XSLFShape shape : shapes) {
             if (shape instanceof XSLFTextShape) {
                 processTextShape(slide, (XSLFTextShape) shape, data, imageData);
             }
         }
     }
-    
-    private void processTextShape(XSLFSlide slide, XSLFTextShape textShape, Map<String, String> data, Map<String, byte[]> imageData) {
+
+    private void processTextShape(XSLFSlide slide, XSLFTextShape textShape, Map<String, String> data,
+            Map<String, byte[]> imageData) {
         List<XSLFTextParagraph> paragraphs = new ArrayList<>(textShape.getTextParagraphs());
-        
+
         for (XSLFTextParagraph paragraph : paragraphs) {
             String fullText = getFullParagraphText(paragraph);
             for (Map.Entry<String, byte[]> img : imageData.entrySet()) {
                 String placeholder = "${" + img.getKey() + "}";
                 if (fullText.contains(placeholder)) {
+                    System.out.println(fullText);
                     try {
                         replaceTextShapeWithImage(
                                 slide,
                                 textShape,
-                                img.getValue()
-                        );
+                                img.getValue());
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -604,13 +633,17 @@ public class ServicioGenerarCertificado {
             for (Map.Entry<String, String> entry : data.entrySet()) {
                 String placeholder = "${" + entry.getKey() + "}";
                 if (fullText.contains(placeholder)) {
+                    if ("forma".equals(entry.getKey())) {
+                        replaceShapePlaceholder(slide, textShape, entry.getValue());
+                        return;
+                    }
                     String replacement = entry.getValue() != null ? entry.getValue() : "";
                     replacePlaceholder(paragraph, placeholder, replacement, textShape);
                 }
             }
         }
     }
-    
+
     private String getFullParagraphText(XSLFTextParagraph paragraph) {
         StringBuilder sb = new StringBuilder();
         for (XSLFTextRun run : paragraph.getTextRuns()) {
@@ -618,41 +651,41 @@ public class ServicioGenerarCertificado {
         }
         return sb.toString();
     }
-    
-    private void replacePlaceholder(XSLFTextParagraph paragraph, String placeholder, 
-                                String replacement, XSLFTextShape textShape) { // Añadir textShape como parámetro
-    
-    String originalText = getFullParagraphText(paragraph);
-    String newText = originalText.replace(placeholder, replacement);
-    
-    if (!paragraph.getTextRuns().isEmpty()) {
-        // Conservar primer run como referencia de formato
-        XSLFTextRun sourceRun = paragraph.getTextRuns().get(0);
-        
-        // Eliminar runs adicionales (corregido)
-        List<XSLFTextRun> runs = new ArrayList<>(paragraph.getTextRuns());
-        for (int i = runs.size() - 1; i > 0; i--) { // Eliminar desde el último al primero
-            paragraph.removeTextRun(runs.get(i));
+
+    private void replacePlaceholder(XSLFTextParagraph paragraph, String placeholder,
+            String replacement, XSLFTextShape textShape) { // Añadir textShape como parámetro
+
+        String originalText = getFullParagraphText(paragraph);
+        String newText = originalText.replace(placeholder, replacement);
+
+        if (!paragraph.getTextRuns().isEmpty()) {
+            // Conservar primer run como referencia de formato
+            XSLFTextRun sourceRun = paragraph.getTextRuns().get(0);
+
+            // Eliminar runs adicionales (corregido)
+            List<XSLFTextRun> runs = new ArrayList<>(paragraph.getTextRuns());
+            for (int i = runs.size() - 1; i > 0; i--) { // Eliminar desde el último al primero
+                paragraph.removeTextRun(runs.get(i));
+            }
+
+            // Dividir texto y manejar saltos de línea
+            String[] lines = newText.split("\\|");
+            sourceRun.setText(lines[0]);
+
+            // Añadir líneas adicionales (corregido)
+            for (int i = 1; i < lines.length; i++) {
+                // Añadir salto de línea al párrafo (no al text run)
+                paragraph.addLineBreak();
+                XSLFTextRun newRun = paragraph.addNewTextRun();
+                newRun.setText(lines[i]);
+                copyRunProperties(sourceRun, newRun); // Copiar propiedades al nuevo run
+            }
+
+            adjustParagraphAlignment(paragraph);
+            enableAutoFit(textShape); // Ahora textShape está disponible
         }
-        
-        // Dividir texto y manejar saltos de línea
-        String[] lines = newText.split("\\|");
-        sourceRun.setText(lines[0]);
-        
-        // Añadir líneas adicionales (corregido)
-        for (int i = 1; i < lines.length; i++) {
-            // Añadir salto de línea al párrafo (no al text run)
-            paragraph.addLineBreak();
-            XSLFTextRun newRun = paragraph.addNewTextRun();
-            newRun.setText(lines[i]);
-            copyRunProperties(sourceRun, newRun); // Copiar propiedades al nuevo run
-        }
-        
-        adjustParagraphAlignment(paragraph);
-        enableAutoFit(textShape); // Ahora textShape está disponible
     }
-}
-    
+
     private void copyRunProperties(XSLFTextRun source, XSLFTextRun target) {
         target.setFontFamily(source.getFontFamily());
         target.setFontSize(source.getFontSize());
@@ -662,13 +695,13 @@ public class ServicioGenerarCertificado {
         target.setFontColor(source.getFontColor());
         target.setCharacterSpacing(source.getCharacterSpacing());
     }
-    
+
     private void adjustParagraphAlignment(XSLFTextParagraph paragraph) {
         paragraph.setTextAlign(paragraph.getTextAlign());
         paragraph.setBullet(paragraph.isBullet());
         // Mantener otras propiedades de alineación
     }
-    
+
     private void enableAutoFit(XSLFTextShape shape) {
         shape.setTextAutofit(TextAutofit.SHAPE);
         shape.setWordWrap(true);
@@ -677,8 +710,7 @@ public class ServicioGenerarCertificado {
     private void replaceTextShapeWithImage(
             XSLFSlide slide,
             XSLFTextShape textShape,
-            byte[] imageBytes
-    ) throws IOException {
+            byte[] imageBytes) throws IOException {
 
         XSLFPictureData pictureData = slide.getSlideShow()
                 .addPicture(imageBytes, PictureData.PictureType.PNG);
@@ -691,6 +723,129 @@ public class ServicioGenerarCertificado {
         slide.removeShape(textShape);
     }
 
+    private void replaceShapePlaceholder(
+            XSLFSlide slide,
+            XSLFTextShape textShape,
+            String regionKey) {
 
+        ShapeConfig config = REGION_SHAPES.get(regionKey);
+
+        if (config == null) {
+            return; // región no encontrada
+        }
+
+        // Guardar posición y tamaño
+        Rectangle2D anchor = textShape.getAnchor();
+
+        // Eliminar el placeholder
+        slide.removeShape(textShape);
+
+        // Crear nueva forma
+        XSLFAutoShape newShape = slide.createAutoShape();
+        newShape.setShapeType(config.getShapeType());
+        newShape.setAnchor(anchor);
+
+        // Aplicar color
+        newShape.setFillColor(config.getColor());
+
+        // Opcional: sin borde
+        newShape.setLineColor(null);
+        List<XSLFShape> shapes = slide.getShapes();
+        shapes.remove(newShape);
+        shapes.add(0, newShape);
+
+    }
+
+    @Async
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public CompletableFuture<byte[]> descargarFlyerServicio(Curso curso) throws Exception {
+
+        // Obtén la plantilla asociada al alumno
+        Plantilla plantilla = curso.getPlantillaFlyer();
+        if (plantilla == null || plantilla.getNombreCertificado().trim().equals("Error en encontrar plantilla")) {
+            throw new Exception("No hay una plantilla asociada al Curso " + curso.getNombreCurso());
+        }
+
+        // Carga la plantilla PPTX desde pathArchivo
+        String templatePath = plantilla.getPathArchivo();
+
+        // Carga el archivo PPTX usando Apache POI
+        XMLSlideShow ppt;
+        try (FileInputStream inputStream = new FileInputStream(templatePath)) {
+            ppt = new XMLSlideShow(inputStream);
+        }
+        DateTimeFormatter formatoDiaSemana = DateTimeFormatter.ofPattern("EEEE", new Locale("es", "ES"));
+
+        DateTimeFormatter formatoDiaNumero = DateTimeFormatter.ofPattern("d");
+
+        DateTimeFormatter formatoMes = DateTimeFormatter.ofPattern("MMMM", new Locale("es", "ES"));
+
+        DateTimeFormatter formatoHora = DateTimeFormatter.ofPattern("HH:mm");
+
+        // Crea un mapa de los datos del alumno que se usarán para reemplazar en los
+        // placeholders
+        Map<String, String> cursoData = new HashMap<>();
+        cursoData.put("curso", curso.getNombreCurso());
+        cursoData.put("ubicacion_del_curso", curso.getUbicacionDelCurso());
+        cursoData.put("ubicacion_del_cliente", curso.getUbicacionCliente());
+        cursoData.put("dia_semana", curso.getFechaInicio().format(formatoDiaSemana));
+        cursoData.put("dia_numero", curso.getFechaInicio().format(formatoDiaNumero));
+        cursoData.put("mes", curso.getFechaInicio().format(formatoMes));
+        cursoData.put("hora_inicio", curso.getFechaInicio().format(formatoHora));
+        cursoData.put("hora_termino", curso.getFechaFin().format(formatoHora));
+        cursoData.put("relator", curso.getRelator().getNombre());
+        cursoData.put("datos_relator", curso.getRelator().getDatosExtras());
+        cursoData.put("modalidad", curso.getModalidad());
+        cursoData.put("forma", curso.getUbicacionSubida());
+
+        byte[] logoClienteSup = null;
+        byte[] logoClienteInf = null;
+        byte[] fotoRelator = null;
+        try {
+            logoClienteSup = Files.readAllBytes(Paths.get(curso.getCliente().getPathLogo()));
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+        try {
+            logoClienteInf = Files.readAllBytes(Paths.get(curso.getCliente().getPathLogoFooter()));
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+        try {
+            fotoRelator = Files.readAllBytes(Paths.get(curso.getRelator().getFoto()));
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+
+        Map<String, byte[]> imageData = new HashMap<>();
+        if (logoClienteSup != null) {
+            imageData.put("imagen_cliente_superior", logoClienteSup);
+        }
+        if (logoClienteInf != null) {
+            imageData.put("imagen_cliente_inferior", logoClienteInf);
+        }
+        if (fotoRelator != null) {
+            imageData.put("foto_relator", fotoRelator);
+        }
+
+        // Procesa las slides y shapes
+        for (XSLFSlide slide : ppt.getSlides()) {
+            processSlide(slide, cursoData, imageData);
+        }
+
+        // Guarda el PPTX modificado en un archivo temporal
+        File tempPptxFile = File.createTempFile("Flyer-", ".pptx");
+        try (FileOutputStream out = new FileOutputStream(tempPptxFile)) {
+            ppt.write(out);
+        }
+
+        // Cierra el PPTX para evitar problemas
+        ppt.close();
+        byte[] FlyerBytes = Files.readAllBytes(tempPptxFile.toPath());
+        // Eliminar los archivos temporales
+        tempPptxFile.delete();
+
+        return CompletableFuture.completedFuture(FlyerBytes);
+    }
 
 }
