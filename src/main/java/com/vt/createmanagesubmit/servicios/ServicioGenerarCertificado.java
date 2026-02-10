@@ -5,6 +5,7 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,11 +13,14 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -31,10 +35,8 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.imageio.ImageIO;
 
 import org.apache.poi.sl.usermodel.PictureData;
-import org.apache.poi.sl.usermodel.ShapeType;
 import org.apache.poi.sl.usermodel.TextShape.TextAutofit;
 import org.apache.poi.xslf.usermodel.XMLSlideShow;
-import org.apache.poi.xslf.usermodel.XSLFAutoShape;
 import org.apache.poi.xslf.usermodel.XSLFPictureData;
 import org.apache.poi.xslf.usermodel.XSLFPictureShape;
 import org.apache.poi.xslf.usermodel.XSLFShape;
@@ -106,22 +108,22 @@ public class ServicioGenerarCertificado {
     private static final Map<String, ShapeConfig> REGION_SHAPES = new HashMap<>();
 
     static {
-        REGION_SHAPES.put("arica", new ShapeConfig(ShapeType.TRIANGLE, new Color(255, 99, 71)));
-        REGION_SHAPES.put("tarapaca", new ShapeConfig(ShapeType.RECT, new Color(255, 165, 0)));
-        REGION_SHAPES.put("antofagasta", new ShapeConfig(ShapeType.DIAMOND, new Color(255, 215, 0)));
-        REGION_SHAPES.put("atacama", new ShapeConfig(ShapeType.PENTAGON, new Color(210, 105, 30)));
-        REGION_SHAPES.put("coquimbo", new ShapeConfig(ShapeType.ELLIPSE, new Color(70, 130, 180)));
-        REGION_SHAPES.put("valparaiso", new ShapeConfig(ShapeType.RECT, new Color(46, 139, 87)));
-        REGION_SHAPES.put("metropolitana", new ShapeConfig(ShapeType.ROUND_RECT, new Color(128, 0, 128)));
-        REGION_SHAPES.put("ohiggins", new ShapeConfig(ShapeType.CHEVRON, new Color(220, 20, 60)));
-        REGION_SHAPES.put("maule", new ShapeConfig(ShapeType.HEXAGON, new Color(139, 69, 19)));
-        REGION_SHAPES.put("nuble", new ShapeConfig(ShapeType.OCTAGON, new Color(0, 128, 128)));
-        REGION_SHAPES.put("biobio", new ShapeConfig(ShapeType.TRIANGLE, new Color(25, 25, 112)));
-        REGION_SHAPES.put("araucania", new ShapeConfig(ShapeType.STAR_5, new Color(34, 139, 34)));
-        REGION_SHAPES.put("rios", new ShapeConfig(ShapeType.ELLIPSE, new Color(0, 191, 255)));
-        REGION_SHAPES.put("lagos", new ShapeConfig(ShapeType.RECT, new Color(65, 105, 225)));
-        REGION_SHAPES.put("aysen", new ShapeConfig(ShapeType.DIAMOND, new Color(72, 61, 139)));
-        REGION_SHAPES.put("magallanes", new ShapeConfig(ShapeType.TRIANGLE, new Color(47, 79, 79)));
+        REGION_SHAPES.put("arica", new ShapeConfig(new Color(255, 99, 71)));
+        REGION_SHAPES.put("tarapaca", new ShapeConfig(new Color(255, 165, 0)));
+        REGION_SHAPES.put("antofagasta", new ShapeConfig(new Color(255, 215, 0)));
+        REGION_SHAPES.put("atacama", new ShapeConfig(new Color(210, 105, 30)));
+        REGION_SHAPES.put("coquimbo", new ShapeConfig(new Color(70, 130, 180)));
+        REGION_SHAPES.put("valparaiso", new ShapeConfig(new Color(46, 139, 87)));
+        REGION_SHAPES.put("metropolitana", new ShapeConfig(new Color(128, 0, 128)));
+        REGION_SHAPES.put("ohiggins", new ShapeConfig(new Color(220, 20, 60)));
+        REGION_SHAPES.put("maule", new ShapeConfig(new Color(139, 69, 19)));
+        REGION_SHAPES.put("nuble", new ShapeConfig(new Color(0, 128, 128)));
+        REGION_SHAPES.put("biobio", new ShapeConfig(new Color(25, 25, 112)));
+        REGION_SHAPES.put("araucania", new ShapeConfig(new Color(34, 139, 34)));
+        REGION_SHAPES.put("rios", new ShapeConfig(new Color(0, 191, 255)));
+        REGION_SHAPES.put("lagos", new ShapeConfig(new Color(65, 105, 225)));
+        REGION_SHAPES.put("aysen", new ShapeConfig(new Color(72, 61, 139)));
+        REGION_SHAPES.put("magallanes", new ShapeConfig(new Color(47, 79, 79)));
     }
 
     @Async
@@ -131,6 +133,20 @@ public class ServicioGenerarCertificado {
         Plantilla plantilla = alumno.getCurso().getPlantillaDiploma();
         if (plantilla == null || plantilla.getNombreCertificado().trim().equals("Error en encontrar plantilla")) {
             throw new Exception("No hay una plantilla asociada al Alumno " + alumno.getNombreAsistente());
+        }
+
+        String emision = "";
+        if (alumno.getCurso().getLugarYfechaEmision() == null) {
+            LocalDateTime ahora = LocalDateTime.now();
+
+            int dia = ahora.getDayOfMonth();
+            String mes = ahora.getMonth().getDisplayName(TextStyle.FULL, new Locale("es"));
+            int anio = ahora.getYear();
+
+            emision = "Emitido el " + dia + " de " + mes + " de " + anio + ", en "
+                    + alumno.getCurso().getCiudad() + ", " + alumno.getCurso().getUbicacionSubida();
+        } else {
+            emision = alumno.getCurso().getLugarYfechaEmision();
         }
 
         // Carga la plantilla PPTX desde pathArchivo
@@ -162,6 +178,7 @@ public class ServicioGenerarCertificado {
         alumnoData.put("emision", alumno.getCurso().getLugarYfechaEmision());
         alumnoData.put("correlativo", alumno.getNumeroCorrelativoInterno());
         alumnoData.put("modalidad", alumno.getCurso().getModalidad());
+        alumnoData.put("datos_emision", emision);
 
         byte[] logoCliente = null;
         try {
@@ -181,32 +198,32 @@ public class ServicioGenerarCertificado {
         }
 
         // Guarda el PPTX modificado en un archivo temporal
-        String tempPptxPath = stPath + "/temp/" + alumno.getId() + ".pptx";
-        File tempDir = new File("temp");
-        if (!tempDir.exists()) {
-            tempDir.mkdirs();
-        }
-        try (FileOutputStream out = new FileOutputStream(tempPptxPath)) {
+        // Crear carpeta temp
+        Path tempDir = Paths.get(stPath, "temp");
+        Files.createDirectories(tempDir);
+
+        Path tempPptxPath = tempDir.resolve(alumno.getId() + ".pptx");
+        Path tempPdfPath = tempDir.resolve(alumno.getId() + ".pdf");
+
+        // Guardar PPTX
+        try (OutputStream out = Files.newOutputStream(tempPptxPath)) {
             ppt.write(out);
         }
 
-        // Cierra el PPTX para eliminar el warning
         ppt.close();
 
-        // Convierte el PPTX a PDF usando JODConverter
-        String tempPdfPath = stPath + "/temp/" + alumno.getId() + ".pdf";
+        // Convertir a PDF
         JodConverter
-                .convert(new File(tempPptxPath))
-                .to(new File(tempPdfPath))
+                .convert(tempPptxPath.toFile())
+                .to(tempPdfPath.toFile())
                 .execute();
 
-        // Leer el PDF generado como array de bytes
-        byte[] pdfBytes = Files.readAllBytes(Paths.get(tempPdfPath));
+        // Leer PDF
+        byte[] pdfBytes = Files.readAllBytes(tempPdfPath);
 
-        // Eliminar los archivos temporales
-
-        new File(tempPptxPath).delete();
-        new File(tempPdfPath).delete();
+        // Borrar temporales
+        Files.deleteIfExists(tempPptxPath);
+        Files.deleteIfExists(tempPdfPath);
 
         // Enviar correo electrónico al alumno con el PDF y el código QR como adjuntos
         System.out.println("iniciando correo");
@@ -440,6 +457,20 @@ public class ServicioGenerarCertificado {
             throw new Exception("No hay una plantilla asociada al Alumno " + alumno.getNombreAsistente());
         }
 
+        String emision = "";
+        if (alumno.getCurso().getLugarYfechaEmision() == null) {
+            LocalDateTime ahora = LocalDateTime.now();
+
+            int dia = ahora.getDayOfMonth();
+            String mes = ahora.getMonth().getDisplayName(TextStyle.FULL, new Locale("es"));
+            int anio = ahora.getYear();
+
+            emision = "Emitido el " + dia + " de " + mes + " de " + anio + ", en "
+                    + alumno.getCurso().getCiudad() + ", " + alumno.getCurso().getUbicacionSubida();
+        } else {
+            emision = alumno.getCurso().getLugarYfechaEmision();
+        }
+
         // Carga la plantilla PPTX desde pathArchivo
         String templatePath = plantilla.getPathArchivo();
 
@@ -468,6 +499,7 @@ public class ServicioGenerarCertificado {
         alumnoData.put("emision", alumno.getCurso().getLugarYfechaEmision());
         alumnoData.put("correlativo", alumno.getNumeroCorrelativoInterno());
         alumnoData.put("modalidad", alumno.getCurso().getModalidad());
+        alumnoData.put("datos_emision", emision);
 
         byte[] logoCliente = null;
         try {
@@ -487,33 +519,33 @@ public class ServicioGenerarCertificado {
             processSlide(slide, alumnoData, imageData);
         }
 
-        // Guarda el PPTX modificado en un archivo temporal
-        File tempPptxFile = File.createTempFile("certificado-", ".pptx");
-        try (FileOutputStream out = new FileOutputStream(tempPptxFile)) {
+        Path tempDir = Paths.get(stPath, "temp");
+        Files.createDirectories(tempDir);
+
+        Path tempPptxPath = tempDir.resolve(alumno.getId() + ".pptx");
+        Path tempPdfPath = tempDir.resolve(alumno.getId() + ".pdf");
+
+        try (OutputStream out = Files.newOutputStream(tempPptxPath)) {
             ppt.write(out);
         }
 
-        // Cierra el PPTX para evitar problemas
         ppt.close();
 
-        // Convierte el PPTX a PDF usando JODConverter
-        File tempPdfFile = File.createTempFile("certificado-", ".pdf");
-
         JodConverter
-                .convert(tempPptxFile)
-                .to(tempPdfFile)
+                .convert(tempPptxPath.toFile())
+                .to(tempPdfPath.toFile())
                 .execute();
 
-        // Leer el PDF generado como array de bytes
-        byte[] pdfBytes = Files.readAllBytes(tempPdfFile.toPath());
-        // Configurar la respuesta HTTP para enviar el PDF como archivo descargable
+        byte[] pdfBytes = Files.readAllBytes(tempPdfPath);
+
         response.setContentType("application/pdf");
         response.setHeader("Content-Disposition", "attachment; filename=\"certificado-" + alumno.getId() + ".pdf\"");
         response.getOutputStream().write(pdfBytes);
         response.getOutputStream().flush();
-        // Eliminar los archivos temporales
-        tempPptxFile.delete();
-        tempPdfFile.delete();
+
+        Files.deleteIfExists(tempPptxPath);
+        Files.deleteIfExists(tempPdfPath);
+
         return CompletableFuture.completedFuture(null);
     }
 
@@ -527,6 +559,20 @@ public class ServicioGenerarCertificado {
             throw new Exception("No hay una plantilla asociada al Alumno " + alumno.getNombreAsistente());
         }
 
+        String emision = "";
+        if (alumno.getCurso().getLugarYfechaEmision() == null) {
+            LocalDateTime ahora = LocalDateTime.now();
+
+            int dia = ahora.getDayOfMonth();
+            String mes = ahora.getMonth().getDisplayName(TextStyle.FULL, new Locale("es"));
+            int anio = ahora.getYear();
+
+            emision = "Emitido el " + dia + " de " + mes + " de " + anio + ", en "
+                    + alumno.getCurso().getCiudad() + ", " + alumno.getCurso().getUbicacionSubida();
+        } else {
+            emision = alumno.getCurso().getLugarYfechaEmision();
+        }
+
         // Carga la plantilla PPTX desde pathArchivo
         String templatePath = plantilla.getPathArchivo();
 
@@ -555,6 +601,7 @@ public class ServicioGenerarCertificado {
         alumnoData.put("emision", alumno.getCurso().getLugarYfechaEmision());
         alumnoData.put("correlativo", alumno.getNumeroCorrelativoInterno());
         alumnoData.put("modalidad", alumno.getCurso().getModalidad());
+        alumnoData.put("datos_emision", emision);
 
         byte[] logoCliente = null;
         try {
@@ -574,27 +621,27 @@ public class ServicioGenerarCertificado {
             processSlide(slide, alumnoData, imageData);
         }
 
-        // Guarda el PPTX modificado en un archivo temporal
-        File tempPptxFile = File.createTempFile("certificado-", ".pptx");
-        try (FileOutputStream out = new FileOutputStream(tempPptxFile)) {
+        Path tempDir = Paths.get(stPath, "temp");
+        Files.createDirectories(tempDir);
+
+        Path tempPptxPath = tempDir.resolve(alumno.getId() + ".pptx");
+        Path tempPdfPath = tempDir.resolve(alumno.getId() + ".pdf");
+
+        try (OutputStream out = Files.newOutputStream(tempPptxPath)) {
             ppt.write(out);
         }
 
-        // Cierra el PPTX para evitar problemas
         ppt.close();
-        byte[] pdfBytes = null;
-        // Convierte el PPTX a PDF usando JODConverter
-        File tempPdfFile = File.createTempFile("certificado-", ".pdf");
 
         JodConverter
-                .convert(tempPptxFile)
-                .to(tempPdfFile)
+                .convert(tempPptxPath.toFile())
+                .to(tempPdfPath.toFile())
                 .execute();
 
-        pdfBytes = Files.readAllBytes(tempPdfFile.toPath());
-        // Eliminar los archivos temporales
-        tempPptxFile.delete();
-        tempPdfFile.delete();
+        byte[] pdfBytes = Files.readAllBytes(tempPdfPath);
+
+        Files.deleteIfExists(tempPptxPath);
+        Files.deleteIfExists(tempPdfPath);
 
         return CompletableFuture.completedFuture(pdfBytes);
     }
@@ -634,7 +681,7 @@ public class ServicioGenerarCertificado {
                 String placeholder = "${" + entry.getKey() + "}";
                 if (fullText.contains(placeholder)) {
                     if ("forma".equals(entry.getKey())) {
-                        replaceShapePlaceholder(slide, textShape, entry.getValue());
+                        replaceShapePlaceholder(textShape, entry.getValue());
                         return;
                     }
                     String replacement = entry.getValue() != null ? entry.getValue() : "";
@@ -712,48 +759,64 @@ public class ServicioGenerarCertificado {
             XSLFTextShape textShape,
             byte[] imageBytes) throws IOException {
 
+        // 1. Leer dimensiones reales de la imagen
+        BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageBytes));
+        if (image == null) {
+            throw new IOException("No se pudo leer la imagen");
+        }
+
+        double imgWidth = image.getWidth();
+        double imgHeight = image.getHeight();
+
+        // 2. Anchor original (placeholder)
+        Rectangle2D anchor = textShape.getAnchor();
+        double targetHeight = anchor.getHeight();
+
+        // 3. Calcular ancho proporcional
+        double aspectRatio = imgWidth / imgHeight;
+        double targetWidth = targetHeight * aspectRatio;
+
+        // 4. Centrar horizontalmente (opcional pero recomendado)
+        double x = anchor.getX() + (anchor.getWidth() - targetWidth) / 2;
+        double y = anchor.getY();
+
+        Rectangle2D newAnchor = new Rectangle2D.Double(
+                x,
+                y,
+                targetWidth,
+                targetHeight);
+
+        // 5. Crear imagen en el slide
         XSLFPictureData pictureData = slide.getSlideShow()
                 .addPicture(imageBytes, PictureData.PictureType.PNG);
 
-        Rectangle2D anchor = textShape.getAnchor();
-
         XSLFPictureShape pictureShape = slide.createPicture(pictureData);
-        pictureShape.setAnchor(anchor);
+        pictureShape.setAnchor(newAnchor);
 
+        // 6. Eliminar el placeholder de texto
         slide.removeShape(textShape);
     }
 
     private void replaceShapePlaceholder(
-            XSLFSlide slide,
             XSLFTextShape textShape,
             String regionKey) {
 
         ShapeConfig config = REGION_SHAPES.get(regionKey);
+        if (config == null)
+            return;
 
-        if (config == null) {
-            return; // región no encontrada
+        // Cambiar color de relleno
+        textShape.setFillColor(config.getColor());
+
+        // Opcional: quitar borde
+        textShape.setLineColor(null);
+
+        // Eliminar el texto placeholder
+        for (XSLFTextParagraph paragraph : textShape.getTextParagraphs()) {
+            for (XSLFTextRun run : paragraph.getTextRuns()) {
+                run.setText("");
+            }
         }
-
-        // Guardar posición y tamaño
-        Rectangle2D anchor = textShape.getAnchor();
-
-        // Eliminar el placeholder
-        slide.removeShape(textShape);
-
-        // Crear nueva forma
-        XSLFAutoShape newShape = slide.createAutoShape();
-        newShape.setShapeType(config.getShapeType());
-        newShape.setAnchor(anchor);
-
-        // Aplicar color
-        newShape.setFillColor(config.getColor());
-
-        // Opcional: sin borde
-        newShape.setLineColor(null);
-        List<XSLFShape> shapes = slide.getShapes();
-        shapes.remove(newShape);
-        shapes.add(0, newShape);
-
     }
 
     @Async
@@ -785,6 +848,7 @@ public class ServicioGenerarCertificado {
         // Crea un mapa de los datos del alumno que se usarán para reemplazar en los
         // placeholders
         Map<String, String> cursoData = new HashMap<>();
+        cursoData.put("forma", curso.getUbicacionSubida());
         cursoData.put("curso", curso.getNombreCurso());
         cursoData.put("ubicacion_del_curso", curso.getUbicacionDelCurso());
         cursoData.put("ubicacion_del_cliente", curso.getUbicacionCliente());
@@ -796,7 +860,6 @@ public class ServicioGenerarCertificado {
         cursoData.put("relator", curso.getRelator().getNombre());
         cursoData.put("datos_relator", curso.getRelator().getDatosExtras());
         cursoData.put("modalidad", curso.getModalidad());
-        cursoData.put("forma", curso.getUbicacionSubida());
 
         byte[] logoClienteSup = null;
         byte[] logoClienteInf = null;

@@ -2,9 +2,6 @@
 -backup de base de datos
 -solo admin puede eliminar clientes,realtores y curso,plantilla
 -limitar vision para cordinarores en curso temporales
--plantilla flyer
--mantener resolucion de la imagen original(logo)
 -arreglar enviar
--arreglar probar plantilla
 -arreglar moodle
 -lugar y fecha de emision

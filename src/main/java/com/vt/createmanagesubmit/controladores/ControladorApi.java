@@ -7,6 +7,9 @@ import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
@@ -44,6 +47,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.vt.createmanagesubmit.dto.AlumnoDTO;
@@ -862,6 +866,98 @@ public class ControladorApi {
     public List<RelatorDTO> buscarRelator(@RequestParam String q) {
         return repoRel.findTop10ByNombreContainingIgnoreCase(q).stream().map(RelatorDTO::new)
                 .collect(Collectors.toList());
+    }
+
+    @PostMapping("/dataBaseCurso/nuevoCurso")
+    public ResponseEntity<byte[]> crearNuevoCurso(
+
+            // ===== DIPLOMA =====
+            @RequestParam String nombreCurso,
+            @RequestParam String diasCursos,
+            @RequestParam String duracion,
+
+            @RequestParam Long clienteId,
+            @RequestParam String modalidad,
+            @RequestParam String ubicacionSubida,
+            @RequestParam String ciudad,
+
+            @RequestParam Long relatorId,
+            @RequestParam Long plantillaDipId,
+
+            @RequestParam Float NotaMin,
+            @RequestParam Integer asistenciaMin,
+
+            // ===== FLYER =====
+            @RequestParam String ubicacionDelCurso,
+            @RequestParam String ubicacionCliente,
+
+            @RequestParam String fecha, // yyyy-MM-dd
+            @RequestParam String horaI, // HH:mm
+            @RequestParam String horaF, // HH:mm
+            @RequestParam Float horasRelatorCurso,
+            @RequestParam Long plantillaFlyId,
+
+            RedirectAttributes redirectAttrs) {
+
+        try {
+
+            LocalDate fechaCurso = LocalDate.parse(fecha);
+            LocalTime horaInicio = LocalTime.parse(horaI);
+            LocalTime horaFin = LocalTime.parse(horaF);
+
+            LocalDateTime fechaDeInicio = LocalDateTime.of(fechaCurso, horaInicio);
+            LocalDateTime fechaDeFinalizacion = LocalDateTime.of(fechaCurso, horaFin);
+
+            Cliente cliente = ser.clientePorId(clienteId);
+
+            Relator relator = ser.buscarRelatorPorId(relatorId);
+            relator.setHorasTrabajados(relator.getHorasTrabajados() + horasRelatorCurso);
+            ser.guardarRelator(relator);
+            Plantilla plantillaDiploma = ser.plantillaPorId(plantillaDipId);
+
+            Plantilla plantillaFlyer = ser.plantillaPorId(plantillaFlyId);
+
+            Curso curso = new Curso();
+            curso.setNombreCurso(nombreCurso);
+            curso.setDiasCursos(diasCursos);
+            curso.setDuracion(duracion);
+
+            curso.setCliente(cliente);
+            curso.setModalidad(modalidad);
+            curso.setUbicacionSubida(ubicacionSubida);
+            curso.setCiudad(ciudad);
+
+            curso.setRelator(relator);
+            curso.setNotaMin(NotaMin);
+            curso.setAsistenciaMin(asistenciaMin);
+
+            curso.setUbicacionDelCurso(ubicacionDelCurso);
+            curso.setUbicacionCliente(ubicacionCliente);
+            curso.setFechaInicio(fechaDeInicio);
+            curso.setFechaFin(fechaDeFinalizacion);
+
+            curso.setPlantillaDiploma(plantillaDiploma);
+            curso.setPlantillaFlyer(plantillaFlyer);
+            curso.setHorasRelatorCurso(horasRelatorCurso);
+            curso.setAsistenciaQr(true);
+            ser.guardarCurso(curso);
+
+            byte[] flyerBytes =
+                servicioGenerarCertificado
+                        .descargarFlyerServicio(curso)
+                        .get();
+
+
+            return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=Flyer-" + curso.getNombreCurso() + ".pptx")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(flyerBytes);
+
+        } catch (Exception e) {
+            redirectAttrs.addFlashAttribute("error", e.getMessage());
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @GetMapping("/datosCurso")
