@@ -311,6 +311,13 @@ public class Servicio {
         repoPlanti.save(plantilla);
     }
 
+    public void guardarAlumno(Alumno alumno){
+        repoAlum.save(alumno);
+        if (alumno.getNumeroCorrelativoInterno()==null){
+            numeroCorrelativoAuto(alumno);
+        } 
+    }
+
     public Relator buscarRelatorPorId(Long relator) {
         Optional<Relator> relatoropt = repoRelator.findById(relator);
         if (relatoropt.isPresent()) {
@@ -353,6 +360,10 @@ public class Servicio {
         relator.setNombre(nombre);
         repoRelator.save(relator);
         return relator;
+    }
+
+    public void borrarRelator(Long id){
+        repoRelator.deleteById(id);
     }
 
     public void borrarPlantillaPorId(Long id) throws IOException {
@@ -883,6 +894,10 @@ public class Servicio {
     public void guardarCliente(Cliente cliente) {
         repoCliente.save(cliente);
     }
+    
+    public void borrarCliente(Long id){
+        repoCliente.deleteById(id);
+    }
 
     public Cliente clientePorId(Long id) throws Exception {
 
@@ -1028,6 +1043,10 @@ public class Servicio {
 
     public void guardarCurso(Curso curso) {
         repoCurso.save(curso);
+    }
+
+    public void borrarCurso(Long id){
+        repoCurso.deleteById(id);
     }
 
     public Page<Curso> buscarConMultiplesFiltrosCurso(List<Map<String, String>> filtros) {

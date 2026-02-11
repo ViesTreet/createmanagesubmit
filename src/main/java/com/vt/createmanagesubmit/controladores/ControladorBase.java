@@ -7,9 +7,13 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.TextStyle;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,11 +21,14 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -29,6 +36,8 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.vt.createmanagesubmit.dto.AlumnoDTO;
+import com.vt.createmanagesubmit.dto.AlumnosWrapper;
 import com.vt.createmanagesubmit.exceptions.MissingAdminIdException;
 import com.vt.createmanagesubmit.exceptions.MissingAlumnoIdException;
 import com.vt.createmanagesubmit.exceptions.MissingNameOrRutException;
@@ -49,8 +58,6 @@ import com.vt.createmanagesubmit.servicios.ServicioTareasProgramadas;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
 @Controller
 public class ControladorBase {
@@ -253,6 +260,20 @@ public class ControladorBase {
 
             if ("enviar".equalsIgnoreCase(diploma)
                     && "aprobado".equalsIgnoreCase(nuevoAlumno.getEstado())) {
+                Curso cursoAlumno = nuevoAlumno.getCurso();
+                String emision = "";
+                if (cursoAlumno.getLugarYfechaEmision() == null) {
+                    LocalDateTime ahora = LocalDateTime.now();
+
+                    int dia = ahora.getDayOfMonth();
+                    String mes = ahora.getMonth().getDisplayName(TextStyle.FULL, new Locale("es"));
+                    int anio = ahora.getYear();
+
+                    emision = "Emitido el " + dia + " de " + mes + " de " + anio + ", en "
+                            + cursoAlumno.getCiudad() + ", " + cursoAlumno.getUbicacionSubida();
+                    cursoAlumno.setLugarYfechaEmision(emision);
+                    servicio.guardarCurso(cursoAlumno);
+                }
                 servicioGenerarCertificado.generateCertificateForAlumno(nuevoAlumno);
                 nuevoAlumno.setDiploma("enviado");
             } else {
@@ -421,34 +442,50 @@ public class ControladorBase {
         return "moodleProgramado";
     }
 
-    @PostMapping("/programarCertificadoMoodle/crear")
-    public String crearMoodleTarea(
-            HttpSession session,
-            @RequestParam(name = "cursoMoodle", required = true) String cursoMoodleParam,
-            @RequestParam(name = "accion", required = true) String accion,
-            @RequestParam(name = "cursoId", required = true) Long cursoId,
-            @RequestParam(name = "fechaDeEjecucion", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaDeEjecucion) {
-        Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
-        if (usuarioTemporal == null) {
-            return "redirect:/";
+    @PostMapping("/programarCertificadoMoodleManual/crear")
+    public String procesarAlumnos(
+
+            @RequestParam Long cursoMoodle,
+
+            @RequestParam(required = true) Long cursoId,
+
+            @RequestParam String accion,
+
+            @ModelAttribute AlumnosWrapper wrapper) {
+        List<AlumnoDTO> alumnosForm = wrapper.getAlumnos();
+        List<AlumnoDTO> habilitados = new ArrayList<AlumnoDTO>();
+
+        for (AlumnoDTO alumno : alumnosForm) {
+            if (alumno.getEstado().equals("Aprobado")) {
+                habilitados.add(alumno);
+            }
+        }
+        List<Alumno> alumnos = habilitados.stream().map(f -> {
+            Alumno a = new Alumno();
+            a.setNombreAsistente(f.getNombreAsistente());
+            a.setCorreo(f.getCorreo());
+            a.setNotaAprobacion(f.getNotaAprobacion());
+            a.setAsistencia(f.getAsistencia());
+            a.setEstado("Aprobado"); // o el estado que toque
+            a.setDiploma("noEnviado"); // inicial
+            Curso curso = servicio.cursoPorId(cursoId);
+            a.setCurso(curso);
+            return a;
+        }).collect(Collectors.toList());
+
+        for (Alumno alumno : alumnos) {
+            servicio.guardarAlumno(alumno);
+            if ("emitirYGuardar".equalsIgnoreCase(accion)) {
+                try {
+                    servicioAr.generateCertificatesById(alumno.getId());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
-        // 2) Parseo de IDs (vacío → null)
-        Long idCurso = (cursoMoodleParam == null || cursoMoodleParam.isBlank())
-                ? null
-                : Long.valueOf(cursoMoodleParam);
+        return "redirect:/programarCertificadoMoodleManual";
 
-        if (idCurso == null || accion.isBlank()) {
-            return "redirect:/programarCertificadoMoodle";
-        }
-        Curso curso = servicio.cursoPorId(idCurso);
-        servicioTareaP.CrearTarea(
-                idCurso,
-                accion,
-                fechaDeEjecucion,
-                curso);
-
-        return "redirect:/programarCertificadoMoodle";
     }
 
     @GetMapping("/programarCertificadoMoodleManual")
@@ -1077,7 +1114,6 @@ public class ControladorBase {
         model.addAttribute("admin", usuarioTemporal);
         return "databaseCurso";
     }
-
 
     @GetMapping("/dataBaseCurso/Cliente/{id}")
     public String dataBaseCursoPorCliente(HttpSession session, Model model, @PathVariable("id") Long id) {

@@ -258,9 +258,15 @@
               "/editar'>Editar</a>" +
               "<a class='btn btn-secondary' href='/dataBaseCurso/Curso/" +
               curso.id +
-              "/alumnos'>Alumnos</a>" +
-              "</td>" +
-              "</tr>";
+              "/alumnos'>Alumnos</a>";
+            if (adminCorreo === "admin@admin.com") {
+              fila +=
+                "<button class='btn btn-danger btn-sm' onclick='eliminarCurso(" +
+                curso.id +
+                ")'>Borrar</button>" +
+                "</td>" +
+                "</tr>";
+            }
 
             tbody.append(fila);
           });
@@ -557,7 +563,8 @@
           "</td>" +
           "<td " +
           estiloFila +
-          ">" + (
+          ">" +
+          (
             curso.fechaInicio
               ? formatearFecha(curso.fechaInicio) + aviso
               : ""
@@ -583,9 +590,15 @@
           "/editar'>Editar</a>" +
           "<a class='btn btn-secondary' href='/dataBaseCurso/Curso/" +
           curso.id +
-          "/alumnos'>Alumnos</a>" +
-          "</td>" +
-          "</tr>";
+          "/alumnos'>Alumnos</a>";
+        if (adminCorreo === "admin@admin.com") {
+          fila +=
+            "<button class='btn btn-danger btn-sm' onclick='eliminarCurso(" +
+            curso.id +
+            ")'>Borrar</button>" +
+            "</td>" +
+            "</tr>";
+        }
 
         tbody.append(fila);
       });
@@ -886,7 +899,7 @@
           const url = window.URL.createObjectURL(blob);
           const a = document.createElement("a");
           a.href = url;
-          a.download = "flyer-"+nombreCurso+".pptx"; // nombre de descarga
+          a.download = "flyer-" + nombreCurso + ".pptx"; // nombre de descarga
           document.body.appendChild(a);
           a.click();
           a.remove();
@@ -896,6 +909,29 @@
         })
         .catch(err => alert("Error al generar el flyer: " + err));
     });
+
+  </script>
+  <script th:inline="javascript">
+    function eliminarCurso(id) {
+      if (!confirm("¿Seguro que quieres eliminar este curso?")) {
+        return;
+      }
+
+      fetch("/api/dataBaseCurso/borrarCurso/" + id, {
+        method: "DELETE"
+      })
+        .then(response => {
+          if (response.ok) {
+            location.reload();
+          } else {
+            alert("Error al eliminar curso");
+          }
+        })
+        .catch(error => {
+          console.error(error);
+          alert("Error de conexión");
+        });
+    }
 
   </script>
 </body>

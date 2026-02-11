@@ -135,20 +135,6 @@ public class ServicioGenerarCertificado {
             throw new Exception("No hay una plantilla asociada al Alumno " + alumno.getNombreAsistente());
         }
 
-        String emision = "";
-        if (alumno.getCurso().getLugarYfechaEmision() == null) {
-            LocalDateTime ahora = LocalDateTime.now();
-
-            int dia = ahora.getDayOfMonth();
-            String mes = ahora.getMonth().getDisplayName(TextStyle.FULL, new Locale("es"));
-            int anio = ahora.getYear();
-
-            emision = "Emitido el " + dia + " de " + mes + " de " + anio + ", en "
-                    + alumno.getCurso().getCiudad() + ", " + alumno.getCurso().getUbicacionSubida();
-        } else {
-            emision = alumno.getCurso().getLugarYfechaEmision();
-        }
-
         // Carga la plantilla PPTX desde pathArchivo
         String templatePath = plantilla.getPathArchivo();
 
@@ -178,7 +164,7 @@ public class ServicioGenerarCertificado {
         alumnoData.put("emision", alumno.getCurso().getLugarYfechaEmision());
         alumnoData.put("correlativo", alumno.getNumeroCorrelativoInterno());
         alumnoData.put("modalidad", alumno.getCurso().getModalidad());
-        alumnoData.put("datos_emision", emision);
+        alumnoData.put("datos_emision", alumno.getCurso().getLugarYfechaEmision());
 
         byte[] logoCliente = null;
         try {
@@ -456,9 +442,9 @@ public class ServicioGenerarCertificado {
         if (plantilla == null || plantilla.getNombreCertificado().trim().equals("Error en encontrar plantilla")) {
             throw new Exception("No hay una plantilla asociada al Alumno " + alumno.getNombreAsistente());
         }
-
+        Curso cursoAlumno = alumno.getCurso();
         String emision = "";
-        if (alumno.getCurso().getLugarYfechaEmision() == null) {
+        if (cursoAlumno.getLugarYfechaEmision() == null) {
             LocalDateTime ahora = LocalDateTime.now();
 
             int dia = ahora.getDayOfMonth();
@@ -466,7 +452,9 @@ public class ServicioGenerarCertificado {
             int anio = ahora.getYear();
 
             emision = "Emitido el " + dia + " de " + mes + " de " + anio + ", en "
-                    + alumno.getCurso().getCiudad() + ", " + alumno.getCurso().getUbicacionSubida();
+                    + cursoAlumno.getCiudad() + ", " + cursoAlumno.getUbicacionSubida();
+            cursoAlumno.setLugarYfechaEmision(emision);
+            servicio.guardarCurso(cursoAlumno);
         } else {
             emision = alumno.getCurso().getLugarYfechaEmision();
         }
@@ -559,20 +547,6 @@ public class ServicioGenerarCertificado {
             throw new Exception("No hay una plantilla asociada al Alumno " + alumno.getNombreAsistente());
         }
 
-        String emision = "";
-        if (alumno.getCurso().getLugarYfechaEmision() == null) {
-            LocalDateTime ahora = LocalDateTime.now();
-
-            int dia = ahora.getDayOfMonth();
-            String mes = ahora.getMonth().getDisplayName(TextStyle.FULL, new Locale("es"));
-            int anio = ahora.getYear();
-
-            emision = "Emitido el " + dia + " de " + mes + " de " + anio + ", en "
-                    + alumno.getCurso().getCiudad() + ", " + alumno.getCurso().getUbicacionSubida();
-        } else {
-            emision = alumno.getCurso().getLugarYfechaEmision();
-        }
-
         // Carga la plantilla PPTX desde pathArchivo
         String templatePath = plantilla.getPathArchivo();
 
@@ -601,7 +575,7 @@ public class ServicioGenerarCertificado {
         alumnoData.put("emision", alumno.getCurso().getLugarYfechaEmision());
         alumnoData.put("correlativo", alumno.getNumeroCorrelativoInterno());
         alumnoData.put("modalidad", alumno.getCurso().getModalidad());
-        alumnoData.put("datos_emision", emision);
+        alumnoData.put("datos_emision", alumno.getCurso().getLugarYfechaEmision());
 
         byte[] logoCliente = null;
         try {

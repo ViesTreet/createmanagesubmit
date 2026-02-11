@@ -234,6 +234,12 @@
               "<a href='/dataBaseCurso/Relator/" +
               relator.id +
               "' class='btn btn-secondary'>Cursos</a>";
+            if (adminCorreo === "admin@admin.com") {
+              fila +=
+                "<button class='btn btn-danger btn-sm' onclick='eliminarRelator(" +
+                relator.id +
+                ")'>Borrar</button>";
+            }
 
             fila += "</td></tr>";
 
@@ -472,12 +478,41 @@
           "<a href='/dataBaseCurso/Relator/" +
           relator.id +
           "' class='btn btn-secondary'>Cursos</a>";
+        if (adminCorreo === "admin@admin.com") {
+          fila +=
+            "<button class='btn btn-danger btn-sm' onclick='eliminarRelator(" +
+            relator.id +
+            ")'>Borrar</button>";
+        }
 
         fila += "</td></tr>";
 
         tbody.append(fila);
       });
     }
+  </script>
+  <script th:inline="javascript">
+    function eliminarRelator(id) {
+      if (!confirm("¿Seguro que quieres eliminar este relator?")) {
+        return;
+      }
+
+      fetch("/api/dataBaseRelator/borrarRelator/" + id, {
+        method: "DELETE"
+      })
+        .then(response => {
+          if (response.ok) {
+            location.reload();
+          } else {
+            alert("Error al eliminar relator");
+          }
+        })
+        .catch(error => {
+          console.error(error);
+          alert("Error de conexión");
+        });
+    }
+
   </script>
 </body>
 

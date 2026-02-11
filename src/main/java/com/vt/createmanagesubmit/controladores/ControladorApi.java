@@ -10,12 +10,14 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -56,7 +58,6 @@ import com.vt.createmanagesubmit.dto.ClienteDTO;
 import com.vt.createmanagesubmit.dto.CursoDTO;
 import com.vt.createmanagesubmit.dto.RelatorDTO;
 import com.vt.createmanagesubmit.dto.TareaDTO;
-import com.vt.createmanagesubmit.dto.filtroDTO;
 import com.vt.createmanagesubmit.modelos.Admin;
 import com.vt.createmanagesubmit.modelos.Alumno;
 import com.vt.createmanagesubmit.modelos.AlumnoTemporal;
@@ -311,6 +312,21 @@ public class ControladorApi {
                     // Generar certificados y guardarlos en la carpeta
                     for (Long id : ids) {
                         Alumno alumno = ser.alumnoPorId(id); // Método que debes tener o implementar
+                        Curso cursoAlumno = alumno.getCurso();
+                        String emision = "";
+                        if (cursoAlumno.getLugarYfechaEmision() == null) {
+                            LocalDateTime ahora = LocalDateTime.now();
+
+                            int dia = ahora.getDayOfMonth();
+                            String mes = ahora.getMonth().getDisplayName(TextStyle.FULL, new Locale("es"));
+                            int anio = ahora.getYear();
+
+                            emision = "Emitido el " + dia + " de " + mes + " de " + anio + ", en "
+                                    + cursoAlumno.getCiudad() + ", " + cursoAlumno.getUbicacionSubida();
+                            cursoAlumno.setLugarYfechaEmision(emision);
+                            ser.guardarCurso(cursoAlumno);
+                        }
+
                         byte[] certificadoBytes = servicioGenerarCertificado.descargarCertificadosServicio(alumno)
                                 .join();
 
@@ -376,6 +392,20 @@ public class ControladorApi {
 
                 for (Long id : ids) {
                     Alumno alumno = ser.alumnoPorId(id);
+                    Curso cursoAlumno = alumno.getCurso();
+                    String emision = "";
+                    if (cursoAlumno.getLugarYfechaEmision() == null) {
+                        LocalDateTime ahora = LocalDateTime.now();
+
+                        int dia = ahora.getDayOfMonth();
+                        String mes = ahora.getMonth().getDisplayName(TextStyle.FULL, new Locale("es"));
+                        int anio = ahora.getYear();
+
+                        emision = "Emitido el " + dia + " de " + mes + " de " + anio + ", en "
+                                + cursoAlumno.getCiudad() + ", " + cursoAlumno.getUbicacionSubida();
+                        cursoAlumno.setLugarYfechaEmision(emision);
+                        ser.guardarCurso(cursoAlumno);
+                    }
 
                     byte[] certificadoBytes = servicioGenerarCertificado
                             .descargarCertificadosServicio(alumno)
@@ -473,6 +503,9 @@ public class ControladorApi {
         alumno.setNotaAprobacion(notaAprobacion);
         alumno.setAsistencia(asistencia);
         alumno.setId(1L);
+        if (curso.getLugarYfechaEmision() == null) {
+            curso.setLugarYfechaEmision("Emitido el 11 de febrero de 2026, en Concepcion, Bio Bio");
+        }
 
         try {
             return servicioGenerarCertificado.descargarCertificadosServicio(alumno)
@@ -547,139 +580,82 @@ public class ControladorApi {
         }
     }
 
-    /*
-     * @GetMapping("/programarCertificadoMoodleManual/alumnos/{courseId}")
-     * public ResponseEntity<?> getAlumnosCurso(@PathVariable Long courseId) {
-     * try {
-     * System.out.println("Obteniendo alumnos para curso: {}" + courseId);
-     * 
-     * // 1. Obtener IDs de usuarios matriculados
-     * List<Long> userIds = servicioTarea.obtenerUsuariosMatriculados(courseId);
-     * System.out.println("IDs de usuarios encontrados: {}" + userIds);
-     * 
-     * if (userIds.isEmpty()) {
-     * return ResponseEntity.ok(Collections.emptyList());
-     * }
-     * 
-     * // 2. Obtener información detallada de usuarios
-     * Map<Long, JsonNode> userInfoMap =
-     * servicioTarea.obtenerUsuariosInfoBatch(userIds);
-     * System.out.println("Información de usuarios obtenida: {}" +
-     * userInfoMap.keySet());
-     * 
-     * List<AlumnoDTO> alumnos = new ArrayList<>();
-     * 
-     * for (Long userId : userIds) {
-     * try {
-     * JsonNode userNode = userInfoMap.get(userId);
-     * if (userNode == null) {
-     * System.out.println("Usuario {} no encontrado en la respuesta" + userId);
-     * continue;
-     * }
-     * System.out.println(userNode);
-     * AlumnoDTO dto = new AlumnoDTO();
-     * dto.setId(userId);
-     * 
-     * // 3. Procesar nombre (fullname o firstname + lastname)
-     * if (userNode.has("fullname") && !userNode.get("fullname").isNull()) {
-     * dto.setNombreAsistente(userNode.get("fullname").asText().trim());
-     * } else {
-     * String firstName = userNode.has("firstname") ?
-     * userNode.get("firstname").asText("") : "";
-     * String lastName = userNode.has("lastname") ?
-     * userNode.get("lastname").asText("") : "";
-     * dto.setNombreAsistente((firstName + " " + lastName).trim());
-     * }
-     * dto.setNombreAsistente(dto.getNombreAsistente().toUpperCase());
-     * // 4. Procesar email
-     * if (userNode.has("email")) {
-     * dto.setCorreo(userNode.get("email").asText());
-     * } else {
-     * System.out.println("Usuario {} no tiene email"+ userId);
-     * dto.setCorreo("sin-email@ejemplo.com");
-     * }
-     * 
-     * // 5. Obtener nota con manejo de errores
-     * try {
-     * double nota = (servicioTarea.obtenerPromedioNotas(courseId, userId));
-     * dto.setNotaAprovacion(String.valueOf(nota));
-     * } catch (Exception e) {
-     * System.out.println("Error al obtener nota para usuario {}: {}"+ userId+
-     * e.getMessage());
-     * dto.setNotaAprovacion(String.valueOf(7.0)); // Valor por defecto
-     * }
-     * 
-     * alumnos.add(dto);
-     * 
-     * } catch (Exception e) {
-     * System.out.println("Error procesando usuario {}: {}"+ userId+
-     * e.getMessage());
-     * }
-     * }
-     * 
-     * return ResponseEntity.ok(alumnos);
-     * 
-     * } catch (Exception e) {
-     * System.out.println("Error crítico al obtener alumnos: {}"+ e.getMessage()+
-     * e);
-     * return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-     * .body(Map.of(
-     * "error", "Error al obtener alumnos",
-     * "detalle", e.getMessage(),
-     * "cursoId", courseId
-     * ));
-     * }
-     * }
-     * 
-     * @PostMapping("/programarCertificadoMoodleManual/crear")
-     * public ResponseEntity<?> procesarAlumnos(
-     * 
-     * @RequestParam Long cursoMoodle,
-     * 
-     * @RequestParam(required = false, name ="cursoID" )Long cursoID,
-     * 
-     * @RequestParam String accion,
-     * 
-     * @ModelAttribute("alumnos") AlumnosWrapper wrapper
-     * ) {
-     * List<AlumnoDTO> alumnosForm = wrapper.getAlumnos();
-     * List<AlumnoDTO> habilitados = new ArrayList<AlumnoDTO>();
-     * for(AlumnoDTO alumno: alumnosForm){
-     * if(alumno.getEstado().equals("Aprobado")){
-     * habilitados.add(alumno);
-     * }
-     * }
-     * List<Alumno> alumnos = habilitados.stream().map(f -> {
-     * Alumno a = new Alumno();
-     * a.setNombreAsistente(f.getNombreAsistente());
-     * a.setCorreo(f.getCorreo());
-     * a.setNotaAprobacion(f.getNotaAprovacion());
-     * a.setAsistencia(f.getAsistencia());
-     * a.setEstado("Aprobado"); // o el estado que toque
-     * a.setDiploma("noEnviado"); // inicial
-     * Curso curso = ser.cursoPorId(cursoID);
-     * a.setCurso(curso);
-     * return a;
-     * }).collect(Collectors.toList());
-     * 
-     * for(Alumno alumno:alumnos){
-     * repoAlum.save(alumno);
-     * if ("emitirYGuardar".equalsIgnoreCase(accion)) {
-     * try {
-     * servicioAr.generateCertificatesById(alumno.getId());
-     * } catch (Exception e) {
-     * e.printStackTrace();
-     * }
-     * }
-     * }
-     * 
-     * 
-     * 
-     * return ResponseEntity.ok(Map.of("redirectUrl",
-     * "/programarCertificadoMoodleManual"));
-     * 
-     * }
-     */
+    @GetMapping("/programarCertificadoMoodleManual/alumnos/{courseId}")
+    public ResponseEntity<?> getAlumnosCurso(@PathVariable Long courseId) {
+        try {
+
+            // 1. Obtener IDs de usuarios matriculados
+            List<Long> userIds = servicioTarea.obtenerUsuariosMatriculados(courseId);
+            System.out.println("IDs de usuarios encontrados: {}" + userIds);
+
+            if (userIds.isEmpty()) {
+                return ResponseEntity.ok(Collections.emptyList());
+            }
+
+            // 2. Obtener información detallada de usuarios
+            Map<Long, JsonNode> userInfoMap = servicioTarea.obtenerUsuariosInfoBatch(userIds);
+
+            List<AlumnoDTO> alumnos = new ArrayList<>();
+
+            for (Long userId : userIds) {
+                try {
+                    JsonNode userNode = userInfoMap.get(userId);
+                    if (userNode == null) {
+                        System.out.println("Usuario {} no encontrado en la respuesta" + userId);
+                        continue;
+                    }
+                    System.out.println(userNode);
+                    AlumnoDTO dto = new AlumnoDTO();
+                    dto.setId(userId);
+
+                    // 3. Procesar nombre (fullname o firstname + lastname)
+                    if (userNode.has("fullname") && !userNode.get("fullname").isNull()) {
+                        dto.setNombreAsistente(userNode.get("fullname").asText().trim());
+                    } else {
+                        String firstName = userNode.has("firstname") ? userNode.get("firstname").asText("") : "";
+                        String lastName = userNode.has("lastname") ? userNode.get("lastname").asText("") : "";
+                        dto.setNombreAsistente((firstName + " " + lastName).trim());
+                    }
+                    dto.setNombreAsistente(dto.getNombreAsistente().toUpperCase());
+                    // 4. Procesar email
+                    if (userNode.has("email")) {
+                        dto.setCorreo(userNode.get("email").asText());
+                    } else {
+                        System.out.println("Usuario {} no tiene email" + userId);
+                        dto.setCorreo("sin-email@ejemplo.com");
+                    }
+
+                    // 5. Obtener nota con manejo de errores
+                    try {
+                        double nota = (servicioTarea.obtenerPromedioNotas(courseId, userId));
+                        dto.setNotaAprobacion(String.valueOf(nota));
+                    } catch (Exception e) {
+                        System.out.println("Error al obtener nota para usuario {}: {}" + userId +
+                                e.getMessage());
+                        dto.setNotaAprobacion(String.valueOf(7.0)); // Valor por defecto
+                    }
+
+                    alumnos.add(dto);
+
+                } catch (Exception e) {
+                    System.out.println("Error procesando usuario {}: {}" + userId +
+                            e.getMessage());
+                }
+            }
+
+            return ResponseEntity.ok(alumnos);
+
+        } catch (Exception e) {
+            System.out.println("Error crítico al obtener alumnos: {}" + e.getMessage() +
+                    e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                            "error", "Error al obtener alumnos",
+                            "detalle", e.getMessage(),
+                            "cursoId", courseId));
+        }
+    }
+
     @DeleteMapping("/tareasProgramadas/borrar/{id}")
     public ResponseEntity<Void> borrarTarea(@PathVariable Long id) {
         ser.borrarTareaPorId(id);
@@ -840,6 +816,17 @@ public class ControladorApi {
                 .collect(Collectors.toList());
     }
 
+    @DeleteMapping("/databaseCliente/borrarCliente/{id}")
+    public ResponseEntity<?> borrarCliente(@PathVariable Long id) {
+        try {
+            ser.borrarCliente(id);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al eliminar curso");
+        }
+    }
+
     @GetMapping("/datosRelator")
     public List<RelatorDTO> getDatosRelator(HttpSession session) {
         Admin usuarioTemporal = (Admin) session.getAttribute("usuarioEnSesion");
@@ -866,6 +853,17 @@ public class ControladorApi {
     public List<RelatorDTO> buscarRelator(@RequestParam String q) {
         return repoRel.findTop10ByNombreContainingIgnoreCase(q).stream().map(RelatorDTO::new)
                 .collect(Collectors.toList());
+    }
+
+    @DeleteMapping("/dataBaseRelator/borrarRelator/{id}")
+    public ResponseEntity<?> borrarRelator(@PathVariable Long id) {
+        try {
+            ser.borrarRelator(id);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al eliminar relator");
+        }
     }
 
     @PostMapping("/dataBaseCurso/nuevoCurso")
@@ -942,17 +940,15 @@ public class ControladorApi {
             curso.setAsistenciaQr(true);
             ser.guardarCurso(curso);
 
-            byte[] flyerBytes =
-                servicioGenerarCertificado
-                        .descargarFlyerServicio(curso)
-                        .get();
-
+            byte[] flyerBytes = servicioGenerarCertificado
+                    .descargarFlyerServicio(curso)
+                    .get();
 
             return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=Flyer-" + curso.getNombreCurso() + ".pptx")
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(flyerBytes);
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=Flyer-" + curso.getNombreCurso() + ".pptx")
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .body(flyerBytes);
 
         } catch (Exception e) {
             redirectAttrs.addFlashAttribute("error", e.getMessage());
@@ -1017,6 +1013,20 @@ public class ControladorApi {
             return resultado.getContent().stream().map(CursoDTO::new).collect(Collectors.toList());
         }
         return Collections.emptyList();
+    }
+
+    @DeleteMapping("/dataBaseCurso/borrarCurso/{id}")
+    public ResponseEntity<String> borrarCurso(@PathVariable Long id) {
+
+        try {
+            ser.borrarCurso(id);
+
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al eliminar cliente");
+        }
+
     }
 
     @PostMapping("/datosCurso/busquedaMultiFiltro/relator/{id}")

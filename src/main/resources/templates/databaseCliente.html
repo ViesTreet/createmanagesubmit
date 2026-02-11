@@ -234,14 +234,24 @@
               "<td>" +
               (cliente.cursos != null ? cliente.cursos : "") +
               "</td>" +
-              "<td style='width: 25vw;display: flex; justify-content: space-around;'>" +
+              "<td style='width: 25vw;display: flex; justify-content: space-around;'>";
+            fila +=
               "<a class='btn btn-primary' href='/dataBaseCliente/Cliente/" +
               cliente.id +
-              "/editar'>Editar</a>" +
-              "<a href='/dataBaseCurso/Cliente/" +
-              cliente.id +
-              "' class='btn btn-secondary'>Cursos</a>";
+              "/editar'>Editar</a>";
 
+            fila +=
+              "<a class='btn btn-secondary' href='/dataBaseCurso/Cliente/" +
+              cliente.id +
+              "'>Cursos</a>";
+
+            // SOLO si es admin real
+            if (adminCorreo === "admin@admin.com") {
+              fila +=
+                "<button class='btn btn-danger btn-sm' onclick='eliminarCliente(" +
+                cliente.id +
+                ")'>Borrar</button>";
+            }
             fila += "</td></tr>";
 
             tbody.append(fila);
@@ -485,13 +495,24 @@
           "<td>" +
           (cliente.cursos != null ? cliente.cursos : "") +
           "</td>" +
-          "<td style='width: 25vw;display: flex; justify-content: space-around;'>" +
+          "<td style='width: 25vw;display: flex; justify-content: space-around;'>";
+        fila +=
           "<a class='btn btn-primary' href='/dataBaseCliente/Cliente/" +
           cliente.id +
-          "/editar'>Editar</a>" +
-          "<a href='/dataBaseCurso/Cliente/" +
+          "/editar'>Editar</a>";
+
+        fila +=
+          "<a class='btn btn-secondary' href='/dataBaseCurso/Cliente/" +
           cliente.id +
-          "' class='btn btn-secondary'>Cursos</a>";
+          "'>Cursos</a>";
+
+        // SOLO si es admin real
+        if (adminCorreo === "admin@admin.com") {
+          fila +=
+            "<button class='btn btn-danger btn-sm' onclick='eliminarCliente(" +
+            cliente.id +
+            ")'>Borrar</button>";
+        }
 
         fila += "</td></tr>";
 
@@ -499,6 +520,30 @@
       });
     }
   </script>
+  <script th:inline="javascript">
+    function eliminarCliente(id) {
+
+      if (!confirm("¿Seguro que quieres eliminar este cliente?")) {
+        return;
+      }
+
+      fetch("/api/databaseCliente/borrarCliente/" + id, {
+        method: "DELETE"
+      })
+        .then(response => {
+          if (response.ok) {
+            location.reload();
+          } else {
+            alert("Error al eliminar cliente");
+          }
+        })
+        .catch(error => {
+          console.error(error);
+          alert("Error de conexión");
+        });
+    }
+  </script>
+
 </body>
 
 </html>

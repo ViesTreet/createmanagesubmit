@@ -4,9 +4,12 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.TextStyle;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -19,7 +22,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,15 +30,12 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.vt.createmanagesubmit.dto.AlumnoDTO;
 import com.vt.createmanagesubmit.exceptions.CertificateGenerationException;
 import com.vt.createmanagesubmit.modelos.Alumno;
 import com.vt.createmanagesubmit.modelos.Curso;
 import com.vt.createmanagesubmit.modelos.Plantilla;
 import com.vt.createmanagesubmit.repositorios.RepositorioAlumnos;
 import com.vt.createmanagesubmit.repositorios.RepositorioPlantillas;
-
-import jakarta.servlet.http.HttpServletResponse;
 
 @Service
 public class ServicioArchivos {
@@ -63,11 +62,12 @@ public class ServicioArchivos {
     String correoEmpresa;
 
     @Async
-    public CompletableFuture<Void> leerExcelYGuardarEnBD(byte[] fileBytes, String estadoDiplomaExcel, String estadoExcel, String rutificador, Curso curso) throws IOException {
-        try (InputStream fileInputStream = new ByteArrayInputStream(fileBytes)){
+    public CompletableFuture<Void> leerExcelYGuardarEnBD(byte[] fileBytes, String estadoDiplomaExcel,
+            String estadoExcel, String rutificador, Curso curso) throws IOException {
+        try (InputStream fileInputStream = new ByteArrayInputStream(fileBytes)) {
             Workbook workbook = WorkbookFactory.create(fileInputStream);
 
-        // Iterar sobre las hojas del libro
+            // Iterar sobre las hojas del libro
             for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
                 Sheet hoja = workbook.getSheetAt(i);
 
@@ -91,7 +91,6 @@ public class ServicioArchivos {
 
                     Alumno alumno = new Alumno();
 
-                    
                     for (Cell celda : fila) {
                         int indiceColumna = celda.getColumnIndex();
                         String nombreColumna = mapaColumnas.get(indiceColumna);
@@ -102,7 +101,8 @@ public class ServicioArchivos {
 
                     if (alumno.getNombreAsistente() != null) {
 
-                        if (alumno.getCorreo() == null || alumno.getCorreo().trim().isEmpty() || alumno.getCorreo().trim().isBlank()) {
+                        if (alumno.getCorreo() == null || alumno.getCorreo().trim().isEmpty()
+                                || alumno.getCorreo().trim().isBlank()) {
                             alumno.setCorreo(correoEmpresa);
                         }
 
@@ -118,7 +118,8 @@ public class ServicioArchivos {
                             }
                         }
 
-                        if (alumno.getEstado() == null || alumno.getEstado().trim().isEmpty() || alumno.getEstado().trim().equals("Eexcel")) {
+                        if (alumno.getEstado() == null || alumno.getEstado().trim().isEmpty()
+                                || alumno.getEstado().trim().equals("Eexcel")) {
                             alumno.setEstado("revisionManual");
                         }
 
@@ -133,38 +134,69 @@ public class ServicioArchivos {
                                 alumno.setDiploma("enviado");
                             }
                         }
-                        if(rutificador.trim().equals("rutiTodos")){
-                            if(alumno.getRut() != null && !alumno.getRut().trim().isEmpty()){
+                        if (rutificador.trim().equals("rutiTodos")) {
+                            if (alumno.getRut() != null && !alumno.getRut().trim().isEmpty()) {
                                 String rutFormateado = formatearRut(alumno.getRut());
                                 String nombreRutificado = servicioApi.obtenerNombrePorRut(rutFormateado);
-                                if(!nombreRutificado.trim().equals("nombreNoEncontrado")){
+                                if (!nombreRutificado.trim().equals("nombreNoEncontrado")) {
                                     alumno.setNombreAsistente(nombreRutificado);
                                 }
-        
+
                             }
                         }
 
-                        if(alumno.getDiploma() == null || alumno.getDiploma().trim().isEmpty()){
+                        if (alumno.getDiploma() == null || alumno.getDiploma().trim().isEmpty()) {
                             alumno.setDiploma("noEnviado");
                         }
                         String nombre = alumno.getNombreAsistente().trim().toUpperCase();
                         alumno.setNombreAsistente(nombre);
-                        if(!alumno.getNombreAsistente().isEmpty()){
+                        if (!alumno.getNombreAsistente().isEmpty()) {
                             alumno.setCurso(curso);
                             alumnoRepo.save(alumno);
                             servicio.numeroCorrelativoAuto(alumno);
-                            if(estadoDiplomaExcel.equals("enviarApro")&&estadoExcel.equals("aprobado")){
+                            if (estadoDiplomaExcel.equals("enviarApro") && estadoExcel.equals("aprobado")) {
                                 estadoDiplomaExcel = "enviarTodos";
                             }
                             if (estadoDiplomaExcel.equals("enviarTodos")) {
                                 try {
+                                    Curso cursoAlumno = alumno.getCurso();
+                                    String emision = "";
+                                    if (cursoAlumno.getLugarYfechaEmision() == null) {
+                                        LocalDateTime ahora = LocalDateTime.now();
+
+                                        int dia = ahora.getDayOfMonth();
+                                        String mes = ahora.getMonth().getDisplayName(TextStyle.FULL, new Locale("es"));
+                                        int anio = ahora.getYear();
+
+                                        emision = "Emitido el " + dia + " de " + mes + " de " + anio + ", en "
+                                                + cursoAlumno.getCiudad() + ", " + cursoAlumno.getUbicacionSubida();
+                                        cursoAlumno.setLugarYfechaEmision(emision);
+                                        servicio.guardarCurso(cursoAlumno);
+                                    }
+
                                     servicioGenerarCertificado.generateCertificateForAlumno(alumno);
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
                             } else if (estadoDiplomaExcel.equals("enviarApro")) {
-                                if (alumno.getEstado().equals("aprobado")&&alumno.getDiploma().equals("noEnviado")) {
+                                if (alumno.getEstado().equals("aprobado") && alumno.getDiploma().equals("noEnviado")) {
                                     try {
+                                        Curso cursoAlumno = alumno.getCurso();
+                                        String emision = "";
+                                        if (cursoAlumno.getLugarYfechaEmision() == null) {
+                                            LocalDateTime ahora = LocalDateTime.now();
+
+                                            int dia = ahora.getDayOfMonth();
+                                            String mes = ahora.getMonth().getDisplayName(TextStyle.FULL,
+                                                    new Locale("es"));
+                                            int anio = ahora.getYear();
+
+                                            emision = "Emitido el " + dia + " de " + mes + " de " + anio + ", en "
+                                                    + cursoAlumno.getCiudad() + ", " + cursoAlumno.getUbicacionSubida();
+                                            cursoAlumno.setLugarYfechaEmision(emision);
+                                            servicio.guardarCurso(cursoAlumno);
+                                        }
+
                                         servicioGenerarCertificado.generateCertificateForAlumno(alumno);
                                     } catch (Exception e) {
                                         e.printStackTrace();
@@ -178,9 +210,9 @@ public class ServicioArchivos {
             workbook.close();
             fileInputStream.close();
         } catch (Exception ex) {
-            throw new IOException("Error al procesar el excel, verifique los datos.",ex);
+            throw new IOException("Error al procesar el excel, verifique los datos.", ex);
         }
-        
+
         return CompletableFuture.completedFuture(null);
     }
 
@@ -240,11 +272,12 @@ public class ServicioArchivos {
                 break;
             case "rutificador":
             case "Rutificador":
-                if(rutificar.trim().equals("rutiExcel")){
-                    if((valorCelda.trim().equalsIgnoreCase("si")) && (!alumno.getRut().trim().isEmpty() && alumno.getRut() != null)){
+                if (rutificar.trim().equals("rutiExcel")) {
+                    if ((valorCelda.trim().equalsIgnoreCase("si"))
+                            && (!alumno.getRut().trim().isEmpty() && alumno.getRut() != null)) {
                         String rutFormateado = formatearRut(alumno.getRut());
                         String nombreRutificado = servicioApi.obtenerNombrePorRut(rutFormateado);
-                        if(!nombreRutificado.trim().equals("nombreNoEncontrado")){
+                        if (!nombreRutificado.trim().equals("nombreNoEncontrado")) {
                             alumno.setNombreAsistente(nombreRutificado);
                         }
 
@@ -268,17 +301,18 @@ public class ServicioArchivos {
                 } else {
                     double valorNumerico = celda.getNumericCellValue();
                     if (valorNumerico == Math.floor(valorNumerico)) {
-                    // Si el número no tiene decimales (entero), lo convertimos sin decimales
+                        // Si el número no tiene decimales (entero), lo convertimos sin decimales
                         return String.format("%.0f", valorNumerico);
                     } else {
-                    // Si tiene decimales, se conserva el formato decimal
+                        // Si tiene decimales, se conserva el formato decimal
                         return String.valueOf(valorNumerico);
-                }
+                    }
                 }
             case BOOLEAN:
                 return String.valueOf(celda.getBooleanCellValue());
             case FORMULA:
-                FormulaEvaluator evaluator = celda.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
+                FormulaEvaluator evaluator = celda.getSheet().getWorkbook().getCreationHelper()
+                        .createFormulaEvaluator();
                 CellValue cellValue = evaluator.evaluate(celda);
                 return cellValue.formatAsString();
             case BLANK:
@@ -290,13 +324,11 @@ public class ServicioArchivos {
 
     public String formatearRut(String rut) {
         if (rut == null || rut.trim().isEmpty()) {
-            return rut;  
+            return rut;
         }
 
-        
         String rutSinPuntos = rut.replaceAll("\\.", "");
 
-        
         if (!rutSinPuntos.contains("-")) {
             int largoRut = rutSinPuntos.length();
             if (largoRut > 1) {
@@ -312,11 +344,26 @@ public class ServicioArchivos {
         List<Alumno> alumnos = alumnoRepo.findAllByDiplomaAndEstado("noEnviado", "aprobado");
         Optional<Plantilla> optPlantilla = servicio.plantillaPorNombre("Error en encontrar plantilla");
         Plantilla plantillaError = new Plantilla();
-        if(optPlantilla.isPresent()){
+        if (optPlantilla.isPresent()) {
             plantillaError = optPlantilla.get();
         }
         for (Alumno alumno : alumnos) {
-            if(alumno.getCurso().getPlantillaDiploma() != plantillaError){
+            if (alumno.getCurso().getPlantillaDiploma() != plantillaError) {
+                Curso cursoAlumno = alumno.getCurso();
+                String emision = "";
+                if (cursoAlumno.getLugarYfechaEmision() == null) {
+                    LocalDateTime ahora = LocalDateTime.now();
+
+                    int dia = ahora.getDayOfMonth();
+                    String mes = ahora.getMonth().getDisplayName(TextStyle.FULL, new Locale("es"));
+                    int anio = ahora.getYear();
+
+                    emision = "Emitido el " + dia + " de " + mes + " de " + anio + ", en "
+                            + cursoAlumno.getCiudad() + ", " + cursoAlumno.getUbicacionSubida();
+                    cursoAlumno.setLugarYfechaEmision(emision);
+                    servicio.guardarCurso(cursoAlumno);
+                }
+
                 servicioGenerarCertificado.generateCertificateForAlumno(alumno);
                 alumno.setDiploma("enviado");
                 alumnoRepo.save(alumno);
@@ -326,13 +373,12 @@ public class ServicioArchivos {
 
     @Transactional
     @Async
-    public void generateFlyerById(Long id) throws Exception{
+    public void generateFlyerById(Long id) throws Exception {
         Curso curso = servicio.cursoPorId(id);
         servicioGenerarCertificado.descargarFlyerServicio(curso);
     }
 
     @Transactional
-    @Async
     public void generateCertificatesById(Long id) throws Exception {
         Alumno alumno = alumnoRepo.findById(id).orElseThrow(() -> new Exception("Alumno no encontrado con ID: " + id));
 
@@ -342,6 +388,21 @@ public class ServicioArchivos {
                 Hibernate.initialize(plantilla);
             }
             try {
+                Curso cursoAlumno = alumno.getCurso();
+                String emision = "";
+                if (cursoAlumno.getLugarYfechaEmision() == null) {
+                    LocalDateTime ahora = LocalDateTime.now();
+
+                    int dia = ahora.getDayOfMonth();
+                    String mes = ahora.getMonth().getDisplayName(TextStyle.FULL, new Locale("es"));
+                    int anio = ahora.getYear();
+
+                    emision = "Emitido el " + dia + " de " + mes + " de " + anio + ", en "
+                            + cursoAlumno.getCiudad() + ", " + cursoAlumno.getUbicacionSubida();
+                    cursoAlumno.setLugarYfechaEmision(emision);
+                    servicio.guardarCurso(cursoAlumno);
+                }
+
                 servicioGenerarCertificado.generateCertificateForAlumno(alumno);
                 alumno.setDiploma("enviado");
                 alumnoRepo.save(alumno);
@@ -349,10 +410,8 @@ public class ServicioArchivos {
                 ex.printStackTrace();
                 throw new CertificateGenerationException("Ocurrió un error al generar el certificado.");
             }
-            
+
         }
     }
 
 }
-
-    
