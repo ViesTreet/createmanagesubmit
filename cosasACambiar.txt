@@ -2,3 +2,5 @@
 -backup de base de datos
 -arreglar enviar
 -agregar boton para descargar flyerd
+-arreglar curso en editar alumno
+-generar presentación y documentación 
