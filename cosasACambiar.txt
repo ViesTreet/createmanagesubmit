@@ -3,4 +3,5 @@
 -arreglar enviar
 -agregar boton para descargar flyerd
 -arreglar curso en editar alumno
--generar presentación y documentación 
+-generar presentación y documentación
+-limitar visión de curso temporales para coordinador
