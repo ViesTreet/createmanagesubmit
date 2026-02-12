@@ -5,3 +5,4 @@
 -arreglar curso en editar alumno
 -generar presentación y documentación
 -limitar visión de curso temporales para coordinador
+-preguntar por correo automatizado 
