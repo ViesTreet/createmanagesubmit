@@ -159,45 +159,15 @@ public class ServicioArchivos {
                             }
                             if (estadoDiplomaExcel.equals("enviarTodos")) {
                                 try {
-                                    Curso cursoAlumno = alumno.getCurso();
-                                    String emision = "";
-                                    if (cursoAlumno.getLugarYfechaEmision() == null) {
-                                        LocalDateTime ahora = LocalDateTime.now();
 
-                                        int dia = ahora.getDayOfMonth();
-                                        String mes = ahora.getMonth().getDisplayName(TextStyle.FULL, new Locale("es"));
-                                        int anio = ahora.getYear();
-
-                                        emision = "Emitido el " + dia + " de " + mes + " de " + anio + ", en "
-                                                + cursoAlumno.getCiudad() + ", " + cursoAlumno.getUbicacionSubida();
-                                        cursoAlumno.setLugarYfechaEmision(emision);
-                                        servicio.guardarCurso(cursoAlumno);
-                                    }
-
-                                    servicioGenerarCertificado.generateCertificateForAlumno(alumno);
+                                    servicioGenerarCertificado.generateCertificateForAlumno(alumno.getId());
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
                             } else if (estadoDiplomaExcel.equals("enviarApro")) {
                                 if (alumno.getEstado().equals("aprobado") && alumno.getDiploma().equals("noEnviado")) {
                                     try {
-                                        Curso cursoAlumno = alumno.getCurso();
-                                        String emision = "";
-                                        if (cursoAlumno.getLugarYfechaEmision() == null) {
-                                            LocalDateTime ahora = LocalDateTime.now();
-
-                                            int dia = ahora.getDayOfMonth();
-                                            String mes = ahora.getMonth().getDisplayName(TextStyle.FULL,
-                                                    new Locale("es"));
-                                            int anio = ahora.getYear();
-
-                                            emision = "Emitido el " + dia + " de " + mes + " de " + anio + ", en "
-                                                    + cursoAlumno.getCiudad() + ", " + cursoAlumno.getUbicacionSubida();
-                                            cursoAlumno.setLugarYfechaEmision(emision);
-                                            servicio.guardarCurso(cursoAlumno);
-                                        }
-
-                                        servicioGenerarCertificado.generateCertificateForAlumno(alumno);
+                                        servicioGenerarCertificado.generateCertificateForAlumno(alumno.getId());
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                     }
@@ -349,28 +319,12 @@ public class ServicioArchivos {
         }
         for (Alumno alumno : alumnos) {
             if (alumno.getCurso().getPlantillaDiploma() != plantillaError) {
-                Curso cursoAlumno = alumno.getCurso();
-                String emision = "";
-                if (cursoAlumno.getLugarYfechaEmision() == null) {
-                    LocalDateTime ahora = LocalDateTime.now();
-
-                    int dia = ahora.getDayOfMonth();
-                    String mes = ahora.getMonth().getDisplayName(TextStyle.FULL, new Locale("es"));
-                    int anio = ahora.getYear();
-
-                    emision = "Emitido el " + dia + " de " + mes + " de " + anio + ", en "
-                            + cursoAlumno.getCiudad() + ", " + cursoAlumno.getUbicacionSubida();
-                    cursoAlumno.setLugarYfechaEmision(emision);
-                    servicio.guardarCurso(cursoAlumno);
-                }
-
-                servicioGenerarCertificado.generateCertificateForAlumno(alumno);
+                servicioGenerarCertificado.generateCertificateForAlumno(alumno.getId());
                 alumno.setDiploma("enviado");
                 alumnoRepo.save(alumno);
             }
         }
     }
-
     @Transactional
     @Async
     public void generateFlyerById(Long id) throws Exception {
@@ -383,27 +337,8 @@ public class ServicioArchivos {
         Alumno alumno = alumnoRepo.findById(id).orElseThrow(() -> new Exception("Alumno no encontrado con ID: " + id));
 
         if (alumno != null) {
-            Plantilla plantilla = alumno.getCurso().getPlantillaDiploma();
-            if (plantilla != null) {
-                Hibernate.initialize(plantilla);
-            }
             try {
-                Curso cursoAlumno = alumno.getCurso();
-                String emision = "";
-                if (cursoAlumno.getLugarYfechaEmision() == null) {
-                    LocalDateTime ahora = LocalDateTime.now();
-
-                    int dia = ahora.getDayOfMonth();
-                    String mes = ahora.getMonth().getDisplayName(TextStyle.FULL, new Locale("es"));
-                    int anio = ahora.getYear();
-
-                    emision = "Emitido el " + dia + " de " + mes + " de " + anio + ", en "
-                            + cursoAlumno.getCiudad() + ", " + cursoAlumno.getUbicacionSubida();
-                    cursoAlumno.setLugarYfechaEmision(emision);
-                    servicio.guardarCurso(cursoAlumno);
-                }
-
-                servicioGenerarCertificado.generateCertificateForAlumno(alumno);
+                servicioGenerarCertificado.generateCertificateForAlumno(id);
                 alumno.setDiploma("enviado");
                 alumnoRepo.save(alumno);
             } catch (Exception ex) {

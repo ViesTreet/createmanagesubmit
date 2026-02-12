@@ -1,664 +1,841 @@
 <!doctype html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <title>Base de datos cursos</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Importar CSS de Bootstrap -->
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/styleCustom.css}" />
+    <link
+      rel="icon"
+      th:href="@{/images/Logobgremove.png}"
+      type="image/x-icon"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+    />
+    <!-- Importar jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- Importar JS de Bootstrap -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-<head>
-  <title>Base de datos cursos</title>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- Importar CSS de Bootstrap -->
-  <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
-  <link rel="stylesheet" th:href="@{/css/styleCustom.css}" />
-  <link rel="icon" th:href="@{/images/Logobgremove.png}" type="image/x-icon" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
-  <!-- Importar jQuery -->
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <!-- Importar JS de Bootstrap -->
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
-  <style>
-    th {
-      font-size: 13px;
-    }
-
-    td {
-      overflow-x: auto;
-      font-size: 11px;
-    }
-
-    #alumnoBuscador {
-      padding-right: 0px;
-      padding-left: 0px;
-    }
-
-    .overlay {
-      display: none;
-      /* Oculto por defecto */
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.7);
-      /* Fondo oscuro */
-      z-index: 999;
-      /* Por encima de otros elementos */
-    }
-
-    /* Contenedor del formulario emergente */
-    .popup {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background-color: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      z-index: 1000;
-      /* Por encima del overlay */
-    }
-
-    /* Botón cerrar */
-    .close-btn {
-      background-color: red;
-      color: white;
-      border: none;
-      padding: 5px 10px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    .close-btn:hover {
-      background-color: darkred;
-    }
-
-    /* Botón principal */
-    .open-btn {
-      margin: 20px;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    #alumnosNoEnviados {
-      height: 50vh;
-      /* Define una altura fija */
-      overflow-y: auto;
-      /* Permite el desplazamiento vertical cuando el contenido es grande */
-    }
-
-    @media (min-width: 1024px) {
-      #contenderBase {
-        max-width: 95vw;
-      }
-    }
-
-    @media (max-width: 768px) {
-      #contenderBase {
-        max-width: 100vw !important;
-        padding-left: 0px !important;
-        padding-right: 0px !important;
-      }
-
-      #contenedorTabla {
-        max-width: 100vw !important;
-        overflow-y: auto;
-        overflow-x: auto;
-      }
-
-      #alumnoBuscador {
-        max-width: 100vw !important;
-      }
-
+    <style>
       th {
-        font-size: 15px;
+        font-size: 13px;
       }
 
       td {
         overflow-x: auto;
-        font-size: 12px;
+        font-size: 11px;
       }
 
-      #tablaPlantilla {
-        width: 250vw;
+      #alumnoBuscador {
+        padding-right: 0px;
+        padding-left: 0px;
       }
-    }
-  </style>
-</head>
 
-<body>
-  <header class="d-flex align-items-center justify-content-between p-3 bg-light" style="height: 10vh; z-index: 1">
-    <a th:href="@{/home}" class="logo">
-      <img th:src="@{/images/Logobgremove.png}" alt="[LOGO]" />
-    </a>
-    <nav class="d-flex justify-content-center align-items-center flex-nowrap">
-      <a th:href="@{/home}" class="btn btn-primary mx-2">Regresar</a>
-      <a th:href="@{/home}" class="btn btn-primary mx-2">Inicio</a>
-      <a th:href="@{/documentacion}" target="_blank" class="btn btn-primary mx-2">Documentación</a>
-      <div class="d-flex flex-column justify-content-center align-items-center">
-        <i class="fa-solid fa-user"></i>
-        <p class="p-0 m-0" style="font-size: normal" th:text="${admin.nombre}"></p>
-      </div>
-    </nav>
-  </header>
-  <div id="contenderBase" class="container pt-2 pb-2" style="height: 90vh">
-    <h2 class="text-center">Base de datos cursos</h2>
-    <div class="d-flex align-items-center justify-content-between pb-1" style="max-width: 95vw">
-      <div>
-        <form id="alumnoBuscador" class="d-flex col-12">
-          <select id="filtroBusquedaAlumno" class="form-select" name="filtroBusquedaAlumno">
-            <option value="nombreCurso">Nombre</option>
-            <option value="fechaInicio">Fecha del curso</option>
-            <option value="ciudad">Ciudad</option>
-            <option value="region">Region</option>
-            <option value="cliente">Cliente</option>
-            <option value="relator">Relator</option>
-          </select>
-          <input id="busquedaAlumno" type="search" class="col-5" placeholder="Buscar" name="busquedaAlumno"
-            onkeydown="submitOnEnter(event)" />
-          <button type="button" class="btn btn-outline-primary" onclick="agregarFiltro()">
-            Agregar Filtro
+      .overlay {
+        display: none;
+        /* Oculto por defecto */
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        /* Fondo oscuro */
+        z-index: 999;
+        /* Por encima de otros elementos */
+      }
+
+      /* Contenedor del formulario emergente */
+      .popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        /* Por encima del overlay */
+      }
+
+      /* Botón cerrar */
+      .close-btn {
+        background-color: red;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      .close-btn:hover {
+        background-color: darkred;
+      }
+
+      /* Botón principal */
+      .open-btn {
+        margin: 20px;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+
+      #alumnosNoEnviados {
+        height: 50vh;
+        /* Define una altura fija */
+        overflow-y: auto;
+        /* Permite el desplazamiento vertical cuando el contenido es grande */
+      }
+
+      @media (min-width: 1024px) {
+        #contenderBase {
+          max-width: 95vw;
+        }
+      }
+
+      @media (max-width: 768px) {
+        #contenderBase {
+          max-width: 100vw !important;
+          padding-left: 0px !important;
+          padding-right: 0px !important;
+        }
+
+        #contenedorTabla {
+          max-width: 100vw !important;
+          overflow-y: auto;
+          overflow-x: auto;
+        }
+
+        #alumnoBuscador {
+          max-width: 100vw !important;
+        }
+
+        th {
+          font-size: 15px;
+        }
+
+        td {
+          overflow-x: auto;
+          font-size: 12px;
+        }
+
+        #tablaPlantilla {
+          width: 250vw;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header
+      class="d-flex align-items-center justify-content-between p-3 bg-light"
+      style="height: 10vh; z-index: 1"
+    >
+      <a th:href="@{/home}" class="logo">
+        <img th:src="@{/images/Logobgremove.png}" alt="[LOGO]" />
+      </a>
+      <nav class="d-flex justify-content-center align-items-center flex-nowrap">
+        <a th:href="@{/home}" class="btn btn-primary mx-2">Regresar</a>
+        <a th:href="@{/home}" class="btn btn-primary mx-2">Inicio</a>
+        <a
+          th:href="@{/documentacion}"
+          target="_blank"
+          class="btn btn-primary mx-2"
+          >Documentación</a
+        >
+        <div
+          class="d-flex flex-column justify-content-center align-items-center"
+        >
+          <i class="fa-solid fa-user"></i>
+          <p
+            class="p-0 m-0"
+            style="font-size: normal"
+            th:text="${admin.nombre}"
+          ></p>
+        </div>
+      </nav>
+    </header>
+    <div id="contenderBase" class="container pt-2 pb-2" style="height: 90vh">
+      <h2 class="text-center">Base de datos cursos</h2>
+      <div
+        class="d-flex align-items-center justify-content-between pb-1"
+        style="max-width: 95vw"
+      >
+        <div>
+          <form id="alumnoBuscador" class="d-flex col-12">
+            <select
+              id="filtroBusquedaAlumno"
+              class="form-select"
+              name="filtroBusquedaAlumno"
+            >
+              <option value="nombreCurso">Nombre</option>
+              <option value="fechaInicio">Fecha del curso</option>
+              <option value="ciudad">Ciudad</option>
+              <option value="region">Region</option>
+              <option value="cliente">Cliente</option>
+              <option value="relator">Relator</option>
+            </select>
+            <input
+              id="busquedaAlumno"
+              type="search"
+              class="col-5"
+              placeholder="Buscar"
+              name="busquedaAlumno"
+              onkeydown="submitOnEnter(event)"
+            />
+            <button
+              type="button"
+              class="btn btn-outline-primary"
+              onclick="agregarFiltro()"
+            >
+              Agregar Filtro
+            </button>
+          </form>
+          <div id="filtros-activos" class="d-flex flex-wrap gap-2 mt-2"></div>
+        </div>
+        <div>
+          <button class="btn btn-success" onclick="openForm()">
+            Agregar nuevo curso
           </button>
-        </form>
-        <div id="filtros-activos" class="d-flex flex-wrap gap-2 mt-2"></div>
+        </div>
       </div>
-      <div>
-        <button class="btn btn-success" onclick="openForm()">
-          Agregar nuevo curso
-        </button>
+      <div
+        id="contenedorTabla"
+        style="overflow-y: auto; max-height: 70vh; max-width: 95vw"
+      >
+        <table
+          class="table table-hover table-bordered mb-5"
+          style="table-layout: fixed; height: 100%"
+          id="tablaCurso"
+        >
+          <thead class="thead-dark">
+            <tr>
+              <th>Nombre</th>
+              <th>fecha del curso</th>
+              <th>Ubicacion</th>
+              <th>Cliente</th>
+              <th>Relator</th>
+              <th>Cantidad Alumnos</th>
+              <th style="width: 25vw">Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Se cargarán dinámicamente las filas -->
+          </tbody>
+        </table>
       </div>
     </div>
-    <div id="contenedorTabla" style="overflow-y: auto; max-height: 70vh; max-width: 95vw">
-      <table class="table table-hover table-bordered mb-5" style="table-layout: fixed; height: 100%" id="tablaCurso">
-        <thead class="thead-dark">
-          <tr>
-            <th>Nombre</th>
-            <th>fecha del curso</th>
-            <th>Ubicacion</th>
-            <th>Cliente</th>
-            <th>Relator</th>
-            <th>Cantidad Alumnos</th>
-            <th style="width: 25vw">Acción</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Se cargarán dinámicamente las filas -->
-        </tbody>
-      </table>
-    </div>
-  </div>
-  <script th:inline="javascript">
-    function cargarDatos() {
-      $.ajax({
-        url: "/api/datosCurso",
-        method: "GET",
-        success: function (data) {
-          var tbody = $("#tablaCurso tbody");
-          tbody.empty(); // Limpiar la tabla antes de agregar nuevos datos
+    <script th:inline="javascript">
+      function cargarDatos() {
+        $.ajax({
+          url: "/api/datosCurso",
+          method: "GET",
+          success: function (data) {
+            var tbody = $("#tablaCurso tbody");
+            tbody.empty(); // Limpiar la tabla antes de agregar nuevos datos
 
-          $.each(data, function (i, curso) {
-            // Inyectar el correo del admin en sesión desde el modelo
-            var adminCorreo = /*[[${admin.correo}]]*/ "default";
-            // Construir la fila
-            let estiloFila = "";
-            let aviso = "";
+            $.each(data, function (i, curso) {
+              // Inyectar el correo del admin en sesión desde el modelo
+              var adminCorreo = /*[[${admin.correo}]]*/ "default";
+              // Construir la fila
+              let estiloFila = "";
+              let aviso = "";
 
-            if (curso.fechaInicio) {
-              const ahora = new Date();
-              const fechaCurso = new Date(curso.fechaInicio);
+              if (curso.fechaInicio) {
+                const ahora = new Date();
+                const fechaCurso = new Date(curso.fechaInicio);
 
-              const diffMs = fechaCurso - ahora;
-              const diffDias = diffMs / (1000 * 60 * 60 * 24);
+                const diffMs = fechaCurso - ahora;
+                const diffDias = diffMs / (1000 * 60 * 60 * 24);
 
-              if (diffDias <= 1 && diffDias >= 0) {
-                // curso mañana o hoy
-                estiloFila = " style='background-color: #fff3cd;'"; // amarillo suave
-                aviso = " (Próximo)";
-              } else if (diffDias > 1) {
-                // falta más tiempo
-                estiloFila = " style='background-color: #e7f5ff;'"; // azul suave
-              } else {
-                // ya pasó (opcional)
-                estiloFila = " style='background-color: #f8d7da;'"; // rojo suave muy leve
-                aviso = " (Ya iniciado)";
+                if (diffDias <= 1 && diffDias >= 0) {
+                  // curso mañana o hoy
+                  estiloFila = " style='background-color: #fff3cd;'"; // amarillo suave
+                  aviso = " (Próximo)";
+                } else if (diffDias > 1) {
+                  // falta más tiempo
+                  estiloFila = " style='background-color: #e7f5ff;'"; // azul suave
+                } else {
+                  // ya pasó (opcional)
+                  estiloFila = " style='background-color: #f8d7da;'"; // rojo suave muy leve
+                  aviso = " (Ya iniciado)";
+                }
               }
-            }
 
-            var fila =
-              "<tr>" +
-              "<td>" +
-              (curso.nombreCurso ?? "") +
-              "</td>" +
-              "<td " +
-              estiloFila +
-              ">" +
-              (
-                curso.fechaInicio
-                  ? formatearFecha(curso.fechaInicio) + aviso
-                  : ""
-              ) +
-              "</td>" +
-              "<td>" +
-              (curso.ciudad && curso.ubicacionSubida
-                ? curso.ciudad + ", " + curso.ubicacionSubida
-                : "") +
-              "</td>" +
-              "<td>" +
-              (curso.cliente ?? "") +
-              "</td>" +
-              "<td>" +
-              (curso.relator ?? "") +
-              "</td>" +
-              "<td>" +
-              (curso.alumnos ?? 0) +
-              "</td>" +
-              "<td style='width: 25vw;display: flex; justify-content: space-around;'>" +
-              "<a class='btn btn-primary' href='/dataBaseCurso/Curso/" +
-              curso.id +
-              "/editar'>Editar</a>" +
-              "<a class='btn btn-secondary' href='/dataBaseCurso/Curso/" +
-              curso.id +
-              "/alumnos'>Alumnos</a>";
-            if (adminCorreo === "admin@admin.com") {
-              fila +=
-                "<button class='btn btn-danger btn-sm' onclick='eliminarCurso(" +
-                curso.id +
-                ")'>Borrar</button>" +
+              var fila =
+                "<tr>" +
+                "<td>" +
+                (curso.nombreCurso ?? "") +
                 "</td>" +
-                "</tr>";
-            }
+                "<td " +
+                estiloFila +
+                ">" +
+                (curso.fechaInicio
+                  ? formatearFecha(curso.fechaInicio) + aviso
+                  : "") +
+                "</td>" +
+                "<td>" +
+                (curso.ciudad && curso.ubicacionSubida
+                  ? curso.ciudad + ", " + curso.ubicacionSubida
+                  : "") +
+                "</td>" +
+                "<td>" +
+                (curso.cliente ?? "") +
+                "</td>" +
+                "<td>" +
+                (curso.relator ?? "") +
+                "</td>" +
+                "<td>" +
+                (curso.alumnos ?? 0) +
+                "</td>" +
+                "<td style='width: 25vw;display: flex; justify-content: space-around;'>" +
+                "<a class='btn btn-primary' href='/dataBaseCurso/Curso/" +
+                curso.id +
+                "/editar'>Editar</a>" +
+                "<a class='btn btn-secondary' href='/dataBaseCurso/Curso/" +
+                curso.id +
+                "/alumnos'>Alumnos</a>"+
+                "<button class='btn btn-success' onclick='descargarFlyer("+curso.id+")'>Flyer</button>";
+              if (adminCorreo === "admin@admin.com") {
+                fila +=
+                  "<button class='btn btn-danger btn-sm' onclick='eliminarCurso(" +
+                  curso.id +
+                  ")'>Borrar</button>" +
+                  "</td>" +
+                  "</tr>";
+              }
 
-            tbody.append(fila);
-          });
-        },
-        error: function (error) {
-          console.log("Error al obtener los datos", error);
-        },
+              tbody.append(fila);
+            });
+          },
+          error: function (error) {
+            console.log("Error al obtener los datos", error);
+          },
+        });
+      }
+      $(document).ready(function () {
+        // Cargar datos inicialmente
+        cargarDatos();
+
+        // Actualizar la tabla cada 30 segundos
+        setInterval(function () {
+          if (filtrosActivos.length > 0) {
+            cargarDatosConFiltros();
+          } else {
+            cargarDatos();
+          }
+        }, 30000);
       });
-    }
-    $(document).ready(function () {
-      // Cargar datos inicialmente
-      cargarDatos();
+    </script>
+    <script>
+      // Detecta la tecla Enter y simula clic en un botón
+      function submitOnEnter(event, buttonId) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          document.getElementById(buttonId).click();
+        }
+      }
+    </script>
+    <div class="overlay" id="overlay">
+      <div class="popup col-8" style="max-height: 90vh; overflow-y: auto">
+        <div class="d-flex justify-content-end">
+          <button class="btn btn-danger" onclick="closeForm()">Cerrar</button>
+        </div>
+        <form th:action="@{/api/dataBaseCurso/nuevoCurso}" method="post">
+          <div id="diploma">
+            <h2 class="text-center pb-2">Datos del diploma</h2>
+            <div class="pb-2">
+              <label for="nombreCurso">Nombre del curso</label>
+              <input
+                id="nombreCurso"
+                name="nombreCurso"
+                type="text"
+                class="form-control"
+                placeholder="Nombre del curso"
+              />
+              <label for="diasCursos">Dia/s en que se realizara el curso</label>
+              <input
+                id="diasCursos"
+                type="text"
+                name="diasCursos"
+                class="form-control"
+                placeholder="12/03/25 al 13/03/25"
+              />
+              <label for="duracion">Duración del curso</label>
+              <input
+                id="duracion"
+                type="text"
+                name="duracion"
+                class="form-control"
+                placeholder="3 horas"
+              />
+              <label for="clienteInput">Cliente</label>
+              <input
+                id="clienteInput"
+                type="text"
+                placeholder="Escribe para buscar un cliente"
+                autocomplete="off"
+                class="form-control"
+              />
+              <input type="hidden" name="clienteId" id="clienteId" required />
+              <div
+                id="clienteResultados"
+                class="list-group position-absolute w-100"
+                style="z-index: 1000; display: none"
+              ></div>
+              <label for="modalidad">Modalidad</label>
+              <input
+                id="modalidad"
+                type="text"
+                name="modalidad"
+                class="form-control"
+                placeholder="virtual"
+              />
+              <label for="ubicacionSubida">Región</label>
+              <select
+                name="ubicacionSubida"
+                id="ubicacionSubida"
+                class="form-select"
+              >
+                <option value="">Seleccione región</option>
+                <option value="arica">Arica y Parinacota</option>
+                <option value="tarapaca">Tarapacá</option>
+                <option value="antofagasta">Antofagasta</option>
+                <option value="atacama">Atacama</option>
+                <option value="coquimbo">Coquimbo</option>
+                <option value="valparaiso">Valparaíso</option>
+                <option value="metropolitana">Metropolitana de Santiago</option>
+                <option value="ohiggins">O'Higgins</option>
+                <option value="maule">Maule</option>
+                <option value="nuble">Ñuble</option>
+                <option value="biobio">Biobío</option>
+                <option value="araucania">La Araucanía</option>
+                <option value="rios">Los Ríos</option>
+                <option value="lagos">Los Lagos</option>
+                <option value="aysen">Aysén</option>
+                <option value="magallanes">Magallanes</option>
+              </select>
+              <label for="ciudad">Ciudad</label>
+              <input
+                id="ciudad"
+                type="text"
+                name="ciudad"
+                class="form-control"
+                placeholder="Talca"
+              />
+              <label for="relatorInput">Profesor</label>
+              <input
+                id="relatorInput"
+                type="text"
+                placeholder="Escribe para buscar un relator"
+                autocomplete="off"
+                class="form-control"
+              />
+              <input type="hidden" name="relatorId" id="relatorId" required />
+              <div
+                id="relatorResultados"
+                class="list-group position-absolute w-100"
+                style="z-index: 1000; display: none"
+              ></div>
+              <label for="plantillaDipInput">Plantilla del diploma</label>
+              <input
+                id="plantillaDipInput"
+                type="text"
+                placeholder="Escribe para buscar una plantilla"
+                autocomplete="off"
+                class="form-control"
+              />
+              <input
+                type="hidden"
+                name="plantillaDipId"
+                id="plantillaDipId"
+                required
+              />
+              <div
+                id="plantillaDipResultados"
+                class="list-group position-absolute w-100"
+                style="z-index: 1000; display: none"
+              ></div>
+              <label for="NotaMin">Nota minima para aprobar</label>
+              <input
+                type="number"
+                name="NotaMin"
+                min="0"
+                max="7"
+                step="0.1"
+                placeholder="0.0 - 7.0"
+                class="form-control"
+              />
+              <label for="asistenciaMin">Asistencia minima para aprobar</label>
+              <input
+                type="number"
+                name="asistenciaMin"
+                min="0"
+                max="100"
+                step="1"
+                placeholder="0 - 100"
+                class="form-control"
+              />
+            </div>
+            <div class="d-flex justify-content-center mt-1">
+              <button id="sigForm" type="button" class="btn btn-success">
+                Siguiente
+              </button>
+            </div>
+          </div>
+          <div id="flyer" style="display: none">
+            <h2 class="text-center pb-2">Datos del flyer</h2>
+            <div class="pb-2">
+              <label for="ubicacionDelCurso"
+                >Ubicación donde se realizara el curso</label
+              >
+              <input
+                id="ubicacionDelCurso"
+                name="ubicacionDelCurso"
+                type="text"
+                class="form-control"
+                placeholder="SEREMI del Trabajo. Germán Riesco #277, Of.21, Rancagua"
+              />
+              <label for="ubicacionCliente">Ubicación del cliente</label>
+              <input
+                id="ubicacionCliente"
+                type="text"
+                name="ubicacionCliente"
+                class="form-control"
+                placeholder="Instituto de Seguridad Laboral Región OHiggins - Rubio N°329 - Rancagua."
+              />
+              <label for="fecha">Fecha de cuando se realizara el curso</label>
+              <input
+                id="fecha"
+                type="date"
+                name="fecha"
+                class="form-control"
+                placeholder="12/03/26"
+              />
+              <label for="horaI">Hora de inicio</label>
+              <input
+                id="horaI"
+                type="time"
+                name="horaI"
+                class="form-control"
+                placeholder="12:00 pm"
+              />
+              <label for="horaF">Hora de finalización</label>
+              <input
+                id="horaF"
+                type="time"
+                name="horaF"
+                class="form-control"
+                placeholder="14:00 pm"
+              />
+              <label for="horasRelatorCurso"
+                >Horas trabajadas por el relator</label
+              >
+              <input
+                type="number"
+                name="horasRelatorCurso"
+                step="0.1"
+                placeholder="3"
+                class="form-control"
+              />
+              <label for="plantillaFlyInput">Plantilla del flyer</label>
+              <input
+                id="plantillaFlyInput"
+                type="text"
+                placeholder="Escribe para buscar una plantilla"
+                autocomplete="off"
+                class="form-control"
+              />
+              <input
+                type="hidden"
+                name="plantillaFlyId"
+                id="plantillaFlyId"
+                required
+              />
+              <div
+                id="plantillaFlyResultados"
+                class="list-group position-absolute w-100"
+                style="z-index: 1000; display: none"
+              ></div>
+              <div class="d-flex justify-content-center mt-1">
+                <input
+                  class="btn btn-primary"
+                  type="submit"
+                  name="enviar"
+                  id="enviarCurso"
+                  value="Enviar"
+                />
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+    <script>
+      function toggleInputs(type) {
+        if (type === "plantilla") {
+          const checkbox = document.getElementById("clonarPlantilla");
+          const inputFile = document.getElementById("inputPlantilla");
+          const selectOptions = document.getElementById("selectPlantilla");
 
-      // Actualizar la tabla cada 30 segundos
-      setInterval(function () {
+          if (checkbox.checked) {
+            inputFile.style.display = "none";
+            selectOptions.style.display = "block";
+          } else {
+            inputFile.style.display = "block";
+            selectOptions.style.display = "none";
+          }
+        }
+      }
+    </script>
+    <script>
+      function showAlert(message) {
+        if (message && message.trim() !== "") {
+          alert(message);
+        }
+      }
+    </script>
+    <th:block th:if="${error != null}">
+      <script th:inline="javascript">
+        showAlert("[[${error}]]");
+      </script>
+    </th:block>
+    <footer
+      class="text-center p-3 d-flex justify-content-center align-items-center"
+      style="height: 15vh; background-color: #f8f9fa"
+    >
+      <div>
+        <div>
+          <i class="fa-solid fa-phone"></i>
+          <a href="tel:+56 41 3830944">+56 41 3830944</a>
+        </div>
+        <div>
+          <i class="fa-solid fa-location-dot"></i>
+          <a
+            href="https://www.google.com/maps/place/Consultores+Empresariales+E-Volution+Limitada/@-36.8252678,-73.050754,19z/data=!3m1!4b1!4m6!3m5!1s0x9669b5d0308198b5:0xbd67409566499fa!8m2!3d-36.8252678!4d-73.0501103!16s%2Fg%2F11fzwngw1q?entry=ttu&amp;g_ep=EgoyMDI1MDEwNi4xIKXMDSoASAFQAw%3D%3D"
+          >
+            Freire 728, Oficina 206
+          </a>
+        </div>
+        <div>
+          <i class="fa-solid fa-envelope"></i>
+          <a href="mailto:contacto@e-volution.cl">contacto@e-volution.cl</a>
+        </div>
+      </div>
+    </footer>
+    <script th:inline="javascript">
+      const checkboxKey = "checkboxStates";
+      let filtrosActivos = [];
+
+      function crearCardFiltro(filtro, valor) {
+        return `<div class="card filtro-card" style="max-width: 300px;">
+                    <div class="card-body p-2 d-flex justify-content-between align-items-center">
+                        <span>${filtro}: ${valor}</span>
+                        <button type="button" class="btn-close" data-filtro="${filtro}" data-valor="${valor.replace(
+                          /"/g,
+                          "&quot;",
+                        )}"></button>
+                    </div>
+                </div>`;
+      }
+
+      // Agregar este evento delegado para los botones de cerrar
+      $(document).on("click", ".btn-close", function () {
+        const filtro = $(this).data("filtro");
+        const valor = $(this).data("valor");
+        removerFiltro(filtro, valor);
+      });
+
+      function actualizarFiltrosVisibles() {
+        const contenedor = $("#filtros-activos");
+        contenedor.empty();
+        filtrosActivos.forEach((filtro) => {
+          contenedor.append(crearCardFiltro(filtro.campo, filtro.valor));
+        });
+      }
+
+      function agregarFiltro() {
+        const filtro = $("#filtroBusquedaAlumno").val();
+        const valor = $("#busquedaAlumno").val().trim();
+
+        if (valor) {
+          // Evitar duplicados
+          if (
+            !filtrosActivos.some((f) => f.campo === filtro && f.valor === valor)
+          ) {
+            filtrosActivos.push({ campo: filtro, valor: valor });
+            actualizarFiltrosVisibles();
+            cargarDatosConFiltros();
+          }
+          $("#busquedaAlumno").val("");
+        }
+      }
+
+      function removerFiltro(filtro, valor) {
+        filtrosActivos = filtrosActivos.filter(
+          (f) => !(f.campo === filtro && String(f.valor) === String(valor)),
+        );
+
+        actualizarFiltrosVisibles();
+
         if (filtrosActivos.length > 0) {
           cargarDatosConFiltros();
         } else {
           cargarDatos();
         }
-      }, 30000);
-    });
-  </script>
-  <script>
-    // Detecta la tecla Enter y simula clic en un botón
-    function submitOnEnter(event, buttonId) {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        document.getElementById(buttonId).click();
       }
-    }
-  </script>
-  <div class="overlay" id="overlay">
-    <div class="popup col-8" style="max-height: 90vh; overflow-y: auto">
-      <div class="d-flex justify-content-end">
-        <button class="btn btn-danger" onclick="closeForm()">Cerrar</button>
-      </div>
-      <form th:action="@{/api/dataBaseCurso/nuevoCurso}" method="post">
-        <div id="diploma">
-          <h2 class="text-center pb-2">Datos del diploma</h2>
-          <div class="pb-2">
-            <label for="nombreCurso">Nombre del curso</label>
-            <input id="nombreCurso" name="nombreCurso" type="text" class="form-control"
-              placeholder="Nombre del curso" />
-            <label for="diasCursos">Dia/s en que se realizara el curso</label>
-            <input id="diasCursos" type="text" name="diasCursos" class="form-control"
-              placeholder="12/03/25 al 13/03/25" />
-            <label for="duracion">Duración del curso</label>
-            <input id="duracion" type="text" name="duracion" class="form-control" placeholder="3 horas" />
-            <label for="clienteInput">Cliente</label>
-            <input id="clienteInput" type="text" placeholder="Escribe para buscar un cliente" autocomplete="off"
-              class="form-control" />
-            <input type="hidden" name="clienteId" id="clienteId" required />
-            <div id="clienteResultados" class="list-group position-absolute w-100" style="z-index: 1000; display: none">
-            </div>
-            <label for="modalidad">Modalidad</label>
-            <input id="modalidad" type="text" name="modalidad" class="form-control" placeholder="virtual" />
-            <label for="ubicacionSubida">Región</label>
-            <select name="ubicacionSubida" id="ubicacionSubida" class="form-select">
-              <option value="">Seleccione región</option>
-              <option value="arica">Arica y Parinacota</option>
-              <option value="tarapaca">Tarapacá</option>
-              <option value="antofagasta">Antofagasta</option>
-              <option value="atacama">Atacama</option>
-              <option value="coquimbo">Coquimbo</option>
-              <option value="valparaiso">Valparaíso</option>
-              <option value="metropolitana">Metropolitana de Santiago</option>
-              <option value="ohiggins">O'Higgins</option>
-              <option value="maule">Maule</option>
-              <option value="nuble">Ñuble</option>
-              <option value="biobio">Biobío</option>
-              <option value="araucania">La Araucanía</option>
-              <option value="rios">Los Ríos</option>
-              <option value="lagos">Los Lagos</option>
-              <option value="aysen">Aysén</option>
-              <option value="magallanes">Magallanes</option>
-            </select>
-            <label for="ciudad">Ciudad</label>
-            <input id="ciudad" type="text" name="ciudad" class="form-control" placeholder="Talca" />
-            <label for="relatorInput">Profesor</label>
-            <input id="relatorInput" type="text" placeholder="Escribe para buscar un relator" autocomplete="off"
-              class="form-control" />
-            <input type="hidden" name="relatorId" id="relatorId" required />
-            <div id="relatorResultados" class="list-group position-absolute w-100" style="z-index: 1000; display: none">
-            </div>
-            <label for="plantillaDipInput">Plantilla del diploma</label>
-            <input id="plantillaDipInput" type="text" placeholder="Escribe para buscar una plantilla" autocomplete="off"
-              class="form-control" />
-            <input type="hidden" name="plantillaDipId" id="plantillaDipId" required />
-            <div id="plantillaDipResultados" class="list-group position-absolute w-100"
-              style="z-index: 1000; display: none"></div>
-            <label for="NotaMin">Nota minima para aprobar</label>
-            <input type="number" name="NotaMin" min="0" max="7" step="0.1" placeholder="0.0 - 7.0"
-              class="form-control" />
-            <label for="asistenciaMin">Asistencia minima para aprobar</label>
-            <input type="number" name="asistenciaMin" min="0" max="100" step="1" placeholder="0 - 100"
-              class="form-control" />
-          </div>
-          <div class="d-flex justify-content-center mt-1">
-            <button id="sigForm" type="button" class="btn btn-success">
-              Siguiente
-            </button>
-          </div>
-        </div>
-        <div id="flyer" style="display: none">
-          <h2 class="text-center pb-2">Datos del flyer</h2>
-          <div class="pb-2">
-            <label for="ubicacionDelCurso">Ubicación donde se realizara el curso</label>
-            <input id="ubicacionDelCurso" name="ubicacionDelCurso" type="text" class="form-control"
-              placeholder="SEREMI del Trabajo. Germán Riesco #277, Of.21, Rancagua" />
-            <label for="ubicacionCliente">Ubicación del cliente</label>
-            <input id="ubicacionCliente" type="text" name="ubicacionCliente" class="form-control"
-              placeholder="Instituto de Seguridad Laboral Región OHiggins - Rubio N°329 - Rancagua." />
-            <label for="fecha">Fecha de cuando se realizara el curso</label>
-            <input id="fecha" type="date" name="fecha" class="form-control" placeholder="12/03/26" />
-            <label for="horaI">Hora de inicio</label>
-            <input id="horaI" type="time" name="horaI" class="form-control" placeholder="12:00 pm" />
-            <label for="horaF">Hora de finalización</label>
-            <input id="horaF" type="time" name="horaF" class="form-control" placeholder="14:00 pm" />
-            <label for="horasRelatorCurso">Horas trabajadas por el relator</label>
-            <input type="number" name="horasRelatorCurso" step="0.1" placeholder="3" class="form-control" />
-            <label for="plantillaFlyInput">Plantilla del flyer</label>
-            <input id="plantillaFlyInput" type="text" placeholder="Escribe para buscar una plantilla" autocomplete="off"
-              class="form-control" />
-            <input type="hidden" name="plantillaFlyId" id="plantillaFlyId" required />
-            <div id="plantillaFlyResultados" class="list-group position-absolute w-100"
-              style="z-index: 1000; display: none"></div>
-            <div class="d-flex justify-content-center mt-1">
-              <input class="btn btn-primary" type="submit" name="enviar" id="enviarCurso" value="Enviar" />
-            </div>
-          </div>
-        </div>
-      </form>
-    </div>
-  </div>
-  <script>
-    function toggleInputs(type) {
-      if (type === "plantilla") {
-        const checkbox = document.getElementById("clonarPlantilla");
-        const inputFile = document.getElementById("inputPlantilla");
-        const selectOptions = document.getElementById("selectPlantilla");
 
-        if (checkbox.checked) {
-          inputFile.style.display = "none";
-          selectOptions.style.display = "block";
-        } else {
-          inputFile.style.display = "block";
-          selectOptions.style.display = "none";
-        }
+      function cargarDatosConFiltros() {
+        $.ajax({
+          url: "/api/datosCurso/busquedaMultiFiltro",
+          method: "POST",
+          contentType: "application/json",
+          data: JSON.stringify(filtrosActivos),
+          success: function (data) {
+            // Actualizar tabla con los datos recibidos
+            actualizarTabla(data);
+          },
+        });
       }
-    }
-  </script>
-  <script>
-    function showAlert(message) {
-      if (message && message.trim() !== "") {
-        alert(message);
-      }
-    }
-  </script>
-  <th:block th:if="${error != null}">
-    <script th:inline="javascript">
-      showAlert("[[${error}]]");
-    </script>
-  </th:block>
-  <footer class="text-center p-3 d-flex justify-content-center align-items-center"
-    style="height: 15vh; background-color: #f8f9fa">
-    <div>
-      <div>
-        <i class="fa-solid fa-phone"></i>
-        <a href="tel:+56 41 3830944">+56 41 3830944</a>
-      </div>
-      <div>
-        <i class="fa-solid fa-location-dot"></i>
-        <a
-          href="https://www.google.com/maps/place/Consultores+Empresariales+E-Volution+Limitada/@-36.8252678,-73.050754,19z/data=!3m1!4b1!4m6!3m5!1s0x9669b5d0308198b5:0xbd67409566499fa!8m2!3d-36.8252678!4d-73.0501103!16s%2Fg%2F11fzwngw1q?entry=ttu&amp;g_ep=EgoyMDI1MDEwNi4xIKXMDSoASAFQAw%3D%3D">
-          Freire 728, Oficina 206
-        </a>
-      </div>
-      <div>
-        <i class="fa-solid fa-envelope"></i>
-        <a href="mailto:contacto@e-volution.cl">contacto@e-volution.cl</a>
-      </div>
-    </div>
-  </footer>
-  <script th:inline="javascript">
-    const checkboxKey = "checkboxStates";
-    let filtrosActivos = [];
 
-    function crearCardFiltro(filtro, valor) {
-      return `<div class="card filtro-card" style="max-width: 300px;">
-                    <div class="card-body p-2 d-flex justify-content-between align-items-center">
-                        <span>${filtro}: ${valor}</span>
-                        <button type="button" class="btn-close" data-filtro="${filtro}" data-valor="${valor.replace(
-        /"/g,
-        "&quot;",
-      )}"></button>
-                    </div>
-                </div>`;
-    }
+      function actualizarTabla(data) {
+        var tbody = $("#tablaCurso tbody");
+        tbody.empty();
 
-    // Agregar este evento delegado para los botones de cerrar
-    $(document).on("click", ".btn-close", function () {
-      const filtro = $(this).data("filtro");
-      const valor = $(this).data("valor");
-      removerFiltro(filtro, valor);
-    });
+        $.each(data, function (i, curso) {
+          // Construir la fila
+          let estiloFila = "";
+          let aviso = "";
 
-    function actualizarFiltrosVisibles() {
-      const contenedor = $("#filtros-activos");
-      contenedor.empty();
-      filtrosActivos.forEach((filtro) => {
-        contenedor.append(crearCardFiltro(filtro.campo, filtro.valor));
-      });
-    }
+          if (curso.fechaInicio) {
+            const ahora = new Date();
+            const fechaCurso = new Date(curso.fechaInicio);
 
-    function agregarFiltro() {
-      const filtro = $("#filtroBusquedaAlumno").val();
-      const valor = $("#busquedaAlumno").val().trim();
+            const diffMs = fechaCurso - ahora;
+            const diffDias = diffMs / (1000 * 60 * 60 * 24);
 
-      if (valor) {
-        // Evitar duplicados
-        if (
-          !filtrosActivos.some((f) => f.campo === filtro && f.valor === valor)
-        ) {
-          filtrosActivos.push({ campo: filtro, valor: valor });
-          actualizarFiltrosVisibles();
-          cargarDatosConFiltros();
-        }
-        $("#busquedaAlumno").val("");
-      }
-    }
-
-    function removerFiltro(filtro, valor) {
-      filtrosActivos = filtrosActivos.filter(
-        (f) => !(f.campo === filtro && String(f.valor) === String(valor)),
-      );
-
-      actualizarFiltrosVisibles();
-
-      if (filtrosActivos.length > 0) {
-        cargarDatosConFiltros();
-      } else {
-        cargarDatos();
-      }
-    }
-
-    function cargarDatosConFiltros() {
-      $.ajax({
-        url: "/api/datosCurso/busquedaMultiFiltro",
-        method: "POST",
-        contentType: "application/json",
-        data: JSON.stringify(filtrosActivos),
-        success: function (data) {
-          // Actualizar tabla con los datos recibidos
-          actualizarTabla(data);
-        },
-      });
-    }
-
-    function actualizarTabla(data) {
-      var tbody = $("#tablaCurso tbody");
-      tbody.empty();
-
-      $.each(data, function (i, curso) {
-        // Construir la fila
-        let estiloFila = "";
-        let aviso = "";
-
-        if (curso.fechaInicio) {
-          const ahora = new Date();
-          const fechaCurso = new Date(curso.fechaInicio);
-
-          const diffMs = fechaCurso - ahora;
-          const diffDias = diffMs / (1000 * 60 * 60 * 24);
-
-          if (diffDias <= 1 && diffDias >= 0) {
-            // curso mañana o hoy
-            estiloFila = " style='background-color: #fff3cd;'"; // amarillo suave
-            aviso = " (Próximo)";
-          } else if (diffDias > 1) {
-            // falta más tiempo
-            estiloFila = " style='background-color: #e7f5ff;'"; // azul suave
-          } else {
-            // ya pasó (opcional)
-            estiloFila = " style='background-color: #f8d7da;'"; // rojo suave muy leve
-            aviso = " (Ya iniciado)";
+            if (diffDias <= 1 && diffDias >= 0) {
+              // curso mañana o hoy
+              estiloFila = " style='background-color: #fff3cd;'"; // amarillo suave
+              aviso = " (Próximo)";
+            } else if (diffDias > 1) {
+              // falta más tiempo
+              estiloFila = " style='background-color: #e7f5ff;'"; // azul suave
+            } else {
+              // ya pasó (opcional)
+              estiloFila = " style='background-color: #f8d7da;'"; // rojo suave muy leve
+              aviso = " (Ya iniciado)";
+            }
           }
-        }
 
-        var fila =
-          "<tr>" +
-          "<td>" +
-          (curso.nombreCurso ?? "") +
-          "</td>" +
-          "<td " +
-          estiloFila +
-          ">" +
-          (
-            curso.fechaInicio
-              ? formatearFecha(curso.fechaInicio) + aviso
-              : ""
-          ) +
-          "</td>" +
-          "<td>" +
-          (curso.ciudad && curso.ubicacionSubida
-            ? curso.ciudad + ", " + curso.ubicacionSubida
-            : "") +
-          "</td>" +
-          "<td>" +
-          (curso.cliente ?? "") +
-          "</td>" +
-          "<td>" +
-          (curso.relator ?? "") +
-          "</td>" +
-          "<td>" +
-          (curso.alumnos ?? 0) +
-          "</td>" +
-          "<td style='width: 25vw;display: flex; justify-content: space-around;'>" +
-          "<a class='btn btn-primary' href='/dataBaseCurso/Curso/" +
-          curso.id +
-          "/editar'>Editar</a>" +
-          "<a class='btn btn-secondary' href='/dataBaseCurso/Curso/" +
-          curso.id +
-          "/alumnos'>Alumnos</a>";
-        if (adminCorreo === "admin@admin.com") {
-          fila +=
-            "<button class='btn btn-danger btn-sm' onclick='eliminarCurso(" +
-            curso.id +
-            ")'>Borrar</button>" +
+          var fila =
+            "<tr>" +
+            "<td>" +
+            (curso.nombreCurso ?? "") +
             "</td>" +
-            "</tr>";
-        }
+            "<td " +
+            estiloFila +
+            ">" +
+            (curso.fechaInicio
+              ? formatearFecha(curso.fechaInicio) + aviso
+              : "") +
+            "</td>" +
+            "<td>" +
+            (curso.ciudad && curso.ubicacionSubida
+              ? curso.ciudad + ", " + curso.ubicacionSubida
+              : "") +
+            "</td>" +
+            "<td>" +
+            (curso.cliente ?? "") +
+            "</td>" +
+            "<td>" +
+            (curso.relator ?? "") +
+            "</td>" +
+            "<td>" +
+            (curso.alumnos ?? 0) +
+            "</td>" +
+            "<td style='width: 25vw;display: flex; justify-content: space-around;'>" +
+            "<a class='btn btn-primary' href='/dataBaseCurso/Curso/" +
+            curso.id +
+            "/editar'>Editar</a>" +
+            "<a class='btn btn-secondary' href='/dataBaseCurso/Curso/" +
+            curso.id +
+            "/alumnos'>Alumnos</a>"+
+            "<button class='btn btn-success' onclick='descargarFlyer("+curso.id+")'>Flyer</button>";
+          if (adminCorreo === "admin@admin.com") {
+            fila +=
+              "<button class='btn btn-danger btn-sm' onclick='eliminarCurso(" +
+              curso.id +
+              ")'>Borrar</button>" +
+              "</td>" +
+              "</tr>";
+          }
 
-        tbody.append(fila);
+          tbody.append(fila);
+        });
+      }
+    </script>
+    <script th:inline="javascript">
+      let botonSig = document.getElementById("sigForm");
+      let diploma = document.getElementById("diploma");
+      let flyer = document.getElementById("flyer");
+      let botonEnv = document.getElementById("enviarCurso");
+      botonSig.addEventListener("click", function () {
+        botonSig.disabled = true;
+
+        diploma.style.display = "none";
+        flyer.style.display = "block";
+
+        setTimeout(() => {
+          botonSig.disabled = false;
+        }, 300); // pequeño delay
       });
-    }
-  </script>
-  <script th:inline="javascript">
-    let botonSig = document.getElementById("sigForm");
-    let diploma = document.getElementById("diploma");
-    let flyer = document.getElementById("flyer");
-    let botonEnv = document.getElementById("enviarCurso");
-    botonSig.addEventListener("click", function () {
-      botonSig.disabled = true;
 
-      diploma.style.display = "none";
-      flyer.style.display = "block";
+      // Función para mostrar el formulario
+      function openForm() {
+        document.getElementById("overlay").style.display = "block";
+      }
 
-      setTimeout(() => {
-        botonSig.disabled = false;
-      }, 300); // pequeño delay
-    });
+      function closeForm() {
+        document.getElementById("overlay").style.display = "none";
+        flyer.style.display = "none";
+        diploma.style.display = "block";
+      }
+      $("form").on("submit", function () {
+        $("#enviarCurso").prop("disabled", true);
+      });
+    </script>
+    <script th:inline="javascript">
+      $(document).ready(function () {
+        let clienteSeleccionado = false;
 
-    // Función para mostrar el formulario
-    function openForm() {
-      document.getElementById("overlay").style.display = "block";
-    }
+        $("#clienteInput").on("input", function () {
+          const texto = $(this).val();
+          clienteSeleccionado = false;
+          $("#clienteId").val("");
 
-    function closeForm() {
-      document.getElementById("overlay").style.display = "none";
-      flyer.style.display = "none";
-      diploma.style.display = "block";
-    }
-    $("form").on("submit", function () {
-      $("#enviarCurso").prop("disabled", true);
-    });
-  </script>
-  <script th:inline="javascript">
-    $(document).ready(function () {
-      let clienteSeleccionado = false;
-
-      $("#clienteInput").on("input", function () {
-        const texto = $(this).val();
-        clienteSeleccionado = false;
-        $("#clienteId").val("");
-
-        if (texto.length < 2) {
-          $("#clienteResultados").hide();
-          return;
-        }
-
-        $.get("/api/clientes/buscar", { q: texto }, function (data) {
-          const contenedor = $("#clienteResultados");
-          contenedor.empty();
-
-          if (data.length === 0) {
-            contenedor.hide();
+          if (texto.length < 2) {
+            $("#clienteResultados").hide();
             return;
           }
 
-          data.forEach((cliente) => {
-            contenedor.append(`
+          $.get("/api/clientes/buscar", { q: texto }, function (data) {
+            const contenedor = $("#clienteResultados");
+            contenedor.empty();
+
+            if (data.length === 0) {
+              contenedor.hide();
+              return;
+            }
+
+            data.forEach((cliente) => {
+              contenedor.append(`
                             <button 
                                 type="button"
                                 class="list-group-item list-group-item-action"
@@ -667,55 +844,55 @@
                                 ${cliente.nombreCliente}
                             </button>
                         `);
-          });
+            });
 
-          contenedor.show();
+            contenedor.show();
+          });
+        });
+
+        // CLICK EN OPCIÓN
+        $(document).on("click", "#clienteResultados button", function () {
+          $("#clienteInput").val($(this).data("nombre"));
+          $("#clienteId").val($(this).data("id"));
+          clienteSeleccionado = true;
+          $("#clienteResultados").hide();
+        });
+
+        // BLOQUEO SI NO SE SELECCIONÓ
+        $("form").on("submit", function (e) {
+          if (!clienteSeleccionado) {
+            e.preventDefault();
+            alert("Debes seleccionar un cliente válido de la lista");
+            $("#clienteInput").focus();
+          }
         });
       });
+    </script>
+    <script th:inline="javascript">
+      $(document).ready(function () {
+        let relatorSeleccionado = false;
 
-      // CLICK EN OPCIÓN
-      $(document).on("click", "#clienteResultados button", function () {
-        $("#clienteInput").val($(this).data("nombre"));
-        $("#clienteId").val($(this).data("id"));
-        clienteSeleccionado = true;
-        $("#clienteResultados").hide();
-      });
+        $("#relatorInput").on("input", function () {
+          const texto = $(this).val();
+          relatorSeleccionado = false;
+          $("#relatorId").val("");
 
-      // BLOQUEO SI NO SE SELECCIONÓ
-      $("form").on("submit", function (e) {
-        if (!clienteSeleccionado) {
-          e.preventDefault();
-          alert("Debes seleccionar un cliente válido de la lista");
-          $("#clienteInput").focus();
-        }
-      });
-    });
-  </script>
-  <script th:inline="javascript">
-    $(document).ready(function () {
-      let relatorSeleccionado = false;
-
-      $("#relatorInput").on("input", function () {
-        const texto = $(this).val();
-        relatorSeleccionado = false;
-        $("#relatorId").val("");
-
-        if (texto.length < 2) {
-          $("#relatorResultados").hide();
-          return;
-        }
-
-        $.get("/api/relator/buscar", { q: texto }, function (data) {
-          const contenedor = $("#relatorResultados");
-          contenedor.empty();
-
-          if (data.length === 0) {
-            contenedor.hide();
+          if (texto.length < 2) {
+            $("#relatorResultados").hide();
             return;
           }
 
-          data.forEach((relator) => {
-            contenedor.append(`
+          $.get("/api/relator/buscar", { q: texto }, function (data) {
+            const contenedor = $("#relatorResultados");
+            contenedor.empty();
+
+            if (data.length === 0) {
+              contenedor.hide();
+              return;
+            }
+
+            data.forEach((relator) => {
+              contenedor.append(`
                             <button 
                                 type="button"
                                 class="list-group-item list-group-item-action"
@@ -724,59 +901,59 @@
                                 ${relator.nombre}
                             </button>
                         `);
-          });
+            });
 
-          contenedor.show();
+            contenedor.show();
+          });
+        });
+
+        // CLICK EN OPCIÓN
+        $(document).on("click", "#relatorResultados button", function () {
+          $("#relatorInput").val($(this).data("nombre"));
+          $("#relatorId").val($(this).data("id"));
+          relatorSeleccionado = true;
+          $("#relatorResultados").hide();
+        });
+
+        // BLOQUEO SI NO SE SELECCIONÓ
+        $("form").on("submit", function (e) {
+          if (!relatorSeleccionado) {
+            e.preventDefault();
+            alert("Debes seleccionar un relator válido de la lista");
+            $("#relatorInput").focus();
+          }
         });
       });
+    </script>
 
-      // CLICK EN OPCIÓN
-      $(document).on("click", "#relatorResultados button", function () {
-        $("#relatorInput").val($(this).data("nombre"));
-        $("#relatorId").val($(this).data("id"));
-        relatorSeleccionado = true;
-        $("#relatorResultados").hide();
-      });
+    <script th:inline="javascript">
+      $(document).ready(function () {
+        let plantillaDipSeleccionado = false;
 
-      // BLOQUEO SI NO SE SELECCIONÓ
-      $("form").on("submit", function (e) {
-        if (!relatorSeleccionado) {
-          e.preventDefault();
-          alert("Debes seleccionar un relator válido de la lista");
-          $("#relatorInput").focus();
-        }
-      });
-    });
-  </script>
+        $("#plantillaDipInput").on("input", function () {
+          const texto = $(this).val();
+          plantillaDipSeleccionado = false;
+          $("#plantillaDipId").val("");
 
-  <script th:inline="javascript">
-    $(document).ready(function () {
-      let plantillaDipSeleccionado = false;
+          if (texto.length < 2) {
+            $("#plantillaDipResultados").hide();
+            return;
+          }
 
-      $("#plantillaDipInput").on("input", function () {
-        const texto = $(this).val();
-        plantillaDipSeleccionado = false;
-        $("#plantillaDipId").val("");
+          $.get(
+            "/api/plantilla/buscar",
+            { q: texto, t: "diploma" },
+            function (data) {
+              const contenedor = $("#plantillaDipResultados");
+              contenedor.empty();
 
-        if (texto.length < 2) {
-          $("#plantillaDipResultados").hide();
-          return;
-        }
+              if (data.length === 0) {
+                contenedor.hide();
+                return;
+              }
 
-        $.get(
-          "/api/plantilla/buscar",
-          { q: texto, t: "diploma" },
-          function (data) {
-            const contenedor = $("#plantillaDipResultados");
-            contenedor.empty();
-
-            if (data.length === 0) {
-              contenedor.hide();
-              return;
-            }
-
-            data.forEach((plantillaDip) => {
-              contenedor.append(`
+              data.forEach((plantillaDip) => {
+                contenedor.append(`
                             <button 
                                 type="button"
                                 class="list-group-item list-group-item-action"
@@ -785,53 +962,53 @@
                                 ${plantillaDip.nombreCertificado}
                             </button>
                         `);
-            });
+              });
 
-            contenedor.show();
-          },
-        );
+              contenedor.show();
+            },
+          );
+        });
+
+        // CLICK EN OPCIÓN
+        $(document).on("click", "#plantillaDipResultados button", function () {
+          $("#plantillaDipInput").val($(this).data("nombre"));
+          $("#plantillaDipId").val($(this).data("id"));
+          plantillaDipSeleccionado = true;
+          $("#plantillaDipResultados").hide();
+        });
+
+        // BLOQUEO SI NO SE SELECCIONÓ
       });
+    </script>
 
-      // CLICK EN OPCIÓN
-      $(document).on("click", "#plantillaDipResultados button", function () {
-        $("#plantillaDipInput").val($(this).data("nombre"));
-        $("#plantillaDipId").val($(this).data("id"));
-        plantillaDipSeleccionado = true;
-        $("#plantillaDipResultados").hide();
-      });
+    <script th:inline="javascript">
+      $(document).ready(function () {
+        let plantillaFlySeleccionado = false;
 
-      // BLOQUEO SI NO SE SELECCIONÓ
-    });
-  </script>
+        $("#plantillaFlyInput").on("input", function () {
+          const texto = $(this).val();
+          plantillaFlySeleccionado = false;
+          $("#plantillaFlyId").val("");
 
-  <script th:inline="javascript">
-    $(document).ready(function () {
-      let plantillaFlySeleccionado = false;
+          if (texto.length < 2) {
+            $("#plantillaFlyResultados").hide();
+            return;
+          }
 
-      $("#plantillaFlyInput").on("input", function () {
-        const texto = $(this).val();
-        plantillaFlySeleccionado = false;
-        $("#plantillaFlyId").val("");
+          $.get(
+            "/api/plantilla/buscar",
+            { q: texto, t: "flyer" },
+            function (data) {
+              const contenedor = $("#plantillaFlyResultados");
+              contenedor.empty();
 
-        if (texto.length < 2) {
-          $("#plantillaFlyResultados").hide();
-          return;
-        }
+              if (data.length === 0) {
+                contenedor.hide();
+                return;
+              }
 
-        $.get(
-          "/api/plantilla/buscar",
-          { q: texto, t: "flyer" },
-          function (data) {
-            const contenedor = $("#plantillaFlyResultados");
-            contenedor.empty();
-
-            if (data.length === 0) {
-              contenedor.hide();
-              return;
-            }
-
-            data.forEach((plantillaFly) => {
-              contenedor.append(`
+              data.forEach((plantillaFly) => {
+                contenedor.append(`
                             <button 
                                 type="button"
                                 class="list-group-item list-group-item-action"
@@ -840,100 +1017,131 @@
                                 ${plantillaFly.nombreCertificado}
                             </button>
                         `);
-            });
+              });
 
-            contenedor.show();
-          },
-        );
+              contenedor.show();
+            },
+          );
+        });
+
+        // CLICK EN OPCIÓN
+        $(document).on("click", "#plantillaFlyResultados button", function () {
+          $("#plantillaFlyInput").val($(this).data("nombre"));
+          $("#plantillaFlyId").val($(this).data("id"));
+          plantillaFlySeleccionado = true;
+          $("#plantillaFlyResultados").hide();
+        });
+
+        // BLOQUEO SI NO SE SELECCIONÓ
+        $("form").on("submit", function (e) {
+          if (!plantillaFlySeleccionado) {
+            e.preventDefault();
+            alert("Debes seleccionar una plantilla válida de la lista");
+            $("#plantillaFlyInput").focus();
+          }
+        });
       });
+    </script>
+    <script>
+      function formatearFecha(fechaISO) {
+        if (!fechaISO) return "";
 
-      // CLICK EN OPCIÓN
-      $(document).on("click", "#plantillaFlyResultados button", function () {
-        $("#plantillaFlyInput").val($(this).data("nombre"));
-        $("#plantillaFlyId").val($(this).data("id"));
-        plantillaFlySeleccionado = true;
-        $("#plantillaFlyResultados").hide();
-      });
+        const fecha = new Date(fechaISO);
 
-      // BLOQUEO SI NO SE SELECCIONÓ
-      $("form").on("submit", function (e) {
-        if (!plantillaFlySeleccionado) {
-          e.preventDefault();
-          alert("Debes seleccionar una plantilla válida de la lista");
-          $("#plantillaFlyInput").focus();
-        }
-      });
-    });
-  </script>
-  <script>
-    function formatearFecha(fechaISO) {
-      if (!fechaISO) return "";
+        const dd = String(fecha.getDate()).padStart(2, "0");
+        const mm = String(fecha.getMonth() + 1).padStart(2, "0");
+        const aa = String(fecha.getFullYear());
+        const hh = String(fecha.getHours()).padStart(2, "0");
+        const min = String(fecha.getMinutes()).padStart(2, "0");
 
-      const fecha = new Date(fechaISO);
+        return `${dd}-${mm}-${aa} ${hh}:${min}`;
+      }
+    </script>
+    <script th:inline="javascript">
+      document
+        .getElementById("enviarCurso")
+        .addEventListener("click", function (e) {
+          e.preventDefault(); // evita submit normal
 
-      const dd = String(fecha.getDate()).padStart(2, "0");
-      const mm = String(fecha.getMonth() + 1).padStart(2, "0");
-      const aa = String(fecha.getFullYear());
-      const hh = String(fecha.getHours()).padStart(2, "0");
-      const min = String(fecha.getMinutes()).padStart(2, "0");
+          const nombreCurso = document.getElementById("nombreCurso").value;
 
-      return `${dd}-${mm}-${aa} ${hh}:${min}`;
-    }
-  </script>
-  <script th:inline="javascript">
-    document.getElementById("enviarCurso").addEventListener("click", function (e) {
-      e.preventDefault(); // evita submit normal
+          const form = e.target.closest("form");
+          const formData = new FormData(form);
 
-      const nombreCurso = document.getElementById("nombreCurso").value;
+          fetch(form.action, {
+            method: "POST",
+            body: formData,
+          })
+            .then((response) => response.blob()) // espera archivo (flyer)
+            .then((blob) => {
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = "flyer-" + nombreCurso + ".pptx"; // nombre de descarga
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
 
+              closeForm(); // cerramos el overlay
+              location.href = "/dataBaseCurso"; // redirige después
+            })
+            .catch((err) => alert("Error al generar el flyer: " + err));
+        });
+    </script>
+    <script th:inline="javascript">
+      async function descargarFlyer(id) {
+        try {
+          const response = await fetch("/api/dataBaseCurso/descargarFlyer", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ id: id }),
+          });
 
-      const form = e.target.closest("form");
-      const formData = new FormData(form);
+          if (!response.ok) {
+            throw new Error("Error al descargar el flyer");
+          }
 
-      fetch(form.action, {
-        method: "POST",
-        body: formData
-      })
-        .then(response => response.blob()) // espera archivo (flyer)
-        .then(blob => {
+          const blob = await response.blob();
+
           const url = window.URL.createObjectURL(blob);
+
           const a = document.createElement("a");
           a.href = url;
-          a.download = "flyer-" + nombreCurso + ".pptx"; // nombre de descarga
+          a.download = "Flyer.pptx";
           document.body.appendChild(a);
           a.click();
+
           a.remove();
-
-          closeForm(); // cerramos el overlay
-          location.href = "/dataBaseCurso"; // redirige después
-        })
-        .catch(err => alert("Error al generar el flyer: " + err));
-    });
-
-  </script>
-  <script th:inline="javascript">
-    function eliminarCurso(id) {
-      if (!confirm("¿Seguro que quieres eliminar este curso?")) {
-        return;
+          window.URL.revokeObjectURL(url);
+        } catch (error) {
+          console.error("Error:", error);
+          alert("Error al generar el flyer");
+        }
       }
+    </script>
+    <script th:inline="javascript">
+      function eliminarCurso(id) {
+        if (!confirm("¿Seguro que quieres eliminar este curso?")) {
+          return;
+        }
 
-      fetch("/api/dataBaseCurso/borrarCurso/" + id, {
-        method: "DELETE"
-      })
-        .then(response => {
-          if (response.ok) {
-            location.reload();
-          } else {
-            alert("Error al eliminar curso");
-          }
+        fetch("/api/dataBaseCurso/borrarCurso/" + id, {
+          method: "DELETE",
         })
-        .catch(error => {
-          console.error(error);
-          alert("Error de conexión");
-        });
-    }
-
-  </script>
-</body>
-
+          .then((response) => {
+            if (response.ok) {
+              location.reload();
+            } else {
+              alert("Error al eliminar curso");
+            }
+          })
+          .catch((error) => {
+            console.error(error);
+            alert("Error de conexión");
+          });
+      }
+    </script>
+  </body>
 </html>

@@ -1,9 +1,5 @@
 
 -backup de base de datos
--arreglar enviar
--agregar boton para descargar flyerd
--arreglar curso en editar alumno
 -generar presentación y documentación
--limitar visión de curso temporales para coordinador
 -preguntar por correo automatizado
 -conectar a lan

@@ -249,7 +249,7 @@
     </footer>
     <script th:inline="javascript">
       $(document).ready(function () {
-        let cursoSeleccionado = false;
+        let cursoSeleccionado = $("#cursoId").val() !== "";
 
         $("#cursoInput").on("input", function () {
           const texto = $(this).val();

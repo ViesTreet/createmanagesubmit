@@ -260,21 +260,7 @@ public class ControladorBase {
 
             if ("enviar".equalsIgnoreCase(diploma)
                     && "aprobado".equalsIgnoreCase(nuevoAlumno.getEstado())) {
-                Curso cursoAlumno = nuevoAlumno.getCurso();
-                String emision = "";
-                if (cursoAlumno.getLugarYfechaEmision() == null) {
-                    LocalDateTime ahora = LocalDateTime.now();
-
-                    int dia = ahora.getDayOfMonth();
-                    String mes = ahora.getMonth().getDisplayName(TextStyle.FULL, new Locale("es"));
-                    int anio = ahora.getYear();
-
-                    emision = "Emitido el " + dia + " de " + mes + " de " + anio + ", en "
-                            + cursoAlumno.getCiudad() + ", " + cursoAlumno.getUbicacionSubida();
-                    cursoAlumno.setLugarYfechaEmision(emision);
-                    servicio.guardarCurso(cursoAlumno);
-                }
-                servicioGenerarCertificado.generateCertificateForAlumno(nuevoAlumno);
+                servicioGenerarCertificado.generateCertificateForAlumno(nuevoAlumno.getId());
                 nuevoAlumno.setDiploma("enviado");
             } else {
                 nuevoAlumno.setDiploma("noEnviado");

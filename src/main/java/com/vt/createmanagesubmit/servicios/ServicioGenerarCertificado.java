@@ -105,6 +105,28 @@ public class ServicioGenerarCertificado {
     @Value("${ST_FOLDER}")
     public String stPath;
 
+    private static final Map<String, String> regionFormateada = Map.ofEntries(
+            Map.entry("arica", "Región de Arica y Parinacota"),
+            Map.entry("tarapaca", "Región de Tarapacá"),
+            Map.entry("antofagasta", "Región de Antofagasta"),
+            Map.entry("atacama", "Región de Atacama"),
+            Map.entry("coquimbo", "Región de Coquimbo"),
+            Map.entry("valparaiso", "Región de Valparaíso"),
+            Map.entry("metropolitana", "Región Metropolitana de Santiago"),
+            Map.entry("ohiggins", "Región del Libertador General Bernardo O'Higgins"),
+            Map.entry("maule", "Región del Maule"),
+            Map.entry("nuble", "Región de Ñuble"),
+            Map.entry("biobio", "Región del Biobío"),
+            Map.entry("araucania", "Región de La Araucanía"),
+            Map.entry("rios", "Región de Los Ríos"),
+            Map.entry("lagos", "Región de Los Lagos"),
+            Map.entry("aysen", "Región de Aysén"),
+            Map.entry("magallanes", "Región de Magallanes y de la Antártica Chilena"));
+
+    private String nombreRegionBonito(String regionDB) {
+        return regionFormateada.getOrDefault(regionDB, regionDB);
+    }
+
     private static final Map<String, ShapeConfig> REGION_SHAPES = new HashMap<>();
 
     static {
@@ -128,13 +150,30 @@ public class ServicioGenerarCertificado {
 
     @Async
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public CompletableFuture<Void> generateCertificateForAlumno(Alumno alumno) throws Exception {
+    public CompletableFuture<Void> generateCertificateForAlumno(Long id) throws Exception {
         // Obtén la plantilla asociada al alumno
+        Alumno alumno = servicio.alumnoPorId(id);
         Plantilla plantilla = alumno.getCurso().getPlantillaDiploma();
         if (plantilla == null || plantilla.getNombreCertificado().trim().equals("Error en encontrar plantilla")) {
             throw new Exception("No hay una plantilla asociada al Alumno " + alumno.getNombreAsistente());
         }
+        Curso cursoAlumno = alumno.getCurso();
+        String emision = "";
+        if (cursoAlumno.getLugarYfechaEmision() == null) {
+            LocalDateTime ahora = LocalDateTime.now();
 
+            int dia = ahora.getDayOfMonth();
+            String mes = ahora.getMonth().getDisplayName(TextStyle.FULL, new Locale("es"));
+            int anio = ahora.getYear();
+
+            String regionBonita = nombreRegionBonito(cursoAlumno.getUbicacionSubida());
+
+            emision = "Emitido el " + dia + " de " + mes + " de " + anio + ", en "
+                    + cursoAlumno.getCiudad() + ", " + regionBonita;
+
+            cursoAlumno.setLugarYfechaEmision(emision);
+            servicio.guardarCurso(cursoAlumno);
+        }
         // Carga la plantilla PPTX desde pathArchivo
         String templatePath = plantilla.getPathArchivo();
 
@@ -151,8 +190,6 @@ public class ServicioGenerarCertificado {
         ByteArrayOutputStream qrCodeOutputStream = generateQRCodeImage(qrCodeText, 200, 200);
         byte[] qrCodeBytes = qrCodeOutputStream.toByteArray();
 
-        // Crea un mapa de los datos del alumno que se usarán para reemplazar en los
-        // placeholders
         Map<String, String> alumnoData = new HashMap<>();
         alumnoData.put("nombre", alumno.getNombreAsistente());
         alumnoData.put("curso", alumno.getCurso().getNombreCurso());
@@ -170,7 +207,7 @@ public class ServicioGenerarCertificado {
         try {
             logoCliente = Files.readAllBytes(Paths.get(alumno.getCurso().getCliente().getPathLogo()));
         } catch (Exception e) {
-            // TODO: handle exception
+            e.printStackTrace();
         }
 
         Map<String, byte[]> imageData = new HashMap<>();
@@ -212,9 +249,9 @@ public class ServicioGenerarCertificado {
         Files.deleteIfExists(tempPdfPath);
 
         // Enviar correo electrónico al alumno con el PDF y el código QR como adjuntos
-        System.out.println("iniciando correo");
+
         sendEmailWithAttachments(alumno.getCorreo(), "Certificado de Curso", alumno, pdfBytes, qrCodeBytes);
-        System.out.println("termino");
+
         return CompletableFuture.completedFuture(null);
     }
 
@@ -296,7 +333,7 @@ public class ServicioGenerarCertificado {
         helper.setTo(toEmail);
         helper.setSubject(subject);
         byte[] logoBytes = null;
-        System.out.println("entro en el servicio email");
+
         ClassPathResource logoResourceDir = new ClassPathResource("static/images/Logobgremove.png");
         try (InputStream is = logoResourceDir.getInputStream()) {
             logoBytes = is.readAllBytes();
@@ -451,12 +488,13 @@ public class ServicioGenerarCertificado {
             String mes = ahora.getMonth().getDisplayName(TextStyle.FULL, new Locale("es"));
             int anio = ahora.getYear();
 
+            String regionBonita = nombreRegionBonito(cursoAlumno.getUbicacionSubida());
+
             emision = "Emitido el " + dia + " de " + mes + " de " + anio + ", en "
-                    + cursoAlumno.getCiudad() + ", " + cursoAlumno.getUbicacionSubida();
+                    + cursoAlumno.getCiudad() + ", " + regionBonita;
+
             cursoAlumno.setLugarYfechaEmision(emision);
             servicio.guardarCurso(cursoAlumno);
-        } else {
-            emision = alumno.getCurso().getLugarYfechaEmision();
         }
 
         // Carga la plantilla PPTX desde pathArchivo
@@ -487,7 +525,7 @@ public class ServicioGenerarCertificado {
         alumnoData.put("emision", alumno.getCurso().getLugarYfechaEmision());
         alumnoData.put("correlativo", alumno.getNumeroCorrelativoInterno());
         alumnoData.put("modalidad", alumno.getCurso().getModalidad());
-        alumnoData.put("datos_emision", emision);
+        alumnoData.put("datos_emision", alumno.getCurso().getLugarYfechaEmision());
 
         byte[] logoCliente = null;
         try {
@@ -539,12 +577,30 @@ public class ServicioGenerarCertificado {
 
     @Async
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public CompletableFuture<byte[]> descargarCertificadosServicio(Alumno alumno) throws Exception {
+    public CompletableFuture<byte[]> descargarCertificadosServicio(Long id) throws Exception {
 
         // Obtén la plantilla asociada al alumno
+        Alumno alumno = servicio.alumnoPorId(id);
         Plantilla plantilla = alumno.getCurso().getPlantillaDiploma();
         if (plantilla == null || plantilla.getNombreCertificado().trim().equals("Error en encontrar plantilla")) {
             throw new Exception("No hay una plantilla asociada al Alumno " + alumno.getNombreAsistente());
+        }
+        Curso cursoAlumno = alumno.getCurso();
+        String emision = "";
+        if (cursoAlumno.getLugarYfechaEmision() == null) {
+            LocalDateTime ahora = LocalDateTime.now();
+
+            int dia = ahora.getDayOfMonth();
+            String mes = ahora.getMonth().getDisplayName(TextStyle.FULL, new Locale("es"));
+            int anio = ahora.getYear();
+
+            String regionBonita = nombreRegionBonito(cursoAlumno.getUbicacionSubida());
+
+            emision = "Emitido el " + dia + " de " + mes + " de " + anio + ", en "
+                    + cursoAlumno.getCiudad() + ", " + regionBonita;
+
+            cursoAlumno.setLugarYfechaEmision(emision);
+            servicio.guardarCurso(cursoAlumno);
         }
 
         // Carga la plantilla PPTX desde pathArchivo
@@ -883,6 +939,88 @@ public class ServicioGenerarCertificado {
         tempPptxFile.delete();
 
         return CompletableFuture.completedFuture(FlyerBytes);
+    }
+
+    @Async
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public CompletableFuture<byte[]> funcionParaPruebaDeDiplomas(Alumno alumno) throws Exception {
+
+        // Obtén la plantilla asociada al alumno
+        Plantilla plantilla = alumno.getCurso().getPlantillaDiploma();
+        if (plantilla == null || plantilla.getNombreCertificado().trim().equals("Error en encontrar plantilla")) {
+            throw new Exception("No hay una plantilla asociada al Alumno " + alumno.getNombreAsistente());
+        }
+        // Carga la plantilla PPTX desde pathArchivo
+        String templatePath = plantilla.getPathArchivo();
+
+        // Carga el archivo PPTX usando Apache POI
+        XMLSlideShow ppt;
+        try (FileInputStream inputStream = new FileInputStream(templatePath)) {
+            ppt = new XMLSlideShow(inputStream);
+        }
+        // Generar código QR con la URL y el ID encriptado
+        String encryptedId = encryptStudentId(alumno.getId().toString());
+        String qrCodeText = urlPath + "/generarCertificadoQr/" + encryptedId;
+
+        ByteArrayOutputStream qrCodeOutputStream = generateQRCodeImage(qrCodeText, 200, 200);
+        byte[] qrCodeBytes = qrCodeOutputStream.toByteArray();
+
+        // Crea un mapa de los datos del alumno que se usarán para reemplazar en los
+        // placeholders
+        Map<String, String> alumnoData = new HashMap<>();
+        alumnoData.put("nombre", alumno.getNombreAsistente());
+        alumnoData.put("curso", alumno.getCurso().getNombreCurso());
+        alumnoData.put("duracion", alumno.getCurso().getDuracion());
+        alumnoData.put("nota", alumno.getNotaAprobacion());
+        alumnoData.put("dias", alumno.getCurso().getDiasCursos());
+        alumnoData.put("relator", alumno.getCurso().getRelator().getNombre());
+        alumnoData.put("asistencia", alumno.getAsistencia());
+        alumnoData.put("emision", alumno.getCurso().getLugarYfechaEmision());
+        alumnoData.put("correlativo", alumno.getNumeroCorrelativoInterno());
+        alumnoData.put("modalidad", alumno.getCurso().getModalidad());
+        alumnoData.put("datos_emision", alumno.getCurso().getLugarYfechaEmision());
+
+        byte[] logoCliente = null;
+        try {
+            logoCliente = Files.readAllBytes(Paths.get(alumno.getCurso().getCliente().getPathLogo()));
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+
+        Map<String, byte[]> imageData = new HashMap<>();
+        imageData.put("imagen_qr", qrCodeBytes);
+        if (logoCliente != null) {
+            imageData.put("imagen_cliente", logoCliente);
+        }
+
+        // Procesa las slides y shapes
+        for (XSLFSlide slide : ppt.getSlides()) {
+            processSlide(slide, alumnoData, imageData);
+        }
+
+        Path tempDir = Paths.get(stPath, "temp");
+        Files.createDirectories(tempDir);
+
+        Path tempPptxPath = tempDir.resolve(alumno.getId() + ".pptx");
+        Path tempPdfPath = tempDir.resolve(alumno.getId() + ".pdf");
+
+        try (OutputStream out = Files.newOutputStream(tempPptxPath)) {
+            ppt.write(out);
+        }
+
+        ppt.close();
+
+        JodConverter
+                .convert(tempPptxPath.toFile())
+                .to(tempPdfPath.toFile())
+                .execute();
+
+        byte[] pdfBytes = Files.readAllBytes(tempPdfPath);
+
+        Files.deleteIfExists(tempPptxPath);
+        Files.deleteIfExists(tempPdfPath);
+
+        return CompletableFuture.completedFuture(pdfBytes);
     }
 
 }

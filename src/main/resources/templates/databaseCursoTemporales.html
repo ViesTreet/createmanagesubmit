@@ -186,6 +186,9 @@
     </div>
   </div>
   <script th:inline="javascript">
+    const adminCorreo = /*[[${admin.correo}]]*/ "default";
+    const adminRol = /*[[${admin.rol}]]*/ "default";
+    const adminUbi = /*[[${admin.ubicacion}]]*/ "default";
     function cargarDatos() {
       $.ajax({
         url: "/api/datosCurso",
@@ -198,7 +201,9 @@
             if(!curso.asistenciaQr){
               return;
             }
-            var adminCorreo = /*[[${admin.correo}]]*/ "default";
+            if(adminRol != "administrador" && adminUbi != curso.ubicacionSubida){
+              return;
+            }
             // Construir la fila
             var fila =
               "<tr>" +
@@ -390,6 +395,9 @@
 
       $.each(data, function (i, curso) {
         if(!curso.asistenciaQr){
+              return;
+        }
+        if(adminRol != "administrador" && adminUbi != curso.ubicacionSubida){
               return;
         }
         var fila =

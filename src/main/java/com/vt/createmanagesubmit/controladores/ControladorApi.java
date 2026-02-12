@@ -312,22 +312,9 @@ public class ControladorApi {
                     // Generar certificados y guardarlos en la carpeta
                     for (Long id : ids) {
                         Alumno alumno = ser.alumnoPorId(id); // Método que debes tener o implementar
-                        Curso cursoAlumno = alumno.getCurso();
-                        String emision = "";
-                        if (cursoAlumno.getLugarYfechaEmision() == null) {
-                            LocalDateTime ahora = LocalDateTime.now();
 
-                            int dia = ahora.getDayOfMonth();
-                            String mes = ahora.getMonth().getDisplayName(TextStyle.FULL, new Locale("es"));
-                            int anio = ahora.getYear();
-
-                            emision = "Emitido el " + dia + " de " + mes + " de " + anio + ", en "
-                                    + cursoAlumno.getCiudad() + ", " + cursoAlumno.getUbicacionSubida();
-                            cursoAlumno.setLugarYfechaEmision(emision);
-                            ser.guardarCurso(cursoAlumno);
-                        }
-
-                        byte[] certificadoBytes = servicioGenerarCertificado.descargarCertificadosServicio(alumno)
+                        byte[] certificadoBytes = servicioGenerarCertificado
+                                .descargarCertificadosServicio(alumno.getId())
                                 .join();
 
                         // Guardar cada certificado como un archivo PDF en la carpeta temporal
@@ -392,23 +379,9 @@ public class ControladorApi {
 
                 for (Long id : ids) {
                     Alumno alumno = ser.alumnoPorId(id);
-                    Curso cursoAlumno = alumno.getCurso();
-                    String emision = "";
-                    if (cursoAlumno.getLugarYfechaEmision() == null) {
-                        LocalDateTime ahora = LocalDateTime.now();
-
-                        int dia = ahora.getDayOfMonth();
-                        String mes = ahora.getMonth().getDisplayName(TextStyle.FULL, new Locale("es"));
-                        int anio = ahora.getYear();
-
-                        emision = "Emitido el " + dia + " de " + mes + " de " + anio + ", en "
-                                + cursoAlumno.getCiudad() + ", " + cursoAlumno.getUbicacionSubida();
-                        cursoAlumno.setLugarYfechaEmision(emision);
-                        ser.guardarCurso(cursoAlumno);
-                    }
 
                     byte[] certificadoBytes = servicioGenerarCertificado
-                            .descargarCertificadosServicio(alumno)
+                            .descargarCertificadosServicio(alumno.getId())
                             .join();
 
                     merger.addSource(new RandomAccessReadBuffer(certificadoBytes));
@@ -504,11 +477,11 @@ public class ControladorApi {
         alumno.setAsistencia(asistencia);
         alumno.setId(1L);
         if (curso.getLugarYfechaEmision() == null) {
-            curso.setLugarYfechaEmision("Emitido el 11 de febrero de 2026, en Concepcion, Bio Bio");
+            curso.setLugarYfechaEmision("Emitido el 11 de febrero de 2026, en Concepcion, Región del Biobío");
         }
 
         try {
-            return servicioGenerarCertificado.descargarCertificadosServicio(alumno)
+            return servicioGenerarCertificado.funcionParaPruebaDeDiplomas(alumno)
                     .thenApply(fileBytes -> {
                         HttpHeaders headers = new HttpHeaders();
                         headers.setContentType(MediaType.APPLICATION_PDF);
@@ -1013,6 +986,27 @@ public class ControladorApi {
             return resultado.getContent().stream().map(CursoDTO::new).collect(Collectors.toList());
         }
         return Collections.emptyList();
+    }
+
+    @PostMapping("/dataBaseCurso/descargarFlyer")
+    public ResponseEntity<byte[]> descargarFlyer(@RequestBody Map<String, Long> body) throws Exception {
+
+        Long id = body.get("id");
+
+        Curso curso = ser.cursoPorId(id);
+
+        byte[] flyerBytes = servicioGenerarCertificado.descargarFlyerServicio(curso).get();
+        // .get() espera el resultado del CompletableFuture
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType(
+                "application/vnd.openxmlformats-officedocument.presentationml.presentation"));
+        headers.setContentDisposition(ContentDisposition
+                .attachment()
+                .filename("Flyer-" + curso.getNombreCurso() + ".pptx")
+                .build());
+
+        return new ResponseEntity<>(flyerBytes, headers, HttpStatus.OK);
     }
 
     @DeleteMapping("/dataBaseCurso/borrarCurso/{id}")
