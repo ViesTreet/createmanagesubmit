@@ -1,5 +1,5 @@
 
--backup de base de datos
+-backup de base de datos y desactivado de asistencia qr.
 -generar presentación y documentación
 -preguntar por correo automatizado
 -conectar a lan

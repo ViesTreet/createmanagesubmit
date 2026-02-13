@@ -201,7 +201,6 @@ public class ServicioGenerarCertificado {
         alumnoData.put("emision", alumno.getCurso().getLugarYfechaEmision());
         alumnoData.put("correlativo", alumno.getNumeroCorrelativoInterno());
         alumnoData.put("modalidad", alumno.getCurso().getModalidad());
-        alumnoData.put("datos_emision", alumno.getCurso().getLugarYfechaEmision());
 
         byte[] logoCliente = null;
         try {
@@ -525,7 +524,6 @@ public class ServicioGenerarCertificado {
         alumnoData.put("emision", alumno.getCurso().getLugarYfechaEmision());
         alumnoData.put("correlativo", alumno.getNumeroCorrelativoInterno());
         alumnoData.put("modalidad", alumno.getCurso().getModalidad());
-        alumnoData.put("datos_emision", alumno.getCurso().getLugarYfechaEmision());
 
         byte[] logoCliente = null;
         try {
@@ -631,7 +629,6 @@ public class ServicioGenerarCertificado {
         alumnoData.put("emision", alumno.getCurso().getLugarYfechaEmision());
         alumnoData.put("correlativo", alumno.getNumeroCorrelativoInterno());
         alumnoData.put("modalidad", alumno.getCurso().getModalidad());
-        alumnoData.put("datos_emision", alumno.getCurso().getLugarYfechaEmision());
 
         byte[] logoCliente = null;
         try {
@@ -978,7 +975,6 @@ public class ServicioGenerarCertificado {
         alumnoData.put("emision", alumno.getCurso().getLugarYfechaEmision());
         alumnoData.put("correlativo", alumno.getNumeroCorrelativoInterno());
         alumnoData.put("modalidad", alumno.getCurso().getModalidad());
-        alumnoData.put("datos_emision", alumno.getCurso().getLugarYfechaEmision());
 
         byte[] logoCliente = null;
         try {
