@@ -44,6 +44,8 @@ import org.apache.poi.xslf.usermodel.XSLFSlide;
 import org.apache.poi.xslf.usermodel.XSLFTextParagraph;
 import org.apache.poi.xslf.usermodel.XSLFTextRun;
 import org.apache.poi.xslf.usermodel.XSLFTextShape;
+import org.openxmlformats.schemas.presentationml.x2006.main.CTShape;
+import org.openxmlformats.schemas.drawingml.x2006.main.*;
 import org.jodconverter.local.JodConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -272,7 +274,12 @@ public class ServicioGenerarCertificado {
             }
         }
         // Cargar logo
-        BufferedImage logo = ImageIO.read(new File("src/main/resources/static/images/Logo.png"));
+        ClassPathResource logoResource = new ClassPathResource("static/images/Logo.png");
+        BufferedImage logo;
+
+        try (InputStream is = logoResource.getInputStream()) {
+            logo = ImageIO.read(is);
+        }
 
         int originalWidth = logo.getWidth();
         int originalHeight = logo.getHeight();
@@ -824,26 +831,73 @@ public class ServicioGenerarCertificado {
         slide.removeShape(textShape);
     }
 
-    private void replaceShapePlaceholder(
-            XSLFTextShape textShape,
-            String regionKey) {
+    private void replaceShapePlaceholder(XSLFTextShape textShape, String regionKey) {
 
         ShapeConfig config = REGION_SHAPES.get(regionKey);
         if (config == null)
             return;
 
-        // Cambiar color de relleno
-        textShape.setFillColor(config.getColor());
+        // Quitar texto
+        textShape.clearText();
 
-        // Opcional: quitar borde
+        // Obtener CTShape real
+        CTShape ctShape = (CTShape) textShape.getXmlObject();
+        CTShapeProperties props = ctShape.getSpPr();
+        if (props == null)
+            return; // no crear uno nuevo
+
+        // Limpiar rellenos previos
+        if (props.isSetSolidFill())
+            props.unsetSolidFill();
+        if (props.isSetGradFill())
+            props.unsetGradFill();
+
+        // Crear gradiente
+        CTGradientFillProperties gradFill = props.addNewGradFill();
+        CTGradientStopList stopList = gradFill.addNewGsLst();
+
+        // Color inicial
+        CTGradientStop stop1 = stopList.addNewGs();
+        stop1.setPos(0);
+        stop1.addNewSrgbClr().setVal(new byte[] {
+                (byte) config.getColor().getRed(),
+                (byte) config.getColor().getGreen(),
+                (byte) config.getColor().getBlue()
+        });
+
+        // Color final (más claro)
+        Color c = config.getColor();
+        Color lighter = new Color(
+                Math.min(255, c.getRed() + 60),
+                Math.min(255, c.getGreen() + 60),
+                Math.min(255, c.getBlue() + 60));
+
+        CTGradientStop stop2 = stopList.addNewGs();
+        stop2.setPos(100000);
+        stop2.addNewSrgbClr().setVal(new byte[] {
+                (byte) lighter.getRed(),
+                (byte) lighter.getGreen(),
+                (byte) lighter.getBlue()
+        });
+
+        // Dirección del gradiente (vertical)
+        CTLinearShadeProperties lin = gradFill.addNewLin();
+        lin.setAng(10800000); // 180°
+        lin.setScaled(true);
+
+        // Quitar borde
         textShape.setLineColor(null);
+    }
 
-        // Eliminar el texto placeholder
-        for (XSLFTextParagraph paragraph : textShape.getTextParagraphs()) {
-            for (XSLFTextRun run : paragraph.getTextRuns()) {
-                run.setText("");
-            }
-        }
+    private Color lightenColor(Color color, float factor) {
+        int r = (int) (color.getRed() + (255 - color.getRed()) * factor);
+        int g = (int) (color.getGreen() + (255 - color.getGreen()) * factor);
+        int b = (int) (color.getBlue() + (255 - color.getBlue()) * factor);
+
+        return new Color(
+                Math.min(r, 255),
+                Math.min(g, 255),
+                Math.min(b, 255));
     }
 
     @Async
