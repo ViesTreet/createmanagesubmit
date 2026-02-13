@@ -130,22 +130,22 @@ public class ServicioGenerarCertificado {
     private static final Map<String, ShapeConfig> REGION_SHAPES = new HashMap<>();
 
     static {
-        REGION_SHAPES.put("arica", new ShapeConfig(new Color(255, 99, 71)));
-        REGION_SHAPES.put("tarapaca", new ShapeConfig(new Color(255, 165, 0)));
-        REGION_SHAPES.put("antofagasta", new ShapeConfig(new Color(255, 215, 0)));
-        REGION_SHAPES.put("atacama", new ShapeConfig(new Color(210, 105, 30)));
-        REGION_SHAPES.put("coquimbo", new ShapeConfig(new Color(70, 130, 180)));
-        REGION_SHAPES.put("valparaiso", new ShapeConfig(new Color(46, 139, 87)));
-        REGION_SHAPES.put("metropolitana", new ShapeConfig(new Color(128, 0, 128)));
-        REGION_SHAPES.put("ohiggins", new ShapeConfig(new Color(220, 20, 60)));
-        REGION_SHAPES.put("maule", new ShapeConfig(new Color(139, 69, 19)));
-        REGION_SHAPES.put("nuble", new ShapeConfig(new Color(0, 128, 128)));
-        REGION_SHAPES.put("biobio", new ShapeConfig(new Color(25, 25, 112)));
-        REGION_SHAPES.put("araucania", new ShapeConfig(new Color(34, 139, 34)));
-        REGION_SHAPES.put("rios", new ShapeConfig(new Color(0, 191, 255)));
-        REGION_SHAPES.put("lagos", new ShapeConfig(new Color(65, 105, 225)));
-        REGION_SHAPES.put("aysen", new ShapeConfig(new Color(72, 61, 139)));
-        REGION_SHAPES.put("magallanes", new ShapeConfig(new Color(47, 79, 79)));
+        REGION_SHAPES.put("arica", new ShapeConfig(new Color(255, 179, 186))); // #ffb3ba
+        REGION_SHAPES.put("tarapaca", new ShapeConfig(new Color(255, 47, 148))); // #ff2f94
+        REGION_SHAPES.put("antofagasta", new ShapeConfig(new Color(255, 214, 165))); // #ffd6a5
+        REGION_SHAPES.put("atacama", new ShapeConfig(new Color(255, 173, 173))); // #ffadad
+        REGION_SHAPES.put("coquimbo", new ShapeConfig(new Color(202, 255, 191))); // #caffbf
+        REGION_SHAPES.put("valparaiso", new ShapeConfig(new Color(155, 246, 255))); // #9bf6ff
+        REGION_SHAPES.put("metropolitana", new ShapeConfig(new Color(253, 220, 101))); // #fddc65 (RM)
+        REGION_SHAPES.put("ohiggins", new ShapeConfig(new Color(232, 142, 255))); // #e88eff
+        REGION_SHAPES.put("maule", new ShapeConfig(new Color(168, 255, 122))); // #a8ff7a
+        REGION_SHAPES.put("nuble", new ShapeConfig(new Color(168, 255, 122))); // #a8ff7a
+        REGION_SHAPES.put("biobio", new ShapeConfig(new Color(28, 254, 82))); // #1cfe52
+        REGION_SHAPES.put("araucania", new ShapeConfig(new Color(189, 178, 255))); // #bdb2ff
+        REGION_SHAPES.put("rios", new ShapeConfig(new Color(160, 196, 255))); // #a0c4ff
+        REGION_SHAPES.put("lagos", new ShapeConfig(new Color(205, 180, 219))); // #cdb4db
+        REGION_SHAPES.put("aysen", new ShapeConfig(new Color(189, 224, 254))); // #bde0fe
+        REGION_SHAPES.put("magallanes", new ShapeConfig(new Color(208, 244, 222))); // #d0f4de
     }
 
     @Async
