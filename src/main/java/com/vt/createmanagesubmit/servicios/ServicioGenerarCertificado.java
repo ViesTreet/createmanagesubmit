@@ -811,7 +811,7 @@ public class ServicioGenerarCertificado {
         double targetWidth = targetHeight * aspectRatio;
 
         // 4. Centrar horizontalmente (opcional pero recomendado)
-        double x = anchor.getX() + (anchor.getWidth() - targetWidth) / 2;
+        double x = anchor.getX();
         double y = anchor.getY();
 
         Rectangle2D newAnchor = new Rectangle2D.Double(
@@ -868,9 +868,9 @@ public class ServicioGenerarCertificado {
         // Color final (más claro)
         Color c = config.getColor();
         Color lighter = new Color(
-                Math.min(255, c.getRed() + 60),
-                Math.min(255, c.getGreen() + 60),
-                Math.min(255, c.getBlue() + 60));
+                Math.min(255, c.getRed() + 100),
+                Math.min(255, c.getGreen() + 100),
+                Math.min(255, c.getBlue() + 100));
 
         CTGradientStop stop2 = stopList.addNewGs();
         stop2.setPos(100000);
@@ -887,17 +887,6 @@ public class ServicioGenerarCertificado {
 
         // Quitar borde
         textShape.setLineColor(null);
-    }
-
-    private Color lightenColor(Color color, float factor) {
-        int r = (int) (color.getRed() + (255 - color.getRed()) * factor);
-        int g = (int) (color.getGreen() + (255 - color.getGreen()) * factor);
-        int b = (int) (color.getBlue() + (255 - color.getBlue()) * factor);
-
-        return new Color(
-                Math.min(r, 255),
-                Math.min(g, 255),
-                Math.min(b, 255));
     }
 
     @Async

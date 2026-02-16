@@ -43,7 +43,7 @@
                     <div id="diploma">
                         <h5 class="text-center pb-2">Datos del diploma</h5>
                         <div class="pb-2" style="display: flex; flex-direction: row;">
-                            <div style="width: 50%; margin-right: 2px;">
+                            <div style="width: 50%; margin-right: 2px; position: relative;">
                                 <label for="nombreCurso">Nombre del curso</label>
                                 <input th:value="${curso.nombreCurso}" id="nombreCurso" name="nombreCurso" type="text"
                                     class="form-control" placeholder="Nombre del curso" />
@@ -102,7 +102,7 @@
                                         Magallanes</option>
                                 </select>
                             </div>
-                            <div style="width: 50%; margin-left: 2px;">
+                            <div style="width: 50%; margin-left: 2px; position: relative;">
                                 <label for="ciudad">Ciudad</label>
                                 <input th:value="${curso.ciudad}" id="ciudad" type="text" name="ciudad"
                                     class="form-control" placeholder="Talca" />
@@ -140,7 +140,7 @@
                     <div id="flyer" style="display: none">
                         <h5 class="text-center pb-2">Datos del flyer</h5>
                         <div class="pb-2" style="display: flex; flex-direction: row;">
-                            <div style="width: 50%; margin-left: 2px;">
+                            <div style="width: 50%; margin-left: 2px; position: relative;">
                                 <label for="ubicacionDelCurso">Ubicación donde se realizara el curso</label>
                                 <input th:value="${curso.ubicacionDelCurso}" id="ubicacionDelCurso"
                                     name="ubicacionDelCurso" type="text" class="form-control"
@@ -156,7 +156,7 @@
                                 <input th:value="${horaI}" id="horaI" type="time" name="horaI" class="form-control"
                                     placeholder="12:00 pm" />
                             </div>
-                            <div style="width: 50%; margin-left: 2px;">
+                            <div style="width: 50%; margin-left: 2px; position: relative;">
                                 <label for="horaF">Hora de finalización</label>
                                 <input th:value="${horaF}" id="horaF" type="time" name="horaF" class="form-control"
                                     placeholder="14:00 pm" />
@@ -465,6 +465,11 @@
                 }
             });
         });
+    </script>
+    <script th:inline="javascript">
+        function ajustarWidth(){
+            document.getElementById("clienteResultados").style.width=document.getElementById("clienteInput").clientWidth+"px"; 
+        }
     </script>
 </body>
 

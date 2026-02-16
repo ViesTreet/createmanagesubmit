@@ -67,7 +67,7 @@
           <!-- Se elimina el modelAttribute para que se envíen parámetros individuales -->
           <form th:action="@{/dataBaseAlumno/editarAlumno}" method="post">
             <div class="d-flex">
-              <div style="width: 50%; margin-right: 2px">
+              <div style="width: 50%; margin-right: 2px; position: relative">
                 <div>
                   <label for="nombreAsistente">Nombre Asistente</label>
                   <input
@@ -131,7 +131,7 @@
                   />
                 </div>
               </div>
-              <div style="width: 50%; margin-left: 2px">
+              <div style="width: 50%; margin-left: 2px; position: relative;">
                 <div>
                   <label for="estado">Estado</label>
                   <select class="form-select" name="estado" id="estado">
