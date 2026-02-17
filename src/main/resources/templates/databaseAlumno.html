@@ -16,6 +16,23 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
   <style>
+    .big-checkbox {
+      width: 25px;
+      height: 25px;
+    }
+
+    .celda-scroll {
+      height: 60px;
+      overflow-y: auto;
+
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+
+      word-break: break-word;
+      padding: 4px;
+    }
+
     th {
       font-size: 13px;
     }
@@ -23,6 +40,9 @@
     td {
       overflow-x: auto;
       font-size: 11px;
+      word-break: break-word;
+      white-space: normal;
+      vertical-align: top;
     }
 
     #alumnoBuscador {
@@ -340,41 +360,42 @@
           alumno.id +
           "'>" +
           "<td class='d-flex justify-content-center align-items-center' style='width: 5vw; height: 100%;'>" +
-          "<input type='checkbox' value='" +
-          alumno.id +
-          "'></td>" +
-          "<td><a href='/dataBaseAlumno/alumno/" +
+          "<div style='align-items: center;' class='celda-scroll'>" +
+          "<input class='big-checkbox' type='checkbox' value='" + alumno.id + "'>" +
+          "</div></td>" +
+          "<td><div class='celda-scroll'><a href='/dataBaseAlumno/alumno/" +
           alumno.id +
           "'>" +
           (alumno.nombreAsistente != null ? alumno.nombreAsistente : "") +
-          "</a></td>" +
-          "<td>" +
+          "</a></div></td>" +
+          "<td><div class='celda-scroll'>" +
           (alumno.curso != null ? alumno.curso : "") +
-          "</td>" +
-          "<td>" +
+          "</div></td>" +
+          "<td><div class='celda-scroll'>" +
           (alumno.cliente != null ? alumno.cliente : "") +
-          "</td>" +
-          "<td>" +
+          "</div></td>" +
+          "<td><div class='celda-scroll'>" +
           (alumno.relator != null ? alumno.relator : "") +
-          "</td>" +
-          "<td>" +
+          "</div></td>" +
+          "<td><div class='celda-scroll'>" +
           (alumno.estado != null ? alumno.estado : "") +
-          "</td>" +
-          "<td>" +
+          "</div></td>" +
+          "<td><div class='celda-scroll'>" +
           (alumno.rut != null ? alumno.rut : "") +
-          "</td>" +
-          "<td>" +
+          "</div></td>" +
+          "<td><div class='celda-scroll'>" +
           correoText +
-          "</td>" +
-          "<td>" +
+          "</div></td>" +
+          "<td><div class='celda-scroll'>" +
           (alumno.diploma != null ? alumno.diploma : "") +
-          "</td>" +
-          "<td>" +
+          "</div></td>" +
+          "<td><div class='celda-scroll'>" +
           (alumno.numeroCorrelativoInterno != null
             ? alumno.numeroCorrelativoInterno
             : "") +
-          "</td>" +
+          "</div></td>" +
           "</tr>";
+
         tbody.append(fila);
 
         // Si el estado es "noEnviado", agregar un <p> al contenedor
@@ -515,40 +536,40 @@
               alumno.id +
               "'>" +
               "<td class='d-flex justify-content-center align-items-center' style='width: 5vw; height: 100%;'>" +
-              "<input type='checkbox' value='" +
-              alumno.id +
-              "'></td>" +
-              "<td><a href='/dataBaseAlumno/alumno/" +
+              "<div style='align-items: center;' class='celda-scroll'>" +
+              "<input class='big-checkbox' type='checkbox' value='" + alumno.id + "'>" +
+              "</div></td>" +
+              "<td><div class='celda-scroll'><a href='/dataBaseAlumno/alumno/" +
               alumno.id +
               "'>" +
               (alumno.nombreAsistente != null ? alumno.nombreAsistente : "") +
-              "</a></td>" +
-              "<td>" +
+              "</a></div></td>" +
+              "<td><div class='celda-scroll'>" +
               (alumno.curso != null ? alumno.curso : "") +
-              "</td>" +
-              "<td>" +
+              "</div></td>" +
+              "<td><div class='celda-scroll'>" +
               (alumno.cliente != null ? alumno.cliente : "") +
-              "</td>" +
-              "<td>" +
+              "</div></td>" +
+              "<td><div class='celda-scroll'>" +
               (alumno.relator != null ? alumno.relator : "") +
-              "</td>" +
-              "<td>" +
+              "</div></td>" +
+              "<td><div class='celda-scroll'>" +
               (alumno.estado != null ? alumno.estado : "") +
-              "</td>" +
-              "<td>" +
+              "</div></td>" +
+              "<td><div class='celda-scroll'>" +
               (alumno.rut != null ? alumno.rut : "") +
-              "</td>" +
-              "<td>" +
+              "</div></td>" +
+              "<td><div class='celda-scroll'>" +
               correoText +
-              "</td>" +
-              "<td>" +
+              "</div></td>" +
+              "<td><div class='celda-scroll'>" +
               (alumno.diploma != null ? alumno.diploma : "") +
-              "</td>" +
-              "<td>" +
+              "</div></td>" +
+              "<td><div class='celda-scroll'>" +
               (alumno.numeroCorrelativoInterno != null
                 ? alumno.numeroCorrelativoInterno
                 : "") +
-              "</td>" +
+              "</div></td>" +
               "</tr>";
             tbody.append(fila);
 

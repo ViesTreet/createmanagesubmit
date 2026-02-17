@@ -16,6 +16,18 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
   <style>
+    .celda-scroll {
+      height: 60px;
+      overflow-y: auto;
+
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+
+      word-break: break-word;
+      padding: 4px;
+    }
+
     th {
       font-size: 13px;
     }
@@ -23,6 +35,9 @@
     td {
       overflow-x: auto;
       font-size: 11px;
+      word-break: break-word;
+      white-space: normal;
+      vertical-align: top;
     }
 
     #alumnoBuscador {
@@ -47,6 +62,7 @@
       max-width: 100%;
       height: auto;
     }
+
     /* Contenedor del formulario emergente */
     .popup {
       position: fixed;
@@ -198,42 +214,47 @@
           tbody.empty(); // Limpiar la tabla antes de agregar nuevos datos
 
           $.each(data, function (i, curso) {
-            if(!curso.asistenciaQr){
+            if (!curso.asistenciaQr) {
               return;
             }
-            if(adminRol != "administrador" && adminUbi != curso.ubicacionSubida){
+            if (adminRol != "administrador" && adminUbi != curso.ubicacionSubida) {
               return;
             }
             // Construir la fila
             var fila =
               "<tr>" +
-              "<td>" +
+              "<td><div class='celda-scroll'>" +
               (curso.nombreCurso ?? "") +
-              "</td>" +
-              "<td>" +
+              "</div></td>" +
+              "<td><div class='celda-scroll'>" +
               (curso.fechaInicio ? formatearFecha(curso.fechaInicio) : "") +
-              "</td>" +
-              "<td>" +
+              "</div></td>" +
+              "<td><div class='celda-scroll'>" +
               (curso.ciudad && curso.ubicacionSubida
                 ? curso.ciudad + ", " + curso.ubicacionSubida
                 : "") +
-              "</td>" +
-              "<td>" +
+              "</div></td>" +
+              "<td><div class='celda-scroll'>" +
               (curso.cliente ?? "") +
-              "</td>" +
-              "<td>" +
+              "</div></td>" +
+              "<td><div class='celda-scroll'>" +
               (curso.relator ?? "") +
-              "</td>" +
-              "<td>" +
+              "</div></td>" +
+              "<td><div class='celda-scroll'>" +
               (curso.alumnosTemporales ?? 0) +
-              "</td>" +
-              "<td style='width: 25vw;display: flex; justify-content: space-around;'>" +
-              "<button class='btn btn-sm btn-primary' onclick='generarQrFila(" + curso.id + "," + JSON.stringify(curso.nombreCurso ?? "") + ")'>Generar QR</button>" +
-              "<a class='btn btn-sm btn-secondary' href='/seccionAsistencia/revision/" + (curso.id ?? 0) + "'>Revisar</a>" +
-              "</td>" +
+              "</div></td>" +
+              "<td style='width: 25vw;display: flex; justify-content: space-around;'><div class='celda-scroll'>" +
+              "<button class='btn btn-sm btn-primary' onclick='generarQrFila(" +
+              curso.id +
+              "," +
+              JSON.stringify(curso.nombreCurso ?? "") +
+              ")'>Generar QR</button>" +
+              "<a class='btn btn-sm btn-secondary' href='/seccionAsistencia/revision/" +
+              (curso.id ?? 0) +
+              "'>Revisar</a>" +
+              "</div></td>" +
               "</tr>";
 
-            fila += "</td></tr>";
 
             tbody.append(fila);
           });
@@ -394,41 +415,46 @@
       tbody.empty();
 
       $.each(data, function (i, curso) {
-        if(!curso.asistenciaQr){
-              return;
+        if (!curso.asistenciaQr) {
+          return;
         }
-        if(adminRol != "administrador" && adminUbi != curso.ubicacionSubida){
-              return;
+        if (adminRol != "administrador" && adminUbi != curso.ubicacionSubida) {
+          return;
         }
         var fila =
           "<tr>" +
-          "<td>" +
+          "<td><div class='celda-scroll'>" +
           (curso.nombreCurso ?? "") +
-          "</td>" +
-          "<td>" +
+          "</div></td>" +
+          "<td><div class='celda-scroll'>" +
           (curso.fechaInicio ? formatearFecha(curso.fechaInicio) : "") +
-          "</td>" +
-          "<td>" +
+          "</div></td>" +
+          "<td><div class='celda-scroll'>" +
           (curso.ciudad && curso.ubicacionSubida
             ? curso.ciudad + ", " + curso.ubicacionSubida
             : "") +
-          "</td>" +
-          "<td>" +
+          "</div></td>" +
+          "<td><div class='celda-scroll'>" +
           (curso.cliente ?? "") +
-          "</td>" +
-          "<td>" +
+          "</div></td>" +
+          "<td><div class='celda-scroll'>" +
           (curso.relator ?? "") +
-          "</td>" +
-          "<td>" +
+          "</div></td>" +
+          "<td><div class='celda-scroll'>" +
           (curso.alumnosTemporales ?? 0) +
-          "</td>" +
-          "<td style='width: 25vw;display: flex; justify-content: space-around;'>" +
-          "<button class='btn btn-sm btn-primary' onclick='generarQrFila(" + curso.id + "," + JSON.stringify(curso.nombreCurso ?? "") + ")'>Generar QR</button>" +
-          "<a class='btn btn-sm btn-secondary' href='/seccionAsistencia/revision/" + (curso.id ?? 0) + "'>Revisar</a>" +
-          "</td>" +
+          "</div></td>" +
+          "<td style='width: 25vw;display: flex; justify-content: space-around;'><div class='celda-scroll'>" +
+          "<button class='btn btn-sm btn-primary' onclick='generarQrFila(" +
+          curso.id +
+          "," +
+          JSON.stringify(curso.nombreCurso ?? "") +
+          ")'>Generar QR</button>" +
+          "<a class='btn btn-sm btn-secondary' href='/seccionAsistencia/revision/" +
+          (curso.id ?? 0) +
+          "'>Revisar</a>" +
+          "</div></td>" +
           "</tr>";
 
-        fila += "</td></tr>";
 
         tbody.append(fila);
       });
@@ -449,7 +475,7 @@
       return `${dd}-${mm}-${aa} ${hh}:${min}`;
     }
   </script>
-  <script th:inline = "javaScript">
+  <script th:inline="javaScript">
     function generarQrFila(id, cursoNombre) {
       $.ajax({
         url: `/api/cursoTemporal/generarQr/${id}`,

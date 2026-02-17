@@ -16,6 +16,18 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
   <style>
+    .celda-scroll {
+      height: 60px;
+      overflow-y: auto;
+
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+
+      word-break: break-word;
+      padding: 4px;
+    }
+
     th {
       font-size: 13px;
     }
@@ -23,6 +35,9 @@
     td {
       overflow-x: auto;
       font-size: 11px;
+      word-break: break-word;
+      white-space: normal;
+      vertical-align: top;
     }
 
     #alumnoBuscador {
@@ -221,20 +236,22 @@
             // Construir la fila
             var fila =
               "<tr>" +
-              "<td>" +
+              "<td><div class='celda-scroll'>" +
               (cliente.nombreCliente != null ? cliente.nombreCliente : "") +
-              "</td>" +
-              "<td>" +
+              "</div></td>" +
+              "<td><div class='celda-scroll'>" +
               (cliente.identificador != null ? cliente.identificador : "") +
-              "</td>" +
+              "</div></td>" +
               "<td" +
               propiedad +
+              "<div class='celda-scroll'>" +
               textoLogo +
-              "</td>" +
-              "<td>" +
+              "</div></td>" +
+              "<td><div class='celda-scroll'>" +
               (cliente.cursos != null ? cliente.cursos : "") +
-              "</td>" +
-              "<td style='width: 25vw;display: flex; justify-content: space-around;'>";
+              "</div></td>" +
+              "<td style='width: 25vw;display: flex; justify-content: space-around;'><div class='celda-scroll'>";
+
             fila +=
               "<a class='btn btn-primary' href='/dataBaseCliente/Cliente/" +
               cliente.id +
@@ -248,11 +265,13 @@
             // SOLO si es admin real
             if (adminCorreo === "admin@admin.com") {
               fila +=
-                "<button class='btn btn-danger btn-sm' onclick='eliminarCliente(" +
+                "<button class='btn btn-danger btn' onclick='eliminarCliente(" +
                 cliente.id +
                 ")'>Borrar</button>";
             }
-            fila += "</td></tr>";
+
+            fila += "</div></td></tr>";
+
 
             tbody.append(fila);
           });
@@ -482,20 +501,22 @@
         // Construir la fila
         var fila =
           "<tr>" +
-          "<td>" +
+          "<td><div class='celda-scroll'>" +
           (cliente.nombreCliente != null ? cliente.nombreCliente : "") +
-          "</td>" +
-          "<td>" +
+          "</div></td>" +
+          "<td><div class='celda-scroll'>" +
           (cliente.identificador != null ? cliente.identificador : "") +
-          "</td>" +
+          "</div></td>" +
           "<td" +
           propiedad +
+          "<div class='celda-scroll'>" +
           textoLogo +
-          "</td>" +
-          "<td>" +
+          "</div></td>" +
+          "<td><div class='celda-scroll'>" +
           (cliente.cursos != null ? cliente.cursos : "") +
-          "</td>" +
-          "<td style='width: 25vw;display: flex; justify-content: space-around;'>";
+          "</div></td>" +
+          "<td style='width: 25vw;display: flex; justify-content: space-around;'><div class='celda-scroll'>";
+
         fila +=
           "<a class='btn btn-primary' href='/dataBaseCliente/Cliente/" +
           cliente.id +
@@ -509,12 +530,13 @@
         // SOLO si es admin real
         if (adminCorreo === "admin@admin.com") {
           fila +=
-            "<button class='btn btn-danger btn-sm' onclick='eliminarCliente(" +
+            "<button class='btn btn-danger btn' onclick='eliminarCliente(" +
             cliente.id +
             ")'>Borrar</button>";
         }
 
-        fila += "</td></tr>";
+        fila += "</div></td></tr>";
+
 
         tbody.append(fila);
       });

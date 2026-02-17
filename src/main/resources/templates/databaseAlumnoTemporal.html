@@ -1,392 +1,383 @@
 <!doctype html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-  <head>
-    <title>Lista de Alumnos Temporales</title>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Importar CSS de Bootstrap -->
-    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
-    <link rel="stylesheet" th:href="@{/css/styleCustom.css}" />
-    <link
-      rel="icon"
-      th:href="@{/images/Logobgremove.png}"
-      type="image/x-icon"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
-    />
-    <!-- Importar jQuery -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <!-- Importar JS de Bootstrap -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-    <style>
+<head>
+  <title>Lista de Alumnos Temporales</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Importar CSS de Bootstrap -->
+  <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+  <link rel="stylesheet" th:href="@{/css/styleCustom.css}" />
+  <link rel="icon" th:href="@{/images/Logobgremove.png}" type="image/x-icon" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+  <!-- Importar jQuery -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <!-- Importar JS de Bootstrap -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  <style>
+    .celda-scroll {
+      height: 40px;
+      overflow-y: auto;
+
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+
+      word-break: break-word;
+      padding: 4px;
+    }
+
+    th {
+      font-size: 13px;
+    }
+
+    td {
+      overflow-x: auto;
+      font-size: 11px;
+      word-break: break-word;
+      white-space: normal;
+      vertical-align: top;
+    }
+
+    #alumnoBuscador {
+      padding-right: 0px;
+      padding-left: 0px;
+    }
+
+    .overlay {
+      display: none;
+      /* Oculto por defecto */
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      /* Fondo oscuro */
+      z-index: 999;
+      /* Por encima de otros elementos */
+    }
+
+    /* Contenedor del formulario emergente */
+    .popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+      /* Por encima del overlay */
+      width: 90%;
+      max-width: 400px;
+    }
+
+    .popup2 {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 600px;
+    }
+
+    /* Botón cerrar */
+    .close-btn {
+      background-color: red;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .close-btn:hover {
+      background-color: darkred;
+    }
+
+    /* Botón principal */
+    .open-btn {
+      margin: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    #alumnosNoEnviados {
+      height: 50vh;
+      /* Define una altura fija */
+      overflow-y: auto;
+      /* Permite el desplazamiento vertical cuando el contenido es grande */
+    }
+
+    .filtro-card {
+      background-color: #e9ecef;
+      border-radius: 5px;
+      transition: transform 0.2s;
+    }
+
+    .filtro-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-close {
+      font-size: 0.75rem;
+      padding: 0.25rem;
+    }
+
+    @media (min-width: 1024px) {
+      #contenderBase {
+        max-width: 95vw;
+      }
+    }
+
+    @media (max-width: 768px) {
+      #contenderBase {
+        max-width: 100vw !important;
+        padding-left: 0px !important;
+        padding-right: 0px !important;
+      }
+
+      #contenedorTabla {
+        max-width: 100vw !important;
+        overflow-y: auto;
+        overflow-x: auto;
+      }
+
+      #alumnoBuscador {
+        max-width: 100vw !important;
+      }
+
       th {
-        font-size: 13px;
+        font-size: 15px;
       }
 
       td {
         overflow-x: auto;
-        font-size: 11px;
+        font-size: 12px;
       }
 
-      #alumnoBuscador {
-        padding-right: 0px;
-        padding-left: 0px;
+      #tablaAlumnos {
+        width: 250vw;
       }
+    }
+  </style>
+</head>
 
-      .overlay {
-        display: none;
-        /* Oculto por defecto */
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.7);
-        /* Fondo oscuro */
-        z-index: 999;
-        /* Por encima de otros elementos */
-      }
+<body>
+  <header class="d-flex align-items-center justify-content-between p-3 bg-light" style="height: 10vh; z-index: 1">
+    <a th:href="@{/home}" class="logo">
+      <img th:src="@{/images/Logobgremove.png}" alt="[LOGO]" />
+    </a>
+    <nav class="d-flex justify-content-center align-items-center flex-nowrap">
+      <a th:href="@{/home}" class="btn btn-primary mx-2">Regresar</a>
+      <a th:href="@{/home}" class="btn btn-primary mx-2">Inicio</a>
+      <a th:href="@{/documentacion}" target="_blank" class="btn btn-primary mx-2">Documentación</a>
+      <div class="d-flex flex-column justify-content-center align-items-center">
+        <i class="fa-solid fa-user"></i>
+        <p class="p-0 m-0" style="font-size: normal" th:text="${admin.nombre}"></p>
+      </div>
+    </nav>
+  </header>
+  <div id="contenderBase" class="container pt-2 pb-2" style="height: 90vh">
+    <h2 class="text-center" th:text="'Base de datos del curso '+${cursoTemporal.nombreCurso}"></h2>
+    <div id="contenedorTabla" style="overflow-y: auto; max-height: 70vh; max-width: 95vw">
+      <table class="table table-hover table-bordered mb-5" style="table-layout: fixed; height: 100%" id="tablaAlumnos">
+        <thead class="thead-dark">
+          <tr>
+            <th>Nombre</th>
+            <th>Correo</th>
+            <th>Rut</th>
+            <th>Asistencia</th>
+            <th>Nota</th>
+            <th>Fecha</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Las filas se agregarán dinámicamente aquí -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <script th:inline="javascript">
+    function actualizarTabla(data) {
+      const tbody = $("#tablaAlumnos tbody");
+      tbody.empty();
 
-      /* Contenedor del formulario emergente */
-      .popup {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background-color: white;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        z-index: 1000;
-        /* Por encima del overlay */
-        width: 90%;
-        max-width: 400px;
-      }
+      data.forEach((alumno) => {
+        const fecha = formatearFecha(alumno.createdAt);
 
-      .popup2 {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background-color: white;
-        padding: 20px;
-        border-radius: 8px;
-        width: 90%;
-        max-width: 600px;
-      }
+        const fila = `
+<tr data-id="${alumno.id}">
+    <td><div class="celda-scroll">${alumno.nombreAsistente}</div></td>
+    <td><div class="celda-scroll">${alumno.correo ?? "sin correo"}</div></td>
+    <td><div class="celda-scroll">${alumno.rut ?? ""}</div></td>
 
-      /* Botón cerrar */
-      .close-btn {
-        background-color: red;
-        color: white;
-        border: none;
-        padding: 5px 10px;
-        border-radius: 5px;
-        cursor: pointer;
-      }
-
-      .close-btn:hover {
-        background-color: darkred;
-      }
-
-      /* Botón principal */
-      .open-btn {
-        margin: 20px;
-        padding: 10px 20px;
-        font-size: 16px;
-        cursor: pointer;
-      }
-
-      #alumnosNoEnviados {
-        height: 50vh;
-        /* Define una altura fija */
-        overflow-y: auto;
-        /* Permite el desplazamiento vertical cuando el contenido es grande */
-      }
-
-      .filtro-card {
-        background-color: #e9ecef;
-        border-radius: 5px;
-        transition: transform 0.2s;
-      }
-
-      .filtro-card:hover {
-        transform: translateY(-2px);
-      }
-
-      .btn-close {
-        font-size: 0.75rem;
-        padding: 0.25rem;
-      }
-
-      @media (min-width: 1024px) {
-        #contenderBase {
-          max-width: 95vw;
-        }
-      }
-
-      @media (max-width: 768px) {
-        #contenderBase {
-          max-width: 100vw !important;
-          padding-left: 0px !important;
-          padding-right: 0px !important;
-        }
-
-        #contenedorTabla {
-          max-width: 100vw !important;
-          overflow-y: auto;
-          overflow-x: auto;
-        }
-
-        #alumnoBuscador {
-          max-width: 100vw !important;
-        }
-
-        th {
-          font-size: 15px;
-        }
-
-        td {
-          overflow-x: auto;
-          font-size: 12px;
-        }
-
-        #tablaAlumnos {
-          width: 250vw;
-        }
-      }
-    </style>
-  </head>
-
-  <body>
-    <header
-      class="d-flex align-items-center justify-content-between p-3 bg-light"
-      style="height: 10vh; z-index: 1"
-    >
-      <a th:href="@{/home}" class="logo">
-        <img th:src="@{/images/Logobgremove.png}" alt="[LOGO]" />
-      </a>
-      <nav class="d-flex justify-content-center align-items-center flex-nowrap">
-        <a th:href="@{/home}" class="btn btn-primary mx-2">Regresar</a>
-        <a th:href="@{/home}" class="btn btn-primary mx-2">Inicio</a>
-        <a
-          th:href="@{/documentacion}"
-          target="_blank"
-          class="btn btn-primary mx-2"
-          >Documentación</a
-        >
-        <div
-          class="d-flex flex-column justify-content-center align-items-center"
-        >
-          <i class="fa-solid fa-user"></i>
-          <p
-            class="p-0 m-0"
-            style="font-size: normal"
-            th:text="${admin.nombre}"
-          ></p>
+    <td>
+        <div class="celda-scroll">
+            <input type="number" name="asistencia" min="0" max="100" step="1"
+            placeholder="0 - 100"
+            class="asistencia form-control form-control-sm" />
         </div>
-      </nav>
-    </header>
-    <div id="contenderBase" class="container pt-2 pb-2" style="height: 90vh">
-      <h2
-        class="text-center"
-        th:text="'Base de datos del curso '+${cursoTemporal.nombreCurso}"
-      ></h2>
-      <div
-        id="contenedorTabla"
-        style="overflow-y: auto; max-height: 70vh; max-width: 95vw"
-      >
-        <table
-          class="table table-hover table-bordered mb-5"
-          style="table-layout: fixed; height: 100%"
-          id="tablaAlumnos"
-        >
-          <thead class="thead-dark">
-            <tr>
-              <th>Nombre</th>
-              <th>Correo</th>
-              <th>Rut</th>
-              <th>Asistencia</th>
-              <th>Nota</th>
-              <th>Fecha</th>
-              <th>Acción</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Las filas se agregarán dinámicamente aquí -->
-          </tbody>
-        </table>
+    </td>
+
+    <td>
+        <div class="celda-scroll">
+            <input type="number" name="notaAprobacion" min="0" max="7" step="0.1"
+            placeholder="0.0 - 7.0"
+            class="nota form-control form-control-sm" />
+        </div>
+    </td>
+
+    <td><div class="celda-scroll">${fecha}</div></td>
+
+    <td>
+        <div class="celda-scroll">
+            <button class="btn btn-success btn-sm"
+                onclick="enviarAlumno(${alumno.id})">
+                Enviar
+            </button>
+
+            <button class="btn btn-danger btn-sm"
+                onclick="confirmarBorrado(${alumno.id})">
+                Borrar
+            </button>
+        </div>
+    </td>
+</tr>
+`;
+
+        tbody.append(fila);
+      });
+    }
+  </script>
+  <script th:inline="javascript">
+    function formatearFecha(fechaBD) {
+      if (!fechaBD) return "";
+
+      // Si viene como Date o timestamp
+      let d = new Date(fechaBD);
+
+      // Si falla, intentar formato "yyyy-MM-dd HH:mm:ss.SSS"
+      if (isNaN(d)) {
+        const normalizada = fechaBD.replace(" ", "T").substring(0, 19);
+        d = new Date(normalizada);
+      }
+
+      if (isNaN(d)) return "Fecha inválida";
+
+      const hh = String(d.getHours()).padStart(2, "0");
+      const mm = String(d.getMinutes()).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      const MM = String(d.getMonth() + 1).padStart(2, "0");
+      const yyyy = d.getFullYear();
+
+      return `${hh}:${mm} ${dd}-${MM}-${yyyy}`;
+    }
+  </script>
+  <script th:inline="javascript">
+    const id = /*[[${idCurso}]]*/ "";
+
+    function cargarDatos() {
+      $.ajax({
+        url: "/api/datosAlumnoTemporal/" + id,
+        method: "GET",
+        success: function (data) {
+          actualizarTabla(data);
+        },
+        error: function (error) {
+          console.log("Error al obtener los datos", error);
+        },
+      });
+    }
+  </script>
+  <script th:inline="javascript">
+    function validarNota(valor) {
+      return /^\d+(\.\d+)?$/.test(valor);
+    }
+  </script>
+  <script th:inline="javascript">
+    function enviarAlumno(alumnoId) {
+      const fila = $(`tr[data-id='${alumnoId}']`);
+
+      const asistencia = fila.find(".asistencia").val();
+      const nota = fila.find(".nota").val();
+
+      if (!asistencia || asistencia < 1 || asistencia > 100) {
+        alert("Asistencia inválida");
+        return;
+      }
+
+      if (!validarNota(nota)) {
+        alert("Nota inválida (ej: 3.0)");
+        return;
+      }
+
+      $.ajax({
+        url: "/api/alumnoTemporal/enviar",
+        method: "POST",
+        data: {
+          alumnoId: alumnoId,
+          cursoId: id,
+          asistencia: asistencia.toString(),
+          nota: nota.toString(),
+        },
+        success: function (resp) {
+          console.log("Respuesta backend:", resp);
+          alert("Datos enviados");
+          cargarDatos();
+        },
+        error: function () {
+          alert("Error al enviar");
+        },
+      });
+    }
+  </script>
+  <script th:inline="javascript">
+    function confirmarBorrado(idAlumno) {
+      if (!confirm("¿Seguro que deseas borrar este alumno?")) return;
+
+      $.ajax({
+        url: "/api/alumnoTemporal/" + idAlumno,
+        method: "DELETE",
+        success: () => cargarDatos(),
+        error: () => alert("Error al borrar"),
+      });
+    }
+  </script>
+  <script th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+      cargarDatos();
+    });
+  </script>
+
+  <footer class="text-center p-3 d-flex justify-content-center align-items-center"
+    style="height: 15vh; background-color: #f8f9fa">
+    <div>
+      <div>
+        <i class="fa-solid fa-phone"></i>
+        <a href="tel:+56 41 3830944">+56 41 3830944</a>
+      </div>
+      <div>
+        <i class="fa-solid fa-location-dot"></i>
+        <a
+          href="https://www.google.com/maps/place/Consultores+Empresariales+E-Volution+Limitada/@-36.8252678,-73.050754,19z/data=!3m1!4b1!4m6!3m5!1s0x9669b5d0308198b5:0xbd67409566499fa!8m2!3d-36.8252678!4d-73.0501103!16s%2Fg%2F11fzwngw1q?entry=ttu&g_ep=EgoyMDI1MDEwNi4xIKXMDSoASAFQAw%3D%3D">
+          Freire 728, Oficina 206
+        </a>
+      </div>
+      <div>
+        <i class="fa-solid fa-envelope"></i>
+        <a href="mailto:contacto@e-volution.cl">contacto@e-volution.cl</a>
       </div>
     </div>
-    <script th:inline="javascript">
-      function actualizarTabla(data) {
-        const tbody = $("#tablaAlumnos tbody");
-        tbody.empty();
+  </footer>
+</body>
 
-        data.forEach((alumno) => {
-          const fecha = formatearFecha(alumno.createdAt);
-
-          const fila = `
-            <tr data-id="${alumno.id}">
-                <td>${alumno.nombreAsistente}</td>
-                <td>${alumno.correo ?? "sin correo"}</td>
-                <td>${alumno.rut ?? ""}</td>
-
-                <td>
-                <input type="number" name="asistencia" min="0" max="100" step="1" placeholder="0 - 100"
-                class="asistencia form-control form-control-sm" />
-                </td>
-
-                <td>
-                <input type="number" name="notaAprobacion" min="0" max="7" step="0.1"
-                placeholder="0.0 - 7.0" class="nota form-control form-control-sm" />
-                </td>
-
-                <td>${fecha}</td>
-
-                <td>
-                <button class="btn btn-success btn-sm"
-                    onclick="enviarAlumno(${alumno.id})">
-                    Enviar
-                </button>
-
-                <button class="btn btn-danger btn-sm"
-                    onclick="confirmarBorrado(${alumno.id})">
-                    Borrar
-                </button>
-                </td>
-            </tr>
-            `;
-
-          tbody.append(fila);
-        });
-      }
-    </script>
-    <script th:inline="javascript">
-      function formatearFecha(fechaBD) {
-        if (!fechaBD) return "";
-
-        // Si viene como Date o timestamp
-        let d = new Date(fechaBD);
-
-        // Si falla, intentar formato "yyyy-MM-dd HH:mm:ss.SSS"
-        if (isNaN(d)) {
-          const normalizada = fechaBD.replace(" ", "T").substring(0, 19);
-          d = new Date(normalizada);
-        }
-
-        if (isNaN(d)) return "Fecha inválida";
-
-        const hh = String(d.getHours()).padStart(2, "0");
-        const mm = String(d.getMinutes()).padStart(2, "0");
-        const dd = String(d.getDate()).padStart(2, "0");
-        const MM = String(d.getMonth() + 1).padStart(2, "0");
-        const yyyy = d.getFullYear();
-
-        return `${hh}:${mm} ${dd}-${MM}-${yyyy}`;
-      }
-    </script>
-    <script th:inline="javascript">
-      const id = /*[[${idCurso}]]*/ "";
-
-      function cargarDatos() {
-        $.ajax({
-          url: "/api/datosAlumnoTemporal/" + id,
-          method: "GET",
-          success: function (data) {
-            actualizarTabla(data);
-          },
-          error: function (error) {
-            console.log("Error al obtener los datos", error);
-          },
-        });
-      }
-    </script>
-    <script th:inline="javascript">
-      function validarNota(valor) {
-        return /^\d+(\.\d+)?$/.test(valor);
-      }
-    </script>
-    <script th:inline="javascript">
-      function enviarAlumno(alumnoId) {
-        const fila = $(`tr[data-id='${alumnoId}']`);
-
-        const asistencia = fila.find(".asistencia").val();
-        const nota = fila.find(".nota").val();
-
-        if (!asistencia || asistencia < 1 || asistencia > 100) {
-          alert("Asistencia inválida");
-          return;
-        }
-
-        if (!validarNota(nota)) {
-          alert("Nota inválida (ej: 3.0)");
-          return;
-        }
-
-        $.ajax({
-          url: "/api/alumnoTemporal/enviar",
-          method: "POST",
-          data: {
-            alumnoId: alumnoId,
-            cursoId: id,
-            asistencia: asistencia.toString(),
-            nota: nota.toString(),
-          },
-          success: function (resp) {
-            console.log("Respuesta backend:", resp);
-            alert("Datos enviados");
-            cargarDatos();
-          },
-          error: function () {
-            alert("Error al enviar");
-          },
-        });
-      }
-    </script>
-    <script th:inline="javascript">
-      function confirmarBorrado(idAlumno) {
-        if (!confirm("¿Seguro que deseas borrar este alumno?")) return;
-
-        $.ajax({
-          url: "/api/alumnoTemporal/" + idAlumno,
-          method: "DELETE",
-          success: () => cargarDatos(),
-          error: () => alert("Error al borrar"),
-        });
-      }
-    </script>
-    <script th:inline="javascript">
-      document.addEventListener("DOMContentLoaded", function () {
-        cargarDatos();
-      });
-    </script>
-
-    <footer
-      class="text-center p-3 d-flex justify-content-center align-items-center"
-      style="height: 15vh; background-color: #f8f9fa"
-    >
-      <div>
-        <div>
-          <i class="fa-solid fa-phone"></i>
-          <a href="tel:+56 41 3830944">+56 41 3830944</a>
-        </div>
-        <div>
-          <i class="fa-solid fa-location-dot"></i>
-          <a
-            href="https://www.google.com/maps/place/Consultores+Empresariales+E-Volution+Limitada/@-36.8252678,-73.050754,19z/data=!3m1!4b1!4m6!3m5!1s0x9669b5d0308198b5:0xbd67409566499fa!8m2!3d-36.8252678!4d-73.0501103!16s%2Fg%2F11fzwngw1q?entry=ttu&g_ep=EgoyMDI1MDEwNi4xIKXMDSoASAFQAw%3D%3D"
-          >
-            Freire 728, Oficina 206
-          </a>
-        </div>
-        <div>
-          <i class="fa-solid fa-envelope"></i>
-          <a href="mailto:contacto@e-volution.cl">contacto@e-volution.cl</a>
-        </div>
-      </div>
-    </footer>
-  </body>
 </html>

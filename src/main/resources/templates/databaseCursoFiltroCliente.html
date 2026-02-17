@@ -16,6 +16,18 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
   <style>
+    .celda-scroll {
+      height: 60px;
+      overflow-y: auto;
+
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+
+      word-break: break-word;
+      padding: 4px;
+    }
+
     th {
       font-size: 13px;
     }
@@ -23,6 +35,9 @@
     td {
       overflow-x: auto;
       font-size: 11px;
+      word-break: break-word;
+      white-space: normal;
+      vertical-align: top;
     }
 
     #alumnoBuscador {
@@ -222,46 +237,48 @@
             // Construir la fila
             var fila =
               "<tr>" +
-              "<td>" +
+              "<td><div class='celda-scroll'>" +
               (curso.nombreCurso ?? "") +
-              "</td>" +
+              "</div></td>" +
               "<td " +
               estiloFila +
-              ">" +
+              "><div class='celda-scroll'>" +
               (curso.fechaInicio
                 ? formatearFecha(curso.fechaInicio) + aviso
                 : "") +
-              "</td>" +
-              "<td>" +
+              "</div></td>" +
+              "<td><div class='celda-scroll'>" +
               (curso.ciudad && curso.ubicacionSubida
                 ? curso.ciudad + ", " + curso.ubicacionSubida
                 : "") +
-              "</td>" +
-              "<td>" +
+              "</div></td>" +
+              "<td><div class='celda-scroll'>" +
               (curso.cliente ?? "") +
-              "</td>" +
-              "<td>" +
+              "</div></td>" +
+              "<td><div class='celda-scroll'>" +
               (curso.relator ?? "") +
-              "</td>" +
-              "<td>" +
+              "</div></td>" +
+              "<td><div class='celda-scroll'>" +
               (curso.alumnos ?? 0) +
-              "</td>" +
-              "<td style='width: 25vw;display: flex; justify-content: space-around;'>" +
-              "<a class='btn btn-primary' href='/dataBaseCurso/Curso/" +
+              "</div></td>" +
+              "<td style='width: 25vw;display: flex; justify-content: space-around;'><div class='celda-scroll'>" +
+              "<a class='btn btn-sm btn-primary' href='/dataBaseCurso/Curso/" +
               curso.id +
               "/editar'>Editar</a>" +
-              "<a class='btn btn-secondary' href='/dataBaseCurso/Curso/" +
+              "<a class='btn btn-sm btn-secondary' href='/dataBaseCurso/Curso/" +
               curso.id +
-              "/alumnos'>Alumnos</a>"+
-              "<button class='btn btn-success' onclick='descargarFlyer("+curso.id+")'>Flyer</button>";
+              "/alumnos'>Alumnos</a>" +
+              "<button class='btn btn-sm btn-success' onclick='descargarFlyer(" + curso.id + ")'>Flyer</button>";
+
             if (adminCorreo === "admin@admin.com") {
               fila +=
                 "<button class='btn btn-danger btn-sm' onclick='eliminarCurso(" +
                 curso.id +
-                ")'>Borrar</button>" +
-                "</td>" +
-                "</tr>";
+                ")'>Borrar</button>";
             }
+
+            fila += "</div></td></tr>";
+
 
             tbody.append(fila);
           });
@@ -327,6 +344,7 @@
     </div>
   </footer>
   <script th:inline="javascript">
+    var adminCorreo = /*[[${admin.correo}]]*/ "default";
     const checkboxKey = "checkboxStates";
     let filtrosActivos = [];
 
@@ -434,46 +452,48 @@
         // Construir la fila
         var fila =
           "<tr>" +
-          "<td>" +
+          "<td><div class='celda-scroll'>" +
           (curso.nombreCurso ?? "") +
-          "</td>" +
+          "</div></td>" +
           "<td " +
           estiloFila +
-          ">" +
+          "><div class='celda-scroll'>" +
           (curso.fechaInicio
             ? formatearFecha(curso.fechaInicio) + aviso
             : "") +
-          "</td>" +
-          "<td>" +
+          "</div></td>" +
+          "<td><div class='celda-scroll'>" +
           (curso.ciudad && curso.ubicacionSubida
             ? curso.ciudad + ", " + curso.ubicacionSubida
             : "") +
-          "</td>" +
-          "<td>" +
+          "</div></td>" +
+          "<td><div class='celda-scroll'>" +
           (curso.cliente ?? "") +
-          "</td>" +
-          "<td>" +
+          "</div></td>" +
+          "<td><div class='celda-scroll'>" +
           (curso.relator ?? "") +
-          "</td>" +
-          "<td>" +
+          "</div></td>" +
+          "<td><div class='celda-scroll'>" +
           (curso.alumnos ?? 0) +
-          "</td>" +
-          "<td style='width: 25vw;display: flex; justify-content: space-around;'>" +
-          "<a class='btn btn-primary' href='/dataBaseCurso/Curso/" +
+          "</div></td>" +
+          "<td style='width: 25vw;display: flex; justify-content: space-around;'><div class='celda-scroll'>" +
+          "<a class='btn btn-sm btn-primary' href='/dataBaseCurso/Curso/" +
           curso.id +
           "/editar'>Editar</a>" +
-          "<a class='btn btn-secondary' href='/dataBaseCurso/Curso/" +
+          "<a class='btn btn-sm btn-secondary' href='/dataBaseCurso/Curso/" +
           curso.id +
-          "/alumnos'>Alumnos</a>"+
-          "<button class='btn btn-success' onclick='descargarFlyer("+curso.id+")'>Flyer</button>";
+          "/alumnos'>Alumnos</a>" +
+          "<button class='btn btn-sm btn-success' onclick='descargarFlyer(" + curso.id + ")'>Flyer</button>";
+
         if (adminCorreo === "admin@admin.com") {
           fila +=
             "<button class='btn btn-danger btn-sm' onclick='eliminarCurso(" +
             curso.id +
-            ")'>Borrar</button>" +
-            "</td>" +
-            "</tr>";
+            ")'>Borrar</button>";
         }
+
+        fila += "</div></td></tr>";
+
 
         tbody.append(fila);
       });
@@ -519,38 +539,38 @@
 
   </script>
   <script th:inline="javascript">
-      async function descargarFlyer(id) {
-        try {
-          const response = await fetch("/api/dataBaseCurso/descargarFlyer", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ id: id }),
-          });
+    async function descargarFlyer(id) {
+      try {
+        const response = await fetch("/api/dataBaseCurso/descargarFlyer", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ id: id }),
+        });
 
-          if (!response.ok) {
-            throw new Error("Error al descargar el flyer");
-          }
-
-          const blob = await response.blob();
-
-          const url = window.URL.createObjectURL(blob);
-
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = "Flyer.pptx";
-          document.body.appendChild(a);
-          a.click();
-
-          a.remove();
-          window.URL.revokeObjectURL(url);
-        } catch (error) {
-          console.error("Error:", error);
-          alert("Error al generar el flyer");
+        if (!response.ok) {
+          throw new Error("Error al descargar el flyer");
         }
+
+        const blob = await response.blob();
+
+        const url = window.URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "Flyer.pptx";
+        document.body.appendChild(a);
+        a.click();
+
+        a.remove();
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error("Error:", error);
+        alert("Error al generar el flyer");
       }
-    </script>
+    }
+  </script>
 </body>
 
 </html>

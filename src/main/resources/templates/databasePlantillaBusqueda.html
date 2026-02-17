@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <title>Plantillas de diplomas búsqueda</title>
     <meta charset="UTF-8">
@@ -10,32 +11,54 @@
     <link rel="icon" th:href="@{/images/Logobgremove.png}" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <!-- Importar jQuery -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>  
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <!-- Importar JS de Bootstrap -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <style>
+        .celda-scroll {
+            height: 60px;
+            overflow-y: auto;
+
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+
+            word-break: break-word;
+            padding: 4px;
+        }
+
         th {
             font-size: 13px;
         }
+
         td {
             overflow-x: auto;
             font-size: 11px;
+            word-break: break-word;
+            white-space: normal;
+            vertical-align: top;
         }
+
         #alumnoBuscador {
             padding-right: 0px;
             padding-left: 0px;
         }
+
         .overlay {
-            display: none; /* Oculto por defecto */
+            display: none;
+            /* Oculto por defecto */
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.7); /* Fondo oscuro */
-            z-index: 999; /* Por encima de otros elementos */
+            background-color: rgba(0, 0, 0, 0.7);
+            /* Fondo oscuro */
+            z-index: 999;
+            /* Por encima de otros elementos */
         }
+
         /* Contenedor del formulario emergente */
         .popup {
             position: fixed;
@@ -46,8 +69,10 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            z-index: 1000; /* Por encima del overlay */
+            z-index: 1000;
+            /* Por encima del overlay */
         }
+
         /* Botón cerrar */
         .close-btn {
             background-color: red;
@@ -57,9 +82,11 @@
             border-radius: 5px;
             cursor: pointer;
         }
+
         .close-btn:hover {
             background-color: darkred;
         }
+
         /* Botón principal */
         .open-btn {
             margin: 20px;
@@ -67,42 +94,53 @@
             font-size: 16px;
             cursor: pointer;
         }
+
         #alumnosNoEnviados {
-            height: 50vh; /* Define una altura fija */
-            overflow-y: auto; /* Permite el desplazamiento vertical cuando el contenido es grande */
+            height: 50vh;
+            /* Define una altura fija */
+            overflow-y: auto;
+            /* Permite el desplazamiento vertical cuando el contenido es grande */
         }
+
         @media (min-width: 1024px) {
             #contenderBase {
                 max-width: 95vw;
             }
         }
+
         @media (max-width: 768px) {
             #contenderBase {
                 max-width: 100vw !important;
                 padding-left: 0px !important;
                 padding-right: 0px !important;
             }
+
             #contenedorTabla {
                 max-width: 100vw !important;
                 overflow-y: auto;
                 overflow-x: auto;
             }
+
             #alumnoBuscador {
                 max-width: 100vw !important;
             }
+
             th {
                 font-size: 15px;
             }
+
             td {
                 overflow-x: auto;
                 font-size: 12px;
             }
+
             #tablaAlumnos {
                 width: 250vw;
             }
         }
     </style>
 </head>
+
 <body>
     <header class="d-flex align-items-center justify-content-between p-3 bg-light" style="height: 10vh; z-index: 1;">
         <a th:href="@{/home}" class="logo">
@@ -123,7 +161,8 @@
         <div class="d-flex align-items-center justify-content-between pb-1" style="max-width: 95vw;">
             <div>
                 <form id="plantillaBuscador" class="col-12">
-                    <input id="busquedaPlantilla" type="search" onkeydown="submitOnEnter(event, 'buscarLink')" class="col-7" placeholder="Buscar por nombre" name="busquedaPlantilla"/>
+                    <input id="busquedaPlantilla" type="search" onkeydown="submitOnEnter(event, 'buscarLink')"
+                        class="col-7" placeholder="Buscar por nombre" name="busquedaPlantilla" />
                     <a id="buscarLink" href="#" class="btn btn-outline-primary">Buscar</a>
                 </form>
             </div>
@@ -132,7 +171,8 @@
             </div>
         </div>
         <div id="contenedorTabla" style="overflow-y: auto; max-height: 70vh; max-width: 95vw;">
-            <table class="table table-hover table-bordered mb-5" style="table-layout: auto; height: 100%;" id="tablaPlantilla">
+            <table class="table table-hover table-bordered mb-5" style="table-layout: auto; height: 100%;"
+                id="tablaPlantilla">
                 <thead class="thead-dark">
                     <tr>
                         <th>Nombre Plantilla</th>
@@ -166,21 +206,22 @@
 
                         $.each(data, function (i, plantilla) {
                             var fila = "<tr>" +
-                                "<td>" + (plantilla.nombreCertificado != null ? plantilla.nombreCertificado : "") + "</td>" +
-                                "<td>" + (plantilla.descripcion != null ? plantilla.descripcion : "") + "</td>" +
-                                "<td>" + (plantilla.asistenciaMin != null ? plantilla.asistenciaMin : "") + "</td>" +
-                                "<td>" + (plantilla.notaMin != null ? plantilla.notaMin : "") + "</td>" +
-                                "<td>" + (plantilla.tipo != null ? plantilla.tipo : "") + "</td>" +
-                                "<td class='d-flex justify-content-center flex-nowrap' style='width: 25vw;'>" +
+                                "<td><div class='celda-scroll'>" + (plantilla.nombreCertificado != null ? plantilla.nombreCertificado : "") + "</div></td>" +
+                                "<td><div class='celda-scroll'>" + (plantilla.descripcion != null ? plantilla.descripcion : "") + "</div></td>" +
+                                "<td><div class='celda-scroll'>" + (plantilla.asistenciaMin != null ? plantilla.asistenciaMin : "") + "</div></td>" +
+                                "<td><div class='celda-scroll'>" + (plantilla.notaMin != null ? plantilla.notaMin : "") + "</div></td>" +
+                                "<td><div class='celda-scroll'>" + (plantilla.tipo != null ? plantilla.tipo : "") + "</div></td>" +
+                                "<td class='d-flex justify-content-center flex-nowrap' style='width: 25vw;'><div class='celda-scroll'>" +
                                 "<a class='btn btn-primary' href='/dataBasePlantilla/plantilla/" + plantilla.id + "/editar'>Editar</a>" +
                                 "<a href='/api/dataBasePlantilla/plantilla/" + plantilla.id + "/descargar' class='btn btn-success'>Descargar</a>" +
                                 "<a href='/dataBasePlantilla/plantilla/" + plantilla.id + "/probar' class='btn btn-secondary'>Probar</a>";
-                            
+
                             if (adminCorreo === "admin@admin.com") {
                                 fila += "<a href='/dataBasePlantilla/plantilla/" + plantilla.id + "/borrar' class='btn btn-danger'>Borrar</a>";
                             }
-                            
-                            fila += "</td></tr>";
+
+                            fila += "</div></td></tr>";
+
                             tbody.append(fila);
                         });
                     },
@@ -189,15 +230,15 @@
                     }
                 });
             }
-    
+
             // Cargar datos inicialmente
             cargarDatos();
-    
+
             // Actualizar la tabla cada 30 segundos
             setInterval(cargarDatos, 30000);
         });
     </script>
-    
+
     <script>
         // Detecta la tecla Enter y simula clic en el botón de búsqueda
         function submitOnEnter(event, buttonId) {
@@ -207,7 +248,7 @@
             }
         }
     </script>
-    
+
     <div class="overlay" id="overlay">
         <div class="popup col-7">
             <div class="d-flex justify-content-end">
@@ -218,17 +259,20 @@
                 <div class="d-flex justify-content-around pb-2">
                     <div style="max-width: 40%;">
                         <label for="nombreCertificado">Nombre Plantilla</label>
-                        <input id="nombreCertificado" name="nombreCertificado" type="text" class="form-control" placeholder="Nombre de la plantilla">
+                        <input id="nombreCertificado" name="nombreCertificado" type="text" class="form-control"
+                            placeholder="Nombre de la plantilla">
                         <label for="tipo">Tipo plantilla</label>
                         <select name="tipo" id="tipo" class="form-select">
                             <option value="diploma">Diploma</option>
                             <option value="flyer">Flyer</option>
                         </select>
                         <label for="descripcion">Descripción Plantilla</label>
-                        <input id="descripcion" type="text" name="descripcion" class="form-control" placeholder="Descripción de la plantilla">
+                        <input id="descripcion" type="text" name="descripcion" class="form-control"
+                            placeholder="Descripción de la plantilla">
                     </div>
                     <div style="max-width: 40%;">
-                        <input type="checkbox" id="clonarPlantilla" name="clonarPlantilla" value="true" onclick="toggleInputs('plantilla')">
+                        <input type="checkbox" id="clonarPlantilla" name="clonarPlantilla" value="true"
+                            onclick="toggleInputs('plantilla')">
                         <label for="clonarPlantilla">Clonar Plantilla</label>
                         <!-- Input file para subir la nueva plantilla -->
                         <div id="inputPlantilla">
@@ -239,13 +283,14 @@
                             <label for="pathArchivoS">Elegir Plantilla</label>
                             <select name="pathArchivoS" id="pathArchivoS" class="form-select">
                                 <th:block th:each="plantilla : ${plantillas}">
-                                    <option th:value="${plantilla.pathArchivo}" th:text="${plantilla.nombreCertificado}"></option>
+                                    <option th:value="${plantilla.pathArchivo}"
+                                        th:text="${plantilla.nombreCertificado}"></option>
                                 </th:block>
                             </select>
                         </div>
                     </div>
                 </div>
-    
+
                 <div class="d-flex justify-content-center">
                     <input type="hidden" name="orden" value="true">
                     <input class="btn btn-success" type="submit" value="Enviar">
@@ -253,7 +298,7 @@
             </form>
         </div>
     </div>
-    
+
     <script>
         // Función para mostrar el formulario
         function openForm() {
@@ -264,14 +309,14 @@
             document.getElementById('overlay').style.display = 'none';
         }
     </script>
-    
+
     <script>
         function toggleInputs(type) {
             if (type === 'plantilla') {
                 const checkbox = document.getElementById('clonarPlantilla');
                 const inputFile = document.getElementById('inputPlantilla');
                 const selectOptions = document.getElementById('selectPlantilla');
-            
+
                 if (checkbox.checked) {
                     inputFile.style.display = 'none';
                     selectOptions.style.display = 'block';
@@ -282,22 +327,23 @@
             }
         }
     </script>
-    
+
     <script>
         function showAlert(message) {
-            if (message && message.trim() !== "") { 
+            if (message && message.trim() !== "") {
                 alert(message);
             }
         }
     </script>
-    
+
     <th:block th:if="${error != null}">
         <script th:inline="javascript">
             showAlert("[[${error}]]");
         </script>
     </th:block>
-    
-    <footer class="text-center p-3 d-flex justify-content-center align-items-center" style="height: 15vh; background-color: #f8f9fa;">
+
+    <footer class="text-center p-3 d-flex justify-content-center align-items-center"
+        style="height: 15vh; background-color: #f8f9fa;">
         <div>
             <div>
                 <i class="fa-solid fa-phone"></i>
@@ -305,7 +351,8 @@
             </div>
             <div>
                 <i class="fa-solid fa-location-dot"></i>
-                <a href="https://www.google.com/maps/place/Consultores+Empresariales+E-Volution+Limitada/@-36.8252678,-73.050754,19z/data=!3m1!4b1!4m6!3m5!1s0x9669b5d0308198b5:0xbd67409566499fa!8m2!3d-36.8252678!4d-73.0501103!16s%2Fg%2F11fzwngw1q?entry=ttu&amp;g_ep=EgoyMDI1MDEwNi4xIKXMDSoASAFQAw%3D%3D">
+                <a
+                    href="https://www.google.com/maps/place/Consultores+Empresariales+E-Volution+Limitada/@-36.8252678,-73.050754,19z/data=!3m1!4b1!4m6!3m5!1s0x9669b5d0308198b5:0xbd67409566499fa!8m2!3d-36.8252678!4d-73.0501103!16s%2Fg%2F11fzwngw1q?entry=ttu&amp;g_ep=EgoyMDI1MDEwNi4xIKXMDSoASAFQAw%3D%3D">
                     Freire 728, Oficina 206
                 </a>
             </div>
@@ -316,4 +363,5 @@
         </div>
     </footer>
 </body>
+
 </html>
