@@ -805,9 +805,32 @@ public class ServicioGenerarCertificado {
         double aspectRatio = imgWidth / imgHeight;
         double targetWidth = targetHeight * aspectRatio;
 
+        String shapeName = textShape.getShapeName();
+
+        boolean isFotoPlaceholder = shapeName != null && shapeName.toLowerCase().contains("foto");
+
+        double newX;
+        double newY;
+
+        if (isFotoPlaceholder) {
+
+            double centerX = anchor.getX() + anchor.getWidth() / 2;
+            double centerY = anchor.getY() + anchor.getHeight() / 2;
+
+            newX = centerX - targetWidth / 2;
+            newY = centerY - targetHeight / 2;
+
+        } else {
+
+            // comportamiento normal
+            newX = anchor.getX();
+            newY = anchor.getY();
+
+        }
+
         Rectangle2D newAnchor = new Rectangle2D.Double(
-                anchor.getX(),
-                anchor.getY(),
+                newX,
+                newY,
                 targetWidth,
                 targetHeight);
 
