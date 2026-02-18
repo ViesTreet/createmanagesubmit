@@ -213,9 +213,8 @@ public class ServicioGenerarCertificado {
 
         Map<String, byte[]> imageData = new HashMap<>();
         imageData.put("imagen_qr", qrCodeBytes);
-        if (logoCliente != null) {
-            imageData.put("imagen_cliente", logoCliente);
-        }
+
+        imageData.put("imagen_cliente", logoCliente);
 
         for (XSLFSlide slide : ppt.getSlides()) {
             processSlide(slide, alumnoData, imageData);
@@ -541,9 +540,8 @@ public class ServicioGenerarCertificado {
 
         Map<String, byte[]> imageData = new HashMap<>();
         imageData.put("imagen_qr", qrCodeBytes);
-        if (logoCliente != null) {
-            imageData.put("imagen_cliente", logoCliente);
-        }
+
+        imageData.put("imagen_cliente", logoCliente);
 
         // Procesa las slides y shapes
         for (XSLFSlide slide : ppt.getSlides()) {
@@ -646,9 +644,7 @@ public class ServicioGenerarCertificado {
 
         Map<String, byte[]> imageData = new HashMap<>();
         imageData.put("imagen_qr", qrCodeBytes);
-        if (logoCliente != null) {
-            imageData.put("imagen_cliente", logoCliente);
-        }
+        imageData.put("imagen_cliente", logoCliente);
 
         // Procesa las slides y shapes
         for (XSLFSlide slide : ppt.getSlides()) {
@@ -793,42 +789,53 @@ public class ServicioGenerarCertificado {
             XSLFTextShape textShape,
             byte[] imageBytes) throws IOException {
 
-        // 1. Leer dimensiones reales de la imagen
-        BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageBytes));
-        if (image == null) {
-            throw new IOException("No se pudo leer la imagen");
+        if (!isValidImage(imageBytes)) {
+            slide.removeShape(textShape);
+            return;
         }
+
+        BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageBytes));
 
         double imgWidth = image.getWidth();
         double imgHeight = image.getHeight();
 
-        // 2. Anchor original (placeholder)
         Rectangle2D anchor = textShape.getAnchor();
-        double targetHeight = anchor.getHeight();
 
-        // 3. Calcular ancho proporcional
+        double targetHeight = anchor.getHeight();
         double aspectRatio = imgWidth / imgHeight;
         double targetWidth = targetHeight * aspectRatio;
 
-        // 4. Centrar horizontalmente (opcional pero recomendado)
-        double x = anchor.getX();
-        double y = anchor.getY();
-
         Rectangle2D newAnchor = new Rectangle2D.Double(
-                x,
-                y,
+                anchor.getX(),
+                anchor.getY(),
                 targetWidth,
                 targetHeight);
 
-        // 5. Crear imagen en el slide
-        XSLFPictureData pictureData = slide.getSlideShow()
-                .addPicture(imageBytes, PictureData.PictureType.PNG);
+        PictureData.PictureType type = detectPictureType(imageBytes);
+
+        XSLFPictureData pictureData = slide.getSlideShow().addPicture(imageBytes, type);
 
         XSLFPictureShape pictureShape = slide.createPicture(pictureData);
+
         pictureShape.setAnchor(newAnchor);
 
-        // 6. Eliminar el placeholder de texto
         slide.removeShape(textShape);
+    }
+
+    private PictureData.PictureType detectPictureType(byte[] bytes) {
+        if (bytes.length >= 4) {
+            if (bytes[0] == (byte) 0x89 &&
+                    bytes[1] == (byte) 0x50 &&
+                    bytes[2] == (byte) 0x4E &&
+                    bytes[3] == (byte) 0x47) {
+                return PictureData.PictureType.PNG;
+            }
+            if (bytes[0] == (byte) 0xFF &&
+                    bytes[1] == (byte) 0xD8) {
+                return PictureData.PictureType.JPEG;
+            }
+        }
+        return PictureData.PictureType.PNG;
     }
 
     private void replaceShapePlaceholder(XSLFTextShape textShape, String regionKey) {
@@ -887,6 +894,28 @@ public class ServicioGenerarCertificado {
 
         // Quitar borde
         textShape.setLineColor(null);
+    }
+
+    private boolean isValidImage(byte[] imageBytes) {
+
+        if (imageBytes == null || imageBytes.length < 10)
+            return false;
+
+        try {
+
+            BufferedImage img = ImageIO.read(new ByteArrayInputStream(imageBytes));
+
+            if (img == null)
+                return false;
+
+            if (img.getWidth() <= 0 || img.getHeight() <= 0)
+                return false;
+
+            return true;
+
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Async
@@ -951,34 +980,45 @@ public class ServicioGenerarCertificado {
         }
 
         Map<String, byte[]> imageData = new HashMap<>();
-        if (logoClienteSup != null) {
-            imageData.put("imagen_cliente_superior", logoClienteSup);
-        }
-        if (logoClienteInf != null) {
-            imageData.put("imagen_cliente_inferior", logoClienteInf);
-        }
-        if (fotoRelator != null) {
-            imageData.put("foto_relator", fotoRelator);
-        }
+
+        imageData.put("imagen_cliente_superior", logoClienteSup);
+
+        imageData.put("imagen_cliente_inferior", logoClienteInf);
+
+        imageData.put("foto_relator", fotoRelator);
 
         // Procesa las slides y shapes
         for (XSLFSlide slide : ppt.getSlides()) {
             processSlide(slide, cursoData, imageData);
         }
 
-        // Guarda el PPTX modificado en un archivo temporal
-        File tempPptxFile = File.createTempFile("Flyer-", ".pptx");
-        try (FileOutputStream out = new FileOutputStream(tempPptxFile)) {
+        Path tempDir = Paths.get(stPath, "temp");
+        Files.createDirectories(tempDir);
+
+        Path tempInputPptx = tempDir.resolve("flyer_" + curso.getId() + "_poi.pptx");
+        Path tempOutputPptx = tempDir.resolve("flyer_" + curso.getId() + "_fixed.pptx");
+
+        // Guardar archivo generado por POI
+        try (OutputStream out = Files.newOutputStream(tempInputPptx)) {
             ppt.write(out);
         }
 
-        // Cierra el PPTX para evitar problemas
         ppt.close();
-        byte[] FlyerBytes = Files.readAllBytes(tempPptxFile.toPath());
-        // Eliminar los archivos temporales
-        tempPptxFile.delete();
 
-        return CompletableFuture.completedFuture(FlyerBytes);
+        JodConverter
+                .convert(tempInputPptx.toFile())
+                .to(tempOutputPptx.toFile())
+                .execute();
+
+        // Leer archivo reparado
+        byte[] flyerBytes = Files.readAllBytes(tempOutputPptx);
+
+        // limpiar temporales
+        Files.deleteIfExists(tempInputPptx);
+        Files.deleteIfExists(tempOutputPptx);
+
+        return CompletableFuture.completedFuture(flyerBytes);
+
     }
 
     @Async
@@ -1028,9 +1068,8 @@ public class ServicioGenerarCertificado {
 
         Map<String, byte[]> imageData = new HashMap<>();
         imageData.put("imagen_qr", qrCodeBytes);
-        if (logoCliente != null) {
-            imageData.put("imagen_cliente", logoCliente);
-        }
+
+        imageData.put("imagen_cliente", logoCliente);
 
         // Procesa las slides y shapes
         for (XSLFSlide slide : ppt.getSlides()) {
