@@ -33,6 +33,7 @@ public class Relator {
 
     private Float horasTrabajados;
 
+    @Column(columnDefinition = "TEXT")
     private String datosExtras;
 
     @OneToMany(mappedBy = "relator", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
