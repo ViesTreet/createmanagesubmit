@@ -695,10 +695,10 @@ public class ServicioGenerarCertificado {
             for (Map.Entry<String, byte[]> img : imageData.entrySet()) {
                 String placeholder = "${" + img.getKey() + "}";
                 if (fullText.contains(placeholder)) {
-                    System.out.println(fullText);
                     try {
                         replaceTextShapeWithImage(
                                 slide,
+                                placeholder,
                                 textShape,
                                 img.getValue());
                     } catch (Exception e) {
@@ -786,6 +786,7 @@ public class ServicioGenerarCertificado {
 
     private void replaceTextShapeWithImage(
             XSLFSlide slide,
+            String placeHolder,
             XSLFTextShape textShape,
             byte[] imageBytes) throws IOException {
 
@@ -805,15 +806,12 @@ public class ServicioGenerarCertificado {
         double aspectRatio = imgWidth / imgHeight;
         double targetWidth = targetHeight * aspectRatio;
 
-        String shapeName = textShape.getShapeName();
-
-        boolean isFotoPlaceholder = shapeName != null && shapeName.toLowerCase().contains("foto");
+        boolean isFotoPlaceholder = placeHolder != null && placeHolder.contains("foto");
 
         double newX;
         double newY;
 
         if (isFotoPlaceholder) {
-
             double centerX = anchor.getX() + anchor.getWidth() / 2;
             double centerY = anchor.getY() + anchor.getHeight() / 2;
 
@@ -961,7 +959,7 @@ public class ServicioGenerarCertificado {
         }
         DateTimeFormatter formatoDiaSemana = DateTimeFormatter.ofPattern("EEEE", new Locale("es", "ES"));
 
-        DateTimeFormatter formatoDiaNumero = DateTimeFormatter.ofPattern("d");
+        DateTimeFormatter formatoDiaNumero = DateTimeFormatter.ofPattern("dd");
 
         DateTimeFormatter formatoMes = DateTimeFormatter.ofPattern("MMMM", new Locale("es", "ES"));
 
@@ -982,6 +980,8 @@ public class ServicioGenerarCertificado {
         cursoData.put("relator", curso.getRelator().getNombre());
         cursoData.put("datos_relator", curso.getRelator().getDatosExtras());
         cursoData.put("modalidad", curso.getModalidad());
+        cursoData.put("cliente", curso.getCliente().getNombreCliente());
+        cursoData.put("subcontrato", curso.getSubcontratoDelCliente());
 
         byte[] logoClienteSup = null;
         byte[] logoClienteInf = null;

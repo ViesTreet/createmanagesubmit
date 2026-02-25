@@ -1192,6 +1192,8 @@ public class ControladorBase {
 
             @RequestParam String ubicacionCliente,
 
+            @RequestParam String subcontratoDelCliente,
+
             @RequestParam String fecha, // yyyy-MM-dd
 
             @RequestParam String horaI, // HH:mm
@@ -1245,6 +1247,7 @@ public class ControladorBase {
 
             curso.setUbicacionDelCurso(ubicacionDelCurso);
             curso.setUbicacionCliente(ubicacionCliente);
+            curso.setSubcontratoDelCliente(subcontratoDelCliente);
             curso.setFechaInicio(fechaDeInicio);
             curso.setFechaFin(fechaDeFinalizacion);
 

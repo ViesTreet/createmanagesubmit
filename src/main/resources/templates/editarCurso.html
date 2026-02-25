@@ -149,6 +149,8 @@
                                 <input th:value="${curso.ubicacionCliente}" id="ubicacionCliente" type="text"
                                     name="ubicacionCliente" class="form-control"
                                     placeholder="Instituto de Seguridad Laboral Región OHiggins - Rubio N°329 - Rancagua." />
+                                <label for="subcontratoDelCliente">Subcontrato del cliente</label>
+                                <input th:value="${curso.subcontratoDelCliente}" type="text" name="subcontratoDelCliente" id="subcontratoDelCliente" class="form-control" placeholder="Servicios electricos guillermina aravena">
                                 <label for="fecha">Fecha de cuando se realizara el curso</label>
                                 <input th:value="${fecha}" id="fecha" type="date" name="fecha" class="form-control"
                                     placeholder="12/03/26" />
@@ -467,8 +469,8 @@
         });
     </script>
     <script th:inline="javascript">
-        function ajustarWidth(){
-            document.getElementById("clienteResultados").style.width=document.getElementById("clienteInput").clientWidth+"px"; 
+        function ajustarWidth() {
+            document.getElementById("clienteResultados").style.width = document.getElementById("clienteInput").clientWidth + "px";
         }
     </script>
 </body>

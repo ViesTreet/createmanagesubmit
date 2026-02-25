@@ -861,6 +861,7 @@ public class ControladorApi {
             // ===== FLYER =====
             @RequestParam String ubicacionDelCurso,
             @RequestParam String ubicacionCliente,
+            @RequestParam String subcontratoDelCliente,
 
             @RequestParam String fecha, // yyyy-MM-dd
             @RequestParam String horaI, // HH:mm
@@ -904,6 +905,7 @@ public class ControladorApi {
 
             curso.setUbicacionDelCurso(ubicacionDelCurso);
             curso.setUbicacionCliente(ubicacionCliente);
+            curso.setSubcontratoDelCliente(subcontratoDelCliente);
             curso.setFechaInicio(fechaDeInicio);
             curso.setFechaFin(fechaDeFinalizacion);
 

@@ -66,6 +66,8 @@ public class Curso {
 
     private boolean asistenciaQr;
 
+    private String subcontratoDelCliente;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "plantilla_diploma_id")
     private Plantilla plantillaDiploma;
@@ -96,13 +98,14 @@ public class Curso {
 
     public Curso() {
     }
-
+    
     public Curso(Long id, String nombreCurso, String diasCursos, String duracion, Cliente cliente, String modalidad,
             String ubicacionSubida, String ciudad, String ubicacionDelCurso, String ubicacionCliente,
             LocalDateTime fechaInicio, LocalDateTime fechaFin, Float horasRelatorCurso, String lugarYfechaEmision,
-            int asistenciaMin, float notaMin, boolean asistenciaQr, Plantilla plantillaDiploma,
-            Plantilla plantillaFlyer, List<Alumno> alumnos, List<TareaProgramada> tareaProgramadas,
-            List<AlumnoTemporal> alumnosTemporales, Relator relator, Date createdAt, Date updatedAt) {
+            int asistenciaMin, float notaMin, boolean asistenciaQr, String subcontratoDelCliente,
+            Plantilla plantillaDiploma, Plantilla plantillaFlyer, List<Alumno> alumnos,
+            List<TareaProgramada> tareaProgramadas, List<AlumnoTemporal> alumnosTemporales, Relator relator,
+            Date createdAt, Date updatedAt) {
         this.id = id;
         this.nombreCurso = nombreCurso;
         this.diasCursos = diasCursos;
@@ -120,6 +123,7 @@ public class Curso {
         this.asistenciaMin = asistenciaMin;
         this.notaMin = notaMin;
         this.asistenciaQr = asistenciaQr;
+        this.subcontratoDelCliente = subcontratoDelCliente;
         this.plantillaDiploma = plantillaDiploma;
         this.plantillaFlyer = plantillaFlyer;
         this.alumnos = alumnos;
@@ -129,7 +133,7 @@ public class Curso {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
-
+    
     public Long getId() {
         return id;
     }
@@ -258,6 +262,22 @@ public class Curso {
         this.notaMin = notaMin;
     }
 
+    public boolean isAsistenciaQr() {
+        return asistenciaQr;
+    }
+
+    public void setAsistenciaQr(boolean asistenciaQr) {
+        this.asistenciaQr = asistenciaQr;
+    }
+
+    public String getSubcontratoDelCliente() {
+        return subcontratoDelCliente;
+    }
+
+    public void setSubcontratoDelCliente(String subcontratoDelCliente) {
+        this.subcontratoDelCliente = subcontratoDelCliente;
+    }
+
     public Plantilla getPlantillaDiploma() {
         return plantillaDiploma;
     }
@@ -304,14 +324,6 @@ public class Curso {
 
     public void setRelator(Relator relator) {
         this.relator = relator;
-    }
-
-    public boolean isAsistenciaQr() {
-        return asistenciaQr;
-    }
-
-    public void setAsistenciaQr(boolean asistenciaQr) {
-        this.asistenciaQr = asistenciaQr;
     }
 
     public Date getCreatedAt() {
