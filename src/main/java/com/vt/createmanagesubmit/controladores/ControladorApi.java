@@ -52,6 +52,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vt.createmanagesubmit.dto.AlumnoDTO;
 import com.vt.createmanagesubmit.dto.AlumnosWrapper;
 import com.vt.createmanagesubmit.dto.ClienteDTO;
@@ -63,6 +64,7 @@ import com.vt.createmanagesubmit.modelos.Alumno;
 import com.vt.createmanagesubmit.modelos.AlumnoTemporal;
 import com.vt.createmanagesubmit.modelos.Cliente;
 import com.vt.createmanagesubmit.modelos.Curso;
+import com.vt.createmanagesubmit.modelos.Jornada;
 import com.vt.createmanagesubmit.modelos.Plantilla;
 import com.vt.createmanagesubmit.modelos.Relator;
 import com.vt.createmanagesubmit.repositorios.RepositorioAlumnos;
@@ -863,9 +865,7 @@ public class ControladorApi {
             @RequestParam String ubicacionCliente,
             @RequestParam String subcontratoDelCliente,
 
-            @RequestParam String fecha, // yyyy-MM-dd
-            @RequestParam String horaI, // HH:mm
-            @RequestParam String horaF, // HH:mm
+            @RequestParam String jornadasJson,
             @RequestParam Float horasRelatorCurso,
             @RequestParam Long plantillaFlyId,
 
@@ -873,12 +873,25 @@ public class ControladorApi {
 
         try {
 
-            LocalDate fechaCurso = LocalDate.parse(fecha);
-            LocalTime horaInicio = LocalTime.parse(horaI);
-            LocalTime horaFin = LocalTime.parse(horaF);
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(jornadasJson);
 
-            LocalDateTime fechaDeInicio = LocalDateTime.of(fechaCurso, horaInicio);
-            LocalDateTime fechaDeFinalizacion = LocalDateTime.of(fechaCurso, horaFin);
+            List<Jornada> listaJornadas = new ArrayList<>();
+
+            for (JsonNode node : root) {
+
+                String fechaInicioStr = node.get("fechaInicio").asText();
+                String fechaFinStr = node.get("fechaFin").asText();
+
+                LocalDateTime fechaInicio = LocalDateTime.parse(fechaInicioStr);
+                LocalDateTime fechaFin = LocalDateTime.parse(fechaFinStr);
+
+                Jornada jornada = new Jornada();
+                jornada.setFechaInicio(fechaInicio);
+                jornada.setFechaFin(fechaFin);
+
+                listaJornadas.add(jornada);
+            }
 
             Cliente cliente = ser.clientePorId(clienteId);
 
@@ -906,13 +919,13 @@ public class ControladorApi {
             curso.setUbicacionDelCurso(ubicacionDelCurso);
             curso.setUbicacionCliente(ubicacionCliente);
             curso.setSubcontratoDelCliente(subcontratoDelCliente);
-            curso.setFechaInicio(fechaDeInicio);
-            curso.setFechaFin(fechaDeFinalizacion);
+            curso.setJornadas(listaJornadas);
 
             curso.setPlantillaDiploma(plantillaDiploma);
             curso.setPlantillaFlyer(plantillaFlyer);
             curso.setHorasRelatorCurso(horasRelatorCurso);
             curso.setAsistenciaQr(true);
+            ser.guardarJornadas(listaJornadas);
             ser.guardarCurso(curso);
 
             byte[] flyerBytes = servicioGenerarCertificado

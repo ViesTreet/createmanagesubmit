@@ -36,6 +36,8 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vt.createmanagesubmit.dto.AlumnoDTO;
 import com.vt.createmanagesubmit.dto.AlumnosWrapper;
 import com.vt.createmanagesubmit.exceptions.MissingAdminIdException;
@@ -46,6 +48,7 @@ import com.vt.createmanagesubmit.modelos.Admin;
 import com.vt.createmanagesubmit.modelos.Alumno;
 import com.vt.createmanagesubmit.modelos.Cliente;
 import com.vt.createmanagesubmit.modelos.Curso;
+import com.vt.createmanagesubmit.modelos.Jornada;
 import com.vt.createmanagesubmit.modelos.Plantilla;
 import com.vt.createmanagesubmit.modelos.Relator;
 import com.vt.createmanagesubmit.repositorios.RepositorioAlumnos;
@@ -1147,14 +1150,8 @@ public class ControladorBase {
         }
         Curso curso = servicio.cursoPorId(id);
 
-        LocalDate fecha = curso.getFechaInicio().toLocalDate();
-        LocalTime horaInicio = curso.getFechaInicio().toLocalTime();
-        LocalTime horaFin = curso.getFechaFin().toLocalTime();
         model.addAttribute("admin", usuarioTemporal);
         model.addAttribute("curso", curso);
-        model.addAttribute("fecha", fecha);
-        model.addAttribute("horaI", horaInicio);
-        model.addAttribute("horaF", horaFin);
 
         return "editarCurso";
     }
@@ -1194,11 +1191,7 @@ public class ControladorBase {
 
             @RequestParam String subcontratoDelCliente,
 
-            @RequestParam String fecha, // yyyy-MM-dd
-
-            @RequestParam String horaI, // HH:mm
-
-            @RequestParam String horaF, // HH:mm
+            @RequestParam String jornadasJson,
 
             @RequestParam Float horasRelatorCurso,
 
@@ -1212,12 +1205,26 @@ public class ControladorBase {
 
         try {
 
-            LocalDate fechaCurso = LocalDate.parse(fecha);
-            LocalTime horaInicio = LocalTime.parse(horaI);
-            LocalTime horaFin = LocalTime.parse(horaF);
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(jornadasJson);
 
-            LocalDateTime fechaDeInicio = LocalDateTime.of(fechaCurso, horaInicio);
-            LocalDateTime fechaDeFinalizacion = LocalDateTime.of(fechaCurso, horaFin);
+            List<Jornada> listaJornadas = new ArrayList<>();
+
+            for (JsonNode node : root) {
+
+                String fechaInicioStr = node.get("fechaInicio").asText();
+                String fechaFinStr = node.get("fechaFin").asText();
+
+                LocalDateTime fechaInicio = LocalDateTime.parse(fechaInicioStr);
+                LocalDateTime fechaFin = LocalDateTime.parse(fechaFinStr);
+
+                Jornada jornada = new Jornada();
+                jornada.setFechaInicio(fechaInicio);
+                jornada.setFechaFin(fechaFin);
+
+                listaJornadas.add(jornada);
+            }
+
             Curso curso = servicio.cursoPorId(id);
             Cliente cliente = servicio.clientePorId(clienteId);
 
@@ -1248,13 +1255,14 @@ public class ControladorBase {
             curso.setUbicacionDelCurso(ubicacionDelCurso);
             curso.setUbicacionCliente(ubicacionCliente);
             curso.setSubcontratoDelCliente(subcontratoDelCliente);
-            curso.setFechaInicio(fechaDeInicio);
-            curso.setFechaFin(fechaDeFinalizacion);
+
 
             curso.setPlantillaDiploma(plantillaDiploma);
             curso.setPlantillaFlyer(plantillaFlyer);
             curso.setHorasRelatorCurso(horasRelatorCurso);
             curso.setAsistenciaQr(asistenciaQr);
+            curso.getJornadas().clear(); 
+            curso.getJornadas().addAll(listaJornadas);
             servicio.guardarCurso(curso);
             return "redirect:/dataBaseCurso";
 

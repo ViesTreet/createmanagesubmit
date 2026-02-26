@@ -150,18 +150,11 @@
                                     name="ubicacionCliente" class="form-control"
                                     placeholder="Instituto de Seguridad Laboral Región OHiggins - Rubio N°329 - Rancagua." />
                                 <label for="subcontratoDelCliente">Subcontrato del cliente</label>
-                                <input th:value="${curso.subcontratoDelCliente}" type="text" name="subcontratoDelCliente" id="subcontratoDelCliente" class="form-control" placeholder="Servicios electricos guillermina aravena">
-                                <label for="fecha">Fecha de cuando se realizara el curso</label>
-                                <input th:value="${fecha}" id="fecha" type="date" name="fecha" class="form-control"
-                                    placeholder="12/03/26" />
-                                <label for="horaI">Hora de inicio</label>
-                                <input th:value="${horaI}" id="horaI" type="time" name="horaI" class="form-control"
-                                    placeholder="12:00 pm" />
+                                <input th:value="${curso.subcontratoDelCliente}" type="text"
+                                    name="subcontratoDelCliente" id="subcontratoDelCliente" class="form-control"
+                                    placeholder="Servicios electricos guillermina aravena">
                             </div>
                             <div style="width: 50%; margin-left: 2px; position: relative;">
-                                <label for="horaF">Hora de finalización</label>
-                                <input th:value="${horaF}" id="horaF" type="time" name="horaF" class="form-control"
-                                    placeholder="14:00 pm" />
                                 <label for="horasRelatorCurso">Horas trabajadas por el relator</label>
                                 <input th:value="${curso.horasRelatorCurso}" type="number" name="horasRelatorCurso"
                                     step="0.1" placeholder="3" class="form-control" />
@@ -181,9 +174,26 @@
                             </div>
                         </div>
                         <div class="d-flex justify-content-center mt-3">
-                            <input type="hidden" name="id" th:value="${curso.id}">
-                            <input class="btn btn-primary" type="submit" name="enviar" id="enviarCurso"
-                                value="Enviar" />
+                            <button id="sigForm2" type="button" class="btn btn-success">
+                                Siguiente
+                            </button>
+                        </div>
+                    </div>
+                    <div id="fechas" style="display: none">
+                        <h2 class="text-center pb-2">Fechas para el flyer</h2>
+                        <div class="pb-2" style="position: relative;">
+                            <div
+                                style="display: flex; justify-content: space-evenly; align-items: center; flex-wrap: nowrap; flex-direction: row;">
+                                <label for="cantidad">¿En cuantos dias se realizara el curso?</label>
+                                <input type="number" name="cantidad" id="cantidad" class="form-control">
+                            </div>
+                            <div id="contenedorDias"></div>
+                            <input type="hidden" name="jornadasJson" id="jornadasJson">
+                            <div class="d-flex justify-content-center mt-3">
+                                <input type="hidden" name="id" th:value="${curso.id}">
+                                <input class="btn btn-primary" type="submit" name="enviar" id="enviarCurso"
+                                    value="Enviar" />
+                            </div>
                         </div>
                     </div>
                 </form>
@@ -223,18 +233,130 @@
     </footer>
     <script th:inline="javascript">
         let botonSig = document.getElementById("sigForm");
+        let botonSig2 = document.getElementById("sigForm2");
         let diploma = document.getElementById("diploma");
         let flyer = document.getElementById("flyer");
+        let fecha = document.getElementById("fechas");
         let botonEnv = document.getElementById("enviarCurso");
         botonSig.addEventListener("click", function () {
             botonSig.disabled = true;
 
             diploma.style.display = "none";
             flyer.style.display = "block";
+            fecha.style.display = "none";
 
             setTimeout(() => {
                 botonSig.disabled = false;
             }, 300); // pequeño delay
+        });
+        botonSig2.addEventListener("click", function () {
+            botonSig2.disabled = true;
+
+            diploma.style.display = "none";
+            flyer.style.display = "none";
+            fecha.style.display = "block";
+
+            setTimeout(() => {
+                botonSig2.disabled = false;
+            }, 300); // pequeño delay
+        });
+        // Función para mostrar el formulario
+        function openForm() {
+            document.getElementById("overlay").style.display = "block";
+        }
+
+        function closeForm() {
+            document.getElementById("overlay").style.display = "none";
+            flyer.style.display = "none";
+            diploma.style.display = "block";
+        }
+        $("form").on("submit", function () {
+            $("#enviarCurso").prop("disabled", true);
+        });
+    </script>
+    <script th:inline="javascript">
+        document.getElementById("cantidad").addEventListener("input", function () {
+
+            const cantidad = parseInt(this.value);
+            const contenedor = document.getElementById("contenedorDias");
+
+            // Limpiar días anteriores
+            contenedor.innerHTML = "";
+
+            if (isNaN(cantidad) || cantidad <= 0) return;
+
+            for (let i = 1; i <= cantidad; i++) {
+
+                const bloque = document.createElement("div");
+                bloque.classList.add("mb-3");
+
+                bloque.innerHTML = `
+            <label>Día ${i}:</label>
+            <div style="width: 100%; display: flex; justify-content: space-around; align-items: center;">
+              
+              <label for="dia${i}I">Fecha de Inicio</label>
+              <input class="form-control me-1" type="datetime-local" name="dia${i}I" id="dia${i}I">
+
+              <label class="ms-1" for="dia${i}F">Fecha de Finalización</label>
+              <input class="form-control"type="datetime-local" name="dia${i}F" id="dia${i}F">
+              
+            </div>
+        `;
+
+                contenedor.appendChild(bloque);
+            }
+        });
+    </script>
+    <script th:inline="javascript">
+        let jornadasDB = /*[[${curso.jornadas}]]*/ "1";
+        document.addEventListener("DOMContentLoaded", function () {
+
+            if (!jornadasDB || jornadasDB.length === 0) return;
+
+            const inputCantidad = document.getElementById("cantidad");
+            const contenedor = document.getElementById("contenedorDias");
+
+            inputCantidad.value = jornadasDB.length;
+
+            inputCantidad.dispatchEvent(new Event("input"));
+
+            jornadasDB.forEach((jornada, index) => {
+
+                let i = index + 1;
+
+                let inputInicio = document.getElementById(`dia${i}I`);
+                let inputFin = document.getElementById(`dia${i}F`);
+
+                if (inputInicio && jornada.fechaInicio) {
+                    inputInicio.value = jornada.fechaInicio.substring(0, 16);
+                }
+
+                if (inputFin && jornada.fechaFin) {
+                    inputFin.value = jornada.fechaFin.substring(0, 16);
+                }
+
+            });
+
+        });
+    </script>
+    <script th:inline="javascript">
+        document.getElementById("enviarCurso").addEventListener("click", function () {
+
+            const cantidad = parseInt(document.getElementById("cantidad").value);
+            let jornadas = [];
+
+            for (let i = 1; i <= cantidad; i++) {
+
+                const inicio = document.getElementById("dia" + i + "I").value;
+                const fin = document.getElementById("dia" + i + "F").value;
+
+                jornadas.push({
+                    fechaInicio: inicio,
+                    fechaFin: fin
+                });
+            }
+
+            document.getElementById("jornadasJson").value = JSON.stringify(jornadas);
         });
     </script>
     <script th:inline="javascript">

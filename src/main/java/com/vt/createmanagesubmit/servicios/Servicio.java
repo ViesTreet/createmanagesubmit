@@ -15,7 +15,6 @@ import java.time.LocalTime;
 import java.time.Year;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
@@ -46,7 +45,6 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
-import com.vt.createmanagesubmit.dto.filtroDTO;
 import com.vt.createmanagesubmit.exceptions.MissingAdminIdException;
 import com.vt.createmanagesubmit.exceptions.MissingAlumnoIdException;
 import com.vt.createmanagesubmit.exceptions.MissingNameOrRutException;
@@ -56,6 +54,7 @@ import com.vt.createmanagesubmit.modelos.Alumno;
 import com.vt.createmanagesubmit.modelos.AlumnoTemporal;
 import com.vt.createmanagesubmit.modelos.Cliente;
 import com.vt.createmanagesubmit.modelos.Curso;
+import com.vt.createmanagesubmit.modelos.Jornada;
 import com.vt.createmanagesubmit.modelos.Plantilla;
 import com.vt.createmanagesubmit.modelos.Relator;
 import com.vt.createmanagesubmit.modelos.TareaProgramada;
@@ -64,11 +63,10 @@ import com.vt.createmanagesubmit.repositorios.RepositorioAlumnoTemporal;
 import com.vt.createmanagesubmit.repositorios.RepositorioAlumnos;
 import com.vt.createmanagesubmit.repositorios.RepositorioCliente;
 import com.vt.createmanagesubmit.repositorios.RepositorioCurso;
+import com.vt.createmanagesubmit.repositorios.RepositorioJornada;
 import com.vt.createmanagesubmit.repositorios.RepositorioPlantillas;
 import com.vt.createmanagesubmit.repositorios.RepositorioRelator;
 import com.vt.createmanagesubmit.repositorios.RepositorioTareasProgramadas;
-
-import jakarta.persistence.criteria.Predicate;
 
 @Service
 public class Servicio {
@@ -93,6 +91,9 @@ public class Servicio {
 
     @Autowired
     private RepositorioRelator repoRelator;
+
+    @Autowired
+    private RepositorioJornada repoJornada;
 
     @Autowired
     @Lazy
@@ -1222,6 +1223,18 @@ public class Servicio {
 
             return cb.conjunction();
         };
+    }
+
+    public void guardarJornadas(List<Jornada> jornadas){
+        repoJornada.saveAll(jornadas);
+    } 
+
+    public void borrarJornadas(List<Jornada> jornadas){
+        repoJornada.deleteAll(jornadas);
+    }
+
+    public void borrarJornada(Jornada jornada){
+        repoJornada.delete(jornada);
     }
 
 }

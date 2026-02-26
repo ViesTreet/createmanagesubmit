@@ -52,10 +52,6 @@ public class Curso {
 
     private String ubicacionCliente;
 
-    private LocalDateTime fechaInicio;
-
-    private LocalDateTime fechaFin;
-
     private Float horasRelatorCurso;
 
     private String lugarYfechaEmision;
@@ -85,6 +81,10 @@ public class Curso {
     @OneToMany(mappedBy = "cursoTemporal", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<AlumnoTemporal> alumnosTemporales;
 
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "curso_id") 
+    private List<Jornada> jornadas;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "relator_id")
     private Relator relator;
@@ -98,14 +98,13 @@ public class Curso {
 
     public Curso() {
     }
-    
+
     public Curso(Long id, String nombreCurso, String diasCursos, String duracion, Cliente cliente, String modalidad,
             String ubicacionSubida, String ciudad, String ubicacionDelCurso, String ubicacionCliente,
-            LocalDateTime fechaInicio, LocalDateTime fechaFin, Float horasRelatorCurso, String lugarYfechaEmision,
-            int asistenciaMin, float notaMin, boolean asistenciaQr, String subcontratoDelCliente,
-            Plantilla plantillaDiploma, Plantilla plantillaFlyer, List<Alumno> alumnos,
-            List<TareaProgramada> tareaProgramadas, List<AlumnoTemporal> alumnosTemporales, Relator relator,
-            Date createdAt, Date updatedAt) {
+            Float horasRelatorCurso, String lugarYfechaEmision, int asistenciaMin, float notaMin, boolean asistenciaQr,
+            String subcontratoDelCliente, Plantilla plantillaDiploma, Plantilla plantillaFlyer, List<Alumno> alumnos,
+            List<TareaProgramada> tareaProgramadas, List<AlumnoTemporal> alumnosTemporales, List<Jornada> jornadas,
+            Relator relator, Date createdAt, Date updatedAt) {
         this.id = id;
         this.nombreCurso = nombreCurso;
         this.diasCursos = diasCursos;
@@ -116,8 +115,6 @@ public class Curso {
         this.ciudad = ciudad;
         this.ubicacionDelCurso = ubicacionDelCurso;
         this.ubicacionCliente = ubicacionCliente;
-        this.fechaInicio = fechaInicio;
-        this.fechaFin = fechaFin;
         this.horasRelatorCurso = horasRelatorCurso;
         this.lugarYfechaEmision = lugarYfechaEmision;
         this.asistenciaMin = asistenciaMin;
@@ -129,11 +126,12 @@ public class Curso {
         this.alumnos = alumnos;
         this.tareaProgramadas = tareaProgramadas;
         this.alumnosTemporales = alumnosTemporales;
+        this.jornadas = jornadas;
         this.relator = relator;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
-    
+
     public Long getId() {
         return id;
     }
@@ -212,22 +210,6 @@ public class Curso {
 
     public void setUbicacionCliente(String ubicacionCliente) {
         this.ubicacionCliente = ubicacionCliente;
-    }
-
-    public LocalDateTime getFechaInicio() {
-        return fechaInicio;
-    }
-
-    public void setFechaInicio(LocalDateTime fechaInicio) {
-        this.fechaInicio = fechaInicio;
-    }
-
-    public LocalDateTime getFechaFin() {
-        return fechaFin;
-    }
-
-    public void setFechaFin(LocalDateTime fechaFin) {
-        this.fechaFin = fechaFin;
     }
 
     public Float getHorasRelatorCurso() {
@@ -316,6 +298,14 @@ public class Curso {
 
     public void setAlumnosTemporales(List<AlumnoTemporal> alumnosTemporales) {
         this.alumnosTemporales = alumnosTemporales;
+    }
+
+    public List<Jornada> getJornadas() {
+        return jornadas;
+    }
+
+    public void setJornadas(List<Jornada> jornadas) {
+        this.jornadas = jornadas;
     }
 
     public Relator getRelator() {

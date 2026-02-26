@@ -210,32 +210,45 @@
         success: function (data) {
           var tbody = $("#tablaCurso tbody");
           tbody.empty(); // Limpiar la tabla antes de agregar nuevos datos
-
+          var adminCorreo = /*[[${admin.correo}]]*/ "default";
           $.each(data, function (i, curso) {
-            // Inyectar el correo del admin en sesión desde el modelo
-            var adminCorreo = /*[[${admin.correo}]]*/ "default";
             // Construir la fila
             let estiloFila = "";
             let aviso = "";
 
-            if (curso.fechaInicio) {
+            let fechaEvaluar = null;
+
+            if (curso.jornadas && curso.jornadas.length > 0) {
+
               const ahora = new Date();
-              const fechaCurso = new Date(curso.fechaInicio);
 
-              const diffMs = fechaCurso - ahora;
-              const diffDias = diffMs / (1000 * 60 * 60 * 24);
+              // ordenar por fecha
+              const jornadasOrdenadas = curso.jornadas
+                .map(j => new Date(j.fechaInicio))
+                .sort((a, b) => a - b);
 
-              if (diffDias <= 1 && diffDias >= 0) {
-                // curso mañana o hoy
-                estiloFila = " style='background-color: #fff3cd;'"; // amarillo suave
-                aviso = " (Próximo)";
-              } else if (diffDias > 1) {
-                // falta más tiempo
-                estiloFila = " style='background-color: #e7f5ff;'"; // azul suave
-              } else {
-                // ya pasó (opcional)
-                estiloFila = " style='background-color: #f8d7da;'"; // rojo suave muy leve
-                aviso = " (Ya iniciado)";
+              // buscar la próxima jornada
+              fechaEvaluar = jornadasOrdenadas.find(f => f >= ahora);
+
+              // si no hay futura → usar la última
+              if (!fechaEvaluar) {
+                fechaEvaluar = jornadasOrdenadas[jornadasOrdenadas.length - 1];
+              }
+              if (fechaEvaluar) {
+
+                const ahora = new Date();
+                const diffMs = fechaEvaluar - ahora;
+                const diffDias = diffMs / (1000 * 60 * 60 * 24);
+
+                if (diffDias <= 1 && diffDias >= 0) {
+                  estiloFila = " style='background-color: #fff3cd;'";
+                  aviso = " (Próximo)";
+                } else if (diffDias > 1) {
+                  estiloFila = " style='background-color: #e7f5ff;'";
+                } else {
+                  estiloFila = " style='background-color: #f8d7da;'";
+                  aviso = " (Finalizado)";
+                }
               }
             }
 
@@ -247,9 +260,7 @@
               "<td " +
               estiloFila +
               "><div class='celda-scroll'>" +
-              (curso.fechaInicio
-                ? formatearFecha(curso.fechaInicio) + aviso
-                : "") +
+              (fechaEvaluar ? formatearFecha(fechaEvaluar.toISOString()) + aviso : "") +
               "</div></td>" +
               "<td><div class='celda-scroll'>" +
               (curso.ciudad && curso.ubicacionSubida
@@ -397,13 +408,8 @@
             <input id="ubicacionCliente" type="text" name="ubicacionCliente" class="form-control"
               placeholder="Instituto de Seguridad Laboral Región OHiggins - Rubio N°329 - Rancagua." />
             <label for="subcontratoDelCliente">Subcontrato del cliente</label>
-            <input type="text" name="subcontratoDelCliente" id="subcontratoDelCliente" class="form-control" placeholder="Servicios electricos guillermina aravena">
-            <label for="fecha">Fecha de cuando se realizara el curso</label>
-            <input id="fecha" type="date" name="fecha" class="form-control" placeholder="12/03/26" />
-            <label for="horaI">Hora de inicio</label>
-            <input id="horaI" type="time" name="horaI" class="form-control" placeholder="12:00 pm" />
-            <label for="horaF">Hora de finalización</label>
-            <input id="horaF" type="time" name="horaF" class="form-control" placeholder="14:00 pm" />
+            <input type="text" name="subcontratoDelCliente" id="subcontratoDelCliente" class="form-control"
+              placeholder="Servicios electricos guillermina aravena">
             <label for="horasRelatorCurso">Horas trabajadas por el relator</label>
             <input type="number" name="horasRelatorCurso" step="0.1" placeholder="3" class="form-control" />
             <label for="plantillaFlyInput">Plantilla del flyer</label>
@@ -412,6 +418,23 @@
             <input type="hidden" name="plantillaFlyId" id="plantillaFlyId" required />
             <div id="plantillaFlyResultados" class="list-group position-absolute w-100"
               style="z-index: 1000; display: none"></div>
+            <div class="d-flex justify-content-center mt-3">
+              <button id="sigForm2" type="button" class="btn btn-success">
+                Siguiente
+              </button>
+            </div>
+          </div>
+        </div>
+        <div id="fechas" style="display: none">
+          <h2 class="text-center pb-2">Fechas para el flyer</h2>
+          <div class="pb-2" style="position: relative;">
+            <div
+              style="display: flex; justify-content: space-evenly; align-items: center; flex-wrap: nowrap; flex-direction: row;">
+              <label for="cantidad">¿En cuantos dias se realizara el curso?</label>
+              <input type="number" name="cantidad" id="cantidad" class="form-control">
+            </div>
+            <div id="contenedorDias"></div>
+            <input type="hidden" name="jornadasJson" id="jornadasJson">
             <div class="d-flex justify-content-center mt-1">
               <input class="btn btn-primary" type="submit" name="enviar" id="enviarCurso" value="Enviar" />
             </div>
@@ -554,24 +577,39 @@
         let estiloFila = "";
         let aviso = "";
 
-        if (curso.fechaInicio) {
+        let fechaEvaluar = null;
+
+        if (curso.jornadas && curso.jornadas.length > 0) {
+
           const ahora = new Date();
-          const fechaCurso = new Date(curso.fechaInicio);
 
-          const diffMs = fechaCurso - ahora;
-          const diffDias = diffMs / (1000 * 60 * 60 * 24);
+          // ordenar por fecha
+          const jornadasOrdenadas = curso.jornadas
+            .map(j => new Date(j.fechaInicio))
+            .sort((a, b) => a - b);
 
-          if (diffDias <= 1 && diffDias >= 0) {
-            // curso mañana o hoy
-            estiloFila = " style='background-color: #fff3cd;'"; // amarillo suave
-            aviso = " (Próximo)";
-          } else if (diffDias > 1) {
-            // falta más tiempo
-            estiloFila = " style='background-color: #e7f5ff;'"; // azul suave
-          } else {
-            // ya pasó (opcional)
-            estiloFila = " style='background-color: #f8d7da;'"; // rojo suave muy leve
-            aviso = " (Ya iniciado)";
+          // buscar la próxima jornada
+          fechaEvaluar = jornadasOrdenadas.find(f => f >= ahora);
+
+          // si no hay futura → usar la última
+          if (!fechaEvaluar) {
+            fechaEvaluar = jornadasOrdenadas[jornadasOrdenadas.length - 1];
+          }
+          if (fechaEvaluar) {
+
+            const ahora = new Date();
+            const diffMs = fechaEvaluar - ahora;
+            const diffDias = diffMs / (1000 * 60 * 60 * 24);
+
+            if (diffDias <= 1 && diffDias >= 0) {
+              estiloFila = " style='background-color: #fff3cd;'";
+              aviso = " (Próximo)";
+            } else if (diffDias > 1) {
+              estiloFila = " style='background-color: #e7f5ff;'";
+            } else {
+              estiloFila = " style='background-color: #f8d7da;'";
+              aviso = " (Finalizado)";
+            }
           }
         }
 
@@ -583,9 +621,7 @@
           "<td " +
           estiloFila +
           "><div class='celda-scroll'>" +
-          (curso.fechaInicio
-            ? formatearFecha(curso.fechaInicio) + aviso
-            : "") +
+          (fechaEvaluar ? formatearFecha(fechaEvaluar.toISOString()) + aviso : "") +
           "</div></td>" +
           "<td><div class='celda-scroll'>" +
           (curso.ciudad && curso.ubicacionSubida
@@ -626,20 +662,33 @@
   </script>
   <script th:inline="javascript">
     let botonSig = document.getElementById("sigForm");
+    let botonSig2 = document.getElementById("sigForm2");
     let diploma = document.getElementById("diploma");
     let flyer = document.getElementById("flyer");
+    let fecha = document.getElementById("fechas");
     let botonEnv = document.getElementById("enviarCurso");
     botonSig.addEventListener("click", function () {
       botonSig.disabled = true;
 
       diploma.style.display = "none";
       flyer.style.display = "block";
+      fecha.style.display = "none";
 
       setTimeout(() => {
         botonSig.disabled = false;
       }, 300); // pequeño delay
     });
+    botonSig2.addEventListener("click", function () {
+      botonSig2.disabled = true;
 
+      diploma.style.display = "none";
+      flyer.style.display = "none";
+      fecha.style.display = "block";
+
+      setTimeout(() => {
+        botonSig2.disabled = false;
+      }, 300); // pequeño delay
+    });
     // Función para mostrar el formulario
     function openForm() {
       document.getElementById("overlay").style.display = "block";
@@ -652,6 +701,59 @@
     }
     $("form").on("submit", function () {
       $("#enviarCurso").prop("disabled", true);
+    });
+  </script>
+  <script th:inline="javascript">
+    document.getElementById("cantidad").addEventListener("input", function () {
+
+      const cantidad = parseInt(this.value);
+      const contenedor = document.getElementById("contenedorDias");
+
+      // Limpiar días anteriores
+      contenedor.innerHTML = "";
+
+      if (isNaN(cantidad) || cantidad <= 0) return;
+
+      for (let i = 1; i <= cantidad; i++) {
+
+        const bloque = document.createElement("div");
+        bloque.classList.add("mb-3");
+
+        bloque.innerHTML = `
+            <label>Día ${i}:</label>
+            <div style="width: 100%; display: flex; justify-content: space-around; align-items: center;">
+              
+              <label for="dia${i}I">Fecha de Inicio</label>
+              <input class="form-control me-1" type="datetime-local" name="dia${i}I" id="dia${i}I">
+
+              <label class="ms-1" for="dia${i}F">Fecha de Finalización</label>
+              <input class="form-control"type="datetime-local" name="dia${i}F" id="dia${i}F">
+              
+            </div>
+        `;
+
+        contenedor.appendChild(bloque);
+      }
+    });
+  </script>
+  <script th:inline="javascript">
+    document.getElementById("enviarCurso").addEventListener("click", function () {
+
+      const cantidad = parseInt(document.getElementById("cantidad").value);
+      let jornadas = [];
+
+      for (let i = 1; i <= cantidad; i++) {
+
+        const inicio = document.getElementById("dia" + i + "I").value;
+        const fin = document.getElementById("dia" + i + "F").value;
+
+        jornadas.push({
+          fechaInicio: inicio,
+          fechaFin: fin
+        });
+      }
+
+      document.getElementById("jornadasJson").value = JSON.stringify(jornadas);
     });
   </script>
   <script th:inline="javascript">

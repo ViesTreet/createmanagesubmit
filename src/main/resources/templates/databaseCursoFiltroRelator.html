@@ -214,24 +214,39 @@
             let estiloFila = "";
             let aviso = "";
 
-            if (curso.fechaInicio) {
+            let fechaEvaluar = null;
+
+            if (curso.jornadas && curso.jornadas.length > 0) {
+
               const ahora = new Date();
-              const fechaCurso = new Date(curso.fechaInicio);
 
-              const diffMs = fechaCurso - ahora;
-              const diffDias = diffMs / (1000 * 60 * 60 * 24);
+              // ordenar por fecha
+              const jornadasOrdenadas = curso.jornadas
+                .map(j => new Date(j.fechaInicio))
+                .sort((a, b) => a - b);
 
-              if (diffDias <= 1 && diffDias >= 0) {
-                // curso mañana o hoy
-                estiloFila = " style='background-color: #fff3cd;'"; // amarillo suave
-                aviso = " (Próximo)";
-              } else if (diffDias > 1) {
-                // falta más tiempo
-                estiloFila = " style='background-color: #e7f5ff;'"; // azul suave
-              } else {
-                // ya pasó (opcional)
-                estiloFila = " style='background-color: #f8d7da;'"; // rojo suave muy leve
-                aviso = " (Ya iniciado)";
+              // buscar la próxima jornada
+              fechaEvaluar = jornadasOrdenadas.find(f => f >= ahora);
+
+              // si no hay futura → usar la última
+              if (!fechaEvaluar) {
+                fechaEvaluar = jornadasOrdenadas[jornadasOrdenadas.length - 1];
+              }
+              if (fechaEvaluar) {
+
+                const ahora = new Date();
+                const diffMs = fechaEvaluar - ahora;
+                const diffDias = diffMs / (1000 * 60 * 60 * 24);
+
+                if (diffDias <= 1 && diffDias >= 0) {
+                  estiloFila = " style='background-color: #fff3cd;'";
+                  aviso = " (Próximo)";
+                } else if (diffDias > 1) {
+                  estiloFila = " style='background-color: #e7f5ff;'";
+                } else {
+                  estiloFila = " style='background-color: #f8d7da;'";
+                  aviso = " (Finalizado)";
+                }
               }
             }
             var fila =
@@ -242,9 +257,7 @@
               "<td " +
               estiloFila +
               "><div class='celda-scroll'>" +
-              (curso.fechaInicio
-                ? formatearFecha(curso.fechaInicio) + aviso
-                : "") +
+              (fechaEvaluar ? formatearFecha(fechaEvaluar.toISOString()) + aviso : "") +
               "</div></td>" +
               "<td><div class='celda-scroll'>" +
               (curso.ciudad && curso.ubicacionSubida
@@ -427,24 +440,39 @@
         let estiloFila = "";
         let aviso = "";
 
-        if (curso.fechaInicio) {
+        let fechaEvaluar = null;
+
+        if (curso.jornadas && curso.jornadas.length > 0) {
+
           const ahora = new Date();
-          const fechaCurso = new Date(curso.fechaInicio);
 
-          const diffMs = fechaCurso - ahora;
-          const diffDias = diffMs / (1000 * 60 * 60 * 24);
+          // ordenar por fecha
+          const jornadasOrdenadas = curso.jornadas
+            .map(j => new Date(j.fechaInicio))
+            .sort((a, b) => a - b);
 
-          if (diffDias <= 1 && diffDias >= 0) {
-            // curso mañana o hoy
-            estiloFila = " style='background-color: #fff3cd;'"; // amarillo suave
-            aviso = " (Próximo)";
-          } else if (diffDias > 1) {
-            // falta más tiempo
-            estiloFila = " style='background-color: #e7f5ff;'"; // azul suave
-          } else {
-            // ya pasó (opcional)
-            estiloFila = " style='background-color: #f8d7da;'"; // rojo suave muy leve
-            aviso = " (Ya iniciado)";
+          // buscar la próxima jornada
+          fechaEvaluar = jornadasOrdenadas.find(f => f >= ahora);
+
+          // si no hay futura → usar la última
+          if (!fechaEvaluar) {
+            fechaEvaluar = jornadasOrdenadas[jornadasOrdenadas.length - 1];
+          }
+          if (fechaEvaluar) {
+
+            const ahora = new Date();
+            const diffMs = fechaEvaluar - ahora;
+            const diffDias = diffMs / (1000 * 60 * 60 * 24);
+
+            if (diffDias <= 1 && diffDias >= 0) {
+              estiloFila = " style='background-color: #fff3cd;'";
+              aviso = " (Próximo)";
+            } else if (diffDias > 1) {
+              estiloFila = " style='background-color: #e7f5ff;'";
+            } else {
+              estiloFila = " style='background-color: #f8d7da;'";
+              aviso = " (Finalizado)";
+            }
           }
         }
         var fila =
@@ -455,9 +483,7 @@
           "<td " +
           estiloFila +
           "><div class='celda-scroll'>" +
-          (curso.fechaInicio
-            ? formatearFecha(curso.fechaInicio) + aviso
-            : "") +
+          (fechaEvaluar ? formatearFecha(fechaEvaluar.toISOString()) + aviso : "") +
           "</div></td>" +
           "<td><div class='celda-scroll'>" +
           (curso.ciudad && curso.ubicacionSubida

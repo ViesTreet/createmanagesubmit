@@ -7,10 +7,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
-// Otras importaciones necesarias
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -28,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import javax.crypto.Cipher;
@@ -41,12 +39,17 @@ import org.apache.poi.xslf.usermodel.XSLFPictureData;
 import org.apache.poi.xslf.usermodel.XSLFPictureShape;
 import org.apache.poi.xslf.usermodel.XSLFShape;
 import org.apache.poi.xslf.usermodel.XSLFSlide;
+import org.apache.poi.xslf.usermodel.XSLFSlideLayout;
 import org.apache.poi.xslf.usermodel.XSLFTextParagraph;
 import org.apache.poi.xslf.usermodel.XSLFTextRun;
 import org.apache.poi.xslf.usermodel.XSLFTextShape;
-import org.openxmlformats.schemas.presentationml.x2006.main.CTShape;
-import org.openxmlformats.schemas.drawingml.x2006.main.*;
 import org.jodconverter.local.JodConverter;
+import org.openxmlformats.schemas.drawingml.x2006.main.CTGradientFillProperties;
+import org.openxmlformats.schemas.drawingml.x2006.main.CTGradientStop;
+import org.openxmlformats.schemas.drawingml.x2006.main.CTGradientStopList;
+import org.openxmlformats.schemas.drawingml.x2006.main.CTLinearShadeProperties;
+import org.openxmlformats.schemas.drawingml.x2006.main.CTShapeProperties;
+import org.openxmlformats.schemas.presentationml.x2006.main.CTShape;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -68,6 +71,7 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import com.vt.createmanagesubmit.config.ShapeConfig;
 import com.vt.createmanagesubmit.modelos.Alumno;
 import com.vt.createmanagesubmit.modelos.Curso;
+import com.vt.createmanagesubmit.modelos.Jornada;
 import com.vt.createmanagesubmit.modelos.Plantilla;
 import com.vt.createmanagesubmit.repositorios.RepositorioAlumnos;
 
@@ -225,8 +229,10 @@ public class ServicioGenerarCertificado {
         Path tempDir = Paths.get(stPath, "temp");
         Files.createDirectories(tempDir);
 
-        Path tempPptxPath = tempDir.resolve(alumno.getId() + ".pptx");
-        Path tempPdfPath = tempDir.resolve(alumno.getId() + ".pdf");
+        String uuid = UUID.randomUUID().toString();
+
+        Path tempPptxPath = tempDir.resolve(alumno.getId() + "_" + uuid + ".pptx");
+        Path tempPdfPath = tempDir.resolve(alumno.getId() + "_" + uuid + ".pdf");
 
         // Guardar PPTX
         try (OutputStream out = Files.newOutputStream(tempPptxPath)) {
@@ -551,8 +557,10 @@ public class ServicioGenerarCertificado {
         Path tempDir = Paths.get(stPath, "temp");
         Files.createDirectories(tempDir);
 
-        Path tempPptxPath = tempDir.resolve(alumno.getId() + ".pptx");
-        Path tempPdfPath = tempDir.resolve(alumno.getId() + ".pdf");
+        String uuid = UUID.randomUUID().toString();
+
+        Path tempPptxPath = tempDir.resolve(alumno.getId() + "_" + uuid + ".pptx");
+        Path tempPdfPath = tempDir.resolve(alumno.getId() + "_" + uuid + ".pdf");
 
         try (OutputStream out = Files.newOutputStream(tempPptxPath)) {
             ppt.write(out);
@@ -654,8 +662,10 @@ public class ServicioGenerarCertificado {
         Path tempDir = Paths.get(stPath, "temp");
         Files.createDirectories(tempDir);
 
-        Path tempPptxPath = tempDir.resolve(alumno.getId() + ".pptx");
-        Path tempPdfPath = tempDir.resolve(alumno.getId() + ".pdf");
+        String uuid = UUID.randomUUID().toString();
+
+        Path tempPptxPath = tempDir.resolve(alumno.getId() + "_" + uuid + ".pptx");
+        Path tempPdfPath = tempDir.resolve(alumno.getId() + "_" + uuid + ".pdf");
 
         try (OutputStream out = Files.newOutputStream(tempPptxPath)) {
             ppt.write(out);
@@ -957,6 +967,14 @@ public class ServicioGenerarCertificado {
         try (FileInputStream inputStream = new FileInputStream(templatePath)) {
             ppt = new XMLSlideShow(inputStream);
         }
+        List<Jornada> jornadas = curso.getJornadas();
+
+        if (jornadas == null || jornadas.isEmpty()) {
+            ppt.close();
+            throw new Exception("El curso no tiene jornadas asociadas");
+        }
+        XSLFSlide originalSlide = ppt.getSlides().get(0);
+
         DateTimeFormatter formatoDiaSemana = DateTimeFormatter.ofPattern("EEEE", new Locale("es", "ES"));
 
         DateTimeFormatter formatoDiaNumero = DateTimeFormatter.ofPattern("dd");
@@ -964,24 +982,6 @@ public class ServicioGenerarCertificado {
         DateTimeFormatter formatoMes = DateTimeFormatter.ofPattern("MMMM", new Locale("es", "ES"));
 
         DateTimeFormatter formatoHora = DateTimeFormatter.ofPattern("HH:mm");
-
-        // Crea un mapa de los datos del alumno que se usarán para reemplazar en los
-        // placeholders
-        Map<String, String> cursoData = new HashMap<>();
-        cursoData.put("forma", curso.getUbicacionSubida());
-        cursoData.put("curso", curso.getNombreCurso());
-        cursoData.put("ubicacion_del_curso", curso.getUbicacionDelCurso());
-        cursoData.put("ubicacion_del_cliente", curso.getUbicacionCliente());
-        cursoData.put("dia_semana", curso.getFechaInicio().format(formatoDiaSemana));
-        cursoData.put("dia_numero", curso.getFechaInicio().format(formatoDiaNumero));
-        cursoData.put("mes", curso.getFechaInicio().format(formatoMes));
-        cursoData.put("hora_inicio", curso.getFechaInicio().format(formatoHora));
-        cursoData.put("hora_termino", curso.getFechaFin().format(formatoHora));
-        cursoData.put("relator", curso.getRelator().getNombre());
-        cursoData.put("datos_relator", curso.getRelator().getDatosExtras());
-        cursoData.put("modalidad", curso.getModalidad());
-        cursoData.put("cliente", curso.getCliente().getNombreCliente());
-        cursoData.put("subcontrato", curso.getSubcontratoDelCliente());
 
         byte[] logoClienteSup = null;
         byte[] logoClienteInf = null;
@@ -1010,16 +1010,52 @@ public class ServicioGenerarCertificado {
 
         imageData.put("foto_relator", fotoRelator);
 
-        // Procesa las slides y shapes
-        for (XSLFSlide slide : ppt.getSlides()) {
+        XSLFSlideLayout layout = originalSlide.getSlideLayout();
+        int n = 1;
+        for (Jornada jornada : jornadas) {
+
+            // Crear slide nueva basada en el layout original
+            XSLFSlide slide = ppt.createSlide(layout);
+
+            // Importar contenido desde la plantilla ORIGINAL (no modificada)
+            slide.importContent(originalSlide);
+
+            LocalDateTime fechaInicio = jornada.getFechaInicio();
+            LocalDateTime fechaFin = jornada.getFechaFin();
+
+            Map<String, String> cursoData = new HashMap<>();
+
+            cursoData.put("forma", curso.getUbicacionSubida());
+            cursoData.put("curso", curso.getNombreCurso());
+            cursoData.put("ubicacion_del_curso", curso.getUbicacionDelCurso());
+            cursoData.put("ubicacion_del_cliente", curso.getUbicacionCliente());
+
+            cursoData.put("dia_semana", fechaInicio.format(formatoDiaSemana));
+            cursoData.put("dia_numero", fechaInicio.format(formatoDiaNumero));
+            cursoData.put("mes", fechaInicio.format(formatoMes));
+
+            cursoData.put("hora_inicio", fechaInicio.format(formatoHora));
+            cursoData.put("hora_termino", fechaFin.format(formatoHora));
+
+            cursoData.put("relator", curso.getRelator().getNombre());
+            cursoData.put("datos_relator", curso.getRelator().getDatosExtras());
+            cursoData.put("modalidad", curso.getModalidad());
+            cursoData.put("cliente", curso.getCliente().getNombreCliente());
+            cursoData.put("subcontrato", curso.getSubcontratoDelCliente());
+            cursoData.put("n", String.valueOf(n));
+
             processSlide(slide, cursoData, imageData);
+            n++;
         }
+        ppt.removeSlide(0);
 
         Path tempDir = Paths.get(stPath, "temp");
         Files.createDirectories(tempDir);
 
-        Path tempInputPptx = tempDir.resolve("flyer_" + curso.getId() + "_poi.pptx");
-        Path tempOutputPptx = tempDir.resolve("flyer_" + curso.getId() + "_fixed.pptx");
+        String uuid = UUID.randomUUID().toString();
+
+        Path tempInputPptx = tempDir.resolve("flyer_" + uuid + "_poi.pptx");
+        Path tempOutputPptx = tempDir.resolve("flyer_" + uuid + "_fixed.pptx");
 
         // Guardar archivo generado por POI
         try (OutputStream out = Files.newOutputStream(tempInputPptx)) {
@@ -1102,8 +1138,10 @@ public class ServicioGenerarCertificado {
         Path tempDir = Paths.get(stPath, "temp");
         Files.createDirectories(tempDir);
 
-        Path tempPptxPath = tempDir.resolve(alumno.getId() + ".pptx");
-        Path tempPdfPath = tempDir.resolve(alumno.getId() + ".pdf");
+        String uuid = UUID.randomUUID().toString();
+
+        Path tempPptxPath = tempDir.resolve(alumno.getId() + "_" + uuid + ".pptx");
+        Path tempPdfPath = tempDir.resolve(alumno.getId() + "_" + uuid + ".pdf");
 
         try (OutputStream out = Files.newOutputStream(tempPptxPath)) {
             ppt.write(out);

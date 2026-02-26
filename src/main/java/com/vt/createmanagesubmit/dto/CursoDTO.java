@@ -2,12 +2,14 @@ package com.vt.createmanagesubmit.dto;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import com.vt.createmanagesubmit.modelos.Curso;
 
 public class CursoDTO {
 
-	private Long id;
+    private Long id;
 
     private String nombreCurso;
 
@@ -27,9 +29,7 @@ public class CursoDTO {
 
     private String ubicacionCliente;
 
-    private LocalDateTime fechaInicio;
-
-    private LocalDateTime fechaFin;
+    private List<JornadaDTO> jornadas;
 
     private Float horasRelatorCurso;
 
@@ -37,7 +37,7 @@ public class CursoDTO {
 
     private int asistenciaMin;
 
-    private float notaMin; 
+    private float notaMin;
 
     private String plantillaDiploma;
 
@@ -53,36 +53,70 @@ public class CursoDTO {
 
     private boolean asistenciaQr;
 
-	private Date createdAt;
-	
-	private Date updatedAt;
+    private Date createdAt;
+
+    private Date updatedAt;
 
     public CursoDTO() {
     }
 
     public CursoDTO(Curso curso) {
+
         this.id = curso.getId();
         this.nombreCurso = curso.getNombreCurso();
         this.diasCursos = curso.getDiasCursos();
         this.duracion = curso.getDuracion();
-        this.cliente = curso.getCliente().getNombreCliente();
+
+        this.cliente = curso.getCliente() != null
+                ? curso.getCliente().getNombreCliente()
+                : null;
+
         this.modalidad = curso.getModalidad();
         this.ubicacionSubida = curso.getUbicacionSubida();
         this.ciudad = curso.getCiudad();
         this.ubicacionDelCurso = curso.getUbicacionDelCurso();
         this.ubicacionCliente = curso.getUbicacionCliente();
-        this.fechaInicio = curso.getFechaInicio();
-        this.fechaFin = curso.getFechaFin();
+
+        // 🔥 NUEVO: mapear jornadas
+        if (curso.getJornadas() != null) {
+            this.jornadas = curso.getJornadas()
+                    .stream()
+                    .map(j -> new JornadaDTO(
+                            j.getId(),
+                            j.getFechaInicio(),
+                            j.getFechaFin()))
+                    .collect(Collectors.toList());
+        }
+
         this.horasRelatorCurso = curso.getHorasRelatorCurso();
         this.lugarYfechaEmision = curso.getLugarYfechaEmision();
         this.asistenciaMin = curso.getAsistenciaMin();
         this.notaMin = curso.getNotaMin();
-        this.plantillaDiploma = curso.getPlantillaDiploma().getNombreCertificado();
-        this.plantillaFlyer = curso.getPlantillaFlyer().getNombreCertificado();
-        this.alumnos = curso.getAlumnos().size();
-        this.tareaProgramadas = curso.getTareaProgramadas().size();
-        this.alumnosTemporales = curso.getAlumnosTemporales().size();
-        this.relator = curso.getRelator().getNombre();
+
+        this.plantillaDiploma = curso.getPlantillaDiploma() != null
+                ? curso.getPlantillaDiploma().getNombreCertificado()
+                : null;
+
+        this.plantillaFlyer = curso.getPlantillaFlyer() != null
+                ? curso.getPlantillaFlyer().getNombreCertificado()
+                : null;
+
+        this.alumnos = curso.getAlumnos() != null
+                ? curso.getAlumnos().size()
+                : 0;
+
+        this.tareaProgramadas = curso.getTareaProgramadas() != null
+                ? curso.getTareaProgramadas().size()
+                : 0;
+
+        this.alumnosTemporales = curso.getAlumnosTemporales() != null
+                ? curso.getAlumnosTemporales().size()
+                : 0;
+
+        this.relator = curso.getRelator() != null
+                ? curso.getRelator().getNombre()
+                : null;
+
         this.createdAt = curso.getCreatedAt();
         this.updatedAt = curso.getUpdatedAt();
         this.asistenciaQr = curso.isAsistenciaQr();
@@ -168,20 +202,12 @@ public class CursoDTO {
         this.ubicacionCliente = ubicacionCliente;
     }
 
-    public LocalDateTime getFechaInicio() {
-        return fechaInicio;
+    public List<JornadaDTO> getJornadas() {
+        return jornadas;
     }
 
-    public void setFechaInicio(LocalDateTime fechaInicio) {
-        this.fechaInicio = fechaInicio;
-    }
-
-    public LocalDateTime getFechaFin() {
-        return fechaFin;
-    }
-
-    public void setFechaFin(LocalDateTime fechaFin) {
-        this.fechaFin = fechaFin;
+    public void setJornadas(List<JornadaDTO> jornadas) {
+        this.jornadas = jornadas;
     }
 
     public Float getHorasRelatorCurso() {
@@ -264,6 +290,14 @@ public class CursoDTO {
         this.relator = relator;
     }
 
+    public boolean isAsistenciaQr() {
+        return asistenciaQr;
+    }
+
+    public void setAsistenciaQr(boolean asistenciaQr) {
+        this.asistenciaQr = asistenciaQr;
+    }
+
     public Date getCreatedAt() {
         return createdAt;
     }
@@ -280,14 +314,6 @@ public class CursoDTO {
         this.updatedAt = updatedAt;
     }
 
-    public boolean isAsistenciaQr() {
-        return asistenciaQr;
-    }
+    
 
-    public void setAsistenciaQr(boolean asistenciaQr) {
-        this.asistenciaQr = asistenciaQr;
-    }
-    
-    
-    
 }
