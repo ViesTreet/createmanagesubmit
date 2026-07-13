@@ -55,6 +55,7 @@ services:
     volumes:
       # Bind mount directo a la carpeta que ya tenían en Windows
       - C:/evolutionApp/e-volution/app/evolution/static:/app/static
+      - C:/evolutionApp/e-volution/app/evolution/static:/home/e-volution/app/evolution/static
 
   backup:
     image: mariadb:10.11
