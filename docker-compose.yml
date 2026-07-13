@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  db:
+    image: mariadb:10.11
+    container_name: evolution_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: appevolution
+      MYSQL_USER: app
+      MYSQL_PASSWORD: Lmh8ybA5yibFiW1K
+    ports:
+      - "3307:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: evolution_app
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_USER=app
+      - DB_PASSWORD=Lmh8ybA5yibFiW1K
+      - DB_NAME=appevolution
+      - SP_MAIL_HOST=mail.e-volution.cl
+      - SP_MAIL_PORT=465
+      - SP_MAIL_USERNAME=diplomas@e-volution.cl
+      - SP_MAIL_PASSWORD=bUS39WvrTye
+      - AD_MAIL=admin@admin.com
+      - AD_NAME=admin
+      - AD_PASSWORD=RcOqkObsJN
+      - ST_FOLDER=/app/static
+      - ENCRYPT_KEY_ASIS=t8iLdaYUBMsMDMt5
+      - URL_PATH=https://app.e-volution.cl
+      - MOODLE_TOKEN=255a3f0b97656fcec9552a98df8c13c3
+      - MOODLE_PATH=https://aulavirtual.e-volution.cl
+      - ENCRYPT_KEY_GEN=eFSan7jbftsl2P6
+      - DIP_MAIL=diplomas@e-volution.cl
+    volumes:
+      - static_data:/app/static
+
+volumes:
+  mariadb_data:
+  static_data:
+  
