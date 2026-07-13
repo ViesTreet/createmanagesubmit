@@ -14,6 +14,9 @@ services:
       - "3307:3306"
     volumes:
       - mariadb_data:/var/lib/mysql
+      # Restauración inicial: MariaDB ejecuta automáticamente cualquier .sql
+      # que encuentre acá SOLO la primera vez que el volumen está vacío
+      - C:/evolutionApp/db-init:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
       interval: 10s
@@ -27,7 +30,8 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
       - DB_HOST=db
       - DB_PORT=3306
@@ -49,9 +53,36 @@ services:
       - ENCRYPT_KEY_GEN=eFSan7jbftsl2P6
       - DIP_MAIL=diplomas@e-volution.cl
     volumes:
-      - static_data:/app/static
+      # Bind mount directo a la carpeta que ya tenían en Windows
+      - C:/evolutionApp/e-volution/app/evolution/static:/app/static
+
+  backup:
+    image: mariadb:10.11
+    container_name: evolution_backup
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - MYSQL_PWD=root
+    volumes:
+      - C:/evolutionApp/backups:/backups
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        while true; do
+          FECHA=$$(date +%Y%m%d_%H%M%S)
+          echo "[backup] Generando dump $$FECHA..."
+          mysqldump -h db -u root appevolution > /backups/appevolution_$$FECHA.sql
+
+          # Rotación: dejar solo los 2 backups más recientes
+          cd /backups
+          ls -1t appevolution_*.sql | tail -n +3 | xargs -r rm --
+
+          echo "[backup] Listo. Backups actuales:"
+          ls -lh /backups
+          sleep 86400
+        done
 
 volumes:
   mariadb_data:
-  static_data:
-  
